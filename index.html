@@ -343,7 +343,16 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 .infobx{background:var(--phyto-pale);border-radius:10px;padding:10px 12px;margin-top:8px;font-size:11px;color:var(--phyto);display:none;}
 .empty-state{text-align:center;padding:40px 20px;color:var(--texte-doux);}
 .empty-state .ei{font-size:40px;margin-bottom:10px;}
-.kml-zone{margin-bottom:14px;background:white;border:2px dashed var(--gris);border-radius:14px;padding:16px;text-align:center;cursor:pointer;}
+.sdp-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--gris-clair);cursor:pointer;transition:background 0.1s;border-radius:6px;}
+.sdp-row:active{background:var(--gris-clair);}
+.sdp-row.sdp-done{background:var(--vert-pale);border-radius:8px;padding:11px 8px;border-color:transparent;margin:1px 0;}
+.sdp-check{width:22px;height:22px;border-radius:7px;border:2px solid var(--gris);background:white;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0;transition:all 0.15s;}
+.sdp-check.on{background:var(--vert-med);border-color:var(--vert-med);}
+.sdp-nom{font-size:13px;font-weight:600;flex:1;}
+.sdp-done .sdp-nom{color:var(--vert);}
+.sdp-surf{font-size:11px;color:var(--texte-doux);flex-shrink:0;}
+
+
 .kml-zone p{font-size:12px;color:var(--texte-doux);margin-top:4px;}
 #map{height:340px;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-md);margin-bottom:12px;}
 .mapwrap{padding:0 16px;display:none;}.mapwrap.vis{display:block;}
@@ -451,6 +460,16 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
   <div class="login-title">Ma Vigne</div>
   <div class="login-sub">Choisissez votre profil</div>
   <div class="login-profiles" id="login-profiles"></div>
+  <div id="login-pwd-panel" style="display:none;width:100%;margin-top:20px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <button id="login-back-btn" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:8px 12px;color:white;font-size:13px;cursor:pointer">← Retour</button>
+      <div id="login-pwd-name" style="color:white;font-size:16px;font-weight:600"></div>
+    </div>
+    <div class="login-label">Mot de passe</div>
+    <input type="password" id="login-pwd-input" class="login-input" placeholder="Votre mot de passe" autocomplete="current-password">
+    <div id="login-pwd-error" style="color:#FF8A80;font-size:12px;margin-top:-8px;margin-bottom:10px;display:none">❌ Mot de passe incorrect</div>
+    <button class="login-btn" id="login-pwd-btn">Se connecter</button>
+  </div>
 </div>
 
 <!-- ══════ PAGE ACCUEIL ══════ -->
@@ -543,14 +562,12 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
       <div class="fchip active" data-filter="toutes">Toutes</div>
       <div class="fchip" data-filter="complet">✅ Finies</div>
       <div class="fchip" data-filter="avance">🟡 En cours</div>
-      <div class="fchip" data-filter="retard">🟠 Retard</div>
       <div class="fchip" data-filter="arrachee">Arrachées</div>
     </div>
   </div>
   <div class="sband c4" style="transform:translateY(-14px)">
     <div class="sbi"><div class="sbi-val cv" id="pc-c">0</div><div class="sbi-lbl">Finies</div></div>
     <div class="sbi"><div class="sbi-val cor" id="pc-e">0</div><div class="sbi-lbl">Cours</div></div>
-    <div class="sbi"><div class="sbi-val" style="color:var(--orange)" id="pc-r">0</div><div class="sbi-lbl">Retard</div></div>
     <div class="sbi"><div class="sbi-val" style="color:var(--rouge)" id="pc-a">0</div><div class="sbi-lbl">Arrach.</div></div>
   </div>
   <div class="tabs2">
@@ -559,6 +576,19 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
   </div>
   <div class="plist vis" id="pwrapliste">
     <div class="content">
+      <div id="priority-banner" style="display:none;background:linear-gradient(135deg,#FFF8E8,#FAF0CC);border:1.5px solid #E8C840;border-radius:14px;padding:13px 16px;margin-bottom:12px;position:relative">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <div style="font-size:20px;flex-shrink:0">⚡</div>
+          <div style="flex:1">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7A5C10;margin-bottom:3px">Priorité du moment</div>
+            <div id="priority-text" style="font-size:13px;font-weight:600;color:#4A3A08;line-height:1.4"></div>
+          </div>
+          <div id="priority-edit-btn" style="display:none;font-size:16px;cursor:pointer;color:#7A5C10" onclick="openPriorityEdit()">✏️</div>
+        </div>
+      </div>
+      <div id="priority-empty" style="display:none;margin-bottom:12px">
+        <button onclick="openPriorityEdit()" style="width:100%;background:white;border:1.5px dashed var(--gris);border-radius:12px;padding:10px;font-size:12px;color:var(--texte-doux);cursor:pointer;font-family:'Outfit',sans-serif">⚡ Définir une tâche prioritaire…</button>
+      </div>
       <div class="sbox"><span>🔍</span><input type="text" id="pSearch" placeholder="Rechercher une parcelle…"></div>
       <div id="pList"></div>
     </div>
@@ -586,6 +616,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
       <div style="float:right;font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600" id="dp-pct"></div>
       <div class="modal-title" id="dp-nom"></div>
       <div class="modal-sub" id="dp-sub"></div>
+      <button id="dp-gps-btn" onclick="openGPS()" style="display:none;margin-top:10px;background:var(--bleu);color:white;border:none;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;width:fit-content">📍 Ouvrir dans GPS</button>
     </div>
     <div class="modal-body">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
@@ -606,7 +637,6 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
   <div class="sband c4">
     <div class="sbi"><div class="sbi-val cv" id="js-tot">0</div><div class="sbi-lbl">Total</div></div>
     <div class="sbi"><div class="sbi-val cv" id="js-val">0</div><div class="sbi-lbl">Validés</div></div>
-    <div class="sbi"><div class="sbi-val cor" id="js-f">0</div><div class="sbi-lbl">Faits</div></div>
     <div class="sbi"><div class="sbi-val" style="color:var(--orange)" id="js-e">0</div><div class="sbi-lbl">En cours</div></div>
   </div>
   <div class="ost-card" id="ouvrier-stats-card"></div>
@@ -702,8 +732,8 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
   <div class="set-sec">
     <div class="set-title">Application</div>
     <div style="margin:0 16px">
-      <div class="set-row" style="border-radius:16px 16px 0 0"><div class="sr-l"><div class="sr-ico" style="background:var(--terre-pale)">🔔</div><div><div class="sr-lbl">Notifications</div><div class="sr-sub">Alertes gel, DAR, validations</div></div></div><div class="sr-arr">›</div></div>
-      <div class="set-row"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">📤</div><div><div class="sr-lbl">Exporter données</div><div class="sr-sub">PDF · Excel · Registre phyto</div></div></div><div class="sr-arr">›</div></div>
+      <div class="set-row" style="border-radius:16px 16px 0 0" onclick="requestNotifications()"><div class="sr-l"><div class="sr-ico" style="background:var(--terre-pale)">🔔</div><div><div class="sr-lbl">Notifications</div><div class="sr-sub" id="notif-status">Alertes gel, DAR, validations</div></div></div><div class="sr-arr" id="notif-arr">›</div></div>
+      <div class="set-row" onclick="openExport()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">📤</div><div><div class="sr-lbl">Exporter données</div><div class="sr-sub">JSON complet · CSV journal · CSV parcelles</div></div></div><div class="sr-arr">›</div></div>
       <div class="set-row" style="border-radius:0 0 16px 16px" onclick="logout()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🚪</div><div><div class="sr-lbl" style="color:var(--rouge)">Se déconnecter</div></div></div><div class="sr-arr">›</div></div>
     </div>
   </div>
@@ -734,6 +764,72 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 
 <div class="overlay" id="ovProduit" onclick="closeOv(event,'ovProduit')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">📦 Nouveau produit</div></div><div class="modal-body"><div class="fl">Nom commercial</div><input type="text" class="fi ph" id="np-nom" placeholder="Ex : Bordeaux B…"><div class="fl">Type</div><select class="fsel" id="np-type"><option>Cuivre</option><option>Soufre</option><option>Fongicide</option><option>Insecticide</option><option>Herbicide</option><option>Biocontrôle</option></select><div class="fl">N° AMM</div><input type="text" class="fi ph" id="np-amm"><div class="fl">DAR (jours)</div><input type="number" class="fi ph" id="np-dar" placeholder="21"><div class="fl">Dose max</div><input type="text" class="fi ph" id="np-dose"><button class="mbtn phyte" onclick="saveProduit()">Ajouter</button></div></div></div>
 
+<div class="overlay" id="ovExport" onclick="closeOv(event,'ovExport')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">📤 Exporter les données</div><div class="modal-sub">Choisissez le format d'export</div></div><div class="modal-body">
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="background:var(--rouge-pale);border-radius:14px;padding:14px 16px">
+      <div style="font-size:13px;font-weight:700;color:var(--rouge);margin-bottom:10px">🖨️ Rapport PDF mensuel</div>
+      <div class="fl" style="margin-top:0">Mois</div>
+      <input type="month" class="fi" id="pdf-mois" style="margin-bottom:10px">
+      <button onclick="exportPDFMois()" style="background:var(--rouge);color:white;border:none;border-radius:10px;padding:11px 18px;font-size:13px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;width:100%">Générer le PDF du mois</button>
+    </div>
+    <button onclick="exportCSVJournal()" style="background:var(--vert);color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">📋 <div><div>Export CSV — Journal</div><div style="font-size:11px;opacity:0.75;font-weight:400">Tous les travaux avec date, parcelle, ouvrier, statut</div></div></button>
+    <button onclick="exportCSVParcelles()" style="background:var(--or);color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">🗺️ <div><div>Export CSV — Parcelles</div><div style="font-size:11px;opacity:0.75;font-weight:400">Avancement par parcelle et par tâche</div></div></button>
+    <button onclick="exportJSON()" style="background:var(--acier);color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">📦 <div><div>Export JSON complet</div><div style="font-size:11px;opacity:0.75;font-weight:400">Toutes les données — sauvegarde complète</div></div></button>
+  </div>
+  <div id="export-feedback" style="display:none;margin-top:14px;background:var(--vert-pale);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--vert);font-weight:600"></div>
+</div></div></div>
+
+<!-- Overlay détail session tracteur -->
+<div class="overlay" id="ovSessionDetail" onclick="closeOv(event,'ovSessionDetail')"><div class="modal" style="max-height:92vh"><div class="modal-handle"></div>
+  <div class="modal-hd" style="position:sticky;top:0;background:white;z-index:2;border-radius:24px 24px 0 0">
+    <div class="modal-title" id="sd-titre"></div>
+    <div class="modal-sub" id="sd-meta"></div>
+    <div style="margin-top:10px;background:var(--acier-pale);border-radius:10px;padding:10px 14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-size:11px;font-weight:700;color:var(--acier)" id="sd-progress">0/0 parcelles</div>
+        <button onclick="closeSessionDetail()" style="background:var(--acier);color:white;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer">Enregistrer</button>
+      </div>
+      <div style="height:6px;background:rgba(0,0,0,0.1);border-radius:6px;overflow:hidden"><div id="sd-bar" style="height:100%;background:var(--acier);border-radius:6px;transition:width 0.2s;width:0%"></div></div>
+    </div>
+  </div>
+  <div class="modal-body" style="padding-top:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--texte-doux)">Parcelles restantes</div>
+      <div onclick="toggleSDShowDone()" id="sd-show-done-btn" style="font-size:11px;font-weight:600;color:var(--acier);cursor:pointer;background:var(--acier-pale);padding:4px 10px;border-radius:8px">Voir toutes</div>
+    </div>
+    <div id="sd-parcelles"></div>
+  </div>
+</div></div>
+
+<!-- Overlay priorité -->
+<div class="overlay" id="ovPriority" onclick="closeOv(event,'ovPriority')"><div class="modal"><div class="modal-handle"></div>
+  <div class="modal-hd"><div class="modal-title">⚡ Message priorité</div><div class="modal-sub">Visible par toute l'équipe dans l'onglet Parcelles</div></div>
+  <div class="modal-body">
+    <div class="fl">Message</div>
+    <textarea class="fi" id="prio-input" rows="3" placeholder="Ex : Finir le Relevage avant de continuer l'Ébourgeonnage" style="resize:none;font-family:'Outfit',sans-serif"></textarea>
+    <button class="mbtn verte" onclick="savePriority()">Afficher le message</button>
+    <button class="mbtn-del" onclick="clearPriority()">Supprimer le message</button>
+  </div>
+</div></div>
+
+<div class="overlay" id="ovValidation" onclick="closeOv(event,'ovValidation')"><div class="modal"><div class="modal-handle"></div>
+  <div class="modal-hd">
+    <div class="modal-title" id="vp-titre">Valider tâche</div>
+    <div class="modal-sub" id="vp-parcelle"></div>
+  </div>
+  <div class="modal-body">
+    <div class="fl">Date du travail</div>
+    <input type="date" class="fi" id="vp-date">
+    <div class="fl">Réalisé</div>
+    <div class="ppicker" id="vp-equipe-pick">
+      <div class="pchk sel vert" data-val="non" onclick="pickVal(this,'vp-equipe-val','vert')">👤 Seul</div>
+      <div class="pchk" data-val="oui" onclick="pickVal(this,'vp-equipe-val','vert')">👥 En équipe</div>
+    </div>
+    <input type="hidden" id="vp-equipe-val" value="non">
+    <button class="mbtn verte" onclick="confirmValidation()">✓ Valider le travail</button>
+  </div>
+</div></div>
+
 <div class="overlay" id="ovSaison" onclick="closeOv(event,'ovSaison')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">📅 Nouvelle saison</div></div><div class="modal-body"><div class="fl">Nom de la saison</div><input type="text" class="fi" id="ns-nom" placeholder="Ex : Été 2026, Hiver 2026…"><div class="fl">Période</div><input type="text" class="fi" id="ns-periode" placeholder="Ex : Juin–Août 2026"><button class="mbtn verte" onclick="saveSaison()">Créer la saison</button></div></div></div>
 
 <div class="overlay" id="ovTache" onclick="closeOv(event,'ovTache')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">🌿 Nouvelle tâche</div></div><div class="modal-body"><div class="fl">Nom de la tâche</div><input type="text" class="fi" id="nt-nom" placeholder="Ex : Relevage, Accolage…"><div class="fl">Heures par hectare</div><input type="number" class="fi" id="nt-hha" placeholder="Ex : 50" min="0"><div class="fl">Saison</div><select class="fsel" id="nt-saison"></select><button class="mbtn verte" onclick="saveTache()">Ajouter la tâche</button></div></div></div>
@@ -748,13 +844,13 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 // ════════════════════════════════════
 
 let MEMBRES = [
-  {nom:'Nico', email:'gueret.nicolas@gmail.com', roles:['admin','ouvrier','tractoriste'], statut:'Actif', couleur:'#3D6B27'},
-  {nom:'Victor', email:'leravictor904@gmail.com', roles:['ouvrier','tractoriste'], statut:'Actif', couleur:'#1A4A7A'},
-  {nom:'Dessi', email:'dessi.9332@yahoo.com', roles:['ouvrier'], statut:'Actif', couleur:'#7A4F2E'},
-  {nom:'Etienne', email:'etienne.marchand.21@gmail.com', roles:['ouvrier','tractoriste'], statut:'Actif', couleur:'#5B2D8E'},
-  {nom:'Chloé', email:'tonnelierchloe21@gmail.com', roles:['ouvrier'], statut:'Actif', couleur:'#B8913A'},
-  {nom:'Shana', email:'nana.badyka@gmail.com', roles:['ouvrier'], statut:'Actif', couleur:'#C0392B'},
-  {nom:'Alicia', email:'alicia.dupont58@live.fr', roles:['ouvrier'], statut:'Actif', couleur:'#1A5276'},
+  {nom:'Nico', email:'gueret.nicolas@gmail.com', roles:['admin','ouvrier','tractoriste'], statut:'Actif', couleur:'#3D6B27', mdp:'vigne21'},
+  {nom:'Victor', email:'leravictor904@gmail.com', roles:['ouvrier','tractoriste'], statut:'Actif', couleur:'#1A4A7A', mdp:'victor21'},
+  {nom:'Dessi', email:'dessi.9332@yahoo.com', roles:['ouvrier'], statut:'Actif', couleur:'#7A4F2E', mdp:'dessi21'},
+  {nom:'Etienne', email:'etienne.marchand.21@gmail.com', roles:['ouvrier','tractoriste'], statut:'Actif', couleur:'#5B2D8E', mdp:'etienne21'},
+  {nom:'Chloe', email:'tonnelierchloe21@gmail.com', roles:['ouvrier'], statut:'Actif', couleur:'#B8913A', mdp:'chloe21'},
+  {nom:'Shana', email:'nana.badyka@gmail.com', roles:['ouvrier'], statut:'Actif', couleur:'#C0392B', mdp:'shana21'},
+  {nom:'Alicia', email:'alicia.dupont58@live.fr', roles:['ouvrier'], statut:'Actif', couleur:'#1A5276', mdp:'alicia21'},
 ];
 
 let SAISONS = [
@@ -797,9 +893,9 @@ let TRAVAUX = {
   "Palissage":{h_ha:50,saison:'Printemps',surf_done:0,surf_total:11.76,pct:0,h_total:588.2,h_done:0,h_reste:588.2},
 };
 
-const PARCELLES=[{"nom":"Ruchottes","surface":0.077,"statut":"Active","lat":"47.220945445764066","lng":"4.965241122676378","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé"}},{"nom":"Champitenois Grande","surface":0.3299,"statut":"Active","lat":"47.21695608571429","lng":"4.970948385714285","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Champitenois Petite","surface":0.0732,"statut":"Active","lat":"47.21619832499999","lng":"4.971599275","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Ergot","surface":0.3709,"statut":"Active","lat":"47.21576756666666","lng":"4.970841155555556","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Perrieres Vieille","surface":0.1086,"statut":"Active","lat":"47.220130850000004","lng":"4.970564925","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé"}},{"nom":"Perrieres Jeune","surface":0.1079,"statut":"Active","lat":"47.221010275000005","lng":"4.9709544999999995","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"7 Rangs","surface":0.0667,"statut":"Active","lat":"47.2321987","lng":"4.9669846","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Champs","surface":0.1536,"statut":"Active","lat":"47.233109725000006","lng":"4.9675726749999995","taches":{"Taille":"Validé","Tirage":"Fait","Brulage":"Fait","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Au Velle","surface":0.3699,"statut":"Active","lat":"47.23146115","lng":"4.966617233333333","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"20 Rangs","surface":0.1875,"statut":"Active","lat":"47.23192664999999","lng":"4.966694575","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Songe du Haut","surface":0.2019,"statut":"Active","lat":"47.231575899999996","lng":"4.968590525","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Chaziere","surface":0.087,"statut":"Arrachee","lat":"47.23062468333333","lng":"4.96851645","taches":{"Taille":"En cours","Tirage":"Fait","Brulage":"Fait","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Entre 2 Routes","surface":0.0406,"statut":"Active","lat":"47.231785800000004","lng":"4.9676618","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Songe du Bas","surface":0.1652,"statut":"Active","lat":"47.231314075","lng":"4.96999265","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Combe du Dessus","surface":0.169,"statut":"Active","lat":"47.2285493875","lng":"4.9679725375","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Carougeot","surface":0.1986,"statut":"Active","lat":"47.22154918333333","lng":"4.973382983333334","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Jouise","surface":0.5151,"statut":"Active","lat":"47.222287725","lng":"4.9754784125","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Créot","surface":0.3643,"statut":"Active","lat":"47.233935","lng":"4.972331225","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Sylvie","surface":0.0457,"statut":"Active","lat":"47.23081858","lng":"4.97407412","taches":{"Taille":"En cours","Tirage":"En cours","Brulage":"En cours","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Champerrier","surface":0.2968,"statut":"Active","lat":"47.23110025714286","lng":"4.971331928571429","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Combe du Bas","surface":1.6753,"statut":"Active","lat":"47.228471828571436","lng":"4.973085071428571","taches":{"Taille":"En cours","Tirage":"En cours","Brulage":"En cours","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé","Pioche1":"Validé"}},{"nom":"Mansouze","surface":0.148,"statut":"Active","lat":"47.20969473333334","lng":"4.974225916666666","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Charreux","surface":0.1139,"statut":"Active","lat":"47.22999388","lng":"4.9788474","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Billard Petite","surface":0.2315,"statut":"Active","lat":"47.23032445","lng":"4.97894445","taches":{"Taille":"En cours","Tirage":"En cours","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Billard Grande","surface":0.6484,"statut":"Active","lat":"47.230732","lng":"4.980187044444445","taches":{"Taille":"En cours","Tirage":"En cours","Brulage":"En cours","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Crais","surface":0.554,"statut":"Active","lat":"47.227280549999996","lng":"4.985994825","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Etelois","surface":0.2988,"statut":"Active","lat":"47.21371381428572","lng":"4.9710809","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Fourneau Vieille","surface":0.1607,"statut":"Active","lat":"47.21490634999999","lng":"4.9775889","taches":{"Taille":"Validé","Brulage":"Validé","Tirage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Fourneau Jeune","surface":0.1304,"statut":"Active","lat":"47.215599475","lng":"4.975778075","taches":{"Taille":"Fait","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Marchais Petite","surface":0.0385,"statut":"Active","lat":"47.22525455","lng":"4.960455575","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Marchais Grande","surface":0.405,"statut":"Active","lat":"47.22450284285714","lng":"4.961353242857143","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Croix des Champs","surface":0.1259,"statut":"Active","lat":"47.221786175000005","lng":"4.978182125","taches":{"Brulage":"Validé","Tirage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Platieres","surface":0.3119,"statut":"Active","lat":"47.221922966666675","lng":"4.989312333333333","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Reniard","surface":0.1871,"statut":"Active","lat":"47.21254178333333","lng":"4.978380283333333","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Herbiottes","surface":0.2711,"statut":"Active","lat":"47.2012746","lng":"4.969528033333334","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Cognées","surface":0.1385,"statut":"Active","lat":"47.197667925000005","lng":"4.971090125","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Bras","surface":0.1144,"statut":"Active","lat":"47.203484849999995","lng":"4.97142495","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Pouroux","surface":0.2021,"statut":"Active","lat":"47.192603725","lng":"4.965891900000001","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Herbues","surface":0.335,"statut":"Active","lat":"47.189758899999994","lng":"4.9672456125","taches":{"Taille":"Validé","Brulage":"Validé","Tirage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Pasquier des Chenes","surface":0.3325,"statut":"Active","lat":"47.20466566666666","lng":"4.979041383333334","taches":{"Taille":"Validé","Brulage":"Validé","Tirage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Crotteaux","surface":0.2992,"statut":"Active","lat":"47.17761585","lng":"4.968223575000001","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Gravieres","surface":0.165,"statut":"Active","lat":"47.1866447","lng":"4.976601574999999","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Bollery Blanc","surface":0.2324,"statut":"Active","lat":"47.171483625","lng":"4.9644239875","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Bollery","surface":0.3285,"statut":"Active","lat":"47.1714132125","lng":"4.964357925","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Batailles","surface":0.1775,"statut":"Active","lat":"47.184826599999994","lng":"4.971313175","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Comble","surface":0.2961,"statut":"Active","lat":"47.2381557875","lng":"4.981507875","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}}];
+const PARCELLES=[{"nom":"Ruchottes","surface":0.077,"statut":"Active","lat":"47.220945445764066","lng":"4.965241122676378","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé"}},{"nom":"Champitenois Grande","surface":0.3299,"statut":"Active","lat":"47.21695608571429","lng":"4.970948385714285","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Champitenois Petite","surface":0.0732,"statut":"Active","lat":"47.21619832499999","lng":"4.971599275","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Ergot","surface":0.3709,"statut":"Active","lat":"47.21576756666666","lng":"4.970841155555556","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Perrieres Vieille","surface":0.1086,"statut":"Active","lat":"47.220130850000004","lng":"4.970564925","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé"}},{"nom":"Perrieres Jeune","surface":0.1079,"statut":"Active","lat":"47.221010275000005","lng":"4.9709544999999995","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"7 Rangs","surface":0.0667,"statut":"Active","lat":"47.2321987","lng":"4.9669846","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Champs","surface":0.1536,"statut":"Active","lat":"47.233109725000006","lng":"4.9675726749999995","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Au Velle","surface":0.3699,"statut":"Active","lat":"47.23146115","lng":"4.966617233333333","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"20 Rangs","surface":0.1875,"statut":"Active","lat":"47.23192664999999","lng":"4.966694575","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Songe du Haut","surface":0.2019,"statut":"Active","lat":"47.231575899999996","lng":"4.968590525","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Chaziere","surface":0.087,"statut":"Arrachee","lat":"47.23062468333333","lng":"4.96851645","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Entre 2 Routes","surface":0.0406,"statut":"Active","lat":"47.231785800000004","lng":"4.9676618","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Songe du Bas","surface":0.1652,"statut":"Active","lat":"47.231314075","lng":"4.96999265","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Combe du Dessus","surface":0.169,"statut":"Active","lat":"47.2285493875","lng":"4.9679725375","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Carougeot","surface":0.1986,"statut":"Active","lat":"47.22154918333333","lng":"4.973382983333334","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Jouise","surface":0.5151,"statut":"Active","lat":"47.222287725","lng":"4.9754784125","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Créot","surface":0.3643,"statut":"Active","lat":"47.233935","lng":"4.972331225","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Sylvie","surface":0.0457,"statut":"Active","lat":"47.23081858","lng":"4.97407412","taches":{"Taille":"En cours","Tirage":"En cours","Brulage":"En cours","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Champerrier","surface":0.2968,"statut":"Active","lat":"47.23110025714286","lng":"4.971331928571429","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Combe du Bas","surface":1.6753,"statut":"Active","lat":"47.228471828571436","lng":"4.973085071428571","taches":{"Taille":"En cours","Tirage":"En cours","Brulage":"En cours","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé","Pioche1":"Validé"}},{"nom":"Mansouze","surface":0.148,"statut":"Active","lat":"47.20969473333334","lng":"4.974225916666666","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Charreux","surface":0.1139,"statut":"Active","lat":"47.22999388","lng":"4.9788474","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Billard Petite","surface":0.2315,"statut":"Active","lat":"47.23032445","lng":"4.97894445","taches":{"Taille":"En cours","Tirage":"En cours","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Billard Grande","surface":0.6484,"statut":"Active","lat":"47.230732","lng":"4.980187044444445","taches":{"Taille":"En cours","Tirage":"En cours","Brulage":"En cours","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Crais","surface":0.554,"statut":"Active","lat":"47.227280549999996","lng":"4.985994825","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Etelois","surface":0.2988,"statut":"Active","lat":"47.21371381428572","lng":"4.9710809","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Fourneau Vieille","surface":0.1607,"statut":"Active","lat":"47.21490634999999","lng":"4.9775889","taches":{"Taille":"Validé","Brulage":"Validé","Tirage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Fourneau Jeune","surface":0.1304,"statut":"Active","lat":"47.215599475","lng":"4.975778075","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Marchais Petite","surface":0.0385,"statut":"Active","lat":"47.22525455","lng":"4.960455575","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Marchais Grande","surface":0.405,"statut":"Active","lat":"47.22450284285714","lng":"4.961353242857143","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Croix des Champs","surface":0.1259,"statut":"Active","lat":"47.221786175000005","lng":"4.978182125","taches":{"Brulage":"Validé","Tirage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Platieres","surface":0.3119,"statut":"Active","lat":"47.221922966666675","lng":"4.989312333333333","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Reniard","surface":0.1871,"statut":"Active","lat":"47.21254178333333","lng":"4.978380283333333","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Herbiottes","surface":0.2711,"statut":"Active","lat":"47.2012746","lng":"4.969528033333334","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Cognées","surface":0.1385,"statut":"Active","lat":"47.197667925000005","lng":"4.971090125","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Bras","surface":0.1144,"statut":"Active","lat":"47.203484849999995","lng":"4.97142495","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Pouroux","surface":0.2021,"statut":"Active","lat":"47.192603725","lng":"4.965891900000001","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Herbues","surface":0.335,"statut":"Active","lat":"47.189758899999994","lng":"4.9672456125","taches":{"Taille":"Validé","Brulage":"Validé","Tirage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Pasquier des Chenes","surface":0.3325,"statut":"Active","lat":"47.20466566666666","lng":"4.979041383333334","taches":{"Taille":"Validé","Brulage":"Validé","Tirage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Crotteaux","surface":0.2992,"statut":"Active","lat":"47.17761585","lng":"4.968223575000001","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Gravieres","surface":0.165,"statut":"Active","lat":"47.1866447","lng":"4.976601574999999","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Bollery Blanc","surface":0.2324,"statut":"Active","lat":"47.171483625","lng":"4.9644239875","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Bollery","surface":0.3285,"statut":"Active","lat":"47.1714132125","lng":"4.964357925","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Batailles","surface":0.1775,"statut":"Active","lat":"47.184826599999994","lng":"4.971313175","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Comble","surface":0.2961,"statut":"Active","lat":"47.2381557875","lng":"4.981507875","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}}];
 
-let JOURNAL=[{"id":"0b550083","date":"2026-05-15","parcelle":"Songe du Haut","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"aae22292","date":"2026-05-15","parcelle":"Songe du Bas","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"7f0cd410","date":"2026-05-15","parcelle":"Sylvie","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"8bb78013","date":"2026-05-15","parcelle":"Créot","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"db024ff1","date":"2026-05-15","parcelle":"Champerrier","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"8145ac12","date":"2026-05-15","parcelle":"Au Velle","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"0ddb359c","date":"2026-05-15","parcelle":"Combe du Bas","tache":"Pioche1","qui":"Nico","statut":"Validé","equipe":false},{"id":"21deacbc","date":"2026-05-15","parcelle":"Combe du Bas","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"e8f3ceda","date":"2026-05-05","parcelle":"Bras","tache":"Plantation","qui":"Nico","statut":"Validé","equipe":false},{"id":"a6cfb7e1","date":"2026-05-05","parcelle":"Batailles","tache":"Plantation","qui":"Nico","statut":"Validé","equipe":false},{"id":"22780352","date":"2026-04-28","parcelle":"Songe du Haut","tache":"Plantation","qui":"Victor","statut":"Validé","equipe":false},{"id":"18eb523b","date":"2026-04-28","parcelle":"20 Rangs","tache":"Plantation","qui":"Victor","statut":"Validé","equipe":false},{"id":"e75e51a2","date":"2026-04-13","parcelle":"Herbiottes","tache":"Pliage","qui":"Victor","statut":"Validé","equipe":true},{"id":"72da567b","date":"2026-04-13","parcelle":"Champerrier","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":true},{"id":"c5033ff8","date":"2026-04-07","parcelle":"Billard Petite","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":false},{"id":"8313d752","date":"2026-04-02","parcelle":"Songe du Bas","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":true},{"id":"528f116a","date":"2026-04-02","parcelle":"Champs","tache":"Reparation","qui":"Victor","statut":"Validé","equipe":true},{"id":"be88676d","date":"2026-04-01","parcelle":"Entre 2 Routes","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":false},{"id":"6fd2d9a1","date":"2026-03-24","parcelle":"Ruchottes","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":false},{"id":"04bcb496","date":"2026-03-14","parcelle":"Crais","tache":"Brulage","qui":"Nico","statut":"Validé","equipe":false},{"id":"39151ef7","date":"2026-03-11","parcelle":"Crotteaux","tache":"Tirage","qui":"Dessi","statut":"Validé","equipe":false},{"id":"a4dd94a4","date":"2026-03-11","parcelle":"Cognées","tache":"Brulage","qui":"Dessi","statut":"Validé","equipe":false},{"id":"7a645c11","date":"2026-03-10","parcelle":"Jouise","tache":"Brulage","qui":"Nico","statut":"Validé","equipe":false},{"id":"02a4a184","date":"2026-02-17","parcelle":"Fourneau Jeune","tache":"Taille","qui":"Dessi","statut":"Fait","equipe":false},{"id":"b1a3699d","date":"2026-02-10","parcelle":"Chaziere","tache":"Brulage","qui":"Dessi","statut":"Fait","equipe":true},{"id":"576c1734","date":"2026-01-31","parcelle":"Cognées","tache":"Taille","qui":"Equipe","statut":"Validé","equipe":true},{"id":"ae77bb18","date":"2026-01-29","parcelle":"Bollery Blanc","tache":"Taille","qui":"Nico","statut":"Validé","equipe":false},{"id":"35d29f03","date":"2026-01-28","parcelle":"Songe du Haut","tache":"Taille","qui":"Nico","statut":"Validé","equipe":false},{"id":"180728da","date":"2026-01-27","parcelle":"Charreux","tache":"Taille","qui":null,"statut":"En cours","equipe":false},{"id":"9f43cea3","date":"2026-01-26","parcelle":"Billard Petite","tache":"Taille","qui":null,"statut":"En cours","equipe":false}];
+let JOURNAL=[{"id":"0b550083","date":"2026-05-15","parcelle":"Songe du Haut","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"aae22292","date":"2026-05-15","parcelle":"Songe du Bas","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"7f0cd410","date":"2026-05-15","parcelle":"Sylvie","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"8bb78013","date":"2026-05-15","parcelle":"Créot","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"db024ff1","date":"2026-05-15","parcelle":"Champerrier","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"8145ac12","date":"2026-05-15","parcelle":"Au Velle","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"0ddb359c","date":"2026-05-15","parcelle":"Combe du Bas","tache":"Pioche1","qui":"Nico","statut":"Validé","equipe":false},{"id":"21deacbc","date":"2026-05-15","parcelle":"Combe du Bas","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"e8f3ceda","date":"2026-05-05","parcelle":"Bras","tache":"Plantation","qui":"Nico","statut":"Validé","equipe":false},{"id":"a6cfb7e1","date":"2026-05-05","parcelle":"Batailles","tache":"Plantation","qui":"Nico","statut":"Validé","equipe":false},{"id":"22780352","date":"2026-04-28","parcelle":"Songe du Haut","tache":"Plantation","qui":"Victor","statut":"Validé","equipe":false},{"id":"18eb523b","date":"2026-04-28","parcelle":"20 Rangs","tache":"Plantation","qui":"Victor","statut":"Validé","equipe":false},{"id":"e75e51a2","date":"2026-04-13","parcelle":"Herbiottes","tache":"Pliage","qui":"Victor","statut":"Validé","equipe":true},{"id":"72da567b","date":"2026-04-13","parcelle":"Champerrier","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":true},{"id":"c5033ff8","date":"2026-04-07","parcelle":"Billard Petite","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":false},{"id":"8313d752","date":"2026-04-02","parcelle":"Songe du Bas","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":true},{"id":"528f116a","date":"2026-04-02","parcelle":"Champs","tache":"Reparation","qui":"Victor","statut":"Validé","equipe":true},{"id":"be88676d","date":"2026-04-01","parcelle":"Entre 2 Routes","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":false},{"id":"6fd2d9a1","date":"2026-03-24","parcelle":"Ruchottes","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":false},{"id":"04bcb496","date":"2026-03-14","parcelle":"Crais","tache":"Brulage","qui":"Nico","statut":"Validé","equipe":false},{"id":"39151ef7","date":"2026-03-11","parcelle":"Crotteaux","tache":"Tirage","qui":"Dessi","statut":"Validé","equipe":false},{"id":"a4dd94a4","date":"2026-03-11","parcelle":"Cognées","tache":"Brulage","qui":"Dessi","statut":"Validé","equipe":false},{"id":"7a645c11","date":"2026-03-10","parcelle":"Jouise","tache":"Brulage","qui":"Nico","statut":"Validé","equipe":false},{"id":"02a4a184","date":"2026-02-17","parcelle":"Fourneau Jeune","tache":"Taille","qui":"Dessi","statut":"Validé","equipe":false},{"id":"b1a3699d","date":"2026-02-10","parcelle":"Chaziere","tache":"Brulage","qui":"Dessi","statut":"Validé","equipe":true},{"id":"576c1734","date":"2026-01-31","parcelle":"Cognées","tache":"Taille","qui":"Equipe","statut":"Validé","equipe":true},{"id":"ae77bb18","date":"2026-01-29","parcelle":"Bollery Blanc","tache":"Taille","qui":"Nico","statut":"Validé","equipe":false},{"id":"35d29f03","date":"2026-01-28","parcelle":"Songe du Haut","tache":"Taille","qui":"Nico","statut":"Validé","equipe":false},{"id":"180728da","date":"2026-01-27","parcelle":"Charreux","tache":"Taille","qui":null,"statut":"En cours","equipe":false},{"id":"9f43cea3","date":"2026-01-26","parcelle":"Billard Petite","tache":"Taille","qui":null,"statut":"En cours","equipe":false}];
 
 let ACTIVITES=[{nom:'Griffage',emoji:'🚜'},{nom:'Intercep',emoji:'✂️'},{nom:'Rognage',emoji:'✂️'},{nom:'Buttage',emoji:'🌱'},{nom:'Débuttage',emoji:'🌱'},{nom:'Minibuttage',emoji:'🌱'}];
 let CONDUCTEURS=[{nom:'Nico',statut:'Formé'},{nom:'Etienne',statut:'Formé'}];
@@ -814,6 +910,8 @@ let pFilter='toutes',pSearch='',jQui='tous',jTache='toutes',jSearch='',phTab='re
 let fCond='tous',fAct='toutes',selEmoji='🚜';
 let mapInit=false,leafMap=null;
 let rolesTemp={ouvrier:true,tractoriste:false,saisonnier:false};
+let priorityMessage=''; // Message priorité admin pour onglet Parcelles
+let tracSessionId=null; // Session tracteur actuellement ouverte dans le panneau détail
 
 const COULEURS_MBR={Nico:'#3D6B27',Victor:'#1A4A7A',Dessi:'#7A4F2E',Etienne:'#5B2D8E',Chloé:'#B8913A',Shana:'#C0392B',Alicia:'#1A5276'};
 const TCLS={Cuivre:'tcc',Soufre:'tsc',Fongicide:'tfc',Insecticide:'tic',Herbicide:'thc','Biocontrôle':'tbc'};
@@ -975,11 +1073,12 @@ async function fetchMeteo(){
         }
       }
     }
-    // Enregistrer dans journal
+    // Enregistrer dans journal seulement si un vrai travail existe ce jour
     const existant=METEO_JOURNAL.find(m=>m.date===meteoData.date);
     if(!existant){
       METEO_JOURNAL.push({...meteoData});
-      JOURNAL.unshift({id:'meteo-'+Date.now(),date:meteoData.date,parcelle:'Domaine',tache:'Météo',qui:'Auto',statut:'Info',equipe:false,meteo:true,temp,desc,wind,emoji});
+      // La météo s'insère dans le journal uniquement quand un travail est ajouté ce jour-là
+      // (voir injectMeteoIfNeeded)
     }
   }catch(e){
     const mc=document.getElementById('hv2-meteo-card');
@@ -1100,9 +1199,8 @@ function renderHome(){
     const isEq=r.equipe||r.qui==='Equipe';
     const quiAff=isEq&&r.qui&&r.qui!=='Equipe'?`Équipe (${r.qui})`:isEq?'Équipe':r.qui||'—';
     const isVal=r.statut==='Validé';
-    const isFait=r.statut==='Fait';
-    const dotCls=isVal?'hv2-dot-v':isFait?'hv2-dot-f':'hv2-dot-e';
-    const badgeCls=isVal?'bv2-v':isFait?'bv2-f':'bv2-e';
+    const dotCls=isVal?'hv2-dot-v':'hv2-dot-e';
+    const badgeCls=isVal?'bv2-v':'bv2-e';
     return `<div class="hv2-tv-item" onclick="goTo('journal')">
       <div class="hv2-tv-dot ${dotCls}">${TEMOJI[r.tache]||'📋'}</div>
       <div class="hv2-tv-corps">
@@ -1119,15 +1217,17 @@ function renderHome(){
 
 // ════ PARCELLES ════
 function getPCls(p){
-  const tachesSaison=getTachesSaison().map(t=>t.nom);
-  const tachesParcelle=Object.entries(p.taches).filter(([t])=>tachesSaison.includes(t));
-  const nbTotal=tachesParcelle.length;
-  const nbDone=tachesParcelle.filter(([,s])=>s==='Validé').length;
-  const pct=nbTotal>0?Math.round(nbDone/nbTotal*100):0;
-  if(p.statut==='Arrachee')return{a:'ava-x',d:'dr',cl:'pr',col:'var(--rouge)',fill:'var(--rouge)',em:'🚫',pct};
-  if(pct===100)return{a:'ava-c',d:'dc',cl:'pv',col:'var(--vert-med)',fill:'linear-gradient(90deg,var(--vert),var(--vert-clair))',em:'✅',pct};
-  if(pct>=75)return{a:'ava-a',d:'da',cl:'pa',col:'var(--or)',fill:'linear-gradient(90deg,var(--or),#D4A847)',em:'🌿',pct};
-  return{a:'ava-r',d:'dr',cl:'pr',col:'var(--orange)',fill:'linear-gradient(90deg,var(--orange),#C8701A)',em:'⚠️',pct};
+  const tachesSaison=getTachesSaison();
+  const exclues=p.tachesExclues||[];
+  // Tâches actives (non exclues pour cette parcelle)
+  const tachesActives=tachesSaison.filter(t=>!exclues.includes(t.nom));
+  const totalSaison=tachesActives.length;
+  const nbDone=tachesActives.filter(t=>p.taches[t.nom]==='Validé').length;
+  const pct=totalSaison>0?Math.round(nbDone/totalSaison*100):0;
+  if(p.statut==='Arrachee')return{a:'ava-x',d:'dr',cl:'pr',col:'var(--rouge)',fill:'var(--rouge)',em:'🚫',pct,nbDone,nbTotal:totalSaison};
+  if(pct===100)return{a:'ava-c',d:'dc',cl:'pv',col:'var(--vert-med)',fill:'linear-gradient(90deg,var(--vert),var(--vert-clair))',em:'✅',pct,nbDone,nbTotal:totalSaison};
+  if(pct>=75)return{a:'ava-a',d:'da',cl:'pa',col:'var(--or)',fill:'linear-gradient(90deg,var(--or),#D4A847)',em:'🌿',pct,nbDone,nbTotal:totalSaison};
+  return{a:'ava-r',d:'dr',cl:'pr',col:'var(--orange)',fill:'linear-gradient(90deg,var(--orange),#C8701A)',em:'⚠️',pct,nbDone,nbTotal:totalSaison};
 }
 function computePStats(){
   let c=0,e=0,r=0,a=0;
@@ -1137,33 +1237,42 @@ function computePStats(){
   });
   document.getElementById('pc-c').textContent=c;
   document.getElementById('pc-e').textContent=e;
-  document.getElementById('pc-r').textContent=r;
   document.getElementById('pc-a').textContent=a;
   document.getElementById('p-saison-sub').textContent=`${c+e+r} actives · ${getSaisonActive().nom}`;
 }
 function renderParcelles(){
+  // Encart priorité
+  const pb=document.getElementById('priority-banner');
+  const pe=document.getElementById('priority-empty');
+  const editBtn=document.getElementById('priority-edit-btn');
+  if(priorityMessage){
+    pb.style.display='block';pe.style.display='none';
+    document.getElementById('priority-text').textContent=priorityMessage;
+    if(editBtn)editBtn.style.display=isAdmin()?'block':'none';
+  } else {
+    pb.style.display='none';
+    if(pe)pe.style.display=isAdmin()?'block':'none';
+  }
   const data=PARCELLES.filter(p=>{
     const cl=getPCls(p);
     if(pFilter==='complet'&&(cl.pct!==100||p.statut==='Arrachee'))return false;
     if(pFilter==='avance'&&(cl.pct<75||cl.pct===100||p.statut==='Arrachee'))return false;
-    if(pFilter==='retard'&&(cl.pct>=75||p.statut==='Arrachee'))return false;
     if(pFilter==='arrachee'&&p.statut!=='Arrachee')return false;
     if(pSearch&&!p.nom.toLowerCase().includes(pSearch.toLowerCase()))return false;
     return true;
   });
   const cont=document.getElementById('pList');
   if(!data.length){cont.innerHTML='<div class="empty-state"><div class="ei">🔍</div><p>Aucun résultat.</p></div>';return;}
-  const tachesSaison=getTachesSaison().map(t=>t.nom);
   cont.innerHTML=data.map(p=>{
     const cl=getPCls(p);
-    const tps=Object.entries(p.taches).filter(([t])=>tachesSaison.includes(t));
-    const chips=tps.slice(0,4).map(([t,s])=>`<span class="tc ${s==='Validé'?'tcv':s==='Fait'?'tcf':'tce'}">${t}</span>`).join('');
+    const tps=getTachesSaison().map(t=>([t.nom,p.taches[t.nom]||'Non démarré']));
+    const chips=tps.slice(0,4).map(([t,s])=>`<span class="tc ${s==='Validé'?'tcv':'tce'}">${t}</span>`).join('');
     const more=tps.length>4?`<span class="tc tcm">+${tps.length-4}</span>`:'';
     return `<div class="pcard" onclick="openDP('${p.nom}')">
       <div class="pc-main">
         <div class="pc-ava ${cl.a}">${cl.em}<div class="pc-dot ${cl.d}">${cl.pct}</div></div>
         <div class="pc-info"><div class="pc-nom">${p.nom}</div><div class="pc-meta"><span class="pc-surf">📐 ${p.surface} ha</span><span class="pc-st ${p.statut==='Arrachee'?'st-arr':'st-act'}">${p.statut}</span></div></div>
-        <div class="pc-right"><div class="pc-pct ${cl.cl}">${cl.pct}%</div><div class="pc-pct-lbl">${tps.length} tâches</div></div>
+        <div class="pc-right"><div class="pc-pct ${cl.cl}">${cl.pct}%</div><div class="pc-pct-lbl">${cl.nbDone}/${cl.nbTotal} tâches</div></div>
       </div>
       <div class="pc-bar"><div class="pc-bar-fill" style="width:${cl.pct}%;background:${cl.fill}"></div></div>
       <div class="pc-tchips">${chips}${more}</div>
@@ -1180,10 +1289,12 @@ function openDP(nom){
   pe.textContent=cl.pct+'%';
   pe.style.cssText='float:right;font-family:"Cormorant Garamond",serif;font-size:38px;font-weight:600;color:'+(cl.pct===100?'var(--vert)':cl.pct>=75?'var(--or)':'var(--orange)');
   document.getElementById('dp-surf').textContent=p.surface+' ha';
-  // Heures restantes pour cette parcelle
+  // Heures restantes (hors tâches exclues)
   const tachesSaison=getTachesSaison();
+  const exclues=p.tachesExclues||[];
   let hReste=0;
   tachesSaison.forEach(t=>{
+    if(exclues.includes(t.nom))return;
     const stat=p.taches[t.nom];
     if(stat!=='Validé')hReste+=t.hha*p.surface;
   });
@@ -1191,40 +1302,155 @@ function openDP(nom){
   document.getElementById('dp-saison-label').textContent=getSaisonActive().nom;
   const ovLabel=document.getElementById('dp-saison-label');
   if(ovLabel)ovLabel.textContent=getSaisonActive().nom;
-  // Tâches avec toggle validation
+  // Tâches : afficher toutes, exclues en grisé
   const canEdit=isAdmin()||currentUser?.roles.includes('ouvrier');
+  const nomParcelle=p.nom;
   document.getElementById('dp-taches').innerHTML=tachesSaison.map(t=>{
     const stat=p.taches[t.nom]||'Non démarré';
+    const isExclu=exclues.includes(t.nom);
     const isOn=stat==='Validé';
+    const isEnCours=stat==='En cours';
     const hEstim=Math.round(t.hha*p.surface*10)/10;
-    return `<div class="val-row">
-      <div class="val-left">
-        <div>
-          <div class="val-nom">${TEMOJI[t.nom]||'🌿'} ${t.nom}</div>
-          <div class="val-hha">${t.hha}h/ha · ~${hEstim}h pour cette parcelle</div>
+    const statusColor=isExclu?'var(--texte-doux)':isOn?'var(--vert)':isEnCours?'var(--or)':'var(--texte-doux)';
+    const statusLabel=isExclu?'Non applicable':isOn?'Validé':isEnCours?'En cours':'À faire';
+    if(isExclu){
+      return `<div class="val-row" style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gris-clair);opacity:0.45">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:var(--texte-doux);text-decoration:line-through">🚫 ${t.nom}</div>
+          <div style="font-size:10px;color:var(--texte-doux);margin-top:2px">Non applicable sur cette parcelle</div>
         </div>
+        ${canEdit?`<button onclick="toggleExcluTache('${nomParcelle}','${t.nom}')" style="background:var(--gris-clair);border:none;border-radius:8px;padding:5px 10px;font-size:10px;font-weight:600;color:var(--texte-doux);cursor:pointer;white-space:nowrap;margin-left:10px">Réactiver</button>`:''}
+      </div>`;
+    }
+    return `<div class="val-row" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--gris-clair);gap:8px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600">${TEMOJI[t.nom]||'🌿'} ${t.nom}</div>
+        <div style="font-size:10px;color:var(--texte-doux);margin-top:2px">${t.hha}h/ha · ~${hEstim}h · <span style="color:${statusColor};font-weight:600">${statusLabel}</span></div>
       </div>
-      ${canEdit?`<button class="val-toggle ${isOn?'on':'off'}" onclick="toggleTravail('${p.nom}','${t.nom}',this)">${isOn?'✓':''}</button>`:`<span class="jst ${isOn?'jsv':'jse'}">${stat}</span>`}
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        ${canEdit&&!isOn?`<button onclick="marquerEnCours('${nomParcelle}','${t.nom}',this)" style="background:${isEnCours?'var(--or-pale)':'var(--gris-clair)'};border:${isEnCours?'1.5px solid var(--or)':'1.5px solid transparent'};border-radius:8px;padding:5px 8px;font-size:10px;font-weight:600;color:${isEnCours?'var(--or)':'var(--texte-doux)'};cursor:pointer;white-space:nowrap">${isEnCours?'⏳ En cours':'▶ Démarrer'}</button>`:''}
+        ${canEdit?`<button class="val-toggle ${isOn?'on':'off'}" onclick="toggleTravail('${nomParcelle}','${t.nom}',this)" title="${isOn?'Validé — cliquer pour annuler':'Cliquer pour valider'}">${isOn?'✓':''}</button>`:`<span class="jst ${isOn?'jsv':isEnCours?'jse':'jse'}" style="font-size:10px">${stat}</span>`}
+        ${canEdit&&!isOn?`<button onclick="toggleExcluTache('${nomParcelle}','${t.nom}')" style="background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:12px;cursor:pointer" title="Désactiver cette tâche pour cette parcelle">🚫</button>`:''}
+      </div>
     </div>`;
   }).join('');
+  // Stocker les coordonnées GPS pour le bouton
+  const gpsBtn=document.getElementById('dp-gps-btn');
+  if(gpsBtn){
+    if(p.lat&&p.lng){
+      gpsBtn.style.display='flex';
+      gpsBtn.dataset.lat=p.lat;
+      gpsBtn.dataset.lng=p.lng;
+    } else {
+      gpsBtn.style.display='none';
+    }
+  }
   openOv('ovParcelle');
 }
 
+function openGPS(){
+  const btn=document.getElementById('dp-gps-btn');
+  const lat=btn.dataset.lat,lng=btn.dataset.lng;
+  if(!lat||!lng)return;
+  const nom=document.getElementById('dp-nom').textContent;
+  // Ouvre l'app GPS native (fonctionne iOS/Android/desktop)
+  const url=`geo:${lat},${lng}?q=${lat},${lng}(${encodeURIComponent(nom)})`;
+  // Fallback Apple Maps / Google Maps selon la plateforme
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  if(isIOS){
+    window.open(`maps://maps.apple.com/?q=${encodeURIComponent(nom)}&ll=${lat},${lng}`,'_blank');
+  } else {
+    window.open(`https://maps.google.com/?q=${lat},${lng}(${encodeURIComponent(nom)})`,'_blank');
+  }
+}
+
+function toggleExcluTache(nomParcelle,nomTache){
+  const p=PARCELLES.find(x=>x.nom===nomParcelle);if(!p)return;
+  if(!p.tachesExclues)p.tachesExclues=[];
+  const idx=p.tachesExclues.indexOf(nomTache);
+  if(idx>=0){p.tachesExclues.splice(idx,1);}
+  else{p.tachesExclues.push(nomTache);}
+  renderParcelles();computePStats();
+  // Rafraîchir la fiche ouverte
+  openDP(nomParcelle);
+}
+
+function marquerEnCours(nomParcelle,nomTache,btn){
+  const p=PARCELLES.find(x=>x.nom===nomParcelle);if(!p)return;
+  const stat=p.taches[nomTache]||'Non démarré';
+  if(stat==='En cours'){
+    // Toggle off : repasser à Non démarré
+    p.taches[nomTache]='Non démarré';
+  } else {
+    p.taches[nomTache]='En cours';
+    const today=new Date().toISOString().split('T')[0];
+    JOURNAL.unshift({id:Date.now().toString(16),date:today,parcelle:nomParcelle,tache:nomTache,qui:currentUser.nom,statut:'En cours',equipe:false});
+    injectMeteoIfNeeded(today);
+  }
+  renderParcelles();computePStats();
+  openDP(nomParcelle);
+}
+
+function openPriorityEdit(){
+  document.getElementById('prio-input').value=priorityMessage;
+  openOv('ovPriority');
+}
+function savePriority(){
+  priorityMessage=document.getElementById('prio-input').value.trim();
+  document.getElementById('ovPriority').classList.remove('open');
+  renderParcelles();
+}
+function clearPriority(){
+  priorityMessage='';
+  document.getElementById('ovPriority').classList.remove('open');
+  renderParcelles();
+}
 function toggleTravail(nomParcelle,nomTache,btn){
   const p=PARCELLES.find(x=>x.nom===nomParcelle);if(!p)return;
   const isOn=btn.classList.contains('on');
-  const newStatut=isOn?'En cours':'Validé';
-  p.taches[nomTache]=newStatut;
-  btn.classList.toggle('on',!isOn);
-  btn.classList.toggle('off',isOn);
-  btn.textContent=isOn?'':'✓';
-  // Ajouter au journal
-  if(!isOn){
-    JOURNAL.unshift({id:Date.now().toString(16),date:new Date().toISOString().split('T')[0],parcelle:nomParcelle,tache:nomTache,qui:currentUser.nom,statut:'Validé',equipe:false});
-    // Mettre à jour TRAVAUX
-    recalcTravaux(nomTache);
+  if(isOn){
+    // Dévalider : remettre à En cours
+    p.taches[nomTache]='En cours';
+    btn.classList.remove('on');btn.classList.add('off');btn.textContent='';
+    btn.title='Cliquer pour valider';
+    renderParcelles();computePStats();
+  } else {
+    // Ouvrir le mini-panneau de validation avec choix équipe/seul
+    openValidationPanel(nomParcelle,nomTache,btn);
   }
+}
+
+let _validParcelle='',_validTache='',_validBtn=null;
+function openValidationPanel(nomParcelle,nomTache,btn){
+  _validParcelle=nomParcelle;_validTache=nomTache;_validBtn=btn;
+  document.getElementById('vp-titre').textContent=`${TEMOJI[nomTache]||'🌿'} ${nomTache}`;
+  document.getElementById('vp-parcelle').textContent=nomParcelle;
+  document.getElementById('vp-date').value=new Date().toISOString().split('T')[0];
+  // Pré-sélectionner Seul
+  document.querySelectorAll('#vp-equipe-pick .pchk').forEach((el,i)=>{el.classList.toggle('sel',i===0);el.classList.toggle('vert',i===0);});
+  document.getElementById('vp-equipe-val').value='non';
+  openOv('ovValidation');
+}
+function confirmValidation(){
+  const p=PARCELLES.find(x=>x.nom===_validParcelle);if(!p)return;
+  const equipe=document.getElementById('vp-equipe-val').value==='oui';
+  const date=document.getElementById('vp-date').value||new Date().toISOString().split('T')[0];
+  p.taches[_validTache]='Validé';
+  if(_validBtn){_validBtn.classList.add('on');_validBtn.classList.remove('off');_validBtn.textContent='✓';_validBtn.title='Validé — cliquer pour annuler';}
+  JOURNAL.unshift({id:Date.now().toString(16),date,parcelle:_validParcelle,tache:_validTache,qui:currentUser.nom,statut:'Validé',equipe});
+  recalcTravaux(_validTache);
+  injectMeteoIfNeeded(date);
+  document.getElementById('ovValidation').classList.remove('open');
   renderParcelles();computePStats();
+}
+
+function injectMeteoIfNeeded(date){
+  // Injecter une entrée météo dans le journal si ce jour a un travail et qu'on a des données météo
+  const hasTravail=JOURNAL.some(j=>!j.meteo&&j.date===date);
+  const alreadyMeteo=JOURNAL.some(j=>j.meteo&&j.date===date);
+  if(hasTravail&&!alreadyMeteo&&meteoData&&meteoData.date===date){
+    JOURNAL.push({id:'meteo-'+Date.now(),date,parcelle:'Domaine',tache:'Météo',qui:'Auto',statut:'Info',equipe:false,meteo:true,temp:meteoData.temp,desc:meteoData.desc,wind:meteoData.wind,emoji:meteoData.emoji});
+  }
 }
 
 function recalcTravaux(nomTache){
@@ -1276,8 +1502,7 @@ function loadKML(input){
   };
   reader.readAsText(file);
 }
-document.querySelectorAll('.fchip').forEach(c=>c.addEventListener('click',function(){document.querySelectorAll('.fchip').forEach(x=>x.classList.remove('active'));this.classList.add('active');pFilter=this.dataset.filter;renderParcelles();}));
-document.getElementById('pSearch').addEventListener('input',function(){pSearch=this.value;renderParcelles();});
+// fchip + pSearch listeners moved to DOMContentLoaded
 
 // ════ JOURNAL ════
 function fmtDate(d){if(!d)return'—';const[y,m,j]=d.split('-');return`${parseInt(j)} ${['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'][parseInt(m)-1]}`;}
@@ -1314,11 +1539,9 @@ function renderJournalList(){
   });
   const tot=data.filter(j=>!j.meteo).length;
   const val=data.filter(j=>j.statut==='Validé'&&!j.meteo).length;
-  const fait=data.filter(j=>j.statut==='Fait'&&!j.meteo).length;
   const enc=data.filter(j=>j.statut==='En cours'&&!j.meteo).length;
   document.getElementById('js-tot').textContent=tot;
   document.getElementById('js-val').textContent=val;
-  document.getElementById('js-f').textContent=fait;
   document.getElementById('js-e').textContent=enc;
   document.getElementById('j-sub').textContent=`${tot} entrées · Saison ${getSaisonActive().nom}`;
   const grouped={};
@@ -1330,8 +1553,8 @@ function renderJournalList(){
       <div class="dhead"><div class="dline"></div><div class="dlabel">${fmtDate(date)}</div><div class="dcnt">${items.length}</div><div class="dline"></div></div>
       ${items.map((r,i)=>{
         if(r.meteo)return `<div class="jitem"><div class="jdotcol"><div class="jdot jdm"></div>${i<items.length-1?'<div class="jlinev"></div>':''}</div><div class="meteo-card"><div class="mc-left"><div class="mc-title">Météo enregistrée</div><div class="mc-val">${r.emoji} ${r.temp}°C</div><div class="mc-detail">${r.desc} · Vent ${r.wind} km/h</div></div><div class="mc-icon">${r.emoji}</div></div></div>`;
-        const sc=r.statut==='Validé'?'jdv':r.statut==='Fait'?'jdf':r.statut==='Info'?'jdm':'jde';
-        const sb=r.statut==='Validé'?'jsv':r.statut==='Fait'?'jsf':r.statut==='Info'?'jsm':'jse';
+        const sc=r.statut==='Validé'?'jdv':r.statut==='Info'?'jdm':'jde';
+        const sb=r.statut==='Validé'?'jsv':r.statut==='Info'?'jsm':'jse';
         const m=MEMBRES.find(x=>x.nom===r.qui);
         const col=m?.couleur||COULEURS_MBR[r.qui]||'#888';
         const isEq=r.equipe||r.qui==='Equipe';
@@ -1340,7 +1563,7 @@ function renderJournalList(){
       }).join('')}
     </div>`).join('');
 }
-document.getElementById('jSearch').addEventListener('input',function(){jSearch=this.value;renderJournalList();});
+// jSearch listener moved to DOMContentLoaded
 
 // ════ TRACTEUR ════
 function renderTracteur(){
@@ -1362,12 +1585,75 @@ function renderTracteur(){
     const em=amap[s.activite]?.emoji||'🚜';
     const sc=s.statut==='Validé'?'ssval':s.statut==='En cours'?'ssenc':'sster';
     const pct=s.avancement||100;
-    return `<div class="scard"><div class="sc-hd"><div class="sc-ico">${em}</div><div class="sc-info"><div class="sc-act">${s.activite}</div><div class="sc-meta"><span class="sc-date">📅 ${fmtDate(s.date)}</span><span class="sc-cond">👤 ${s.conducteur}</span></div></div><div class="sc-right"><div class="sc-st ${sc}">${s.statut}</div><div class="sc-pct">${pct}%</div></div></div><div class="sc-bwrap"><div class="sc-blbl"><span>Avancement domaine</span><span>${pct===100?'45/45':Math.round(pct/100*45)+'/45'} parcelles</span></div><div class="sc-btrack"><div class="sc-bfill" style="width:${pct}%"></div></div></div>${s.note?`<div style="padding:0 16px 12px;font-size:11px;color:var(--texte-doux)">💬 ${s.note}</div>`:''}</div>`;
+    const parcellesFaites=(s.parcellesFaites||[]).length;
+    const total=PARCELLES.filter(p=>p.statut!=='Arrachee').length;
+    const clk=isTractoriste()?`onclick="openSessionDetail('${s.id}')" style="cursor:pointer"`:'';
+    return `<div class="scard" ${clk}><div class="sc-hd"><div class="sc-ico">${em}</div><div class="sc-info"><div class="sc-act">${s.activite}</div><div class="sc-meta"><span class="sc-date">📅 ${fmtDate(s.date)}</span><span class="sc-cond">👤 ${s.conducteur}</span></div></div><div class="sc-right"><div class="sc-st ${sc}">${s.statut}</div><div class="sc-pct">${pct}%</div></div></div><div class="sc-bwrap"><div class="sc-blbl"><span>Avancement domaine</span><span>${parcellesFaites}/${total} parcelles</span></div><div class="sc-btrack"><div class="sc-bfill" style="width:${pct}%"></div></div></div>${s.note?`<div style="padding:0 16px 12px;font-size:11px;color:var(--texte-doux)">💬 ${s.note}</div>`:''}</div>`;
   }).join('');
   document.getElementById('s-act').innerHTML=ACTIVITES.map(a=>`<option>${a.emoji} ${a.nom}</option>`).join('');
   document.getElementById('s-cond-pick').innerHTML=CONDUCTEURS.map((c,i)=>`<div class="pchk ${i===0?'sel acre':''}" onclick="pickCond(this)">${c.nom}</div>`).join('');
 }
-function pickCond(el){document.querySelectorAll('#s-cond-pick .pchk').forEach(x=>{x.classList.remove('sel','acre');});el.classList.add('sel','acre');}
+let sdShowDone=false;
+function openSessionDetail(id){
+  const s=SESSIONS.find(x=>x.id===id);if(!s)return;
+  tracSessionId=id;sdShowDone=false;
+  if(!s.parcellesFaites)s.parcellesFaites=[];
+  const amap=ACTIVITES.reduce((m,a)=>{m[a.nom]=a;return m},{});
+  const em=amap[s.activite]?.emoji||'🚜';
+  document.getElementById('sd-titre').textContent=`${em} ${s.activite}`;
+  document.getElementById('sd-meta').textContent=`${fmtDate(s.date)} · ${s.conducteur}`;
+  renderSDParcelles();
+  renderSessionProgress();
+  openOv('ovSessionDetail');
+}
+function renderSDParcelles(){
+  const s=SESSIONS.find(x=>x.id===tracSessionId);if(!s)return;
+  const actives=PARCELLES.filter(p=>p.statut!=='Arrachee');
+  const done=s.parcellesFaites||[];
+  // Par défaut : afficher seulement les non-faites (restantes)
+  const toShow=sdShowDone?actives:actives.filter(p=>!done.includes(p.nom));
+  const btn=document.getElementById('sd-show-done-btn');
+  if(btn)btn.textContent=sdShowDone?'Masquer faites':'Voir toutes';
+  document.getElementById('sd-parcelles').innerHTML=toShow.length===0
+    ?'<div style="text-align:center;padding:24px;color:var(--texte-doux);font-size:13px">✅ Toutes les parcelles sont cochées</div>'
+    :toShow.map(p=>{
+      const fait=done.includes(p.nom);
+      return `<div class="sdp-row ${fait?'sdp-done':''}" onclick="toggleSessionParcelle('${p.nom}',this)">
+        <div class="sdp-check ${fait?'on':''}">${fait?'✓':''}</div>
+        <div class="sdp-nom">${p.nom}</div>
+        <div class="sdp-surf">${p.surface} ha</div>
+      </div>`;
+    }).join('');
+}
+function toggleSDShowDone(){
+  sdShowDone=!sdShowDone;
+  renderSDParcelles();
+}
+function toggleSessionParcelle(nom,row){
+  const s=SESSIONS.find(x=>x.id===tracSessionId);if(!s)return;
+  if(!s.parcellesFaites)s.parcellesFaites=[];
+  const idx=s.parcellesFaites.indexOf(nom);
+  if(idx>=0){s.parcellesFaites.splice(idx,1);}
+  else{s.parcellesFaites.push(nom);}
+  renderSessionProgress();
+  renderSDParcelles(); // re-render (may hide the row if not showing done)
+}
+function renderSessionProgress(){
+  const s=SESSIONS.find(x=>x.id===tracSessionId);if(!s)return;
+  const total=PARCELLES.filter(p=>p.statut!=='Arrachee').length;
+  const done=(s.parcellesFaites||[]).length;
+  const pct=Math.round(done/total*100);
+  s.avancement=pct;
+  document.getElementById('sd-progress').textContent=`${done}/${total} parcelles · ${pct}%`;
+  document.getElementById('sd-bar').style.width=pct+'%';
+  // Mise à jour statut auto
+  if(pct===100&&s.statut==='En cours')s.statut='Terminé';
+  else if(pct<100&&s.statut==='Terminé')s.statut='En cours';
+}
+function closeSessionDetail(){
+  document.getElementById('ovSessionDetail').classList.remove('open');
+  renderTracteur();
+}
 function pickEmoji(el){document.querySelectorAll('#emoji-pick .pchk').forEach(x=>{x.classList.remove('sel','acre');});el.classList.add('sel','acre');selEmoji=el.dataset.val;}
 function saveSession(){
   if(!isTractoriste()){alert('Accès réservé aux tractoristes.');return;}
@@ -1474,15 +1760,237 @@ function openOv(id){document.getElementById(id).classList.add('open');}
 function closeOv(e,id){if(e.target===document.getElementById(id))document.getElementById(id).classList.remove('open');}
 function pickVal(el,hid,cls){el.parentElement.querySelectorAll('.pchk').forEach(x=>{x.classList.remove('sel','vert','acre','phyt');});el.classList.add('sel',cls);document.getElementById(hid).value=el.dataset.val;}
 
+// ════ NOTIFICATIONS ════
+function requestNotifications(){
+  if(!('Notification' in window)){
+    alert('Les notifications ne sont pas supportées par votre navigateur.');return;
+  }
+  if(Notification.permission==='granted'){
+    updateNotifUI('granted');
+    sendTestNotif();
+    return;
+  }
+  if(Notification.permission==='denied'){
+    alert('Les notifications ont été bloquées. Activez-les dans les réglages de votre navigateur.');
+    updateNotifUI('denied');return;
+  }
+  Notification.requestPermission().then(perm=>{
+    updateNotifUI(perm);
+    if(perm==='granted'){
+      sendTestNotif();
+      scheduleNotifCheck();
+    }
+  });
+}
+function updateNotifUI(perm){
+  const sub=document.getElementById('notif-status');
+  const arr=document.getElementById('notif-arr');
+  if(!sub)return;
+  if(perm==='granted'){sub.textContent='✅ Activées — alertes gel et DAR';if(arr)arr.textContent='✓';}
+  else if(perm==='denied'){sub.textContent='🚫 Bloquées par le navigateur';if(arr)arr.textContent='✗';}
+  else{sub.textContent='Alertes gel, DAR, validations';}
+}
+function sendTestNotif(){
+  new Notification('🍇 Ma Vigne',{body:'Notifications activées ! Vous recevrez les alertes gel et DAR.',icon:'icon192.png'});
+}
+function scheduleNotifCheck(){
+  // Vérifier alertes DAR toutes les heures
+  setInterval(checkNotifAlerts,3600000);
+  checkNotifAlerts();
+}
+function checkNotifAlerts(){
+  if(Notification.permission!=='granted')return;
+  const today=new Date();
+  TRAITEMENTS.forEach(t=>{
+    const prod=CATALOGUE.find(p=>p.nom===t.produit);
+    if(!prod||prod.dar===0)return;
+    const darR=Math.max(0,prod.dar-Math.floor((today-new Date(t.date))/86400000));
+    if(darR>0&&darR<=3){
+      new Notification('⚠️ DAR Ma Vigne',{body:`${t.produit} : ${darR}j avant récolte possible`,icon:'icon192.png'});
+    }
+  });
+}
+
+// ════ EXPORT ════
+function openExport(){openOv('ovExport');}
+function dlFile(content,filename,mime){
+  const blob=new Blob([content],{type:mime});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);document.body.removeChild(a);},1000);
+}
+function showExportFeedback(msg){
+  const el=document.getElementById('export-feedback');
+  if(!el)return;
+  el.textContent=msg;el.style.display='block';
+  setTimeout(()=>{el.style.display='none';},3000);
+}
+function exportJSON(){
+  const data={exportDate:new Date().toISOString(),version:'4.0',domaine:'Ma Vigne',parcelles:PARCELLES,journal:JOURNAL.filter(j=>!j.meteo),sessions:SESSIONS,traitements:TRAITEMENTS,membres:MEMBRES.map(m=>({nom:m.nom,roles:m.roles,statut:m.statut})),saisons:SAISONS,taches:TACHES};
+  const date=new Date().toISOString().split('T')[0];
+  dlFile(JSON.stringify(data,null,2),`mavigne_export_${date}.json`,'application/json');
+  showExportFeedback('✅ Export JSON téléchargé !');
+}
+function exportCSVJournal(){
+  const travaux=JOURNAL.filter(j=>!j.meteo);
+  const cols=['Date','Parcelle','Tâche','Ouvrier','Statut','Équipe'];
+  const rows=travaux.map(j=>[j.date,j.parcelle,j.tache,j.qui||'',j.statut,j.equipe?'Oui':'Non'].map(v=>`"${v}"`).join(','));
+  const csv=[cols.join(','),...rows].join('\n');
+  const date=new Date().toISOString().split('T')[0];
+  dlFile('\uFEFF'+csv,`mavigne_journal_${date}.csv`,'text/csv;charset=utf-8');
+  showExportFeedback(`✅ ${travaux.length} entrées exportées en CSV !`);
+}
+function exportCSVParcelles(){
+  const tachesSaison=getTachesSaison();
+  const colsTaches=tachesSaison.map(t=>t.nom);
+  const cols=['Parcelle','Surface (ha)','Statut','Avancement (%)',...colsTaches];
+  const rows=PARCELLES.map(p=>{
+    const cl=getPCls(p);
+    const tacheVals=colsTaches.map(t=>p.taches[t]||'Non démarré');
+    return [`"${p.nom}"`,p.surface,p.statut,cl.pct,...tacheVals.map(v=>`"${v}"`)].join(',');
+  });
+  const csv=[cols.map(c=>`"${c}"`).join(','),...rows].join('\n');
+  const date=new Date().toISOString().split('T')[0];
+  dlFile('\uFEFF'+csv,`mavigne_parcelles_${date}.csv`,'text/csv;charset=utf-8');
+  showExportFeedback(`✅ ${PARCELLES.length} parcelles exportées en CSV !`);
+}
+
+function exportPDFMois(){
+  const moisVal=document.getElementById('pdf-mois').value;
+  if(!moisVal){alert('Veuillez sélectionner un mois.');return;}
+  const [annee,mois]=moisVal.split('-');
+  const moisNoms=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const moisNom=moisNoms[parseInt(mois)-1]+' '+annee;
+
+  // Filtrer le journal pour ce mois
+  const travaux=JOURNAL.filter(j=>!j.meteo&&j.date&&j.date.startsWith(moisVal));
+  const meteoMois=JOURNAL.filter(j=>j.meteo&&j.date&&j.date.startsWith(moisVal));
+
+  // Grouper par date
+  const grouped={};
+  [...travaux,...meteoMois].forEach(r=>{if(!grouped[r.date])grouped[r.date]=[];grouped[r.date].push(r);});
+  const datesTri=Object.keys(grouped).sort((a,b)=>a.localeCompare(b));
+
+  // Stats du mois
+  const nbTravaux=travaux.length;
+  const nbVal=travaux.filter(j=>j.statut==='Validé').length;
+  const parcellesTouchees=[...new Set(travaux.map(j=>j.parcelle))];
+  const tachesTouchees=[...new Set(travaux.map(j=>j.tache))];
+  const ouvrierStats={};
+  travaux.forEach(j=>{const n=j.qui||'—';ouvrierStats[n]=(ouvrierStats[n]||0)+1;});
+
+  const fmtD=d=>{if(!d)return'—';const[y,m,j]=d.split('-');return`${parseInt(j)} ${moisNoms[parseInt(m)-1].slice(0,3)} ${y}`;};
+
+  const html=`<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8">
+<title>Rapport Ma Vigne — ${moisNom}</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1A1A14;background:white;font-size:12px;}
+  .cover{background:#1E3A12;color:white;padding:40px;min-height:180px;position:relative;}
+  .cover-brand{font-size:10px;letter-spacing:3px;text-transform:uppercase;opacity:0.5;margin-bottom:8px;}
+  .cover-title{font-size:32px;font-weight:700;margin-bottom:4px;}
+  .cover-sub{opacity:0.6;font-size:13px;}
+  .cover-date{position:absolute;top:40px;right:40px;text-align:right;opacity:0.6;font-size:11px;}
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:2px solid #EAF3E2;}
+  .stat{padding:16px 20px;border-right:1px solid #EAF3E2;}
+  .stat:last-child{border-right:none;}
+  .stat-val{font-size:28px;font-weight:700;color:#1E3A12;}
+  .stat-lbl{font-size:10px;color:#7A7A6A;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
+  .section{padding:20px 24px;}
+  .section-title{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#7A7A6A;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #EFEDE8;}
+  .day-block{margin-bottom:16px;}
+  .day-head{font-size:11px;font-weight:700;color:#1E3A12;background:#EAF3E2;padding:5px 10px;border-radius:6px;margin-bottom:6px;}
+  table{width:100%;border-collapse:collapse;}
+  td{padding:6px 10px;border-bottom:1px solid #EFEDE8;font-size:11px;}
+  td:first-child{width:30%;font-weight:600;}
+  .badge{display:inline-block;padding:2px 7px;border-radius:6px;font-size:9px;font-weight:700;}
+  .bv{background:#EAF3E2;color:#1E3A12;}.bf{background:#FAF3E0;color:#7A4F2E;}.be{background:#FBF0E6;color:#B85A1A;}
+  .meteo-row{background:#F8F7F3;font-style:italic;color:#7A7A6A;}
+  .ouvrier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .ouvrier-item{background:#F5F5F0;border-radius:8px;padding:10px 12px;}
+  .ouvrier-nom{font-weight:700;font-size:12px;}
+  .ouvrier-nb{font-size:18px;font-weight:700;color:#1E3A12;margin-top:2px;}
+  .footer{border-top:1px solid #EFEDE8;padding:12px 24px;font-size:9px;color:#7A7A6A;display:flex;justify-content:space-between;}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+</style></head><body>
+
+<div class="cover">
+  <div class="cover-date">Généré le ${new Date().toLocaleDateString('fr-FR')}</div>
+  <div class="cover-brand">🍇 Ma Vigne · Rapport mensuel</div>
+  <div class="cover-title">${moisNom}</div>
+  <div class="cover-sub">${getSaisonActive().nom} · Domaine</div>
+</div>
+
+<div class="stats-row">
+  <div class="stat"><div class="stat-val">${nbTravaux}</div><div class="stat-lbl">Travaux</div></div>
+  <div class="stat"><div class="stat-val">${nbVal}</div><div class="stat-lbl">Validés</div></div>
+  <div class="stat"><div class="stat-val">${parcellesTouchees.length}</div><div class="stat-lbl">Parcelles</div></div>
+  <div class="stat"><div class="stat-val">${tachesTouchees.length}</div><div class="stat-lbl">Types tâches</div></div>
+</div>
+
+${Object.keys(ouvrierStats).length>0?`
+<div class="section">
+  <div class="section-title">Travaux par ouvrier</div>
+  <div class="ouvrier-grid">
+    ${Object.entries(ouvrierStats).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`<div class="ouvrier-item"><div class="ouvrier-nom">${n}</div><div class="ouvrier-nb">${v}</div><div style="font-size:9px;color:#7A7A6A">travaux</div></div>`).join('')}
+  </div>
+</div>`:''}
+
+<div class="section">
+  <div class="section-title">Détail par journée</div>
+  ${datesTri.length===0?'<p style="color:#7A7A6A;font-style:italic">Aucun travail enregistré ce mois.</p>':
+    datesTri.map(date=>{
+      const items=grouped[date].sort((a,b)=>(a.meteo?1:-1));
+      return `<div class="day-block">
+        <div class="day-head">${fmtD(date)}</div>
+        <table>${items.map(r=>{
+          if(r.meteo)return`<tr class="meteo-row"><td>🌤 Météo</td><td colspan="3">${r.emoji||''} ${r.temp}°C · ${r.desc} · Vent ${r.wind} km/h</td></tr>`;
+          const sb=r.statut==='Validé'?'bv':'be';
+          return`<tr><td>${TEMOJI[r.tache]||'📋'} ${r.tache}</td><td>${r.parcelle}</td><td>${r.qui||'—'}${r.equipe?' 👥':''}</td><td><span class="badge ${sb}">${r.statut}</span></td></tr>`;
+        }).join('')}</table>
+      </div>`;
+    }).join('')
+  }
+</div>
+
+<div class="footer">
+  <span>Ma Vigne · ${moisNom}</span>
+  <span>Confidentiel — usage interne</span>
+</div>
+
+</body></html>`;
+
+  // Ouvrir dans une nouvelle fenêtre et lancer l'impression
+  const win=window.open('','_blank','width=900,height=700');
+  win.document.write(html);
+  win.document.close();
+  win.onload=()=>{win.focus();win.print();};
+  showExportFeedback(`✅ Rapport ${moisNom} généré !`);
+}
+
 // ════ INIT ════
 document.addEventListener('DOMContentLoaded', function(){
   var todayStr = new Date().toISOString().split('T')[0];
   var sd = document.getElementById('s-date'); if(sd) sd.value = todayStr;
   var pd = document.getElementById('p-date'); if(pd) pd.value = todayStr;
+  var pm = document.getElementById('pdf-mois'); if(pm) pm.value = todayStr.slice(0,7);
   initLogin();
   document.getElementById('login-back-btn').addEventListener('click', backToProfiles);
   document.getElementById('login-pwd-btn').addEventListener('click', confirmLogin);
   document.getElementById('login-pwd-input').addEventListener('keydown', function(e){ if(e.key==='Enter') confirmLogin(); });
+  // Listeners déplacés ici pour garantir que le DOM est prêt
+  document.querySelectorAll('.fchip').forEach(c=>c.addEventListener('click',function(){document.querySelectorAll('.fchip').forEach(x=>x.classList.remove('active'));this.classList.add('active');pFilter=this.dataset.filter;renderParcelles();}));
+  document.getElementById('pSearch').addEventListener('input',function(){pSearch=this.value;renderParcelles();});
+  document.getElementById('jSearch').addEventListener('input',function(){jSearch=this.value;renderJournalList();});
+  // Mettre à jour l'état des notifications si déjà accordées
+  if('Notification' in window&&Notification.permission==='granted'){
+    updateNotifUI('granted');
+    scheduleNotifCheck();
+  } else if('Notification' in window&&Notification.permission==='denied'){
+    updateNotifUI('denied');
+  }
 });
 </script>
 </body>
