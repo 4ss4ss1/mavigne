@@ -108,23 +108,63 @@ async function fbPushAll() {
   }
 }
 
+// ── Après chaque applyFbData, resynchroniser les variables locales du script principal ──
+function syncLocalVars() {
+  // Injecté via le script principal exposé sur window
+  if(window._syncLocalVars) window._syncLocalVars();
+}
+
 function applyFbData(key, value) {
   if(value === undefined || value === null) return;
   switch(key) {
     case 'parcelles':
+      // PARCELLES est const donc on mute le tableau en place
       if(window.PARCELLES){ window.PARCELLES.length=0; value.forEach(x=>window.PARCELLES.push(x)); }
       break;
-    case 'journal':     window.JOURNAL     = value; break;
-    case 'sessions':    window.SESSIONS    = value; break;
-    case 'travaux':     window.TRAVAUX     = value; break;
-    case 'traitements': window.TRAITEMENTS = value; break;
-    case 'catalogue':   window.CATALOGUE   = value; break;
-    case 'conducteurs': window.CONDUCTEURS = value; break;
-    case 'activites':   window.ACTIVITES   = value; break;
-    case 'membres':     window.MEMBRES     = value; break;
-    case 'saisons':     window.SAISONS     = value; break;
-    case 'taches':      window.TACHES      = value; break;
+    // Pour les autres : réassigner window.* ET la variable globale via un trick
+    // Le script principal lit window.JOURNAL etc. via les alias exposés
+    case 'journal':
+      window.JOURNAL = value;
+      try { JOURNAL = value; } catch(e) {}
+      break;
+    case 'sessions':
+      window.SESSIONS = value;
+      try { SESSIONS = value; } catch(e) {}
+      break;
+    case 'travaux':
+      window.TRAVAUX = value;
+      try { TRAVAUX = value; } catch(e) {}
+      break;
+    case 'traitements':
+      window.TRAITEMENTS = value;
+      try { TRAITEMENTS = value; } catch(e) {}
+      break;
+    case 'catalogue':
+      window.CATALOGUE = value;
+      try { CATALOGUE = value; } catch(e) {}
+      break;
+    case 'conducteurs':
+      window.CONDUCTEURS = value;
+      try { CONDUCTEURS = value; } catch(e) {}
+      break;
+    case 'activites':
+      window.ACTIVITES = value;
+      try { ACTIVITES = value; } catch(e) {}
+      break;
+    case 'membres':
+      window.MEMBRES = value;
+      try { MEMBRES = value; } catch(e) {}
+      break;
+    case 'saisons':
+      window.SAISONS = value;
+      try { SAISONS = value; } catch(e) {}
+      break;
+    case 'taches':
+      window.TACHES = value;
+      try { TACHES = value; } catch(e) {}
+      break;
   }
+  syncLocalVars();
 }
 
 // ── Écoute temps réel : mise à jour auto si un autre appareil modifie ──
@@ -1097,6 +1137,22 @@ window.MEMBRES    = MEMBRES;
 window.SAISONS    = SAISONS;
 window.TACHES     = TACHES;
 
+// Resynchronise les variables locales `let` depuis window.* après une mise à jour Firebase
+// (nécessaire car le module Firebase réassigne window.JOURNAL etc. mais pas les let locaux)
+window._syncLocalVars = function() {
+  if(window.JOURNAL     !== undefined) JOURNAL     = window.JOURNAL;
+  if(window.SESSIONS    !== undefined) SESSIONS    = window.SESSIONS;
+  if(window.TRAVAUX     !== undefined) TRAVAUX     = window.TRAVAUX;
+  if(window.TRAITEMENTS !== undefined) TRAITEMENTS = window.TRAITEMENTS;
+  if(window.CATALOGUE   !== undefined) CATALOGUE   = window.CATALOGUE;
+  if(window.CONDUCTEURS !== undefined) CONDUCTEURS = window.CONDUCTEURS;
+  if(window.ACTIVITES   !== undefined) ACTIVITES   = window.ACTIVITES;
+  if(window.MEMBRES     !== undefined) MEMBRES     = window.MEMBRES;
+  if(window.SAISONS     !== undefined) SAISONS     = window.SAISONS;
+  if(window.TACHES      !== undefined) TACHES      = window.TACHES;
+  // PARCELLES est const : muté en place, pas besoin de réassigner
+};
+
 // ════════════════════════════════════
 // PERSISTANCE — Firebase (primaire) + localStorage (fallback)
 // ════════════════════════════════════
@@ -1104,29 +1160,37 @@ const LS_KEY = 'mavigne_data_v1';
 
 // Appelé à chaque modification : écrit dans Firebase ET localStorage
 function saveData(keyHint) {
-  // localStorage fallback (immédiat)
+  // Toujours lire depuis window.* (source de vérité après synchro Firebase)
+  const W = {
+    parcelles:   window.PARCELLES   || PARCELLES,
+    journal:     window.JOURNAL     || JOURNAL,
+    sessions:    window.SESSIONS    || SESSIONS,
+    travaux:     window.TRAVAUX     || TRAVAUX,
+    traitements: window.TRAITEMENTS || TRAITEMENTS,
+    catalogue:   window.CATALOGUE   || CATALOGUE,
+    conducteurs: window.CONDUCTEURS || CONDUCTEURS,
+    activites:   window.ACTIVITES   || ACTIVITES,
+    membres:     window.MEMBRES     || MEMBRES,
+    saisons:     window.SAISONS     || SAISONS,
+    taches:      window.TACHES      || TACHES,
+  };
+
+  // localStorage fallback (immédiat, hors ligne)
   try {
     localStorage.setItem(LS_KEY, JSON.stringify({
-      PARCELLES,JOURNAL,SESSIONS,TRAVAUX,TRAITEMENTS,
-      CATALOGUE,CONDUCTEURS,ACTIVITES,MEMBRES,SAISONS,TACHES,
-      savedAt:Date.now()
+      PARCELLES:W.parcelles, JOURNAL:W.journal, SESSIONS:W.sessions,
+      TRAVAUX:W.travaux, TRAITEMENTS:W.traitements, CATALOGUE:W.catalogue,
+      CONDUCTEURS:W.conducteurs, ACTIVITES:W.activites, MEMBRES:W.membres,
+      SAISONS:W.saisons, TACHES:W.taches, savedAt:Date.now()
     }));
   } catch(e) {}
 
   // Firebase (async, ne bloque pas l'UI)
   if(window.fbSave) {
-    const map = {
-      parcelles:PARCELLES, journal:JOURNAL, sessions:SESSIONS,
-      travaux:TRAVAUX, traitements:TRAITEMENTS, catalogue:CATALOGUE,
-      conducteurs:CONDUCTEURS, activites:ACTIVITES, membres:MEMBRES,
-      saisons:SAISONS, taches:TACHES
-    };
-    if(keyHint && map[keyHint] !== undefined) {
-      // Sauvegarder uniquement la collection modifiée (plus rapide)
-      window.fbSave(keyHint, map[keyHint]);
+    if(keyHint && W[keyHint] !== undefined) {
+      window.fbSave(keyHint, W[keyHint]);
     } else {
-      // Sauvegarder tout
-      Object.entries(map).forEach(([k,v]) => window.fbSave(k, v));
+      Object.entries(W).forEach(([k,v]) => window.fbSave(k, v));
     }
   }
 }
