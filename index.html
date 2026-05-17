@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ma Vigne</title>
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ma Vigne">
+<meta name="theme-color" content="#1E3A12">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{
+  --vert:#1E3A12;--vert-med:#3D6B27;--vert-clair:#6BA34A;--vert-pale:#EAF3E2;
+  --or:#B8913A;--or-pale:#FAF3E0;
+  --terre:#7A4F2E;--terre-pale:#F5EDE4;
+  --acier:#2C3E50;--acier-med:#3D5166;--acier-pale:#ECF0F4;
+  --phyto:#5B2D8E;--phyto-med:#7B4DB8;--phyto-pale:#F0EAF8;
+  --bleu:#1A4A7A;--bleu-pale:#E8F0FA;
+  --blanc:#F8F7F3;--gris-clair:#EFEDE8;--gris:#DDD9D0;
+  --texte:#1A1A14;--texte-med:#4A4A3A;--texte-doux:#7A7A6A;
+  --rouge:#A0291E;--rouge-pale:#FAEAE8;
+  --orange:#B85A1A;--orange-pale:#FBF0E6;
+  --shadow-sm:0 2px 8px rgba(0,0,0,0.07);
+  --shadow-md:0 6px 24px rgba(0,0,0,0.12);
+  --nav-h:68px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;}
+
+/* ══ LOGIN ══ */
+#login-screen{position:fixed;inset:0;background:var(--vert);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:40px 30px;}
+.login-logo{font-size:60px;margin-bottom:16px;}
+.login-title{font-family:'Cormorant Garamond',serif;color:white;font-size:32px;font-weight:600;margin-bottom:6px;}
+.login-sub{color:rgba(255,255,255,0.6);font-size:13px;margin-bottom:40px;letter-spacing:0.5px;}
+.login-label{color:rgba(255,255,255,0.7);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;align-self:flex-start;width:100%;}
+.login-input{width:100%;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);border-radius:12px;padding:13px 16px;font-size:15px;font-family:'Outfit',sans-serif;color:white;outline:none;margin-bottom:14px;}
+.login-input::placeholder{color:rgba(255,255,255,0.4);}
+.login-btn{width:100%;background:white;color:var(--vert);border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;margin-top:6px;}
+.login-profiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:20px;}
+.lp-btn{background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.2);border-radius:12px;padding:12px;text-align:center;cursor:pointer;transition:background 0.15s;}
+.lp-btn:active{background:rgba(255,255,255,0.2);}
+.lp-name{color:white;font-size:13px;font-weight:600;}
+.lp-role{color:rgba(255,255,255,0.5);font-size:10px;margin-top:2px;}
+
+/* ══ NAV ══ */
+.nav-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:white;border-top:1px solid var(--gris-clair);display:grid;grid-template-columns:repeat(6,1fr);height:var(--nav-h);padding:6px 0 14px;box-shadow:0 -4px 24px rgba(0,0,0,0.09);z-index:1000;transition:grid-template-columns 0.3s;}
+.nb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;transition:transform 0.15s;}
+.nb:active{transform:scale(0.86);}
+.nb-icon{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;transition:background 0.2s;}
+.nb-label{font-size:9px;color:var(--texte-doux);font-weight:500;}
+.nb.active .nb-label{font-weight:700;}
+.nb[data-p=home].active .nb-icon{background:var(--vert-pale);}
+.nb[data-p=home].active .nb-label{color:var(--vert);}
+.nb[data-p=parcelles].active .nb-icon{background:var(--vert-pale);}
+.nb[data-p=parcelles].active .nb-label{color:var(--vert-med);}
+.nb[data-p=journal].active .nb-icon{background:var(--or-pale);}
+.nb[data-p=journal].active .nb-label{color:var(--or);}
+.nb[data-p=tracteur].active .nb-icon{background:var(--acier-pale);}
+.nb[data-p=tracteur].active .nb-label{color:var(--acier);}
+.nb[data-p=phyto].active .nb-icon{background:var(--phyto-pale);}
+.nb[data-p=phyto].active .nb-label{color:var(--phyto);}
+.nb[data-p=reglages].active .nb-icon{background:var(--gris-clair);}
+.nb[data-p=reglages].active .nb-label{color:var(--texte-med);}
+
+/* ══ PAGES ══ */
+.page{display:none;min-height:100vh;padding-bottom:calc(var(--nav-h)+12px);animation:pageIn 0.22s ease forwards;}
+.page.active{display:block;}
+@keyframes pageIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══ HEADERS ══ */
+.ph{padding:52px 20px 20px;position:relative;overflow:hidden;}
+.ph.verde{background:var(--vert);}
+.ph.acier{background:var(--acier);}
+.ph.phyto{background:var(--phyto);}
+.ph.gris{background:#3A3A32;}
+.ph::before{content:'';position:absolute;top:-60px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,0.04);}
+.ph-top{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+.ph-name{font-family:'Cormorant Garamond',serif;color:white;font-size:24px;font-weight:600;}
+.ph-domain{color:rgba(255,255,255,0.5);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-top:-2px;}
+.ph-notif{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;position:relative;margin-left:auto;}
+.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--or);border-radius:50%;border:1.5px solid var(--vert);}
+.ph-greeting{color:rgba(255,255,255,0.65);font-size:13px;margin-bottom:5px;}
+.ph-greeting strong{color:white;}
+.ph-badges{display:flex;gap:8px;flex-wrap:wrap;}
+.ph-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);border-radius:20px;padding:5px 12px;font-size:11px;color:rgba(255,255,255,0.85);letter-spacing:0.5px;}
+.ph-dot{width:6px;height:6px;border-radius:50%;background:var(--vert-clair);}
+.meteo-badge{background:rgba(255,255,255,0.08);}
+.ph-title{font-family:'Cormorant Garamond',serif;color:white;font-size:22px;font-weight:600;}
+.ph-sub{color:rgba(255,255,255,0.5);font-size:11px;margin-top:2px;}
+.ph-add{margin-left:auto;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:7px 13px;color:white;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;}
+.ph-add:active{background:rgba(255,255,255,0.22);}
+.user-pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);border-radius:20px;padding:4px 10px;font-size:11px;color:rgba(255,255,255,0.85);cursor:pointer;}
+.user-ava{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:white;}
+.locked-badge{font-size:9px;background:rgba(255,200,0,0.2);border:1px solid rgba(255,200,0,0.4);color:#FFD700;padding:2px 8px;border-radius:8px;font-weight:600;}
+
+/* ══ STAT BAND ══ */
+.sband{background:white;margin:0 16px;border-radius:16px;box-shadow:var(--shadow-md);transform:translateY(-16px);display:grid;overflow:hidden;}
+.sband.c3{grid-template-columns:1fr 1fr 1fr;}
+.sband.c4{grid-template-columns:1fr 1fr 1fr 1fr;}
+.sband.c5{grid-template-columns:1fr 1fr 1fr 1fr 1fr;}
+.sbi{padding:13px 6px;text-align:center;}
+.sbi:not(:last-child){border-right:1px solid var(--gris-clair);}
+.sbi-val{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;}
+.sbi-lbl{font-size:9px;color:var(--texte-doux);text-transform:uppercase;letter-spacing:0.6px;margin-top:2px;}
+.cv{color:var(--vert);}.cor{color:var(--or);}.cac{color:var(--acier);}.cph{color:var(--phyto);}
+
+/* ══ CONTENT ══ */
+.content{padding:0 16px;}
+.sh{display:flex;justify-content:space-between;align-items:center;margin:4px 0 10px;}
+.st{font-size:11px;font-weight:700;color:var(--texte-med);letter-spacing:1px;text-transform:uppercase;}
+.sa{font-size:12px;font-weight:600;cursor:pointer;}
+.sv{color:var(--vert-med);}.sac{color:var(--acier-med);}.sph{color:var(--phyto-med);}
+
+/* ══ HEURES CARD ══ */
+.heures-card{background:white;border-radius:16px;padding:18px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);margin-bottom:14px;}
+.hc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.hc-title{font-size:15px;font-weight:600;}
+.hc-total{text-align:right;}
+.hc-total-val{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--orange);}
+.hc-total-lbl{font-size:9px;color:var(--texte-doux);text-transform:uppercase;letter-spacing:0.5px;}
+.htache-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.htache-row:last-child{margin-bottom:0;}
+.htache-nom{font-size:12px;font-weight:500;width:90px;flex-shrink:0;}
+.htache-bar-wrap{flex:1;}
+.htache-bar-track{height:6px;background:var(--gris-clair);border-radius:6px;overflow:hidden;margin-bottom:3px;}
+.htache-bar-fill{height:100%;border-radius:6px;}
+.htache-stats{display:flex;justify-content:space-between;font-size:9px;color:var(--texte-doux);}
+.htache-pct{font-size:11px;font-weight:600;width:32px;text-align:right;flex-shrink:0;}
+
+/* ══ PARCELLES ══ */
+.frow{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;}
+.frow::-webkit-scrollbar{display:none;}
+.fchip{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.65);transition:all 0.15s;}
+.fchip.active{background:white;color:var(--vert);border-color:white;}
+.tabs2{display:flex;background:var(--gris-clair);border-radius:12px;padding:3px;margin:0 16px 14px;}
+.tab2{flex:1;text-align:center;padding:8px;font-size:12px;font-weight:600;border-radius:10px;cursor:pointer;color:var(--texte-doux);transition:all 0.2s;}
+.tab2.active{background:white;box-shadow:var(--shadow-sm);color:var(--vert-med);}
+.sbox{display:flex;align-items:center;gap:8px;background:white;border-radius:12px;padding:10px 14px;border:1.5px solid var(--gris-clair);box-shadow:var(--shadow-sm);margin-bottom:12px;}
+.sbox input{border:none;outline:none;font-size:13px;flex:1;font-family:'Outfit',sans-serif;background:transparent;}
+.pcard{background:white;border-radius:16px;margin-bottom:10px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);overflow:hidden;cursor:pointer;transition:transform 0.15s;}
+.pcard:active{transform:scale(0.98);}
+.pc-main{display:flex;align-items:center;padding:14px;gap:12px;}
+.pc-ava{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;position:relative;}
+.ava-c{background:var(--vert-pale);}.ava-a{background:var(--or-pale);}.ava-r{background:var(--orange-pale);}.ava-x{background:var(--rouge-pale);}
+.pc-dot{position:absolute;bottom:-2px;right:-2px;width:16px;height:16px;border-radius:50%;border:2px solid white;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.dc{background:var(--vert-med);color:white;}.da{background:var(--or);color:white;}.dr{background:var(--orange);color:white;}
+.pc-info{flex:1;min-width:0;}
+.pc-nom{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pc-meta{display:flex;gap:8px;align-items:center;margin-top:3px;}
+.pc-surf{font-size:11px;color:var(--texte-doux);}
+.pc-st{font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;text-transform:uppercase;}
+.st-act{background:var(--vert-pale);color:var(--vert);}.st-arr{background:var(--rouge-pale);color:var(--rouge);}
+.pc-right{text-align:right;flex-shrink:0;}
+.pc-pct{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;}
+.pv{color:var(--vert);}.pa{color:var(--or);}.pr{color:var(--orange);}
+.pc-pct-lbl{font-size:9px;color:var(--texte-doux);}
+.pc-bar{height:3px;background:var(--gris-clair);margin:0 14px 8px;border-radius:4px;overflow:hidden;}
+.pc-bar-fill{height:100%;border-radius:4px;}
+.pc-tchips{display:flex;gap:4px;padding:0 14px 12px;flex-wrap:wrap;}
+.tc{font-size:9px;padding:3px 8px;border-radius:8px;font-weight:500;}
+.tcv{background:var(--vert-pale);color:var(--vert-med);}.tcf{background:var(--or-pale);color:var(--terre);}.tce{background:var(--orange-pale);color:var(--orange);}.tcm{background:var(--gris-clair);color:var(--texte-doux);}
+
+/* Validation travaux */
+.val-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--gris-clair);}
+.val-row:last-child{border-bottom:none;}
+.val-left{display:flex;align-items:center;gap:10px;}
+.val-nom{font-size:13px;font-weight:500;}
+.val-hha{font-size:10px;color:var(--texte-doux);}
+.val-toggle{width:44px;height:26px;border-radius:13px;border:none;cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0;}
+.val-toggle.on{background:var(--vert-med);}
+.val-toggle.off{background:var(--gris);}
+.val-toggle::after{content:'';position:absolute;top:3px;width:20px;height:20px;border-radius:50%;background:white;box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:left 0.2s;}
+.val-toggle.on::after{left:21px;}
+.val-toggle.off::after{left:3px;}
+
+/* ══ JOURNAL ══ */
+.orow{display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none;}
+.orow::-webkit-scrollbar{display:none;}
+.ochip{flex-shrink:0;display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:white;transition:all 0.15s;}
+.ochip.active{border-color:var(--vert);background:var(--vert-pale);color:var(--vert);}
+.oava{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:white;}
+.tfilters{display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none;}
+.tfilters::-webkit-scrollbar{display:none;}
+.tfchip{flex-shrink:0;padding:5px 12px;border-radius:16px;font-size:10px;font-weight:600;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:white;transition:all 0.15s;}
+.tfchip.active{border-color:var(--vert);background:var(--vert);color:white;}
+.ost-card{background:white;border-radius:14px;padding:14px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);margin:0 16px 14px;}
+.ost-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--texte-doux);margin-bottom:10px;}
+.ostr{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.ostr:last-child{margin-bottom:0;}
+.ostn{font-size:12px;font-weight:600;width:60px;flex-shrink:0;}
+.ostb{flex:1;height:7px;background:var(--gris-clair);border-radius:6px;overflow:hidden;}
+.ostbf{height:100%;border-radius:6px;}
+.ostc{font-size:11px;color:var(--texte-doux);font-weight:600;width:28px;text-align:right;}
+.timeline{padding:0 16px 16px;}
+.dgroup{margin-bottom:20px;}
+.dhead{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.dline{flex:1;height:1px;background:var(--gris);}
+.dlabel{font-size:10px;font-weight:700;color:var(--texte-doux);letter-spacing:0.8px;text-transform:uppercase;white-space:nowrap;}
+.dcnt{font-size:9px;background:var(--gris-clair);color:var(--texte-doux);padding:2px 7px;border-radius:8px;font-weight:600;}
+.jitem{display:flex;gap:10px;margin-bottom:8px;}
+.jdotcol{display:flex;flex-direction:column;align-items:center;padding-top:12px;}
+.jdot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.jdv{background:var(--vert-med);}.jdf{background:var(--or);}.jde{background:var(--orange);}.jdm{background:var(--bleu);}
+.jlinev{width:2px;flex:1;background:var(--gris-clair);margin-top:4px;min-height:20px;}
+.jcard{flex:1;background:white;border-radius:12px;padding:12px 14px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);}
+.jtop{display:flex;justify-content:space-between;align-items:flex-start;}
+.jtache{font-size:13px;font-weight:600;}
+.jst{font-size:9px;font-weight:700;padding:3px 8px;border-radius:8px;text-transform:uppercase;letter-spacing:0.5px;}
+.jsv{background:var(--vert-pale);color:var(--vert);}.jsf{background:var(--or-pale);color:var(--terre);}.jse{background:var(--orange-pale);color:var(--orange);}.jsm{background:var(--bleu-pale);color:var(--bleu);}
+.jparcelle{font-size:11px;color:var(--texte-doux);margin-top:4px;}
+.jbottom{display:flex;align-items:center;gap:6px;margin-top:8px;}
+.jqui{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--texte-doux);}
+.java{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:white;}
+.eq-tag{font-size:9px;font-weight:700;background:var(--bleu-pale);color:var(--bleu);padding:2px 7px;border-radius:8px;margin-left:4px;}
+.meteo-card{background:linear-gradient(135deg,#1A3A6B,#2260A8);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.mc-left{color:white;}
+.mc-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;opacity:0.7;margin-bottom:3px;}
+.mc-val{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;}
+.mc-detail{font-size:10px;opacity:0.75;margin-top:2px;}
+.mc-icon{font-size:30px;}
+
+/* ══ TRACTEUR ══ */
+.chips-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;margin-bottom:14px;}
+.chips-row::-webkit-scrollbar{display:none;}
+.chip{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:white;transition:all 0.15s;display:flex;align-items:center;gap:5px;}
+.chip.active.ac{border-color:var(--acier);background:var(--acier-pale);color:var(--acier);}
+.readonly-banner{background:var(--or-pale);border:1px solid var(--or);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--terre);display:flex;gap:8px;align-items:center;}
+.scard{background:white;border-radius:16px;margin-bottom:12px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);overflow:hidden;}
+.sc-hd{display:flex;align-items:center;gap:14px;padding:16px;}
+.sc-ico{width:48px;height:48px;border-radius:13px;background:var(--acier-pale);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.sc-info{flex:1;min-width:0;}
+.sc-act{font-size:15px;font-weight:700;}
+.sc-meta{display:flex;gap:8px;align-items:center;margin-top:4px;flex-wrap:wrap;}
+.sc-date{font-size:11px;color:var(--texte-doux);}
+.sc-cond{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;background:var(--acier-pale);color:var(--acier);}
+.sc-right{text-align:right;flex-shrink:0;}
+.sc-st{font-size:9px;font-weight:700;padding:3px 9px;border-radius:10px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;display:inline-block;}
+.ssval{background:var(--vert-pale);color:var(--vert-med);}.sster{background:var(--acier-pale);color:var(--acier);}.ssenc{background:var(--orange-pale);color:var(--orange);}
+.sc-pct{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--acier);}
+.sc-bwrap{padding:0 16px 14px;}
+.sc-blbl{display:flex;justify-content:space-between;font-size:10px;color:var(--texte-doux);margin-bottom:5px;}
+.sc-btrack{height:6px;background:var(--gris-clair);border-radius:6px;overflow:hidden;}
+.sc-bfill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--acier-med),#6A8090);}
+
+/* ══ PHYTO ══ */
+.tabs3{display:flex;background:var(--gris-clair);border-radius:12px;padding:3px;margin:0 16px 14px;}
+.tab3{flex:1;text-align:center;padding:8px;font-size:12px;font-weight:600;border-radius:10px;cursor:pointer;color:var(--texte-doux);transition:all 0.2s;}
+.tab3.active{background:white;box-shadow:var(--shadow-sm);color:var(--phyto);}
+.tabcont{display:none;}.tabcont.vis{display:block;}
+.dar-alert{background:var(--rouge-pale);border:1px solid #F5B8B4;border-radius:12px;padding:12px 14px;margin:0 16px 14px;font-size:12px;color:var(--rouge);display:flex;gap:8px;align-items:center;}
+.pchip2{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:white;transition:all 0.15s;}
+.pchip2.active{border-color:var(--phyto);background:var(--phyto-pale);color:var(--phyto);}
+.phcard{background:white;border-radius:16px;margin-bottom:12px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);overflow:hidden;}
+.ph-hd{display:flex;align-items:center;gap:14px;padding:16px;}
+.ph-ico{width:48px;height:48px;border-radius:13px;background:var(--phyto-pale);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.ph-info{flex:1;min-width:0;}
+.ph-prod{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ph-meta{display:flex;gap:8px;align-items:center;margin-top:4px;flex-wrap:wrap;}
+.ph-date{font-size:11px;color:var(--texte-doux);}
+.ph-type{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;}
+.tfc{background:var(--vert-pale);color:#2D5016;}.tic{background:var(--orange-pale);color:var(--orange);}.thc{background:#FFF3CD;color:#856404;}.tcc{background:var(--bleu-pale);color:var(--bleu);}.tsc{background:#FEF9E7;color:#7D6608;}.tbc{background:var(--phyto-pale);color:var(--phyto);}
+.ph-right{text-align:right;flex-shrink:0;}
+.ph-dar{font-size:10px;color:var(--texte-doux);}
+.ph-dar strong{font-size:16px;font-family:'Cormorant Garamond',serif;color:var(--phyto);font-weight:600;}
+.ph-dose{font-size:11px;color:var(--texte-doux);margin-top:2px;}
+.ph-op{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;background:var(--phyto-pale);color:var(--phyto);}
+.ph-amm{font-size:9px;color:var(--texte-doux);padding:0 16px 12px;}
+.catpanel{background:white;border-radius:16px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);margin-bottom:14px;overflow:hidden;}
+.catitem{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--gris-clair);cursor:pointer;transition:background 0.15s;}
+.catitem:last-child{border-bottom:none;}.catitem:active{background:var(--gris-clair);}
+.cat-l{flex:1;min-width:0;}
+.cat-nom{font-size:13px;font-weight:600;}
+.cat-det{font-size:10px;color:var(--texte-doux);margin-top:2px;}
+.cat-r{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;margin-left:10px;}
+.cat-db{font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;}
+
+/* ══ RÉGLAGES ══ */
+.dom-badge{background:var(--vert);color:white;border-radius:16px;padding:16px;margin:0 16px 20px;text-align:center;}
+.db-logo{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;margin-bottom:4px;}
+.db-sub{font-size:11px;opacity:0.7;}
+.set-sec{margin-bottom:24px;}
+.set-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--texte-doux);margin-bottom:10px;padding:0 16px;}
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:white;margin-bottom:1px;cursor:pointer;}
+.set-row:first-of-type{border-radius:16px 16px 0 0;}.set-row:last-of-type{border-radius:0 0 16px 16px;}
+.sr-l{display:flex;align-items:center;gap:12px;}
+.sr-ico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.sr-lbl{font-size:14px;font-weight:500;}.sr-sub{font-size:11px;color:var(--texte-doux);margin-top:1px;}
+.sr-arr{color:var(--texte-doux);font-size:14px;}
+.membre-card{background:white;border-radius:14px;padding:14px 16px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;}
+.m-ava{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:white;flex-shrink:0;}
+.m-info{flex:1;}
+.m-nom{font-size:14px;font-weight:600;}
+.m-roles{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;}
+.m-role-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;text-transform:uppercase;letter-spacing:0.4px;}
+.rb-admin{background:var(--vert-pale);color:var(--vert);}
+.rb-ouvrier{background:var(--or-pale);color:var(--terre);}
+.rb-tractoriste{background:var(--acier-pale);color:var(--acier);}
+.rb-saisonnier{background:var(--phyto-pale);color:var(--phyto);}
+.m-statut{font-size:10px;color:var(--texte-doux);margin-top:2px;}
+.saison-card{background:white;border-radius:14px;padding:14px 16px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.sc-nom{font-size:14px;font-weight:600;}
+.sc-periode{font-size:11px;color:var(--texte-doux);margin-top:2px;}
+.sc-active-badge{font-size:9px;font-weight:700;padding:3px 10px;border-radius:10px;background:var(--vert-pale);color:var(--vert);}
+.tache-config-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--gris-clair);}
+.tache-config-row:last-child{border-bottom:none;}
+.tcr-info{flex:1;}
+.tcr-nom{font-size:13px;font-weight:600;}
+.tcr-hha{font-size:11px;color:var(--texte-doux);margin-top:2px;}
+.tcr-del{font-size:18px;cursor:pointer;color:var(--rouge);padding:4px 8px;}
+
+/* ══ OVERLAYS ══ */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;display:none;align-items:flex-end;max-width:430px;margin:0 auto;}
+.overlay.open{display:flex;}
+.modal{background:white;border-radius:24px 24px 0 0;width:100%;padding:0 0 40px;max-height:88vh;overflow-y:auto;animation:slideUp 0.28s cubic-bezier(.32,1.2,.32,1);}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--gris);border-radius:4px;margin:12px auto 0;}
+.modal-hd{padding:16px 20px 14px;border-bottom:1px solid var(--gris-clair);}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;}
+.modal-sub{font-size:12px;color:var(--texte-doux);margin-top:4px;}
+.modal-body{padding:16px 20px;}
+.fl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--texte-doux);margin-bottom:6px;margin-top:14px;}
+.fl:first-child{margin-top:0;}
+.fi{width:100%;background:var(--gris-clair);border:2px solid transparent;border-radius:10px;padding:11px 14px;font-size:14px;font-family:'Outfit',sans-serif;outline:none;transition:border-color 0.2s;color:var(--texte);}
+.fi:focus{border-color:var(--vert);}
+.fi.ph:focus{border-color:var(--phyto);}
+.fi.ac:focus{border-color:var(--acier);}
+.fsel{width:100%;background:var(--gris-clair);border:2px solid transparent;border-radius:10px;padding:11px 14px;font-size:14px;font-family:'Outfit',sans-serif;outline:none;color:var(--texte);appearance:none;cursor:pointer;}
+.ppicker{display:flex;gap:8px;flex-wrap:wrap;}
+.pchk{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:white;transition:all 0.15s;}
+.pchk.sel.vert{border-color:var(--vert);background:var(--vert-pale);color:var(--vert);}
+.pchk.sel.acre{border-color:var(--acier);background:var(--acier-pale);color:var(--acier);}
+.pchk.sel.phyt{border-color:var(--phyto);background:var(--phyto-pale);color:var(--phyto);}
+.mbtn{width:100%;padding:14px;border-radius:12px;border:none;font-size:15px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;margin-top:20px;}
+.mbtn.verte{background:var(--vert);color:white;}
+.mbtn.acre{background:var(--acier);color:white;}
+.mbtn.phyte{background:var(--phyto);color:white;}
+.mbtn-del{width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--rouge);background:transparent;color:var(--rouge);font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;margin-top:10px;}
+.infobx{background:var(--phyto-pale);border-radius:10px;padding:10px 12px;margin-top:8px;font-size:11px;color:var(--phyto);display:none;}
+.empty-state{text-align:center;padding:40px 20px;color:var(--texte-doux);}
+.empty-state .ei{font-size:40px;margin-bottom:10px;}
+.kml-zone{margin-bottom:14px;background:white;border:2px dashed var(--gris);border-radius:14px;padding:16px;text-align:center;cursor:pointer;}
+.kml-zone p{font-size:12px;color:var(--texte-doux);margin-top:4px;}
+#map{height:340px;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-md);margin-bottom:12px;}
+.mapwrap{padding:0 16px;display:none;}.mapwrap.vis{display:block;}
+.plist.vis{display:block;}.plist{display:none;}
+.leg-row{display:flex;gap:12px;flex-wrap:wrap;padding:0 16px;margin-bottom:16px;}
+.leg{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--texte-doux);}
+.leg-dot{width:10px;height:10px;border-radius:50%;}
+.ver-tag{text-align:center;font-size:11px;color:var(--texte-doux);padding:20px;}
+.roles-check{display:flex;flex-direction:column;gap:8px;}
+.role-check-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--gris-clair);border-radius:10px;}
+.role-check-name{font-size:13px;font-weight:500;}
+.role-chk{width:20px;height:20px;border-radius:6px;border:2px solid var(--gris);background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all 0.15s;}
+.role-chk.on{background:var(--vert);border-color:var(--vert);}
+
+/* ══ ACCUEIL V2 ══ */
+.hv2-header{background:var(--vert);padding:50px 22px 26px;position:relative;overflow:hidden;}
+.hv2-header::before{content:'';position:absolute;top:-50px;right:-30px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,0.05);}
+.hv2-header::after{content:'';position:absolute;bottom:-25px;left:-25px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,0.04);}
+.hv2-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1;}
+.hv2-brand{font-family:'Cormorant Garamond',serif;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:3px;}
+.hv2-title{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;color:#fff;line-height:1.1;}
+.hv2-avatar{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:#fff;cursor:pointer;flex-shrink:0;}
+.hv2-meta{display:flex;align-items:center;gap:10px;margin-top:18px;position:relative;z-index:1;}
+.hv2-saison-pill{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:500;color:rgba(255,255,255,0.85);display:flex;align-items:center;gap:6px;}
+.hv2-dot{width:6px;height:6px;border-radius:50%;background:var(--vert-clair);flex-shrink:0;}
+.hv2-sep{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,0.25);}
+.hv2-date{font-size:11px;color:rgba(255,255,255,0.45);font-weight:300;}
+
+/* météo */
+.hv2-meteo{margin:-1px 16px 0;background:white;border-radius:0 0 18px 18px;padding:15px 18px;display:flex;align-items:center;gap:14px;border:1px solid var(--gris-clair);border-top:none;box-shadow:var(--shadow-sm);}
+.hv2-meteo-skel{display:flex;gap:12px;align-items:center;width:100%;}
+.hv2-skel{background:linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);background-size:200% 100%;animation:hv2-shimmer 1.2s infinite;border-radius:6px;}
+@keyframes hv2-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.hv2-meteo-icon{font-size:30px;line-height:1;flex-shrink:0;}
+.hv2-meteo-main{flex:1;}
+.hv2-meteo-temp{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--texte);line-height:1;}
+.hv2-meteo-desc{font-size:11.5px;color:var(--texte-doux);margin-top:2px;}
+.hv2-meteo-details{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
+.hv2-meteo-detail{font-size:11px;color:var(--texte-doux);}
+.hv2-meteo-detail span{color:var(--texte-med);font-weight:500;}
+
+/* label section */
+.hv2-section-label{font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--texte-doux);padding:0 18px;margin-top:22px;margin-bottom:12px;}
+.hv2-section-head{display:flex;justify-content:space-between;align-items:center;padding:0 18px;margin-top:22px;margin-bottom:12px;}
+.hv2-voir-tout{font-size:12px;font-weight:600;color:var(--vert-med);cursor:pointer;}
+
+/* 2 grandes cartes */
+.hv2-grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px;}
+.hv2-card{border-radius:18px;padding:20px 16px;cursor:pointer;transition:transform 0.15s;position:relative;overflow:hidden;}
+.hv2-card:active{transform:scale(0.97);}
+.hv2-card-vert{background:var(--vert-pale);border:1px solid rgba(61,107,39,0.18);}
+.hv2-card-terre{background:var(--terre-pale);border:1px solid rgba(122,79,46,0.18);}
+.hv2-card-picto{font-size:22px;margin-bottom:14px;line-height:1;}
+.hv2-card-val{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;line-height:1;color:var(--texte);}
+.hv2-card-label{font-size:12px;font-weight:500;color:var(--texte-med);margin-top:5px;}
+.hv2-card-sub{font-size:11px;color:var(--texte-doux);margin-top:2px;}
+.hv2-chip{display:inline-block;font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;margin-top:10px;}
+.hv2-chip-vert{background:rgba(61,107,39,0.14);color:var(--vert-med);}
+.hv2-chip-terre{background:rgba(122,79,46,0.14);color:var(--terre);}
+.hv2-chip-or{background:rgba(184,145,58,0.15);color:var(--or);}
+
+/* tracteur card sombre */
+.hv2-trac-card{margin:0 16px;background:var(--vert);border-radius:18px;padding:18px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:transform 0.15s;box-shadow:var(--shadow-md);}
+.hv2-trac-card:active{transform:scale(0.98);}
+.hv2-trac-left{flex-shrink:0;}
+.hv2-trac-val{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:#fff;line-height:1;}
+.hv2-trac-val span{font-family:'Outfit',sans-serif;font-size:13px;font-weight:300;color:rgba(255,255,255,0.6);margin-left:2px;}
+.hv2-trac-sub{font-size:11px;color:rgba(255,255,255,0.5);margin-top:4px;}
+.hv2-trac-bars{flex:1;display:flex;flex-direction:column;gap:7px;}
+.hv2-bar-item{}
+.hv2-bar-label{display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,0.6);margin-bottom:4px;}
+.hv2-bar-track{height:4px;background:rgba(255,255,255,0.15);border-radius:4px;overflow:hidden;}
+.hv2-bar-fill{height:100%;border-radius:4px;background:var(--vert-clair);}
+.hv2-bar-fill.or{background:var(--or);}
+
+/* travaux récents */
+.hv2-travaux{display:flex;flex-direction:column;gap:9px;padding:0 16px;}
+.hv2-tv-item{background:white;border-radius:14px;border:1px solid var(--gris-clair);padding:13px 15px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-sm);cursor:pointer;transition:transform 0.12s;}
+.hv2-tv-item:active{transform:scale(0.98);}
+.hv2-tv-dot{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.hv2-dot-v{background:var(--vert-pale);}
+.hv2-dot-f{background:var(--bleu-pale);}
+.hv2-dot-e{background:var(--or-pale);}
+.hv2-tv-corps{flex:1;min-width:0;}
+.hv2-tv-tache{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hv2-tv-meta{font-size:11px;color:var(--texte-doux);margin-top:2px;}
+.hv2-tv-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.hv2-tv-date{font-size:10.5px;color:var(--texte-doux);}
+.hv2-tv-badge{font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:12px;letter-spacing:0.2px;}
+.bv2-v{background:var(--vert-pale);color:var(--vert-med);}
+.bv2-f{background:var(--bleu-pale);color:var(--bleu);}
+.bv2-e{background:var(--or-pale);color:var(--or);}
+
+/* heures rétractables */
+.hv2-hcard-wrap{padding:0 16px;margin-bottom:4px;overflow:hidden;transition:max-height 0.35s ease;}
+.hv2-hcard-wrap.hv2-collapsed{max-height:0;}
+
+</style>
+</head>
+<body>
+
+<!-- ══════ LOGIN ══════ -->
+<div id="login-screen">
+  <div class="login-logo">🍇</div>
+  <div class="login-title">Ma Vigne</div>
+  <div class="login-sub">Choisissez votre profil</div>
+  <div class="login-profiles" id="login-profiles"></div>
+</div>
+
+<!-- ══════ PAGE ACCUEIL ══════ -->
+<div class="page" id="page-home">
+
+  <!-- HEADER AÉRÉ -->
+  <div class="hv2-header">
+    <div class="hv2-top">
+      <div>
+        <div class="hv2-brand">Domaine</div>
+        <div class="hv2-title">Ma Vigne</div>
+      </div>
+      <div class="hv2-avatar" id="up-ava-v2" onclick="logout()">N</div>
+    </div>
+    <div class="hv2-meta">
+      <div class="hv2-saison-pill"><span class="hv2-dot"></span> <span id="saison-badge-home"></span></div>
+      <div class="hv2-sep"></div>
+      <div class="hv2-date" id="hv2-date"></div>
+    </div>
+  </div>
+
+  <!-- MÉTÉO CARD -->
+  <div class="hv2-meteo" id="hv2-meteo-card">
+    <div class="hv2-meteo-skel">
+      <div class="hv2-skel" style="width:42px;height:42px;border-radius:50%"></div>
+      <div style="flex:1">
+        <div class="hv2-skel" style="width:70px;height:20px;margin-bottom:7px"></div>
+        <div class="hv2-skel" style="width:130px;height:13px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRANDES STAT CARDS -->
+  <div class="hv2-section-label">Aperçu du domaine</div>
+  <div class="hv2-grid2">
+    <div class="hv2-card hv2-card-vert" onclick="goTo('parcelles')">
+      <div class="hv2-card-picto">🌿</div>
+      <div class="hv2-card-val">45</div>
+      <div class="hv2-card-label">Parcelles actives</div>
+      <div class="hv2-card-sub">11,76 ha au total</div>
+      <div class="hv2-chip hv2-chip-vert">Domaine</div>
+    </div>
+    <div class="hv2-card hv2-card-terre" onclick="goTo('journal')">
+      <div class="hv2-card-picto">⏱</div>
+      <div class="hv2-card-val" id="hs-hreste">—</div>
+      <div class="hv2-card-label">Heures restantes</div>
+      <div class="hv2-card-sub" id="hv2-h-sub">Calcul…</div>
+      <div class="hv2-chip hv2-chip-terre" id="hv2-h-chip">Printemps</div>
+    </div>
+  </div>
+
+  <!-- TRACTEUR SESSIONS — CARD SOMBRE -->
+  <div class="hv2-section-label" style="margin-top:20px">Travaux mécaniques</div>
+  <div class="hv2-trac-card" onclick="goTo('tracteur')">
+    <div class="hv2-trac-left">
+      <div class="hv2-trac-val" id="hv2-trac-nb">3 <span>sessions</span></div>
+      <div class="hv2-trac-sub">Saison 2026</div>
+    </div>
+    <div class="hv2-trac-bars" id="hv2-trac-bars"></div>
+  </div>
+
+  <!-- DERNIERS TRAVAUX -->
+  <div class="hv2-section-head">
+    <div class="hv2-section-label" style="margin:0">Derniers travaux</div>
+    <div class="hv2-voir-tout" onclick="goTo('journal')">Tout voir →</div>
+  </div>
+  <div class="hv2-travaux" id="derniers-travaux"></div>
+
+  <!-- HEURES PAR TÂCHE (conservé, rétractable) -->
+  <div class="hv2-section-head" style="cursor:pointer" onclick="document.getElementById('hv2-hcard').classList.toggle('hv2-collapsed')">
+    <div class="hv2-section-label" style="margin:0">Avancement par tâche</div>
+    <div class="hv2-voir-tout">Détail ›</div>
+  </div>
+  <div class="hv2-hcard-wrap" id="hv2-hcard">
+    <div class="heures-card" id="heures-card-home"></div>
+  </div>
+
+  <!-- IDs cachés pour compatibilité avec renderHome() -->
+  <span id="hs-travaux" style="display:none">0</span>
+
+</div>
+
+<!-- ══════ PAGE PARCELLES ══════ -->
+<div class="page" id="page-parcelles">
+  <div class="ph verde">
+    <div class="ph-top">
+      <div><div class="ph-title">Mes Parcelles</div><div class="ph-sub" id="p-saison-sub"></div></div>
+    </div>
+    <div class="frow">
+      <div class="fchip active" data-filter="toutes">Toutes</div>
+      <div class="fchip" data-filter="complet">✅ Finies</div>
+      <div class="fchip" data-filter="avance">🟡 En cours</div>
+      <div class="fchip" data-filter="retard">🟠 Retard</div>
+      <div class="fchip" data-filter="arrachee">Arrachées</div>
+    </div>
+  </div>
+  <div class="sband c4" style="transform:translateY(-14px)">
+    <div class="sbi"><div class="sbi-val cv" id="pc-c">0</div><div class="sbi-lbl">Finies</div></div>
+    <div class="sbi"><div class="sbi-val cor" id="pc-e">0</div><div class="sbi-lbl">Cours</div></div>
+    <div class="sbi"><div class="sbi-val" style="color:var(--orange)" id="pc-r">0</div><div class="sbi-lbl">Retard</div></div>
+    <div class="sbi"><div class="sbi-val" style="color:var(--rouge)" id="pc-a">0</div><div class="sbi-lbl">Arrach.</div></div>
+  </div>
+  <div class="tabs2">
+    <div class="tab2 active" id="tbl" onclick="switchPTab('liste')">📋 Liste</div>
+    <div class="tab2" id="tbc" onclick="switchPTab('carte')">🗺️ Carte</div>
+  </div>
+  <div class="plist vis" id="pwrapliste">
+    <div class="content">
+      <div class="sbox"><span>🔍</span><input type="text" id="pSearch" placeholder="Rechercher une parcelle…"></div>
+      <div id="pList"></div>
+    </div>
+  </div>
+  <div class="mapwrap" id="pwrapcarte">
+    <div class="kml-zone" onclick="document.getElementById('kmlInput').click()">
+      <div style="font-size:24px">📂</div>
+      <p>Glisser votre KML ou appuyer pour importer</p>
+      <input type="file" id="kmlInput" accept=".kml" style="display:none" onchange="loadKML(this)">
+    </div>
+    <div id="map"></div>
+    <div class="leg-row">
+      <div class="leg"><div class="leg-dot" style="background:var(--vert-med)"></div>100%</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--or)"></div>75–99%</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--orange)"></div>&lt;75%</div>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay détail + validation parcelle -->
+<div class="overlay" id="ovParcelle" onclick="closeOv(event,'ovParcelle')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-hd">
+      <div style="float:right;font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600" id="dp-pct"></div>
+      <div class="modal-title" id="dp-nom"></div>
+      <div class="modal-sub" id="dp-sub"></div>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
+        <div style="background:var(--gris-clair);border-radius:12px;padding:12px"><div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">Surface</div><div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;margin-top:2px" id="dp-surf"></div></div>
+        <div style="background:var(--gris-clair);border-radius:12px;padding:12px"><div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">H restantes</div><div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;margin-top:2px;color:var(--orange)" id="dp-hreste"></div></div>
+      </div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--texte-doux);margin-bottom:10px">Tâches — <span id="dp-saison-label"></span></div>
+      <div id="dp-taches"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ PAGE JOURNAL ══════ -->
+<div class="page" id="page-journal">
+  <div class="ph verde">
+    <div class="ph-top"><div><div class="ph-title">Journal des travaux</div><div class="ph-sub" id="j-sub">0 entrées</div></div></div>
+  </div>
+  <div class="sband c4">
+    <div class="sbi"><div class="sbi-val cv" id="js-tot">0</div><div class="sbi-lbl">Total</div></div>
+    <div class="sbi"><div class="sbi-val cv" id="js-val">0</div><div class="sbi-lbl">Validés</div></div>
+    <div class="sbi"><div class="sbi-val cor" id="js-f">0</div><div class="sbi-lbl">Faits</div></div>
+    <div class="sbi"><div class="sbi-val" style="color:var(--orange)" id="js-e">0</div><div class="sbi-lbl">En cours</div></div>
+  </div>
+  <div class="ost-card" id="ouvrier-stats-card"></div>
+  <div class="orow" id="ouvrier-chips-row"></div>
+  <div class="tfilters" id="tache-chips-row"></div>
+  <div style="padding:0 16px 12px"><div class="sbox"><span>🔍</span><input type="text" id="jSearch" placeholder="Parcelle, tâche, ouvrier…"></div></div>
+  <div class="timeline" id="timeline"></div>
+</div>
+
+<!-- ══════ PAGE TRACTEUR ══════ -->
+<div class="page" id="page-tracteur">
+  <div class="ph acier">
+    <div class="ph-top">
+      <div style="font-size:26px">🚜</div>
+      <div><div class="ph-title">Tracteur</div><div class="ph-sub">Sessions & passages domaine</div></div>
+      <button class="ph-add" id="trac-add-btn" onclick="openOv('ovSession')">＋ Session</button>
+    </div>
+  </div>
+  <div class="sband c3">
+    <div class="sbi"><div class="sbi-val cac" id="st-t">3</div><div class="sbi-lbl">Sessions</div></div>
+    <div class="sbi"><div class="sbi-val cac" id="st-ter">2</div><div class="sbi-lbl">Terminées</div></div>
+    <div class="sbi"><div class="sbi-val" style="color:var(--orange)" id="st-enc">1</div><div class="sbi-lbl">En cours</div></div>
+  </div>
+  <div class="content" style="margin-top:-4px">
+    <div class="readonly-banner" id="trac-readonly" style="display:none">🔒 Consultation seule — vous n'avez pas le rôle Tractoriste</div>
+    <div class="sh"><span class="st">Conducteurs</span><span class="sa sac" id="cond-add-btn" onclick="openOv('ovConducteur')">＋ Ajouter</span></div>
+    <div class="chips-row" id="cond-chips"></div>
+    <div class="sh"><span class="st">Activités</span><span class="sa sac" id="act-add-btn" onclick="openOv('ovActivite')">＋ Créer</span></div>
+    <div class="chips-row" id="act-chips"></div>
+    <div class="sh"><span class="st">Sessions</span></div>
+    <div id="sessions-list"></div>
+  </div>
+</div>
+
+<!-- ══════ PAGE PHYTO ══════ -->
+<div class="page" id="page-phyto">
+  <div class="ph phyto">
+    <div class="ph-top">
+      <div style="font-size:26px">🧪</div>
+      <div><div class="ph-title">Phytosanitaire</div><div class="ph-sub">Registre réglementaire · 2026</div></div>
+      <button class="ph-add" onclick="openOv('ovPhyto')">＋ Traitement</button>
+    </div>
+  </div>
+  <div class="sband c4">
+    <div class="sbi"><div class="sbi-val cph" id="sp-tot">0</div><div class="sbi-lbl">Total</div></div>
+    <div class="sbi"><div class="sbi-val" style="color:var(--bleu)" id="sp-cu">0</div><div class="sbi-lbl">Cuivre</div></div>
+    <div class="sbi"><div class="sbi-val" style="color:#7D6608" id="sp-so">0</div><div class="sbi-lbl">Soufre</div></div>
+    <div class="sbi"><div class="sbi-val" style="color:var(--rouge)" id="sp-dar">0</div><div class="sbi-lbl">DAR actifs</div></div>
+  </div>
+  <div class="dar-alert" id="dar-alert" style="display:none">⚠️ <div><strong>DAR en cours</strong> — délais avant récolte à respecter</div></div>
+  <div class="tabs3">
+    <div class="tab3 active" id="tb-reg" onclick="switchPhTab('reg')">📋 Registre</div>
+    <div class="tab3" id="tb-cat" onclick="switchPhTab('cat')">📦 Catalogue</div>
+  </div>
+  <div class="content">
+    <div class="chips-row" id="phyto-type-row"></div>
+    <div class="tabcont vis" id="tab-reg"><div id="traitements-list"></div></div>
+    <div class="tabcont" id="tab-cat">
+      <div class="sh"><span class="st">Produits homologués vigne</span><span class="sa sph" onclick="openOv('ovProduit')">＋ Ajouter</span></div>
+      <div class="catpanel" id="catalogue-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ PAGE RÉGLAGES ══════ -->
+<div class="page" id="page-reglages">
+  <div class="ph gris" style="padding-bottom:16px">
+    <div class="ph-top"><div><div class="ph-title">Réglages</div><div class="ph-sub">Ma Vigne v4.0</div></div></div>
+  </div>
+  <div style="height:14px"></div>
+  <div class="dom-badge"><div class="db-logo">🍇 Ma Vigne</div><div class="db-sub">Domaine · 45 parcelles · 11,76 ha actifs</div></div>
+
+  <div class="set-sec">
+    <div class="set-title">Saison active</div>
+    <div id="saisons-list" style="padding:0 16px"></div>
+    <div style="padding:0 16px;margin-top:8px"><button class="mbtn verte" style="margin-top:0;font-size:13px;padding:10px" onclick="openOv('ovSaison')">＋ Nouvelle saison</button></div>
+  </div>
+
+  <div class="set-sec">
+    <div class="set-title">Tâches — <span id="taches-saison-label"></span></div>
+    <div style="background:white;border-radius:16px;padding:0 16px;margin:0 16px;box-shadow:var(--shadow-sm)">
+      <div id="taches-config-list"></div>
+    </div>
+    <div style="padding:0 16px;margin-top:8px"><button class="mbtn verte" style="margin-top:0;font-size:13px;padding:10px" onclick="openOv('ovTache')">＋ Nouvelle tâche</button></div>
+  </div>
+
+  <div class="set-sec">
+    <div class="set-title">Équipe & accès</div>
+    <div id="membres-list" style="padding:0 16px"></div>
+    <div style="padding:0 16px;margin-top:8px"><button class="mbtn verte" style="margin-top:0;font-size:13px;padding:10px" onclick="openOv('ovMembre')">＋ Ajouter un membre</button></div>
+  </div>
+
+  <div class="set-sec">
+    <div class="set-title">Application</div>
+    <div style="margin:0 16px">
+      <div class="set-row" style="border-radius:16px 16px 0 0"><div class="sr-l"><div class="sr-ico" style="background:var(--terre-pale)">🔔</div><div><div class="sr-lbl">Notifications</div><div class="sr-sub">Alertes gel, DAR, validations</div></div></div><div class="sr-arr">›</div></div>
+      <div class="set-row"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">📤</div><div><div class="sr-lbl">Exporter données</div><div class="sr-sub">PDF · Excel · Registre phyto</div></div></div><div class="sr-arr">›</div></div>
+      <div class="set-row" style="border-radius:0 0 16px 16px" onclick="logout()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🚪</div><div><div class="sr-lbl" style="color:var(--rouge)">Se déconnecter</div></div></div><div class="sr-arr">›</div></div>
+    </div>
+  </div>
+  <div class="ver-tag">Ma Vigne v4.0 · Tous droits réservés 🍇</div>
+</div>
+
+<!-- ══════ NAV ══════ -->
+<nav class="nav-bar" id="nav-bar">
+  <div class="nb active" data-p="home" onclick="goTo('home')"><div class="nb-icon">🏠</div><div class="nb-label">Accueil</div></div>
+  <div class="nb" data-p="parcelles" onclick="goTo('parcelles')"><div class="nb-icon">🗺️</div><div class="nb-label">Parcelles</div></div>
+  <div class="nb" data-p="journal" onclick="goTo('journal')"><div class="nb-icon">📋</div><div class="nb-label">Journal</div></div>
+  <div class="nb" data-p="tracteur" onclick="goTo('tracteur')"><div class="nb-icon">🚜</div><div class="nb-label">Tracteur</div></div>
+  <div class="nb" data-p="phyto" onclick="goTo('phyto')"><div class="nb-icon">🧪</div><div class="nb-label">Phyto</div></div>
+  <div class="nb" data-p="reglages" onclick="goTo('reglages')"><div class="nb-icon">⚙️</div><div class="nb-label">Réglages</div></div>
+</nav>
+
+<!-- ══════ OVERLAYS ══════ -->
+
+<div class="overlay" id="ovSession" onclick="closeOv(event,'ovSession')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">🚜 Nouvelle session</div></div><div class="modal-body"><div class="fl">Activité</div><select class="fsel ac" id="s-act"></select><div class="fl">Date</div><input type="date" class="fi ac" id="s-date"><div class="fl">Conducteur</div><div class="ppicker" id="s-cond-pick"></div><div class="fl">Statut</div><div class="ppicker"><div class="pchk sel acre" data-val="Terminé" onclick="pickVal(this,'s-st','acre')">✅ Terminé</div><div class="pchk" data-val="En cours" onclick="pickVal(this,'s-st','acre')">🔄 En cours</div></div><input type="hidden" id="s-st" value="Terminé"><div class="fl">Avancement (%)</div><input type="number" class="fi ac" id="s-av" placeholder="100" min="0" max="100"><div class="fl">Note</div><input type="text" class="fi ac" id="s-note" placeholder="Conditions, zone…"><button class="mbtn acre" onclick="saveSession()">Enregistrer</button></div></div></div>
+
+<div class="overlay" id="ovActivite" onclick="closeOv(event,'ovActivite')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">⚙️ Nouvelle activité tracteur</div></div><div class="modal-body"><div class="fl">Nom</div><input type="text" class="fi ac" id="new-act" placeholder="Ex : Oreille de cochon…"><div class="fl">Icône</div><div class="ppicker" id="emoji-pick"><div class="pchk sel acre" data-val="🚜" onclick="pickEmoji(this)">🚜</div><div class="pchk" data-val="✂️" onclick="pickEmoji(this)">✂️</div><div class="pchk" data-val="🌱" onclick="pickEmoji(this)">🌱</div><div class="pchk" data-val="💧" onclick="pickEmoji(this)">💧</div><div class="pchk" data-val="🔧" onclick="pickEmoji(this)">🔧</div><div class="pchk" data-val="🌾" onclick="pickEmoji(this)">🌾</div></div><button class="mbtn acre" onclick="saveActivite()">Créer</button></div></div></div>
+
+<div class="overlay" id="ovConducteur" onclick="closeOv(event,'ovConducteur')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">👤 Nouveau conducteur</div></div><div class="modal-body"><div class="fl">Prénom</div><input type="text" class="fi ac" id="new-cond" placeholder="Prénom"><div class="fl">Statut</div><div class="ppicker"><div class="pchk sel acre" data-val="Formé" onclick="pickVal(this,'nc-st','acre')">✅ Formé</div><div class="pchk" data-val="En formation" onclick="pickVal(this,'nc-st','acre')">🎓 En formation</div></div><input type="hidden" id="nc-st" value="Formé"><button class="mbtn acre" onclick="saveConducteur()">Ajouter</button></div></div></div>
+
+<div class="overlay" id="ovEditCond" onclick="closeOv(event,'ovEditCond')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="ec-title">✏️ Modifier</div></div><input type="hidden" id="ec-nom"><div class="modal-body"><div class="fl">Statut</div><div class="ppicker" id="ec-st-pick"><div class="pchk" data-val="Formé" onclick="pickVal(this,'ec-st','acre')">✅ Formé</div><div class="pchk" data-val="En formation" onclick="pickVal(this,'ec-st','acre')">🎓 En formation</div><div class="pchk" data-val="Suspendu" onclick="pickVal(this,'ec-st','acre')">⏸ Suspendu</div></div><input type="hidden" id="ec-st"><button class="mbtn acre" onclick="saveEditCond()">Enregistrer</button><button class="mbtn-del" onclick="deleteCond()">Supprimer</button></div></div></div>
+
+<div class="overlay" id="ovPhyto" onclick="closeOv(event,'ovPhyto')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">🧪 Nouveau traitement</div></div><div class="modal-body"><div class="fl">Produit</div><select class="fsel" id="p-prod" onchange="onProdChange()"></select><div class="infobx" id="p-infobox"><div id="p-amm"></div><div id="p-dar-info" style="margin-top:3px;font-weight:600"></div></div><div class="fl">Date</div><input type="date" class="fi ph" id="p-date"><div class="fl">Dose utilisée</div><input type="text" class="fi ph" id="p-dose" placeholder="Ex : 300 g/ha"><div class="fl">Opérateur</div><input type="text" class="fi ph" id="p-op" placeholder="Prénom"><div class="fl">Note</div><input type="text" class="fi ph" id="p-note" placeholder="Stade, conditions…"><button class="mbtn phyte" onclick="saveTraitement()">Enregistrer</button></div></div></div>
+
+<div class="overlay" id="ovProduit" onclick="closeOv(event,'ovProduit')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">📦 Nouveau produit</div></div><div class="modal-body"><div class="fl">Nom commercial</div><input type="text" class="fi ph" id="np-nom" placeholder="Ex : Bordeaux B…"><div class="fl">Type</div><select class="fsel" id="np-type"><option>Cuivre</option><option>Soufre</option><option>Fongicide</option><option>Insecticide</option><option>Herbicide</option><option>Biocontrôle</option></select><div class="fl">N° AMM</div><input type="text" class="fi ph" id="np-amm"><div class="fl">DAR (jours)</div><input type="number" class="fi ph" id="np-dar" placeholder="21"><div class="fl">Dose max</div><input type="text" class="fi ph" id="np-dose"><button class="mbtn phyte" onclick="saveProduit()">Ajouter</button></div></div></div>
+
+<div class="overlay" id="ovSaison" onclick="closeOv(event,'ovSaison')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">📅 Nouvelle saison</div></div><div class="modal-body"><div class="fl">Nom de la saison</div><input type="text" class="fi" id="ns-nom" placeholder="Ex : Été 2026, Hiver 2026…"><div class="fl">Période</div><input type="text" class="fi" id="ns-periode" placeholder="Ex : Juin–Août 2026"><button class="mbtn verte" onclick="saveSaison()">Créer la saison</button></div></div></div>
+
+<div class="overlay" id="ovTache" onclick="closeOv(event,'ovTache')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">🌿 Nouvelle tâche</div></div><div class="modal-body"><div class="fl">Nom de la tâche</div><input type="text" class="fi" id="nt-nom" placeholder="Ex : Relevage, Accolage…"><div class="fl">Heures par hectare</div><input type="number" class="fi" id="nt-hha" placeholder="Ex : 50" min="0"><div class="fl">Saison</div><select class="fsel" id="nt-saison"></select><button class="mbtn verte" onclick="saveTache()">Ajouter la tâche</button></div></div></div>
+
+<div class="overlay" id="ovMembre" onclick="closeOv(event,'ovMembre')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">👤 Nouveau membre</div></div><div class="modal-body"><div class="fl">Prénom</div><input type="text" class="fi" id="nm-nom" placeholder="Prénom"><div class="fl">Email</div><input type="email" class="fi" id="nm-email" placeholder="email@domaine.fr"><div class="fl">Rôles</div><div class="roles-check" id="nm-roles"><div class="role-check-row"><span class="role-check-name">🌿 Ouvrier</span><div class="role-chk on" id="rc-ouvrier" onclick="toggleRole('ouvrier')">✓</div></div><div class="role-check-row"><span class="role-check-name">🚜 Tractoriste</span><div class="role-chk" id="rc-tractoriste" onclick="toggleRole('tractoriste')"></div></div><div class="role-check-row"><span class="role-check-name">🎟 Saisonnier</span><div class="role-chk" id="rc-saisonnier" onclick="toggleRole('saisonnier')"></div></div></div><div class="fl">Période (si saisonnier)</div><input type="text" class="fi" id="nm-periode" placeholder="Ex : Juin–Août 2026"><button class="mbtn verte" onclick="saveMembre()">Ajouter</button></div></div></div>
+
+<div class="overlay" id="ovEditMembre" onclick="closeOv(event,'ovEditMembre')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="em-title">✏️ Modifier membre</div></div><input type="hidden" id="em-nom"><div class="modal-body"><div class="fl">Rôles</div><div class="roles-check" id="em-roles"></div><div class="fl">Statut</div><div class="ppicker"><div class="pchk sel vert" data-val="Actif" onclick="pickVal(this,'em-statut','vert')">✅ Actif</div><div class="pchk" data-val="Inactif" onclick="pickVal(this,'em-statut','vert')">⏸ Inactif</div></div><input type="hidden" id="em-statut" value="Actif"><button class="mbtn verte" onclick="saveEditMembre()">Enregistrer</button><button class="mbtn-del" onclick="deleteMembre()">Supprimer</button></div></div></div>
+
+<script>
+// ════════════════════════════════════
+// DONNÉES
+// ════════════════════════════════════
+
+let MEMBRES = [
+  {nom:'Nico', email:'gueret.nicolas@gmail.com', roles:['admin','ouvrier','tractoriste'], statut:'Actif', couleur:'#3D6B27'},
+  {nom:'Victor', email:'leravictor904@gmail.com', roles:['ouvrier','tractoriste'], statut:'Actif', couleur:'#1A4A7A'},
+  {nom:'Dessi', email:'dessi.9332@yahoo.com', roles:['ouvrier'], statut:'Actif', couleur:'#7A4F2E'},
+  {nom:'Etienne', email:'etienne.marchand.21@gmail.com', roles:['ouvrier','tractoriste'], statut:'Actif', couleur:'#5B2D8E'},
+  {nom:'Chloé', email:'tonnelierchloe21@gmail.com', roles:['ouvrier'], statut:'Actif', couleur:'#B8913A'},
+  {nom:'Shana', email:'nana.badyka@gmail.com', roles:['ouvrier'], statut:'Actif', couleur:'#C0392B'},
+  {nom:'Alicia', email:'alicia.dupont58@live.fr', roles:['ouvrier'], statut:'Actif', couleur:'#1A5276'},
+];
+
+let SAISONS = [
+  {nom:'Hiver 2025–2026', periode:'Déc 2025 – Fév 2026', active:false},
+  {nom:'Printemps 2026', periode:'Mar – Mai 2026', active:true},
+];
+
+let TACHES = [
+  {nom:'Taille', hha:70, saison:'Hiver'},
+  {nom:'Tirage', hha:40, saison:'Hiver'},
+  {nom:'Brulage', hha:40, saison:'Hiver'},
+  {nom:'Reparation', hha:30, saison:'Printemps'},
+  {nom:'Pliage', hha:45, saison:'Printemps'},
+  {nom:'Plantation', hha:15, saison:'Printemps'},
+  {nom:'Ebourgeonnage1', hha:35, saison:'Printemps'},
+  {nom:'Ebourgeonnage2', hha:35, saison:'Printemps'},
+  {nom:'Pioche1', hha:40, saison:'Printemps'},
+  {nom:'Pioche2', hha:40, saison:'Printemps'},
+  {nom:'Relevage', hha:50, saison:'Printemps'},
+  {nom:'Accolage', hha:50, saison:'Printemps'},
+  {nom:'Palissage', hha:50, saison:'Printemps'},
+];
+
+const SURF_TOTALE = 11.76;
+
+// Avancement calculé depuis données réelles
+let TRAVAUX = {
+  "Taille":{h_ha:70,saison:'Hiver',surf_done:5.26,surf_total:11.76,pct:45,h_total:823.5,h_done:368.3,h_reste:455.2},
+  "Tirage":{h_ha:40,saison:'Hiver',surf_done:9.01,surf_total:11.76,pct:77,h_total:470.6,h_done:360.4,h_reste:110.2},
+  "Brulage":{h_ha:40,saison:'Hiver',surf_done:9.24,surf_total:11.76,pct:79,h_total:470.6,h_done:369.6,h_reste:101.0},
+  "Reparation":{h_ha:30,saison:'Printemps',surf_done:11.72,surf_total:11.76,pct:100,h_total:352.9,h_done:351.7,h_reste:1.2},
+  "Pliage":{h_ha:45,saison:'Printemps',surf_done:11.76,surf_total:11.76,pct:100,h_total:529.4,h_done:529.4,h_reste:0.0},
+  "Plantation":{h_ha:15,saison:'Printemps',surf_done:11.76,surf_total:11.76,pct:100,h_total:176.5,h_done:176.5,h_reste:0.0},
+  "Ebourgeonnage1":{h_ha:35,saison:'Printemps',surf_done:4.36,surf_total:11.76,pct:37,h_total:411.7,h_done:152.6,h_reste:259.1},
+  "Ebourgeonnage2":{h_ha:35,saison:'Printemps',surf_done:0,surf_total:11.76,pct:0,h_total:411.7,h_done:0,h_reste:411.7},
+  "Pioche1":{h_ha:40,saison:'Printemps',surf_done:1.68,surf_total:11.76,pct:14,h_total:470.6,h_done:67.0,h_reste:403.6},
+  "Pioche2":{h_ha:40,saison:'Printemps',surf_done:0,surf_total:11.76,pct:0,h_total:470.6,h_done:0,h_reste:470.6},
+  "Relevage":{h_ha:50,saison:'Printemps',surf_done:0,surf_total:11.76,pct:0,h_total:588.2,h_done:0,h_reste:588.2},
+  "Accolage":{h_ha:50,saison:'Printemps',surf_done:0,surf_total:11.76,pct:0,h_total:588.2,h_done:0,h_reste:588.2},
+  "Palissage":{h_ha:50,saison:'Printemps',surf_done:0,surf_total:11.76,pct:0,h_total:588.2,h_done:0,h_reste:588.2},
+};
+
+const PARCELLES=[{"nom":"Ruchottes","surface":0.077,"statut":"Active","lat":"47.220945445764066","lng":"4.965241122676378","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé"}},{"nom":"Champitenois Grande","surface":0.3299,"statut":"Active","lat":"47.21695608571429","lng":"4.970948385714285","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Champitenois Petite","surface":0.0732,"statut":"Active","lat":"47.21619832499999","lng":"4.971599275","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Ergot","surface":0.3709,"statut":"Active","lat":"47.21576756666666","lng":"4.970841155555556","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Perrieres Vieille","surface":0.1086,"statut":"Active","lat":"47.220130850000004","lng":"4.970564925","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé"}},{"nom":"Perrieres Jeune","surface":0.1079,"statut":"Active","lat":"47.221010275000005","lng":"4.9709544999999995","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"7 Rangs","surface":0.0667,"statut":"Active","lat":"47.2321987","lng":"4.9669846","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Champs","surface":0.1536,"statut":"Active","lat":"47.233109725000006","lng":"4.9675726749999995","taches":{"Taille":"Validé","Tirage":"Fait","Brulage":"Fait","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Au Velle","surface":0.3699,"statut":"Active","lat":"47.23146115","lng":"4.966617233333333","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"20 Rangs","surface":0.1875,"statut":"Active","lat":"47.23192664999999","lng":"4.966694575","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Songe du Haut","surface":0.2019,"statut":"Active","lat":"47.231575899999996","lng":"4.968590525","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Chaziere","surface":0.087,"statut":"Arrachee","lat":"47.23062468333333","lng":"4.96851645","taches":{"Taille":"En cours","Tirage":"Fait","Brulage":"Fait","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Entre 2 Routes","surface":0.0406,"statut":"Active","lat":"47.231785800000004","lng":"4.9676618","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Songe du Bas","surface":0.1652,"statut":"Active","lat":"47.231314075","lng":"4.96999265","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Combe du Dessus","surface":0.169,"statut":"Active","lat":"47.2285493875","lng":"4.9679725375","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Carougeot","surface":0.1986,"statut":"Active","lat":"47.22154918333333","lng":"4.973382983333334","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Jouise","surface":0.5151,"statut":"Active","lat":"47.222287725","lng":"4.9754784125","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Créot","surface":0.3643,"statut":"Active","lat":"47.233935","lng":"4.972331225","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Sylvie","surface":0.0457,"statut":"Active","lat":"47.23081858","lng":"4.97407412","taches":{"Taille":"En cours","Tirage":"En cours","Brulage":"En cours","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Champerrier","surface":0.2968,"statut":"Active","lat":"47.23110025714286","lng":"4.971331928571429","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Combe du Bas","surface":1.6753,"statut":"Active","lat":"47.228471828571436","lng":"4.973085071428571","taches":{"Taille":"En cours","Tirage":"En cours","Brulage":"En cours","Pliage":"Validé","Reparation":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé","Pioche1":"Validé"}},{"nom":"Mansouze","surface":0.148,"statut":"Active","lat":"47.20969473333334","lng":"4.974225916666666","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Charreux","surface":0.1139,"statut":"Active","lat":"47.22999388","lng":"4.9788474","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Billard Petite","surface":0.2315,"statut":"Active","lat":"47.23032445","lng":"4.97894445","taches":{"Taille":"En cours","Tirage":"En cours","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Billard Grande","surface":0.6484,"statut":"Active","lat":"47.230732","lng":"4.980187044444445","taches":{"Taille":"En cours","Tirage":"En cours","Brulage":"En cours","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Crais","surface":0.554,"statut":"Active","lat":"47.227280549999996","lng":"4.985994825","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Etelois","surface":0.2988,"statut":"Active","lat":"47.21371381428572","lng":"4.9710809","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Fourneau Vieille","surface":0.1607,"statut":"Active","lat":"47.21490634999999","lng":"4.9775889","taches":{"Taille":"Validé","Brulage":"Validé","Tirage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Fourneau Jeune","surface":0.1304,"statut":"Active","lat":"47.215599475","lng":"4.975778075","taches":{"Taille":"Fait","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Marchais Petite","surface":0.0385,"statut":"Active","lat":"47.22525455","lng":"4.960455575","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Marchais Grande","surface":0.405,"statut":"Active","lat":"47.22450284285714","lng":"4.961353242857143","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Croix des Champs","surface":0.1259,"statut":"Active","lat":"47.221786175000005","lng":"4.978182125","taches":{"Brulage":"Validé","Tirage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Platieres","surface":0.3119,"statut":"Active","lat":"47.221922966666675","lng":"4.989312333333333","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Reniard","surface":0.1871,"statut":"Active","lat":"47.21254178333333","lng":"4.978380283333333","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Herbiottes","surface":0.2711,"statut":"Active","lat":"47.2012746","lng":"4.969528033333334","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Cognées","surface":0.1385,"statut":"Active","lat":"47.197667925000005","lng":"4.971090125","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Bras","surface":0.1144,"statut":"Active","lat":"47.203484849999995","lng":"4.97142495","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Pouroux","surface":0.2021,"statut":"Active","lat":"47.192603725","lng":"4.965891900000001","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Herbues","surface":0.335,"statut":"Active","lat":"47.189758899999994","lng":"4.9672456125","taches":{"Taille":"Validé","Brulage":"Validé","Tirage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}},{"nom":"Pasquier des Chenes","surface":0.3325,"statut":"Active","lat":"47.20466566666666","lng":"4.979041383333334","taches":{"Taille":"Validé","Brulage":"Validé","Tirage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Crotteaux","surface":0.2992,"statut":"Active","lat":"47.17761585","lng":"4.968223575000001","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Gravieres","surface":0.165,"statut":"Active","lat":"47.1866447","lng":"4.976601574999999","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Bollery Blanc","surface":0.2324,"statut":"Active","lat":"47.171483625","lng":"4.9644239875","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Bollery","surface":0.3285,"statut":"Active","lat":"47.1714132125","lng":"4.964357925","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Batailles","surface":0.1775,"statut":"Active","lat":"47.184826599999994","lng":"4.971313175","taches":{"Taille":"Validé","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé"}},{"nom":"Comble","surface":0.2961,"statut":"Active","lat":"47.2381557875","lng":"4.981507875","taches":{"Taille":"En cours","Tirage":"Validé","Brulage":"Validé","Reparation":"Validé","Pliage":"Validé","Plantation":"Validé","Ebourgeonnage1":"Validé"}}];
+
+let JOURNAL=[{"id":"0b550083","date":"2026-05-15","parcelle":"Songe du Haut","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"aae22292","date":"2026-05-15","parcelle":"Songe du Bas","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"7f0cd410","date":"2026-05-15","parcelle":"Sylvie","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"8bb78013","date":"2026-05-15","parcelle":"Créot","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"db024ff1","date":"2026-05-15","parcelle":"Champerrier","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"8145ac12","date":"2026-05-15","parcelle":"Au Velle","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"0ddb359c","date":"2026-05-15","parcelle":"Combe du Bas","tache":"Pioche1","qui":"Nico","statut":"Validé","equipe":false},{"id":"21deacbc","date":"2026-05-15","parcelle":"Combe du Bas","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"e8f3ceda","date":"2026-05-05","parcelle":"Bras","tache":"Plantation","qui":"Nico","statut":"Validé","equipe":false},{"id":"a6cfb7e1","date":"2026-05-05","parcelle":"Batailles","tache":"Plantation","qui":"Nico","statut":"Validé","equipe":false},{"id":"22780352","date":"2026-04-28","parcelle":"Songe du Haut","tache":"Plantation","qui":"Victor","statut":"Validé","equipe":false},{"id":"18eb523b","date":"2026-04-28","parcelle":"20 Rangs","tache":"Plantation","qui":"Victor","statut":"Validé","equipe":false},{"id":"e75e51a2","date":"2026-04-13","parcelle":"Herbiottes","tache":"Pliage","qui":"Victor","statut":"Validé","equipe":true},{"id":"72da567b","date":"2026-04-13","parcelle":"Champerrier","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":true},{"id":"c5033ff8","date":"2026-04-07","parcelle":"Billard Petite","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":false},{"id":"8313d752","date":"2026-04-02","parcelle":"Songe du Bas","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":true},{"id":"528f116a","date":"2026-04-02","parcelle":"Champs","tache":"Reparation","qui":"Victor","statut":"Validé","equipe":true},{"id":"be88676d","date":"2026-04-01","parcelle":"Entre 2 Routes","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":false},{"id":"6fd2d9a1","date":"2026-03-24","parcelle":"Ruchottes","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":false},{"id":"04bcb496","date":"2026-03-14","parcelle":"Crais","tache":"Brulage","qui":"Nico","statut":"Validé","equipe":false},{"id":"39151ef7","date":"2026-03-11","parcelle":"Crotteaux","tache":"Tirage","qui":"Dessi","statut":"Validé","equipe":false},{"id":"a4dd94a4","date":"2026-03-11","parcelle":"Cognées","tache":"Brulage","qui":"Dessi","statut":"Validé","equipe":false},{"id":"7a645c11","date":"2026-03-10","parcelle":"Jouise","tache":"Brulage","qui":"Nico","statut":"Validé","equipe":false},{"id":"02a4a184","date":"2026-02-17","parcelle":"Fourneau Jeune","tache":"Taille","qui":"Dessi","statut":"Fait","equipe":false},{"id":"b1a3699d","date":"2026-02-10","parcelle":"Chaziere","tache":"Brulage","qui":"Dessi","statut":"Fait","equipe":true},{"id":"576c1734","date":"2026-01-31","parcelle":"Cognées","tache":"Taille","qui":"Equipe","statut":"Validé","equipe":true},{"id":"ae77bb18","date":"2026-01-29","parcelle":"Bollery Blanc","tache":"Taille","qui":"Nico","statut":"Validé","equipe":false},{"id":"35d29f03","date":"2026-01-28","parcelle":"Songe du Haut","tache":"Taille","qui":"Nico","statut":"Validé","equipe":false},{"id":"180728da","date":"2026-01-27","parcelle":"Charreux","tache":"Taille","qui":null,"statut":"En cours","equipe":false},{"id":"9f43cea3","date":"2026-01-26","parcelle":"Billard Petite","tache":"Taille","qui":null,"statut":"En cours","equipe":false}];
+
+let ACTIVITES=[{nom:'Griffage',emoji:'🚜'},{nom:'Intercep',emoji:'✂️'},{nom:'Rognage',emoji:'✂️'},{nom:'Buttage',emoji:'🌱'},{nom:'Débuttage',emoji:'🌱'},{nom:'Minibuttage',emoji:'🌱'}];
+let CONDUCTEURS=[{nom:'Nico',statut:'Formé'},{nom:'Etienne',statut:'Formé'}];
+let SESSIONS=[{id:'0b81fe25',activite:'Griffage',date:'2026-03-03',conducteur:'Nico',statut:'Validé',avancement:100,note:''},{id:'bf8d7558',activite:'Minibuttage',date:'2026-04-10',conducteur:'Nico',statut:'Terminé',avancement:100,note:''},{id:'4b6e4fb0',activite:'Intercep',date:'2026-04-26',conducteur:'Nico',statut:'En cours',avancement:71,note:'13 parcelles restantes (zone sud)'}];
+let CATALOGUE=[{nom:'Bouillie bordelaise 20 WG',type:'Cuivre',amm:'2010001',dar:21,dose:'4 kg/ha'},{nom:'Nordox 75 WG',type:'Cuivre',amm:'9200386',dar:56,dose:'0,6 kg/ha'},{nom:'Microthiol Special Disperss',type:'Soufre',amm:'2020014',dar:35,dose:'5 kg/ha'},{nom:'Thiovit Jet',type:'Soufre',amm:'8900225',dar:56,dose:'3–5 kg/ha'},{nom:'Mildicut',type:'Fongicide',amm:'2100435',dar:21,dose:'2,5 L/ha'},{nom:'Equation Pro',type:'Fongicide',amm:'2030218',dar:21,dose:'0,4 kg/ha'},{nom:'Pergado F',type:'Fongicide',amm:'2130033',dar:28,dose:'2 kg/ha'},{nom:'Switch',type:'Fongicide',amm:'9900455',dar:7,dose:'0,8 kg/ha'},{nom:'Karate Zeon',type:'Insecticide',amm:'9200556',dar:7,dose:'0,1 L/ha'},{nom:'Serenade ASO',type:'Biocontrôle',amm:'2110156',dar:0,dose:'4 L/ha'},{nom:'Sonata',type:'Biocontrôle',amm:'2120044',dar:0,dose:'8 L/ha'}];
+let TRAITEMENTS=[];
+let METEO_JOURNAL=[];
+
+// État
+let currentUser=null;
+let pFilter='toutes',pSearch='',jQui='tous',jTache='toutes',jSearch='',phTab='reg',phFilter='tous';
+let fCond='tous',fAct='toutes',selEmoji='🚜';
+let mapInit=false,leafMap=null;
+let rolesTemp={ouvrier:true,tractoriste:false,saisonnier:false};
+
+const COULEURS_MBR={Nico:'#3D6B27',Victor:'#1A4A7A',Dessi:'#7A4F2E',Etienne:'#5B2D8E',Chloé:'#B8913A',Shana:'#C0392B',Alicia:'#1A5276'};
+const TCLS={Cuivre:'tcc',Soufre:'tsc',Fongicide:'tfc',Insecticide:'tic',Herbicide:'thc','Biocontrôle':'tbc'};
+const TEMJ={Cuivre:'🔵',Soufre:'🟡',Fongicide:'🟢',Insecticide:'🟠',Herbicide:'🟤','Biocontrôle':'🟣'};
+const TEMOJI={Taille:'🌿',Tirage:'🔄',Brulage:'🔥',Pliage:'🔗',Reparation:'🛠️',Plantation:'🌱',Ebourgeonnage1:'🌾',Ebourgeonnage2:'🌾',Pioche1:'⛏️',Pioche2:'⛏️',Relevage:'↑',Accolage:'🔗',Palissage:'🪵'};
+
+// ════ LOGIN ════
+function initLogin(){
+  const profiles=document.getElementById('login-profiles');
+  profiles.innerHTML=MEMBRES.map(m=>`
+    <div class="lp-btn" onclick="login('${m.nom}')">
+      <div class="lp-name">${m.nom}</div>
+      <div class="lp-role">${getRoleLabel(m.roles)}</div>
+    </div>`).join('');
+}
+function getRoleLabel(roles){
+  if(roles.includes('admin'))return'Admin';
+  const labels=[];
+  if(roles.includes('tractoriste'))labels.push('Tractoriste');
+  if(roles.includes('ouvrier'))labels.push('Ouvrier');
+  if(roles.includes('saisonnier'))labels.push('Saisonnier');
+  return labels.join(' · ')||'Membre';
+}
+function login(nom){
+  currentUser=MEMBRES.find(m=>m.nom===nom);
+  document.getElementById('login-screen').style.display='none';
+  applyRoles();
+  updateNavForRoles();
+  goTo('home');
+  fetchMeteo();
+}
+function logout(){
+  currentUser=null;
+  // Réinitialiser toutes les pages
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  // Réafficher tous les onglets (sera filtré au prochain login)
+  document.querySelectorAll('.nb').forEach(b=>b.style.display='');
+  document.getElementById('nav-bar').style.gridTemplateColumns='repeat(6,1fr)';
+  document.getElementById('login-screen').style.display='flex';
+}
+
+function isAdmin(){return currentUser?.roles.includes('admin');}
+function isTractoriste(){return currentUser?.roles.includes('tractoriste');}
+function canSeePhyto(){return currentUser?.roles.includes('admin');}
+
+function applyRoles(){
+  // Phyto — admin seulement
+  document.querySelectorAll('.nb[data-p=phyto]').forEach(b=>b.style.display=canSeePhyto()?'':'none');
+  document.querySelectorAll('.nb[data-p=reglages]').forEach(b=>b.style.display=isAdmin()?'':'none');
+  // Tracteur readonly
+  const isReadOnly=!isTractoriste();
+  const addBtn=document.getElementById('trac-add-btn');
+  const condAddBtn=document.getElementById('cond-add-btn');
+  const actAddBtn=document.getElementById('act-add-btn');
+  if(addBtn)addBtn.style.display=isReadOnly?'none':'flex';
+  if(condAddBtn)condAddBtn.style.display=isReadOnly?'none':'block';
+  if(actAddBtn)actAddBtn.style.display=isReadOnly?'none':'block';
+  document.getElementById('trac-readonly').style.display=isReadOnly?'flex':'none';
+  // Avatar v2 (header accueil)
+  const m=currentUser;
+  if(m){
+    const ava2=document.getElementById('up-ava-v2');
+    if(ava2){ava2.textContent=m.nom.charAt(0).toUpperCase();ava2.title=m.nom;}
+  }
+}
+function updateNavForRoles(){
+  const items=document.querySelectorAll('.nb');
+  let visible=0;
+  items.forEach(b=>{if(b.style.display!=='none')visible++;});
+  document.getElementById('nav-bar').style.gridTemplateColumns=`repeat(${visible},1fr)`;
+}
+
+// ════ MÉTÉO ════
+let meteoData=null;
+async function fetchMeteo(){
+  try{
+    const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=47.22&longitude=4.97&current=temperature_2m,weathercode,windspeed_10m,precipitation&daily=temperature_2m_min&timezone=Europe/Paris&forecast_days=3');
+    const d=await r.json();
+    const temp=Math.round(d.current.temperature_2m);
+    const code=d.current.weathercode;
+    const wind=Math.round(d.current.windspeed_10m);
+    const rain=Math.round((d.current.precipitation||0)*10)/10;
+    const desc=wmoDesc(code);
+    const emoji=wmoEmoji(code);
+    meteoData={temp,desc,wind,emoji,date:new Date().toISOString().split('T')[0]};
+    // Nouvelle card météo v2
+    const mc=document.getElementById('hv2-meteo-card');
+    if(mc){
+      mc.innerHTML=`<div class="hv2-meteo-icon">${emoji}</div>
+        <div class="hv2-meteo-main">
+          <div class="hv2-meteo-temp">${temp}°<small style="font-size:16px;color:var(--texte-doux)">C</small></div>
+          <div class="hv2-meteo-desc">${desc} · Bourgogne</div>
+        </div>
+        <div class="hv2-meteo-details">
+          <div class="hv2-meteo-detail">Vent <span>${wind} km/h</span></div>
+          <div class="hv2-meteo-detail">Pluie <span>${rain} mm</span></div>
+        </div>`;
+      // Alerte gel
+      if(d.daily&&d.daily.temperature_2m_min){
+        const gelIdx=d.daily.temperature_2m_min.findIndex(t=>t<3);
+        if(gelIdx>=0){
+          const jrs=['ce soir','demain','après-demain'];
+          const alertDiv=document.createElement('div');
+          alertDiv.style.cssText='margin:8px 16px 0;background:#FFF8E8;border:1px solid #F0D080;border-radius:12px;padding:9px 14px;font-size:12px;color:#7A5C10;display:flex;align-items:center;gap:8px;';
+          alertDiv.innerHTML=`⚠️ Risque de gel ${jrs[gelIdx]||''} (${Math.round(d.daily.temperature_2m_min[gelIdx])}°C)`;
+          mc.parentNode.insertBefore(alertDiv,mc.nextSibling);
+        }
+      }
+    }
+    // Enregistrer dans journal
+    const existant=METEO_JOURNAL.find(m=>m.date===meteoData.date);
+    if(!existant){
+      METEO_JOURNAL.push({...meteoData});
+      JOURNAL.unshift({id:'meteo-'+Date.now(),date:meteoData.date,parcelle:'Domaine',tache:'Météo',qui:'Auto',statut:'Info',equipe:false,meteo:true,temp,desc,wind,emoji});
+    }
+  }catch(e){
+    const mc=document.getElementById('hv2-meteo-card');
+    if(mc)mc.innerHTML='<div style="font-size:12px;color:var(--texte-doux);padding:4px 0">Météo indisponible</div>';
+  }
+}
+function wmoDesc(c){const m={0:'Dégagé',1:'Peu nuageux',2:'Partiellement nuageux',3:'Couvert',45:'Brouillard',48:'Brouillard givrant',51:'Bruine légère',53:'Bruine modérée',55:'Bruine forte',61:'Pluie légère',63:'Pluie modérée',65:'Pluie forte',71:'Neige légère',73:'Neige modérée',75:'Neige forte',80:'Averses légères',81:'Averses modérées',82:'Averses fortes',95:'Orage',96:'Orage avec grêle'};return m[c]||'Variable';}
+function wmoEmoji(c){if(c===0)return'☀️';if(c<=2)return'🌤️';if(c===3)return'☁️';if(c<=48)return'🌫️';if(c<=65)return'🌧️';if(c<=77)return'❄️';if(c<=82)return'🌦️';return'⛈️';}
+
+// ════ SAISON ACTIVE ════
+function getSaisonActive(){return SAISONS.find(s=>s.active)||SAISONS[SAISONS.length-1];}
+function getTachesSaison(){
+  const s=getSaisonActive();
+  // Cherche tâches dont la saison correspond au nom de la saison active
+  const nomSaison=s.nom.split(' ')[0]; // "Printemps", "Hiver", "Été"...
+  return TACHES.filter(t=>t.saison===nomSaison||nomSaison.includes(t.saison));
+}
+
+// ════ HEURES ════
+function calcHeures(){
+  const tachesSaison=getTachesSaison();
+  let totalReste=0,totalTotal=0;
+  const data=tachesSaison.map(t=>{
+    const tw=TRAVAUX[t.nom];
+    if(tw){totalReste+=tw.h_reste;totalTotal+=tw.h_total;return{nom:t.nom,pct:tw.pct,h_done:tw.h_done,h_total:tw.h_total,h_reste:tw.h_reste};}
+    return{nom:t.nom,pct:0,h_done:0,h_total:Math.round(t.hha*SURF_TOTALE),h_reste:Math.round(t.hha*SURF_TOTALE)};
+  });
+  return{data,totalReste:Math.round(totalReste),totalTotal:Math.round(totalTotal)};
+}
+
+function renderHeuresCard(containerId){
+  const {data,totalReste}=calcHeures();
+  const c=document.getElementById(containerId);
+  c.innerHTML=`<div class="hc-head"><div class="hc-title">Avancement — ${getSaisonActive().nom}</div><div class="hc-total"><div class="hc-total-val">${totalReste}h</div><div class="hc-total-lbl">Restantes</div></div></div>`
+    +data.map(t=>{
+      const col=t.pct===100?'var(--vert-med)':t.pct>=50?'var(--or)':'var(--orange)';
+      return `<div class="htache-row">
+        <div class="htache-nom">${TEMOJI[t.nom]||'🌿'} ${t.nom}</div>
+        <div class="htache-bar-wrap">
+          <div class="htache-bar-track"><div class="htache-bar-fill" style="width:${t.pct}%;background:${col}"></div></div>
+          <div class="htache-stats"><span>${t.h_done}h faites</span><span>${t.h_reste}h restantes</span></div>
+        </div>
+        <div class="htache-pct" style="color:${col}">${t.pct}%</div>
+      </div>`;
+    }).join('');
+}
+
+// ════ NAVIGATION ════
+function goTo(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  const nb=document.querySelector('.nb[data-p='+page+']');
+  if(nb)nb.classList.add('active');
+  window.scrollTo(0,0);
+  if(page==='home'){renderHome();}
+  if(page==='parcelles'){renderParcelles();computePStats();}
+  if(page==='journal')renderJournal();
+  if(page==='tracteur')renderTracteur();
+  if(page==='phyto')renderPhyto();
+  if(page==='reglages')renderReglages();
+}
+
+// ════ ACCUEIL ════
+function renderHome(){
+  const {totalReste}=calcHeures();
+  const saison=getSaisonActive();
+
+  // Saison badge
+  document.getElementById('saison-badge-home').textContent=saison.nom;
+
+  // Date
+  const jours=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  const mois=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  const now=new Date();
+  const dateEl=document.getElementById('hv2-date');
+  if(dateEl)dateEl.textContent=jours[now.getDay()]+' '+now.getDate()+' '+mois[now.getMonth()];
+
+  // Avatar initiale
+  const ava=document.getElementById('up-ava-v2');
+  if(ava&&currentUser)ava.textContent=currentUser.nom.charAt(0).toUpperCase();
+
+  // Heures restantes
+  const hEl=document.getElementById('hs-hreste');
+  if(hEl)hEl.textContent=totalReste+'h';
+  const nbTravaux=JOURNAL.filter(j=>!j.meteo).length;
+  const hSub=document.getElementById('hv2-h-sub');
+  if(hSub)hSub.textContent=nbTravaux+' travaux enregistrés';
+  const hChip=document.getElementById('hv2-h-chip');
+  if(hChip)hChip.textContent=saison.nom;
+
+  // Heures cachées compat
+  const htEl=document.getElementById('hs-travaux');
+  if(htEl)htEl.textContent=nbTravaux;
+
+  // Tracteur sessions
+  const tracBars=document.getElementById('hv2-trac-bars');
+  if(tracBars){
+    tracBars.innerHTML=SESSIONS.map(s=>{
+      const pct=s.avancement||0;
+      const isCours=s.statut==='En cours';
+      return `<div class="hv2-bar-item">
+        <div class="hv2-bar-label"><span>${s.activite}</span><span>${pct}%</span></div>
+        <div class="hv2-bar-track"><div class="hv2-bar-fill${isCours?' or':''}" style="width:${pct}%"></div></div>
+      </div>`;
+    }).join('');
+  }
+  const tracNb=document.getElementById('hv2-trac-nb');
+  if(tracNb)tracNb.innerHTML=SESSIONS.length+' <span>sessions</span>';
+
+  // Heures card
+  renderHeuresCard('heures-card-home');
+
+  // Derniers travaux — nouveau markup
+  const dt=document.getElementById('derniers-travaux');
+  const recent=JOURNAL.filter(j=>!j.meteo).slice(0,4);
+  dt.innerHTML=recent.map(r=>{
+    const isEq=r.equipe||r.qui==='Equipe';
+    const quiAff=isEq&&r.qui&&r.qui!=='Equipe'?`Équipe (${r.qui})`:isEq?'Équipe':r.qui||'—';
+    const isVal=r.statut==='Validé';
+    const isFait=r.statut==='Fait';
+    const dotCls=isVal?'hv2-dot-v':isFait?'hv2-dot-f':'hv2-dot-e';
+    const badgeCls=isVal?'bv2-v':isFait?'bv2-f':'bv2-e';
+    return `<div class="hv2-tv-item" onclick="goTo('journal')">
+      <div class="hv2-tv-dot ${dotCls}">${TEMOJI[r.tache]||'📋'}</div>
+      <div class="hv2-tv-corps">
+        <div class="hv2-tv-tache">${r.tache}</div>
+        <div class="hv2-tv-meta">${quiAff} · ${r.parcelle}</div>
+      </div>
+      <div class="hv2-tv-right">
+        <div class="hv2-tv-date">${fmtDate(r.date)}</div>
+        <div class="hv2-tv-badge ${badgeCls}">${r.statut}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ════ PARCELLES ════
+function getPCls(p){
+  const tachesSaison=getTachesSaison().map(t=>t.nom);
+  const tachesParcelle=Object.entries(p.taches).filter(([t])=>tachesSaison.includes(t));
+  const nbTotal=tachesParcelle.length;
+  const nbDone=tachesParcelle.filter(([,s])=>s==='Validé').length;
+  const pct=nbTotal>0?Math.round(nbDone/nbTotal*100):0;
+  if(p.statut==='Arrachee')return{a:'ava-x',d:'dr',cl:'pr',col:'var(--rouge)',fill:'var(--rouge)',em:'🚫',pct};
+  if(pct===100)return{a:'ava-c',d:'dc',cl:'pv',col:'var(--vert-med)',fill:'linear-gradient(90deg,var(--vert),var(--vert-clair))',em:'✅',pct};
+  if(pct>=75)return{a:'ava-a',d:'da',cl:'pa',col:'var(--or)',fill:'linear-gradient(90deg,var(--or),#D4A847)',em:'🌿',pct};
+  return{a:'ava-r',d:'dr',cl:'pr',col:'var(--orange)',fill:'linear-gradient(90deg,var(--orange),#C8701A)',em:'⚠️',pct};
+}
+function computePStats(){
+  let c=0,e=0,r=0,a=0;
+  PARCELLES.forEach(p=>{
+    if(p.statut==='Arrachee')a++;
+    else{const cl=getPCls(p);if(cl.pct===100)c++;else if(cl.pct>=75)e++;else r++;}
+  });
+  document.getElementById('pc-c').textContent=c;
+  document.getElementById('pc-e').textContent=e;
+  document.getElementById('pc-r').textContent=r;
+  document.getElementById('pc-a').textContent=a;
+  document.getElementById('p-saison-sub').textContent=`${c+e+r} actives · ${getSaisonActive().nom}`;
+}
+function renderParcelles(){
+  const data=PARCELLES.filter(p=>{
+    const cl=getPCls(p);
+    if(pFilter==='complet'&&(cl.pct!==100||p.statut==='Arrachee'))return false;
+    if(pFilter==='avance'&&(cl.pct<75||cl.pct===100||p.statut==='Arrachee'))return false;
+    if(pFilter==='retard'&&(cl.pct>=75||p.statut==='Arrachee'))return false;
+    if(pFilter==='arrachee'&&p.statut!=='Arrachee')return false;
+    if(pSearch&&!p.nom.toLowerCase().includes(pSearch.toLowerCase()))return false;
+    return true;
+  });
+  const cont=document.getElementById('pList');
+  if(!data.length){cont.innerHTML='<div class="empty-state"><div class="ei">🔍</div><p>Aucun résultat.</p></div>';return;}
+  const tachesSaison=getTachesSaison().map(t=>t.nom);
+  cont.innerHTML=data.map(p=>{
+    const cl=getPCls(p);
+    const tps=Object.entries(p.taches).filter(([t])=>tachesSaison.includes(t));
+    const chips=tps.slice(0,4).map(([t,s])=>`<span class="tc ${s==='Validé'?'tcv':s==='Fait'?'tcf':'tce'}">${t}</span>`).join('');
+    const more=tps.length>4?`<span class="tc tcm">+${tps.length-4}</span>`:'';
+    return `<div class="pcard" onclick="openDP('${p.nom}')">
+      <div class="pc-main">
+        <div class="pc-ava ${cl.a}">${cl.em}<div class="pc-dot ${cl.d}">${cl.pct}</div></div>
+        <div class="pc-info"><div class="pc-nom">${p.nom}</div><div class="pc-meta"><span class="pc-surf">📐 ${p.surface} ha</span><span class="pc-st ${p.statut==='Arrachee'?'st-arr':'st-act'}">${p.statut}</span></div></div>
+        <div class="pc-right"><div class="pc-pct ${cl.cl}">${cl.pct}%</div><div class="pc-pct-lbl">${tps.length} tâches</div></div>
+      </div>
+      <div class="pc-bar"><div class="pc-bar-fill" style="width:${cl.pct}%;background:${cl.fill}"></div></div>
+      <div class="pc-tchips">${chips}${more}</div>
+    </div>`;
+  }).join('');
+}
+
+function openDP(nom){
+  const p=PARCELLES.find(x=>x.nom===nom);if(!p)return;
+  const cl=getPCls(p);
+  document.getElementById('dp-nom').textContent=p.nom;
+  document.getElementById('dp-sub').textContent=`${p.statut} · ${p.surface} ha`;
+  const pe=document.getElementById('dp-pct');
+  pe.textContent=cl.pct+'%';
+  pe.style.cssText='float:right;font-family:"Cormorant Garamond",serif;font-size:38px;font-weight:600;color:'+(cl.pct===100?'var(--vert)':cl.pct>=75?'var(--or)':'var(--orange)');
+  document.getElementById('dp-surf').textContent=p.surface+' ha';
+  // Heures restantes pour cette parcelle
+  const tachesSaison=getTachesSaison();
+  let hReste=0;
+  tachesSaison.forEach(t=>{
+    const stat=p.taches[t.nom];
+    if(stat!=='Validé')hReste+=t.hha*p.surface;
+  });
+  document.getElementById('dp-hreste').textContent=Math.round(hReste)+'h';
+  document.getElementById('dp-saison-label').textContent=getSaisonActive().nom;
+  const ovLabel=document.getElementById('dp-saison-label');
+  if(ovLabel)ovLabel.textContent=getSaisonActive().nom;
+  // Tâches avec toggle validation
+  const canEdit=isAdmin()||currentUser?.roles.includes('ouvrier');
+  document.getElementById('dp-taches').innerHTML=tachesSaison.map(t=>{
+    const stat=p.taches[t.nom]||'Non démarré';
+    const isOn=stat==='Validé';
+    const hEstim=Math.round(t.hha*p.surface*10)/10;
+    return `<div class="val-row">
+      <div class="val-left">
+        <div>
+          <div class="val-nom">${TEMOJI[t.nom]||'🌿'} ${t.nom}</div>
+          <div class="val-hha">${t.hha}h/ha · ~${hEstim}h pour cette parcelle</div>
+        </div>
+      </div>
+      ${canEdit?`<button class="val-toggle ${isOn?'on':'off'}" onclick="toggleTravail('${p.nom}','${t.nom}',this)">${isOn?'✓':''}</button>`:`<span class="jst ${isOn?'jsv':'jse'}">${stat}</span>`}
+    </div>`;
+  }).join('');
+  openOv('ovParcelle');
+}
+
+function toggleTravail(nomParcelle,nomTache,btn){
+  const p=PARCELLES.find(x=>x.nom===nomParcelle);if(!p)return;
+  const isOn=btn.classList.contains('on');
+  const newStatut=isOn?'En cours':'Validé';
+  p.taches[nomTache]=newStatut;
+  btn.classList.toggle('on',!isOn);
+  btn.classList.toggle('off',isOn);
+  btn.textContent=isOn?'':'✓';
+  // Ajouter au journal
+  if(!isOn){
+    JOURNAL.unshift({id:Date.now().toString(16),date:new Date().toISOString().split('T')[0],parcelle:nomParcelle,tache:nomTache,qui:currentUser.nom,statut:'Validé',equipe:false});
+    // Mettre à jour TRAVAUX
+    recalcTravaux(nomTache);
+  }
+  renderParcelles();computePStats();
+}
+
+function recalcTravaux(nomTache){
+  const t=TRAVAUX[nomTache];if(!t)return;
+  const parcellesValidees=PARCELLES.filter(p=>p.taches[nomTache]==='Validé').reduce((s,p)=>s+p.surface,0);
+  t.surf_done=Math.round(parcellesValidees*100)/100;
+  t.h_done=Math.round(t.h_ha*parcellesValidees*10)/10;
+  t.h_reste=Math.round((t.h_total-t.h_done)*10)/10;
+  t.pct=Math.round(parcellesValidees/t.surf_total*100);
+}
+
+function switchPTab(tab){
+  document.getElementById('tbl').classList.toggle('active',tab==='liste');
+  document.getElementById('tbc').classList.toggle('active',tab==='carte');
+  document.getElementById('pwrapliste').classList.toggle('vis',tab==='liste');
+  document.getElementById('pwrapcarte').classList.toggle('vis',tab==='carte');
+  if(tab==='carte'&&!mapInit){initMap();mapInit=true;}
+}
+function initMap(){
+  leafMap=L.map('map').setView([47.21,4.972],12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(leafMap);
+  PARCELLES.forEach(p=>{
+    if(!p.lat||!p.lng)return;
+    const cl=getPCls(p);
+    L.circleMarker([parseFloat(p.lat),parseFloat(p.lng)],{radius:8,fillColor:cl.col,color:'white',weight:2,fillOpacity:0.85})
+      .addTo(leafMap).bindPopup(`<b>${p.nom}</b><br>${p.surface} ha · ${cl.pct}%`)
+      .on('click',()=>openDP(p.nom));
+  });
+}
+function loadKML(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    if(!mapInit){initMap();mapInit=true;}
+    try{
+      const kml=new DOMParser().parseFromString(e.target.result,'text/xml');
+      kml.querySelectorAll('Placemark').forEach(pm=>{
+        const name=pm.querySelector('name')?.textContent||'';
+        const coords=pm.querySelector('coordinates')?.textContent?.trim()||'';
+        if(!coords)return;
+        const pts=coords.split(/\s+/).map(c=>{const[lng,lat]=c.split(',');return[parseFloat(lat),parseFloat(lng)];}).filter(p=>!isNaN(p[0]));
+        if(pts.length<3)return;
+        const p=PARCELLES.find(x=>x.nom.toLowerCase()===name.toLowerCase());
+        const col=p?getPCls(p).col:'var(--vert-med)';
+        L.polygon(pts,{color:col,fillOpacity:0.3,weight:2}).addTo(leafMap).bindPopup(`<b>${name}</b>${p?`<br>${p.surface} ha · ${getPCls(p).pct}%`:''}`);
+      });
+      document.querySelector('.kml-zone').innerHTML='<div style="font-size:24px">✅</div><p style="color:var(--vert-med);font-weight:600">KML chargé</p>';
+    }catch(err){alert('Erreur lecture KML');}
+  };
+  reader.readAsText(file);
+}
+document.querySelectorAll('.fchip').forEach(c=>c.addEventListener('click',function(){document.querySelectorAll('.fchip').forEach(x=>x.classList.remove('active'));this.classList.add('active');pFilter=this.dataset.filter;renderParcelles();}));
+document.getElementById('pSearch').addEventListener('input',function(){pSearch=this.value;renderParcelles();});
+
+// ════ JOURNAL ════
+function fmtDate(d){if(!d)return'—';const[y,m,j]=d.split('-');return`${parseInt(j)} ${['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'][parseInt(m)-1]}`;}
+function renderJournal(){
+  // Stats ouvriers
+  const byQui={};
+  JOURNAL.filter(j=>!j.meteo&&j.qui).forEach(j=>{byQui[j.qui]=(byQui[j.qui]||0)+1;});
+  const sorted=Object.entries(byQui).sort((a,b)=>b[1]-a[1]).slice(0,4);
+  const maxV=sorted[0]?.[1]||1;
+  const ostc=document.getElementById('ouvrier-stats-card');
+  ostc.innerHTML=`<div class="ost-title">Travaux par ouvrier</div>`+sorted.map(([n,v])=>{
+    const m=MEMBRES.find(x=>x.nom===n);
+    return `<div class="ostr"><div class="ostn">${n}</div><div class="ostb"><div class="ostbf" style="width:${v/maxV*100}%;background:${m?.couleur||'#888'}"></div></div><div class="ostc">${v}</div></div>`;
+  }).join('');
+  // Chips ouvriers
+  const orow=document.getElementById('ouvrier-chips-row');
+  const membres=MEMBRES.filter(m=>m.statut==='Actif');
+  orow.innerHTML=`<div class="ochip active" data-qui="tous" onclick="setJQui('tous',this)"><span>👥</span> Tous</div>`
+    +membres.map(m=>`<div class="ochip" data-qui="${m.nom}" onclick="setJQui('${m.nom}',this)"><div class="oava" style="background:${m.couleur||'#888'}">${m.nom[0]}</div> ${m.nom}</div>`).join('');
+  // Chips tâches
+  const trow=document.getElementById('tache-chips-row');
+  trow.innerHTML=`<div class="tfchip active" data-t="toutes" onclick="setJTache('toutes',this)">Toutes</div>`
+    +TACHES.map(t=>`<div class="tfchip" data-t="${t.nom}" onclick="setJTache('${t.nom}',this)">${TEMOJI[t.nom]||''} ${t.nom}</div>`).join('');
+  renderJournalList();
+}
+function setJQui(v,el){jQui=v;document.querySelectorAll('.ochip').forEach(x=>x.classList.remove('active'));el.classList.add('active');renderJournalList();}
+function setJTache(v,el){jTache=v;document.querySelectorAll('.tfchip').forEach(x=>x.classList.remove('active'));el.classList.add('active');renderJournalList();}
+function renderJournalList(){
+  let data=JOURNAL.filter(r=>{
+    if(jQui!=='tous'&&r.qui!==jQui)return false;
+    if(jTache!=='toutes'&&r.tache!==jTache)return false;
+    if(jSearch){const q=jSearch.toLowerCase();if(!r.parcelle.toLowerCase().includes(q)&&!r.tache.toLowerCase().includes(q)&&!(r.qui||'').toLowerCase().includes(q))return false;}
+    return true;
+  });
+  const tot=data.filter(j=>!j.meteo).length;
+  const val=data.filter(j=>j.statut==='Validé'&&!j.meteo).length;
+  const fait=data.filter(j=>j.statut==='Fait'&&!j.meteo).length;
+  const enc=data.filter(j=>j.statut==='En cours'&&!j.meteo).length;
+  document.getElementById('js-tot').textContent=tot;
+  document.getElementById('js-val').textContent=val;
+  document.getElementById('js-f').textContent=fait;
+  document.getElementById('js-e').textContent=enc;
+  document.getElementById('j-sub').textContent=`${tot} entrées · Saison ${getSaisonActive().nom}`;
+  const grouped={};
+  data.forEach(r=>{if(!grouped[r.date])grouped[r.date]=[];grouped[r.date].push(r);});
+  const tl=document.getElementById('timeline');
+  if(!data.length){tl.innerHTML='<div class="empty-state"><div class="ei">🔍</div><p>Aucun résultat.</p></div>';return;}
+  tl.innerHTML=Object.entries(grouped).map(([date,items])=>`
+    <div class="dgroup">
+      <div class="dhead"><div class="dline"></div><div class="dlabel">${fmtDate(date)}</div><div class="dcnt">${items.length}</div><div class="dline"></div></div>
+      ${items.map((r,i)=>{
+        if(r.meteo)return `<div class="jitem"><div class="jdotcol"><div class="jdot jdm"></div>${i<items.length-1?'<div class="jlinev"></div>':''}</div><div class="meteo-card"><div class="mc-left"><div class="mc-title">Météo enregistrée</div><div class="mc-val">${r.emoji} ${r.temp}°C</div><div class="mc-detail">${r.desc} · Vent ${r.wind} km/h</div></div><div class="mc-icon">${r.emoji}</div></div></div>`;
+        const sc=r.statut==='Validé'?'jdv':r.statut==='Fait'?'jdf':r.statut==='Info'?'jdm':'jde';
+        const sb=r.statut==='Validé'?'jsv':r.statut==='Fait'?'jsf':r.statut==='Info'?'jsm':'jse';
+        const m=MEMBRES.find(x=>x.nom===r.qui);
+        const col=m?.couleur||COULEURS_MBR[r.qui]||'#888';
+        const isEq=r.equipe||r.qui==='Equipe';
+        const quiAff=isEq&&r.qui&&r.qui!=='Equipe'?`Équipe (${r.qui})`:isEq?'Équipe':r.qui||'Non assigné';
+        return `<div class="jitem"><div class="jdotcol"><div class="jdot ${sc}"></div>${i<items.length-1?'<div class="jlinev"></div>':''}</div><div class="jcard"><div class="jtop"><div class="jtache">${TEMOJI[r.tache]||'📋'} ${r.tache}</div><div class="jst ${sb}">${r.statut}</div></div><div class="jparcelle">📍 ${r.parcelle}</div><div class="jbottom"><div class="jqui"><div class="java" style="background:${col}">${(r.qui||'?')[0]}</div>${quiAff}${isEq?'<span class="eq-tag">👥</span>':''}</div></div></div></div>`;
+      }).join('')}
+    </div>`).join('');
+}
+document.getElementById('jSearch').addEventListener('input',function(){jSearch=this.value;renderJournalList();});
+
+// ════ TRACTEUR ════
+function renderTracteur(){
+  const tot=SESSIONS.length,ter=SESSIONS.filter(s=>s.statut==='Terminé'||s.statut==='Validé').length,enc=SESSIONS.filter(s=>s.statut==='En cours').length;
+  document.getElementById('st-t').textContent=tot;
+  document.getElementById('st-ter').textContent=ter;
+  document.getElementById('st-enc').textContent=enc;
+  const cc=document.getElementById('cond-chips');
+  cc.innerHTML=`<div class="chip ${fCond==='tous'?'active ac':''}" onclick="fCond='tous';renderTracteur()">👥 Tous</div>`
+    +CONDUCTEURS.map(c=>`<div class="chip ${fCond===c.nom?'active ac':''}" onclick="fCond='${c.nom}';renderTracteur()">${c.statut==='En formation'?'🎓':'✅'} ${c.nom} <span style="opacity:0.5;margin-left:2px" onclick="event.stopPropagation();editCond('${c.nom}')">✏️</span></div>`).join('');
+  const ac=document.getElementById('act-chips');
+  ac.innerHTML=`<div class="chip ${fAct==='toutes'?'active ac':''}" onclick="fAct='toutes';renderTracteur()">Toutes</div>`
+    +ACTIVITES.map(a=>`<div class="chip ${fAct===a.nom?'active ac':''}" onclick="fAct='${a.nom}';renderTracteur()">${a.emoji} ${a.nom}</div>`).join('');
+  let data=SESSIONS.filter(s=>{if(fCond!=='tous'&&s.conducteur!==fCond)return false;if(fAct!=='toutes'&&s.activite!==fAct)return false;return true;}).sort((a,b)=>b.date.localeCompare(a.date));
+  const sl=document.getElementById('sessions-list');
+  if(!data.length){sl.innerHTML='<div class="empty-state"><div class="ei">🚜</div><p>Aucune session.</p></div>';return;}
+  const amap=ACTIVITES.reduce((m,a)=>{m[a.nom]=a;return m},{});
+  sl.innerHTML=data.map(s=>{
+    const em=amap[s.activite]?.emoji||'🚜';
+    const sc=s.statut==='Validé'?'ssval':s.statut==='En cours'?'ssenc':'sster';
+    const pct=s.avancement||100;
+    return `<div class="scard"><div class="sc-hd"><div class="sc-ico">${em}</div><div class="sc-info"><div class="sc-act">${s.activite}</div><div class="sc-meta"><span class="sc-date">📅 ${fmtDate(s.date)}</span><span class="sc-cond">👤 ${s.conducteur}</span></div></div><div class="sc-right"><div class="sc-st ${sc}">${s.statut}</div><div class="sc-pct">${pct}%</div></div></div><div class="sc-bwrap"><div class="sc-blbl"><span>Avancement domaine</span><span>${pct===100?'45/45':Math.round(pct/100*45)+'/45'} parcelles</span></div><div class="sc-btrack"><div class="sc-bfill" style="width:${pct}%"></div></div></div>${s.note?`<div style="padding:0 16px 12px;font-size:11px;color:var(--texte-doux)">💬 ${s.note}</div>`:''}</div>`;
+  }).join('');
+  document.getElementById('s-act').innerHTML=ACTIVITES.map(a=>`<option>${a.emoji} ${a.nom}</option>`).join('');
+  document.getElementById('s-cond-pick').innerHTML=CONDUCTEURS.map((c,i)=>`<div class="pchk ${i===0?'sel acre':''}" onclick="pickCond(this)">${c.nom}</div>`).join('');
+}
+function pickCond(el){document.querySelectorAll('#s-cond-pick .pchk').forEach(x=>{x.classList.remove('sel','acre');});el.classList.add('sel','acre');}
+function pickEmoji(el){document.querySelectorAll('#emoji-pick .pchk').forEach(x=>{x.classList.remove('sel','acre');});el.classList.add('sel','acre');selEmoji=el.dataset.val;}
+function saveSession(){
+  if(!isTractoriste()){alert('Accès réservé aux tractoristes.');return;}
+  const a=document.getElementById('s-act').value.replace(/^[^\s]+ /,'');
+  const date=document.getElementById('s-date').value;
+  if(!date){alert('Date obligatoire');return;}
+  const pct=parseInt(document.getElementById('s-av').value)||100;
+  const condEl=document.querySelector('#s-cond-pick .pchk.sel');
+  SESSIONS.push({id:Date.now().toString(16),activite:a,date,conducteur:condEl?condEl.textContent.trim():CONDUCTEURS[0]?.nom,statut:document.getElementById('s-st').value,avancement:pct,note:document.getElementById('s-note').value});
+  document.getElementById('ovSession').classList.remove('open');
+  renderTracteur();
+}
+function saveActivite(){
+  if(!isTractoriste()){alert('Accès réservé.');return;}
+  const nom=document.getElementById('new-act').value.trim();
+  if(!nom){alert('Nom obligatoire');return;}
+  ACTIVITES.push({nom,emoji:selEmoji});
+  document.getElementById('ovActivite').classList.remove('open');
+  document.getElementById('new-act').value='';
+  renderTracteur();
+}
+function saveConducteur(){
+  const nom=document.getElementById('new-cond').value.trim();
+  if(!nom){alert('Prénom obligatoire');return;}
+  CONDUCTEURS.push({nom,statut:document.getElementById('nc-st').value});
+  document.getElementById('ovConducteur').classList.remove('open');
+  document.getElementById('new-cond').value='';
+  renderTracteur();
+}
+function editCond(nom){
+  const c=CONDUCTEURS.find(x=>x.nom===nom);if(!c)return;
+  document.getElementById('ec-title').textContent='✏️ '+nom;
+  document.getElementById('ec-nom').value=nom;
+  document.querySelectorAll('#ec-st-pick .pchk').forEach(el=>{el.classList.toggle('sel',el.dataset.val===c.statut);el.classList.toggle('acre',el.dataset.val===c.statut);});
+  document.getElementById('ec-st').value=c.statut;
+  openOv('ovEditCond');
+}
+function saveEditCond(){const nom=document.getElementById('ec-nom').value;const c=CONDUCTEURS.find(x=>x.nom===nom);if(c)c.statut=document.getElementById('ec-st').value;document.getElementById('ovEditCond').classList.remove('open');renderTracteur();}
+function deleteCond(){const nom=document.getElementById('ec-nom').value;if(nom==='Nico'){alert('Impossible.');return;}if(!confirm('Supprimer '+nom+'?'))return;CONDUCTEURS=CONDUCTEURS.filter(c=>c.nom!==nom);document.getElementById('ovEditCond').classList.remove('open');renderTracteur();}
+
+// ════ PHYTO ════
+function renderPhyto(){
+  if(!canSeePhyto()){document.getElementById('page-phyto').innerHTML='<div class="empty-state" style="margin-top:100px"><div class="ei">🔒</div><p>Accès réservé à l\'administrateur</p></div>';return;}
+  const tot=TRAITEMENTS.length,cu=TRAITEMENTS.filter(t=>t.type==='Cuivre').length,so=TRAITEMENTS.filter(t=>t.type==='Soufre').length;
+  const today=new Date();
+  const darA=TRAITEMENTS.filter(t=>{if(!t.date)return false;const prod=CATALOGUE.find(p=>p.nom===t.produit);if(!prod||prod.dar===0)return false;return(today-new Date(t.date))/86400000<prod.dar;}).length;
+  document.getElementById('sp-tot').textContent=tot;
+  document.getElementById('sp-cu').textContent=cu;
+  document.getElementById('sp-so').textContent=so;
+  document.getElementById('sp-dar').textContent=darA;
+  document.getElementById('dar-alert').style.display=darA>0?'flex':'none';
+  const types=['tous',...new Set(CATALOGUE.map(p=>p.type))];
+  document.getElementById('phyto-type-row').innerHTML=types.map(t=>`<div class="pchip2 ${phFilter===t?'active':''}" onclick="phFilter='${t}';renderPhyto()">${t==='tous'?'Tous':(TEMJ[t]||'')+' '+t}</div>`).join('');
+  let data=TRAITEMENTS.filter(t=>phFilter==='tous'||t.type===phFilter).sort((a,b)=>b.date.localeCompare(a.date));
+  const reg=document.getElementById('traitements-list');
+  if(!data.length)reg.innerHTML='<div class="empty-state"><div class="ei">🧪</div><p>Aucun traitement.<br>Appuyez sur <strong>＋ Traitement</strong></p></div>';
+  else reg.innerHTML=data.map(t=>{
+    const prod=CATALOGUE.find(p=>p.nom===t.produit);
+    const darR=prod?Math.max(0,prod.dar-Math.floor((today-new Date(t.date))/86400000)):null;
+    return `<div class="phcard"><div class="ph-hd"><div class="ph-ico">${TEMJ[t.type]||'🧪'}</div><div class="ph-info"><div class="ph-prod">${t.produit}</div><div class="ph-meta"><span class="ph-date">📅 ${fmtDate(t.date)}</span><span class="ph-type ${TCLS[t.type]||'tfc'}">${t.type}</span>${t.operateur?`<span class="ph-op">👤 ${t.operateur}</span>`:''}</div>${t.note?`<div style="font-size:10px;color:var(--texte-doux);margin-top:3px">💬 ${t.note}</div>`:''}</div><div class="ph-right">${prod&&prod.dar>0?`<div class="ph-dar">DAR <strong>${darR}j</strong></div>`:'<div style="font-size:10px;color:var(--vert-med);font-weight:600">✅ Libre</div>'}<div class="ph-dose">${t.dose||prod?.dose||'—'}</div></div></div>${prod?`<div class="ph-amm">AMM ${prod.amm} · Dose max : ${prod.dose}</div>`:''}</div>`;
+  }).join('');
+  const catF=phFilter==='tous'?CATALOGUE:CATALOGUE.filter(p=>p.type===phFilter);
+  document.getElementById('catalogue-list').innerHTML=catF.map(p=>`<div class="catitem" onclick="selFromCat('${p.nom}')"><div class="cat-l"><div class="cat-nom">${TEMJ[p.type]} ${p.nom}</div><div class="cat-det">AMM ${p.amm} · ${p.dose}</div></div><div class="cat-r"><span class="cat-db ${TCLS[p.type]||'tfc'}">${p.type}</span><span style="font-size:10px;color:var(--texte-doux)">DAR ${p.dar}j</span></div></div>`).join('');
+  document.getElementById('p-prod').innerHTML=`<option value="">— Choisir —</option>`+CATALOGUE.map(p=>`<option value="${p.nom}">${TEMJ[p.type]} ${p.nom}</option>`).join('');
+}
+function switchPhTab(tab){phTab=tab;document.getElementById('tb-reg').classList.toggle('active',tab==='reg');document.getElementById('tb-cat').classList.toggle('active',tab==='cat');document.getElementById('tab-reg').classList.toggle('vis',tab==='reg');document.getElementById('tab-cat').classList.toggle('vis',tab==='cat');}
+function selFromCat(nom){switchPhTab('reg');openOv('ovPhyto');setTimeout(()=>{document.getElementById('p-prod').value=nom;onProdChange();},100);}
+function onProdChange(){const nom=document.getElementById('p-prod').value;const prod=CATALOGUE.find(p=>p.nom===nom);const ib=document.getElementById('p-infobox');if(prod){document.getElementById('p-amm').textContent='AMM : '+prod.amm+' · Dose max : '+prod.dose;document.getElementById('p-dar-info').textContent='DAR : '+prod.dar+' jours';ib.style.display='block';}else ib.style.display='none';}
+function saveTraitement(){const prod=document.getElementById('p-prod').value,date=document.getElementById('p-date').value;if(!prod||!date){alert('Produit et date obligatoires');return;}const p=CATALOGUE.find(x=>x.nom===prod);TRAITEMENTS.push({produit:prod,type:p?.type||'Fongicide',date,dose:document.getElementById('p-dose').value,operateur:document.getElementById('p-op').value,note:document.getElementById('p-note').value});document.getElementById('ovPhyto').classList.remove('open');['p-dose','p-op','p-note'].forEach(id=>document.getElementById(id).value='');document.getElementById('p-prod').value='';document.getElementById('p-infobox').style.display='none';renderPhyto();}
+function saveProduit(){const nom=document.getElementById('np-nom').value.trim();if(!nom){alert('Nom obligatoire');return;}CATALOGUE.push({nom,type:document.getElementById('np-type').value,amm:document.getElementById('np-amm').value,dar:parseInt(document.getElementById('np-dar').value)||0,dose:document.getElementById('np-dose').value});document.getElementById('ovProduit').classList.remove('open');['np-nom','np-amm','np-dar','np-dose'].forEach(id=>document.getElementById(id).value='');renderPhyto();}
+
+// ════ RÉGLAGES ════
+function renderReglages(){
+  // Saisons
+  const sl=document.getElementById('saisons-list');
+  sl.innerHTML=SAISONS.map(s=>`<div class="saison-card" onclick="activateSaison('${s.nom}')"><div><div class="sc-nom">${s.nom}</div><div class="sc-periode">${s.periode}</div></div>${s.active?'<div class="sc-active-badge">✅ Active</div>':''}</div>`).join('');
+  // Tâches
+  const saisonNom=getSaisonActive().nom.split(' ')[0];
+  document.getElementById('taches-saison-label').textContent=getSaisonActive().nom;
+  const tachesList=document.getElementById('taches-config-list');
+  const tachesFiltrees=TACHES.filter(t=>t.saison===saisonNom||getSaisonActive().nom.includes(t.saison));
+  tachesList.innerHTML=tachesFiltrees.map(t=>`<div class="tache-config-row"><div class="tcr-info"><div class="tcr-nom">${TEMOJI[t.nom]||'🌿'} ${t.nom}</div><div class="tcr-hha">${t.hha}h/ha · Total estimé: ${Math.round(t.hha*SURF_TOTALE)}h</div></div><div class="tcr-del" onclick="deleteTache('${t.nom}')">🗑</div></div>`).join('');
+  // Membres
+  const ml=document.getElementById('membres-list');
+  ml.innerHTML=MEMBRES.map(m=>`<div class="membre-card" onclick="editMembre('${m.nom}')"><div class="m-ava" style="background:${m.couleur||'#888'}">${m.nom[0]}</div><div class="m-info"><div class="m-nom">${m.nom}</div><div class="m-roles">${m.roles.map(r=>`<span class="m-role-badge rb-${r}">${r}</span>`).join('')}</div><div class="m-statut">${m.email||''} · ${m.statut}</div></div></div>`).join('');
+  // Update select saisons dans modal tâche
+  document.getElementById('nt-saison').innerHTML=['Hiver','Printemps','Été','Automne'].map(s=>`<option value="${s}" ${s===saisonNom?'selected':''}>${s}</option>`).join('');
+}
+function activateSaison(nom){SAISONS.forEach(s=>s.active=s.nom===nom);renderReglages();renderParcelles();computePStats();}
+function saveSaison(){const nom=document.getElementById('ns-nom').value.trim();if(!nom)return;SAISONS.push({nom,periode:document.getElementById('ns-periode').value,active:false});document.getElementById('ovSaison').classList.remove('open');document.getElementById('ns-nom').value='';document.getElementById('ns-periode').value='';renderReglages();}
+function saveTache(){const nom=document.getElementById('nt-nom').value.trim(),hha=parseInt(document.getElementById('nt-hha').value)||30,saison=document.getElementById('nt-saison').value;if(!nom)return;TACHES.push({nom,hha,saison});document.getElementById('ovTache').classList.remove('open');document.getElementById('nt-nom').value='';document.getElementById('nt-hha').value='';renderReglages();}
+function deleteTache(nom){if(!confirm(`Supprimer la tâche "${nom}" ?`))return;TACHES=TACHES.filter(t=>t.nom!==nom);renderReglages();}
+
+// Membres
+function toggleRole(r){rolesTemp[r]=!rolesTemp[r];const el=document.getElementById('rc-'+r);el.classList.toggle('on',rolesTemp[r]);el.textContent=rolesTemp[r]?'✓':'';}
+function saveMembre(){const nom=document.getElementById('nm-nom').value.trim();if(!nom)return;const roles=Object.entries(rolesTemp).filter(([,v])=>v).map(([k])=>k);if(roles.length===0)roles.push('ouvrier');const couleurs=['#B85A1A','#C0392B','#1A5276','#7D3C98','#2C3E50'];MEMBRES.push({nom,email:document.getElementById('nm-email').value,roles,statut:'Actif',couleur:couleurs[MEMBRES.length%couleurs.length]});document.getElementById('ovMembre').classList.remove('open');document.getElementById('nm-nom').value='';document.getElementById('nm-email').value='';rolesTemp={ouvrier:true,tractoriste:false,saisonnier:false};['ouvrier','tractoriste','saisonnier'].forEach(r=>{const el=document.getElementById('rc-'+r);el.classList.toggle('on',rolesTemp[r]);el.textContent=rolesTemp[r]?'✓':'';});renderReglages();}
+function editMembre(nom){const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;document.getElementById('em-title').textContent='✏️ '+nom;document.getElementById('em-nom').value=nom;document.getElementById('em-statut').value=m.statut;const er=document.getElementById('em-roles');const allRoles=['admin','ouvrier','tractoriste','saisonnier'];er.innerHTML=allRoles.map(r=>`<div class="role-check-row"><span class="role-check-name">${r}</span><div class="role-chk ${m.roles.includes(r)?'on':''}" id="erc-${r}" onclick="toggleEmRole('${r}',this)">${m.roles.includes(r)?'✓':''}</div></div>`).join('');openOv('ovEditMembre');}
+function toggleEmRole(r,el){el.classList.toggle('on');el.textContent=el.classList.contains('on')?'✓':'';}
+function saveEditMembre(){const nom=document.getElementById('em-nom').value;const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;m.statut=document.getElementById('em-statut').value;const allRoles=['admin','ouvrier','tractoriste','saisonnier'];m.roles=allRoles.filter(r=>document.getElementById('erc-'+r)?.classList.contains('on'));document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
+function deleteMembre(){const nom=document.getElementById('em-nom').value;if(nom==='Nico'){alert('Impossible de supprimer le compte principal.');return;}if(!confirm('Supprimer '+nom+'?'))return;MEMBRES=MEMBRES.filter(m=>m.nom!==nom);document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
+
+// ════ OVERLAYS ════
+function openOv(id){document.getElementById(id).classList.add('open');}
+function closeOv(e,id){if(e.target===document.getElementById(id))document.getElementById(id).classList.remove('open');}
+function pickVal(el,hid,cls){el.parentElement.querySelectorAll('.pchk').forEach(x=>{x.classList.remove('sel','vert','acre','phyt');});el.classList.add('sel',cls);document.getElementById(hid).value=el.dataset.val;}
+
+// ════ INIT ════
+const todayStr=new Date().toISOString().split('T')[0];
+['s-date','p-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=todayStr;});
+initLogin();
+</script>
+</body>
+</html>
