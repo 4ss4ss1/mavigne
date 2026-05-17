@@ -159,6 +159,8 @@ window._fbLoad = async function() {
     showSyncBadge('⚠️ Mode hors ligne', '#A0291E');
     if(window.loadData) window.loadData();
   }
+  // Toujours initialiser le login, quelle que soit l'issue Firebase
+  if(window.initLogin) window.initLogin();
 };
 
 console.log('🔥 Firebase prêt, en attente de _fbLoad()');
@@ -2475,19 +2477,17 @@ document.addEventListener('DOMContentLoaded', function(){
   window.renderTracteur  = renderTracteur;
   window.renderPhyto     = renderPhyto;
   window.renderReglages  = renderReglages;
+  window.initLogin       = initLogin;
 
   // Initialisation : Firebase en priorité, localStorage en fallback
   if(window._fbLoad) {
-    // Firebase dispo — charger depuis le cloud
-    window._fbLoad().then(() => {
-      initLogin();
-    }).catch(() => {
-      // Erreur Firebase : utiliser localStorage
+    // Firebase dispo — _fbLoad appellera initLogin lui-même dans tous les cas
+    window._fbLoad().catch(() => {
       loadData();
       initLogin();
     });
   } else {
-    // Module Firebase pas encore chargé (rare) — attendre ou fallback
+    // Module Firebase pas encore chargé (rare) — fallback immédiat
     loadData();
     initLogin();
   }
