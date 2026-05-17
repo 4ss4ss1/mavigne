@@ -733,7 +733,8 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
     <div class="set-title">Application</div>
     <div style="margin:0 16px">
       <div class="set-row" style="border-radius:16px 16px 0 0" onclick="requestNotifications()"><div class="sr-l"><div class="sr-ico" style="background:var(--terre-pale)">🔔</div><div><div class="sr-lbl">Notifications</div><div class="sr-sub" id="notif-status">Alertes gel, DAR, validations</div></div></div><div class="sr-arr" id="notif-arr">›</div></div>
-      <div class="set-row" onclick="openExport()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">📤</div><div><div class="sr-lbl">Exporter données</div><div class="sr-sub">JSON complet · CSV journal · CSV parcelles</div></div></div><div class="sr-arr">›</div></div>
+      <div class="set-row" onclick="openExport()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">📤</div><div><div class="sr-lbl">Exporter / Importer</div><div class="sr-sub">JSON · CSV journal · CSV parcelles · Restaurer</div></div></div><div class="sr-arr">›</div></div>
+      <div class="set-row" onclick="resetAllData()" id="reset-row" style="display:none"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🗑️</div><div><div class="sr-lbl" style="color:var(--rouge)">Réinitialiser les données</div><div class="sr-sub">Efface tout et repart d'usine</div></div></div><div class="sr-arr">›</div></div>
       <div class="set-row" style="border-radius:0 0 16px 16px" onclick="logout()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🚪</div><div><div class="sr-lbl" style="color:var(--rouge)">Se déconnecter</div></div></div><div class="sr-arr">›</div></div>
     </div>
   </div>
@@ -775,6 +776,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
     <button onclick="exportCSVJournal()" style="background:var(--vert);color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">📋 <div><div>Export CSV — Journal</div><div style="font-size:11px;opacity:0.75;font-weight:400">Tous les travaux avec date, parcelle, ouvrier, statut</div></div></button>
     <button onclick="exportCSVParcelles()" style="background:var(--or);color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">🗺️ <div><div>Export CSV — Parcelles</div><div style="font-size:11px;opacity:0.75;font-weight:400">Avancement par parcelle et par tâche</div></div></button>
     <button onclick="exportJSON()" style="background:var(--acier);color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">📦 <div><div>Export JSON complet</div><div style="font-size:11px;opacity:0.75;font-weight:400">Toutes les données — sauvegarde complète</div></div></button>
+    <button onclick="importJSON()" style="background:var(--bleu);color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">📥 <div><div>Importer un JSON</div><div style="font-size:11px;opacity:0.75;font-weight:400">Restaurer une sauvegarde précédente</div></div></button>
   </div>
   <div id="export-feedback" style="display:none;margin-top:14px;background:var(--vert-pale);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--vert);font-weight:600"></div>
 </div></div></div>
@@ -1398,11 +1400,13 @@ function openPriorityEdit(){
 function savePriority(){
   priorityMessage=document.getElementById('prio-input').value.trim();
   document.getElementById('ovPriority').classList.remove('open');
+  saveAll();
   renderParcelles();
 }
 function clearPriority(){
   priorityMessage='';
   document.getElementById('ovPriority').classList.remove('open');
+  saveAll();
   renderParcelles();
 }
 function toggleTravail(nomParcelle,nomTache,btn){
@@ -1413,6 +1417,7 @@ function toggleTravail(nomParcelle,nomTache,btn){
     p.taches[nomTache]='En cours';
     btn.classList.remove('on');btn.classList.add('off');btn.textContent='';
     btn.title='Cliquer pour valider';
+    saveAll();showSaveIndicator();
     renderParcelles();computePStats();
   } else {
     // Ouvrir le mini-panneau de validation avec choix équipe/seul
@@ -1440,6 +1445,7 @@ function confirmValidation(){
   JOURNAL.unshift({id:Date.now().toString(16),date,parcelle:_validParcelle,tache:_validTache,qui:currentUser.nom,statut:'Validé',equipe});
   recalcTravaux(_validTache);
   injectMeteoIfNeeded(date);
+  saveAll();showSaveIndicator();
   document.getElementById('ovValidation').classList.remove('open');
   renderParcelles();computePStats();
 }
@@ -1651,6 +1657,7 @@ function renderSessionProgress(){
   else if(pct<100&&s.statut==='Terminé')s.statut='En cours';
 }
 function closeSessionDetail(){
+  saveAll();showSaveIndicator();
   document.getElementById('ovSessionDetail').classList.remove('open');
   renderTracteur();
 }
@@ -1664,6 +1671,7 @@ function saveSession(){
   const condEl=document.querySelector('#s-cond-pick .pchk.sel');
   SESSIONS.push({id:Date.now().toString(16),activite:a,date,conducteur:condEl?condEl.textContent.trim():CONDUCTEURS[0]?.nom,statut:document.getElementById('s-st').value,avancement:pct,note:document.getElementById('s-note').value});
   document.getElementById('ovSession').classList.remove('open');
+  saveAll();showSaveIndicator();
   renderTracteur();
 }
 function saveActivite(){
@@ -1673,6 +1681,7 @@ function saveActivite(){
   ACTIVITES.push({nom,emoji:selEmoji});
   document.getElementById('ovActivite').classList.remove('open');
   document.getElementById('new-act').value='';
+  saveAll();showSaveIndicator();
   renderTracteur();
 }
 function saveConducteur(){
@@ -1681,6 +1690,7 @@ function saveConducteur(){
   CONDUCTEURS.push({nom,statut:document.getElementById('nc-st').value});
   document.getElementById('ovConducteur').classList.remove('open');
   document.getElementById('new-cond').value='';
+  saveAll();showSaveIndicator();
   renderTracteur();
 }
 function editCond(nom){
@@ -1691,8 +1701,8 @@ function editCond(nom){
   document.getElementById('ec-st').value=c.statut;
   openOv('ovEditCond');
 }
-function saveEditCond(){const nom=document.getElementById('ec-nom').value;const c=CONDUCTEURS.find(x=>x.nom===nom);if(c)c.statut=document.getElementById('ec-st').value;document.getElementById('ovEditCond').classList.remove('open');renderTracteur();}
-function deleteCond(){const nom=document.getElementById('ec-nom').value;if(nom==='Nico'){alert('Impossible.');return;}if(!confirm('Supprimer '+nom+'?'))return;CONDUCTEURS=CONDUCTEURS.filter(c=>c.nom!==nom);document.getElementById('ovEditCond').classList.remove('open');renderTracteur();}
+function saveEditCond(){const nom=document.getElementById('ec-nom').value;const c=CONDUCTEURS.find(x=>x.nom===nom);if(c)c.statut=document.getElementById('ec-st').value;document.getElementById('ovEditCond').classList.remove('open');saveAll();renderTracteur();}
+function deleteCond(){const nom=document.getElementById('ec-nom').value;if(nom==='Nico'){alert('Impossible.');return;}if(!confirm('Supprimer '+nom+'?'))return;CONDUCTEURS=CONDUCTEURS.filter(c=>c.nom!==nom);document.getElementById('ovEditCond').classList.remove('open');saveAll();renderTracteur();}
 
 // ════ PHYTO ════
 function renderPhyto(){
@@ -1722,11 +1732,14 @@ function renderPhyto(){
 function switchPhTab(tab){phTab=tab;document.getElementById('tb-reg').classList.toggle('active',tab==='reg');document.getElementById('tb-cat').classList.toggle('active',tab==='cat');document.getElementById('tab-reg').classList.toggle('vis',tab==='reg');document.getElementById('tab-cat').classList.toggle('vis',tab==='cat');}
 function selFromCat(nom){switchPhTab('reg');openOv('ovPhyto');setTimeout(()=>{document.getElementById('p-prod').value=nom;onProdChange();},100);}
 function onProdChange(){const nom=document.getElementById('p-prod').value;const prod=CATALOGUE.find(p=>p.nom===nom);const ib=document.getElementById('p-infobox');if(prod){document.getElementById('p-amm').textContent='AMM : '+prod.amm+' · Dose max : '+prod.dose;document.getElementById('p-dar-info').textContent='DAR : '+prod.dar+' jours';ib.style.display='block';}else ib.style.display='none';}
-function saveTraitement(){const prod=document.getElementById('p-prod').value,date=document.getElementById('p-date').value;if(!prod||!date){alert('Produit et date obligatoires');return;}const p=CATALOGUE.find(x=>x.nom===prod);TRAITEMENTS.push({produit:prod,type:p?.type||'Fongicide',date,dose:document.getElementById('p-dose').value,operateur:document.getElementById('p-op').value,note:document.getElementById('p-note').value});document.getElementById('ovPhyto').classList.remove('open');['p-dose','p-op','p-note'].forEach(id=>document.getElementById(id).value='');document.getElementById('p-prod').value='';document.getElementById('p-infobox').style.display='none';renderPhyto();}
-function saveProduit(){const nom=document.getElementById('np-nom').value.trim();if(!nom){alert('Nom obligatoire');return;}CATALOGUE.push({nom,type:document.getElementById('np-type').value,amm:document.getElementById('np-amm').value,dar:parseInt(document.getElementById('np-dar').value)||0,dose:document.getElementById('np-dose').value});document.getElementById('ovProduit').classList.remove('open');['np-nom','np-amm','np-dar','np-dose'].forEach(id=>document.getElementById(id).value='');renderPhyto();}
+function saveTraitement(){const prod=document.getElementById('p-prod').value,date=document.getElementById('p-date').value;if(!prod||!date){alert('Produit et date obligatoires');return;}const p=CATALOGUE.find(x=>x.nom===prod);TRAITEMENTS.push({produit:prod,type:p?.type||'Fongicide',date,dose:document.getElementById('p-dose').value,operateur:document.getElementById('p-op').value,note:document.getElementById('p-note').value});document.getElementById('ovPhyto').classList.remove('open');['p-dose','p-op','p-note'].forEach(id=>document.getElementById(id).value='');document.getElementById('p-prod').value='';document.getElementById('p-infobox').style.display='none';saveAll();showSaveIndicator();renderPhyto();}
+function saveProduit(){const nom=document.getElementById('np-nom').value.trim();if(!nom){alert('Nom obligatoire');return;}CATALOGUE.push({nom,type:document.getElementById('np-type').value,amm:document.getElementById('np-amm').value,dar:parseInt(document.getElementById('np-dar').value)||0,dose:document.getElementById('np-dose').value});document.getElementById('ovProduit').classList.remove('open');['np-nom','np-amm','np-dar','np-dose'].forEach(id=>document.getElementById(id).value='');saveAll();showSaveIndicator();renderPhyto();}
 
 // ════ RÉGLAGES ════
 function renderReglages(){
+  // Afficher reset seulement pour admin
+  const resetRow=document.getElementById('reset-row');
+  if(resetRow)resetRow.style.display=isAdmin()?'flex':'none';
   // Saisons
   const sl=document.getElementById('saisons-list');
   sl.innerHTML=SAISONS.map(s=>`<div class="saison-card" onclick="activateSaison('${s.nom}')"><div><div class="sc-nom">${s.nom}</div><div class="sc-periode">${s.periode}</div></div>${s.active?'<div class="sc-active-badge">✅ Active</div>':''}</div>`).join('');
@@ -1742,18 +1755,18 @@ function renderReglages(){
   // Update select saisons dans modal tâche
   document.getElementById('nt-saison').innerHTML=['Hiver','Printemps','Été','Automne'].map(s=>`<option value="${s}" ${s===saisonNom?'selected':''}>${s}</option>`).join('');
 }
-function activateSaison(nom){SAISONS.forEach(s=>s.active=s.nom===nom);renderReglages();renderParcelles();computePStats();}
-function saveSaison(){const nom=document.getElementById('ns-nom').value.trim();if(!nom)return;SAISONS.push({nom,periode:document.getElementById('ns-periode').value,active:false});document.getElementById('ovSaison').classList.remove('open');document.getElementById('ns-nom').value='';document.getElementById('ns-periode').value='';renderReglages();}
-function saveTache(){const nom=document.getElementById('nt-nom').value.trim(),hha=parseInt(document.getElementById('nt-hha').value)||30,saison=document.getElementById('nt-saison').value;if(!nom)return;TACHES.push({nom,hha,saison});document.getElementById('ovTache').classList.remove('open');document.getElementById('nt-nom').value='';document.getElementById('nt-hha').value='';renderReglages();}
-function deleteTache(nom){if(!confirm(`Supprimer la tâche "${nom}" ?`))return;TACHES=TACHES.filter(t=>t.nom!==nom);renderReglages();}
+function activateSaison(nom){SAISONS.forEach(s=>s.active=s.nom===nom);saveAll();renderReglages();renderParcelles();computePStats();}
+function saveSaison(){const nom=document.getElementById('ns-nom').value.trim();if(!nom)return;SAISONS.push({nom,periode:document.getElementById('ns-periode').value,active:false});document.getElementById('ovSaison').classList.remove('open');document.getElementById('ns-nom').value='';document.getElementById('ns-periode').value='';saveAll();renderReglages();}
+function saveTache(){const nom=document.getElementById('nt-nom').value.trim(),hha=parseInt(document.getElementById('nt-hha').value)||30,saison=document.getElementById('nt-saison').value;if(!nom)return;TACHES.push({nom,hha,saison});document.getElementById('ovTache').classList.remove('open');document.getElementById('nt-nom').value='';document.getElementById('nt-hha').value='';saveAll();renderReglages();}
+function deleteTache(nom){if(!confirm(`Supprimer la tâche "${nom}" ?`))return;TACHES=TACHES.filter(t=>t.nom!==nom);saveAll();renderReglages();}
 
 // Membres
 function toggleRole(r){rolesTemp[r]=!rolesTemp[r];const el=document.getElementById('rc-'+r);el.classList.toggle('on',rolesTemp[r]);el.textContent=rolesTemp[r]?'✓':'';}
-function saveMembre(){const nom=document.getElementById('nm-nom').value.trim();if(!nom)return;const roles=Object.entries(rolesTemp).filter(([,v])=>v).map(([k])=>k);if(roles.length===0)roles.push('ouvrier');const couleurs=['#B85A1A','#C0392B','#1A5276','#7D3C98','#2C3E50'];MEMBRES.push({nom,email:document.getElementById('nm-email').value,roles,statut:'Actif',couleur:couleurs[MEMBRES.length%couleurs.length]});document.getElementById('ovMembre').classList.remove('open');document.getElementById('nm-nom').value='';document.getElementById('nm-email').value='';rolesTemp={ouvrier:true,tractoriste:false,saisonnier:false};['ouvrier','tractoriste','saisonnier'].forEach(r=>{const el=document.getElementById('rc-'+r);el.classList.toggle('on',rolesTemp[r]);el.textContent=rolesTemp[r]?'✓':'';});renderReglages();}
+function saveMembre(){const nom=document.getElementById('nm-nom').value.trim();if(!nom)return;const roles=Object.entries(rolesTemp).filter(([,v])=>v).map(([k])=>k);if(roles.length===0)roles.push('ouvrier');const couleurs=['#B85A1A','#C0392B','#1A5276','#7D3C98','#2C3E50'];MEMBRES.push({nom,email:document.getElementById('nm-email').value,roles,statut:'Actif',couleur:couleurs[MEMBRES.length%couleurs.length]});document.getElementById('ovMembre').classList.remove('open');document.getElementById('nm-nom').value='';document.getElementById('nm-email').value='';rolesTemp={ouvrier:true,tractoriste:false,saisonnier:false};['ouvrier','tractoriste','saisonnier'].forEach(r=>{const el=document.getElementById('rc-'+r);el.classList.toggle('on',rolesTemp[r]);el.textContent=rolesTemp[r]?'✓':'';});saveAll();renderReglages();}
 function editMembre(nom){const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;document.getElementById('em-title').textContent='✏️ '+nom;document.getElementById('em-nom').value=nom;document.getElementById('em-statut').value=m.statut;const er=document.getElementById('em-roles');const allRoles=['admin','ouvrier','tractoriste','saisonnier'];er.innerHTML=allRoles.map(r=>`<div class="role-check-row"><span class="role-check-name">${r}</span><div class="role-chk ${m.roles.includes(r)?'on':''}" id="erc-${r}" onclick="toggleEmRole('${r}',this)">${m.roles.includes(r)?'✓':''}</div></div>`).join('');openOv('ovEditMembre');}
 function toggleEmRole(r,el){el.classList.toggle('on');el.textContent=el.classList.contains('on')?'✓':'';}
-function saveEditMembre(){const nom=document.getElementById('em-nom').value;const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;m.statut=document.getElementById('em-statut').value;const allRoles=['admin','ouvrier','tractoriste','saisonnier'];m.roles=allRoles.filter(r=>document.getElementById('erc-'+r)?.classList.contains('on'));document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
-function deleteMembre(){const nom=document.getElementById('em-nom').value;if(nom==='Nico'){alert('Impossible de supprimer le compte principal.');return;}if(!confirm('Supprimer '+nom+'?'))return;MEMBRES=MEMBRES.filter(m=>m.nom!==nom);document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
+function saveEditMembre(){const nom=document.getElementById('em-nom').value;const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;m.statut=document.getElementById('em-statut').value;const allRoles=['admin','ouvrier','tractoriste','saisonnier'];m.roles=allRoles.filter(r=>document.getElementById('erc-'+r)?.classList.contains('on'));document.getElementById('ovEditMembre').classList.remove('open');saveAll();renderReglages();}
+function deleteMembre(){const nom=document.getElementById('em-nom').value;if(nom==='Nico'){alert('Impossible de supprimer le compte principal.');return;}if(!confirm('Supprimer '+nom+'?'))return;MEMBRES=MEMBRES.filter(m=>m.nom!==nom);document.getElementById('ovEditMembre').classList.remove('open');saveAll();renderReglages();}
 
 // ════ OVERLAYS ════
 function openOv(id){document.getElementById(id).classList.add('open');}
@@ -1970,8 +1983,165 @@ ${Object.keys(ouvrierStats).length>0?`
   showExportFeedback(`✅ Rapport ${moisNom} généré !`);
 }
 
+// ════ LOCALSTORAGE — PERSISTANCE ════
+const LS = {
+  PARCELLES:   'mv_parcelles',
+  JOURNAL:     'mv_journal',
+  SESSIONS:    'mv_sessions',
+  TRAITEMENTS: 'mv_traitements',
+  CATALOGUE:   'mv_catalogue',
+  MEMBRES:     'mv_membres',
+  SAISONS:     'mv_saisons',
+  TACHES:      'mv_taches',
+  CONDUCTEURS: 'mv_conducteurs',
+  ACTIVITES:   'mv_activites',
+  PRIORITY:    'mv_priority',
+};
+
+function saveAll(){
+  try{
+    localStorage.setItem(LS.PARCELLES,   JSON.stringify(PARCELLES));
+    localStorage.setItem(LS.JOURNAL,     JSON.stringify(JOURNAL));
+    localStorage.setItem(LS.SESSIONS,    JSON.stringify(SESSIONS));
+    localStorage.setItem(LS.TRAITEMENTS, JSON.stringify(TRAITEMENTS));
+    localStorage.setItem(LS.CATALOGUE,   JSON.stringify(CATALOGUE));
+    localStorage.setItem(LS.MEMBRES,     JSON.stringify(MEMBRES));
+    localStorage.setItem(LS.SAISONS,     JSON.stringify(SAISONS));
+    localStorage.setItem(LS.TACHES,      JSON.stringify(TACHES));
+    localStorage.setItem(LS.CONDUCTEURS, JSON.stringify(CONDUCTEURS));
+    localStorage.setItem(LS.ACTIVITES,   JSON.stringify(ACTIVITES));
+    localStorage.setItem(LS.PRIORITY,    priorityMessage||'');
+  }catch(e){console.warn('saveAll error:',e);}
+}
+
+function loadAll(){
+  try{
+    const lsParcelles=localStorage.getItem(LS.PARCELLES);
+    if(lsParcelles) PARCELLES=JSON.parse(lsParcelles);
+
+    const lsJournal=localStorage.getItem(LS.JOURNAL);
+    if(lsJournal) JOURNAL=JSON.parse(lsJournal);
+
+    const lsSessions=localStorage.getItem(LS.SESSIONS);
+    if(lsSessions) SESSIONS=JSON.parse(lsSessions);
+
+    const lsTraitements=localStorage.getItem(LS.TRAITEMENTS);
+    if(lsTraitements) TRAITEMENTS=JSON.parse(lsTraitements);
+
+    const lsCatalogue=localStorage.getItem(LS.CATALOGUE);
+    if(lsCatalogue) CATALOGUE=JSON.parse(lsCatalogue);
+
+    const lsMembres=localStorage.getItem(LS.MEMBRES);
+    if(lsMembres){
+      const saved=JSON.parse(lsMembres);
+      // Fusionner les mots de passe (non sauvegardés en LS) depuis les données par défaut
+      MEMBRES=saved.map(m=>{
+        const def=MEMBRES.find(d=>d.nom===m.nom);
+        return{...m, mdp: def?def.mdp:(m.mdp||'')};
+      });
+    }
+
+    const lsSaisons=localStorage.getItem(LS.SAISONS);
+    if(lsSaisons) SAISONS=JSON.parse(lsSaisons);
+
+    const lsTaches=localStorage.getItem(LS.TACHES);
+    if(lsTaches) TACHES=JSON.parse(lsTaches);
+
+    const lsConducteurs=localStorage.getItem(LS.CONDUCTEURS);
+    if(lsConducteurs) CONDUCTEURS=JSON.parse(lsConducteurs);
+
+    const lsActivites=localStorage.getItem(LS.ACTIVITES);
+    if(lsActivites) ACTIVITES=JSON.parse(lsActivites);
+
+    const lsPriority=localStorage.getItem(LS.PRIORITY);
+    if(lsPriority!==null) priorityMessage=lsPriority;
+
+    // Recalculer TRAVAUX depuis les parcelles chargées
+    recalcAllTravaux();
+
+  }catch(e){console.warn('loadAll error:',e);}
+}
+
+function recalcAllTravaux(){
+  TACHES.forEach(t=>{
+    const surf=PARCELLES.filter(p=>p.statut!=='Arrachee').reduce((s,p)=>s+p.surface,0);
+    const surfDone=PARCELLES.filter(p=>p.taches&&p.taches[t.nom]==='Validé').reduce((s,p)=>s+p.surface,0);
+    const pct=surf>0?Math.round(surfDone/surf*100):0;
+    TRAVAUX[t.nom]={
+      h_ha:t.hha, saison:t.saison,
+      surf_done:Math.round(surfDone*100)/100,
+      surf_total:Math.round(surf*100)/100,
+      pct,
+      h_total:Math.round(t.hha*surf*10)/10,
+      h_done:Math.round(t.hha*surfDone*10)/10,
+      h_reste:Math.round(t.hha*(surf-surfDone)*10)/10
+    };
+  });
+}
+
+function importJSON(){
+  const input=document.createElement('input');
+  input.type='file';input.accept='.json';
+  input.onchange=function(e){
+    const file=e.target.files[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      try{
+        const data=JSON.parse(ev.target.result);
+        if(!data.parcelles||!data.journal){alert('Fichier invalide — export Ma Vigne requis.');return;}
+        if(!confirm('⚠️ Importer ce fichier remplacera toutes les données actuelles. Continuer ?'))return;
+        if(data.parcelles)   PARCELLES=data.parcelles;
+        if(data.journal)     JOURNAL=data.journal;
+        if(data.sessions)    SESSIONS=data.sessions;
+        if(data.traitements) TRAITEMENTS=data.traitements;
+        if(data.saisons)     SAISONS=data.saisons;
+        if(data.taches)      TACHES=data.taches;
+        if(data.membres){
+          MEMBRES=data.membres.map(m=>{
+            const def=MEMBRES.find(d=>d.nom===m.nom);
+            return{...m, mdp:def?def.mdp:(m.mdp||''), couleur:m.couleur||def?.couleur||'#888'};
+          });
+        }
+        saveAll();
+        recalcAllTravaux();
+        // Rafraîchir l'UI
+        document.getElementById('ovExport').classList.remove('open');
+        goTo('home');
+        showExportFeedback('✅ Import réussi — données restaurées !');
+        alert('✅ Import réussi ! Données restaurées depuis le fichier.');
+      }catch(err){alert('Erreur lors de l\'import : '+err.message);}
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function resetAllData(){
+  if(!isAdmin()){alert('Action réservée à l\'administrateur.');return;}
+  if(!confirm('⚠️ ATTENTION : Effacer TOUTES les données sauvegardées et repartir des données d\'usine ?\n\nCette action est irréversible.'))return;
+  if(!confirm('Dernière confirmation — toutes vos saisies seront perdues. Continuer ?'))return;
+  Object.values(LS).forEach(k=>localStorage.removeItem(k));
+  alert('Données effacées. L\'application va se recharger.');
+  location.reload();
+}
+
+function showSaveIndicator(){
+  let el=document.getElementById('save-indicator');
+  if(!el){
+    el=document.createElement('div');
+    el.id='save-indicator';
+    el.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1E3A12;color:white;font-size:11px;font-weight:600;padding:6px 14px;border-radius:20px;z-index:9000;opacity:0;transition:opacity 0.3s;pointer-events:none;font-family:Outfit,sans-serif';
+    el.textContent='💾 Sauvegardé';
+    document.body.appendChild(el);
+  }
+  el.style.opacity='1';
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>{el.style.opacity='0';},1500);
+}
+
 // ════ INIT ════
 document.addEventListener('DOMContentLoaded', function(){
+  loadAll(); // ← Charger les données persistées avant tout
   var todayStr = new Date().toISOString().split('T')[0];
   var sd = document.getElementById('s-date'); if(sd) sd.value = todayStr;
   var pd = document.getElementById('p-date'); if(pd) pd.value = todayStr;
