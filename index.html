@@ -36,7 +36,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 const COLLECTIONS = ['parcelles','journal','sessions','travaux','traitements',
-                     'catalogue','conducteurs','activites','membres','saisons','taches'];
+                     'catalogue','conducteurs','activites','membres','saisons','taches','config'];
 
 function fbDoc(key) { return db.collection('mavigne').doc(key); }
 
@@ -57,6 +57,11 @@ function applyFbData(key, value) {
   if(key === 'parcelles') {
     var arr = window.PARCELLES;
     if(arr){ arr.length = 0; value.forEach(function(x){ arr.push(x); }); }
+  } else if(key === 'config') {
+    if(value.priorityMessage !== undefined) {
+      window.priorityMessage = value.priorityMessage;
+      if(window._syncLocalVars) window._syncLocalVars();
+    }
   } else {
     window[key.toUpperCase()] = value;
   }
@@ -1082,6 +1087,7 @@ window._syncLocalVars = function() {
   if(window.MEMBRES     !== undefined) MEMBRES     = window.MEMBRES;
   if(window.SAISONS     !== undefined) SAISONS     = window.SAISONS;
   if(window.TACHES      !== undefined) TACHES      = window.TACHES;
+  if(window.priorityMessage !== undefined) priorityMessage = window.priorityMessage;
   // PARCELLES est const : muté en place, pas besoin de réassigner
 };
 
@@ -1113,7 +1119,8 @@ function saveData(keyHint) {
       PARCELLES:W.parcelles, JOURNAL:W.journal, SESSIONS:W.sessions,
       TRAVAUX:W.travaux, TRAITEMENTS:W.traitements, CATALOGUE:W.catalogue,
       CONDUCTEURS:W.conducteurs, ACTIVITES:W.activites, MEMBRES:W.membres,
-      SAISONS:W.saisons, TACHES:W.taches, savedAt:Date.now()
+      SAISONS:W.saisons, TACHES:W.taches, priorityMessage:priorityMessage,
+      savedAt:Date.now()
     }));
   } catch(e) {}
 
@@ -1143,6 +1150,7 @@ function loadData() {
     if (d.MEMBRES)      { MEMBRES = d.MEMBRES; window.MEMBRES = MEMBRES; }
     if (d.SAISONS)      { SAISONS = d.SAISONS; window.SAISONS = SAISONS; }
     if (d.TACHES)       { TACHES = d.TACHES; window.TACHES = TACHES; }
+    if (d.priorityMessage !== undefined) { priorityMessage = d.priorityMessage; window.priorityMessage = priorityMessage; }
     return true;
   } catch(e) { return false; }
 }
@@ -1651,12 +1659,20 @@ function openPriorityEdit(){
 function savePriority(){
   priorityMessage=document.getElementById('prio-input').value.trim();
   document.getElementById('ovPriority').classList.remove('open');
+  savePriorityData();
   renderParcelles();
 }
 function clearPriority(){
   priorityMessage='';
   document.getElementById('ovPriority').classList.remove('open');
+  savePriorityData();
   renderParcelles();
+}
+function savePriorityData(){
+  // localStorage
+  try { localStorage.setItem('mavigne_priority', priorityMessage); } catch(e){}
+  // Firebase
+  if(window.fbSave) window.fbSave('config', { priorityMessage: priorityMessage });
 }
 function toggleTravail(nomParcelle,nomTache,btn){
   const p=PARCELLES.find(x=>x.nom===nomParcelle);if(!p)return;
