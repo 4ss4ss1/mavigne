@@ -451,17 +451,6 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
   <div class="login-title">Ma Vigne</div>
   <div class="login-sub">Choisissez votre profil</div>
   <div class="login-profiles" id="login-profiles"></div>
-  <!-- Panneau mot de passe (masqué par défaut) -->
-  <div id="login-pwd-panel" style="display:none;width:100%;margin-top:20px">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-      <button onclick="backToProfiles()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:8px 12px;color:white;font-size:13px;cursor:pointer">← Retour</button>
-      <div id="login-pwd-name" style="color:white;font-size:16px;font-weight:600"></div>
-    </div>
-    <div class="login-label">Mot de passe</div>
-    <input type="password" id="login-pwd-input" class="login-input" placeholder="Votre mot de passe" autocomplete="current-password">
-    <div id="login-pwd-error" style="color:#FF8A80;font-size:12px;margin-top:-8px;margin-bottom:10px;display:none">❌ Mot de passe incorrect</div>
-    <button class="login-btn" id="login-pwd-btn">Se connecter</button>
-  </div>
 </div>
 
 <!-- ══════ PAGE ACCUEIL ══════ -->
@@ -597,7 +586,6 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
       <div style="float:right;font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600" id="dp-pct"></div>
       <div class="modal-title" id="dp-nom"></div>
       <div class="modal-sub" id="dp-sub"></div>
-      <button id="dp-gps-btn" style="display:none;margin-top:10px;background:var(--bleu);color:white;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;align-items:center;gap:6px;">📍 Ouvrir dans GPS</button>
     </div>
     <div class="modal-body">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
@@ -714,8 +702,8 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
   <div class="set-sec">
     <div class="set-title">Application</div>
     <div style="margin:0 16px">
-      <div class="set-row" style="border-radius:16px 16px 0 0" onclick="toggleNotifications()"><div class="sr-l"><div class="sr-ico" style="background:var(--terre-pale)">🔔</div><div><div class="sr-lbl">Notifications</div><div class="sr-sub" id="notif-sub">Alertes gel, DAR, validations</div></div></div><div class="sr-arr">›</div></div>
-      <div class="set-row" onclick="exporterDonnees()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">📤</div><div><div class="sr-lbl">Exporter données</div><div class="sr-sub">Journal CSV · Phyto CSV · JSON</div></div></div><div class="sr-arr">›</div></div>
+      <div class="set-row" style="border-radius:16px 16px 0 0"><div class="sr-l"><div class="sr-ico" style="background:var(--terre-pale)">🔔</div><div><div class="sr-lbl">Notifications</div><div class="sr-sub">Alertes gel, DAR, validations</div></div></div><div class="sr-arr">›</div></div>
+      <div class="set-row"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">📤</div><div><div class="sr-lbl">Exporter données</div><div class="sr-sub">PDF · Excel · Registre phyto</div></div></div><div class="sr-arr">›</div></div>
       <div class="set-row" style="border-radius:0 0 16px 16px" onclick="logout()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🚪</div><div><div class="sr-lbl" style="color:var(--rouge)">Se déconnecter</div></div></div><div class="sr-arr">›</div></div>
     </div>
   </div>
@@ -755,27 +743,23 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 <div class="overlay" id="ovEditMembre" onclick="closeOv(event,'ovEditMembre')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="em-title">✏️ Modifier membre</div></div><input type="hidden" id="em-nom"><div class="modal-body"><div class="fl">Rôles</div><div class="roles-check" id="em-roles"></div><div class="fl">Statut</div><div class="ppicker"><div class="pchk sel vert" data-val="Actif" onclick="pickVal(this,'em-statut','vert')">✅ Actif</div><div class="pchk" data-val="Inactif" onclick="pickVal(this,'em-statut','vert')">⏸ Inactif</div></div><input type="hidden" id="em-statut" value="Actif"><button class="mbtn verte" onclick="saveEditMembre()">Enregistrer</button><button class="mbtn-del" onclick="deleteMembre()">Supprimer</button></div></div></div>
 
 <script>
-// Affiche les erreurs JS directement a l'ecran pour debug
-window.onerror = function(msg, src, line, col, err) {
-  var d = document.createElement('div');
-  d.style.cssText = 'position:fixed;top:0;left:0;right:0;background:red;color:white;padding:14px;font-size:13px;z-index:99999;word-break:break-all;font-family:monospace';
-  d.textContent = 'ERREUR L' + line + ': ' + msg;
-  document.body.appendChild(d);
-  return false;
-};
+// ════════════════════════════════════
+// DONNÉES
+// ════════════════════════════════════
+
 let MEMBRES = [
-  {nom:'Nico', email:'gueret.nicolas@gmail.com', roles:['admin','ouvrier','tractoriste'], statut:'Actif', couleur:'#3D6B27', mdp:'vigne21'},
-  {nom:'Victor', email:'leravictor904@gmail.com', roles:['ouvrier','tractoriste'], statut:'Actif', couleur:'#1A4A7A', mdp:'victor21'},
-  {nom:'Dessi', email:'dessi.9332@yahoo.com', roles:['ouvrier'], statut:'Actif', couleur:'#7A4F2E', mdp:'dessi21'},
-  {nom:'Etienne', email:'etienne.marchand.21@gmail.com', roles:['ouvrier','tractoriste'], statut:'Actif', couleur:'#5B2D8E', mdp:'etienne21'},
-  {nom:'Chloe', email:'tonnelierchloe21@gmail.com', roles:['ouvrier'], statut:'Actif', couleur:'#B8913A', mdp:'chloe21'},
-  {nom:'Shana', email:'nana.badyka@gmail.com', roles:['ouvrier'], statut:'Actif', couleur:'#C0392B', mdp:'shana21'},
-  {nom:'Alicia', email:'alicia.dupont58@live.fr', roles:['ouvrier'], statut:'Actif', couleur:'#1A5276', mdp:'alicia21'},
+  {nom:'Nico', email:'gueret.nicolas@gmail.com', roles:['admin','ouvrier','tractoriste'], statut:'Actif', couleur:'#3D6B27'},
+  {nom:'Victor', email:'leravictor904@gmail.com', roles:['ouvrier','tractoriste'], statut:'Actif', couleur:'#1A4A7A'},
+  {nom:'Dessi', email:'dessi.9332@yahoo.com', roles:['ouvrier'], statut:'Actif', couleur:'#7A4F2E'},
+  {nom:'Etienne', email:'etienne.marchand.21@gmail.com', roles:['ouvrier','tractoriste'], statut:'Actif', couleur:'#5B2D8E'},
+  {nom:'Chloé', email:'tonnelierchloe21@gmail.com', roles:['ouvrier'], statut:'Actif', couleur:'#B8913A'},
+  {nom:'Shana', email:'nana.badyka@gmail.com', roles:['ouvrier'], statut:'Actif', couleur:'#C0392B'},
+  {nom:'Alicia', email:'alicia.dupont58@live.fr', roles:['ouvrier'], statut:'Actif', couleur:'#1A5276'},
 ];
 
 let SAISONS = [
-  {nom:'Hiver 2025-2026', periode:'Déc 2025 - Fév 2026', active:false},
-  {nom:'Printemps 2026', periode:'Mar - Mai 2026', active:true},
+  {nom:'Hiver 2025–2026', periode:'Déc 2025 – Fév 2026', active:false},
+  {nom:'Printemps 2026', periode:'Mar – Mai 2026', active:true},
 ];
 
 let TACHES = [
@@ -820,7 +804,7 @@ let JOURNAL=[{"id":"0b550083","date":"2026-05-15","parcelle":"Songe du Haut","ta
 let ACTIVITES=[{nom:'Griffage',emoji:'🚜'},{nom:'Intercep',emoji:'✂️'},{nom:'Rognage',emoji:'✂️'},{nom:'Buttage',emoji:'🌱'},{nom:'Débuttage',emoji:'🌱'},{nom:'Minibuttage',emoji:'🌱'}];
 let CONDUCTEURS=[{nom:'Nico',statut:'Formé'},{nom:'Etienne',statut:'Formé'}];
 let SESSIONS=[{id:'0b81fe25',activite:'Griffage',date:'2026-03-03',conducteur:'Nico',statut:'Validé',avancement:100,note:''},{id:'bf8d7558',activite:'Minibuttage',date:'2026-04-10',conducteur:'Nico',statut:'Terminé',avancement:100,note:''},{id:'4b6e4fb0',activite:'Intercep',date:'2026-04-26',conducteur:'Nico',statut:'En cours',avancement:71,note:'13 parcelles restantes (zone sud)'}];
-let CATALOGUE=[{nom:'Bouillie bordelaise 20 WG',type:'Cuivre',amm:'2010001',dar:21,dose:'4 kg/ha'},{nom:'Nordox 75 WG',type:'Cuivre',amm:'9200386',dar:56,dose:'0,6 kg/ha'},{nom:'Microthiol Special Disperss',type:'Soufre',amm:'2020014',dar:35,dose:'5 kg/ha'},{nom:'Thiovit Jet',type:'Soufre',amm:'8900225',dar:56,dose:'3-5 kg/ha'},{nom:'Mildicut',type:'Fongicide',amm:'2100435',dar:21,dose:'2,5 L/ha'},{nom:'Equation Pro',type:'Fongicide',amm:'2030218',dar:21,dose:'0,4 kg/ha'},{nom:'Pergado F',type:'Fongicide',amm:'2130033',dar:28,dose:'2 kg/ha'},{nom:'Switch',type:'Fongicide',amm:'9900455',dar:7,dose:'0,8 kg/ha'},{nom:'Karate Zeon',type:'Insecticide',amm:'9200556',dar:7,dose:'0,1 L/ha'},{nom:'Serenade ASO',type:'Biocontrôle',amm:'2110156',dar:0,dose:'4 L/ha'},{nom:'Sonata',type:'Biocontrôle',amm:'2120044',dar:0,dose:'8 L/ha'}];
+let CATALOGUE=[{nom:'Bouillie bordelaise 20 WG',type:'Cuivre',amm:'2010001',dar:21,dose:'4 kg/ha'},{nom:'Nordox 75 WG',type:'Cuivre',amm:'9200386',dar:56,dose:'0,6 kg/ha'},{nom:'Microthiol Special Disperss',type:'Soufre',amm:'2020014',dar:35,dose:'5 kg/ha'},{nom:'Thiovit Jet',type:'Soufre',amm:'8900225',dar:56,dose:'3–5 kg/ha'},{nom:'Mildicut',type:'Fongicide',amm:'2100435',dar:21,dose:'2,5 L/ha'},{nom:'Equation Pro',type:'Fongicide',amm:'2030218',dar:21,dose:'0,4 kg/ha'},{nom:'Pergado F',type:'Fongicide',amm:'2130033',dar:28,dose:'2 kg/ha'},{nom:'Switch',type:'Fongicide',amm:'9900455',dar:7,dose:'0,8 kg/ha'},{nom:'Karate Zeon',type:'Insecticide',amm:'9200556',dar:7,dose:'0,1 L/ha'},{nom:'Serenade ASO',type:'Biocontrôle',amm:'2110156',dar:0,dose:'4 L/ha'},{nom:'Sonata',type:'Biocontrôle',amm:'2120044',dar:0,dose:'8 L/ha'}];
 let TRAITEMENTS=[];
 let METEO_JOURNAL=[];
 
@@ -836,45 +820,57 @@ const TCLS={Cuivre:'tcc',Soufre:'tsc',Fongicide:'tfc',Insecticide:'tic',Herbicid
 const TEMJ={Cuivre:'🔵',Soufre:'🟡',Fongicide:'🟢',Insecticide:'🟠',Herbicide:'🟤','Biocontrôle':'🟣'};
 const TEMOJI={Taille:'🌿',Tirage:'🔄',Brulage:'🔥',Pliage:'🔗',Reparation:'🛠️',Plantation:'🌱',Ebourgeonnage1:'🌾',Ebourgeonnage2:'🌾',Pioche1:'⛏️',Pioche2:'⛏️',Relevage:'↑',Accolage:'🔗',Palissage:'🪵'};
 
-// LOGIN ====
-let loginPendingUser = null;
+// LOGIN
+let loginPendingIdx = -1;
 
 function initLogin(){
-  const profiles = document.getElementById('login-profiles');
+  var profiles = document.getElementById('login-profiles');
   profiles.innerHTML = '';
-  MEMBRES.forEach(function(m, idx) {
-    var btn = document.createElement('div');
-    btn.className = 'lp-btn';
-    btn.innerHTML = '<div class="lp-name">' + m.nom + '</div><div class="lp-role">' + getRoleLabel(m.roles) + '</div>';
-    btn.addEventListener('click', function(){ selectProfile(idx); });
-    profiles.appendChild(btn);
-  });
+  for(var i=0; i<MEMBRES.length; i++){
+    (function(idx){
+      var m = MEMBRES[idx];
+      var btn = document.createElement('div');
+      btn.className = 'lp-btn';
+      var nameDiv = document.createElement('div');
+      nameDiv.className = 'lp-name';
+      nameDiv.textContent = m.nom;
+      var roleDiv = document.createElement('div');
+      roleDiv.className = 'lp-role';
+      roleDiv.textContent = getRoleLabel(m.roles);
+      btn.appendChild(nameDiv);
+      btn.appendChild(roleDiv);
+      btn.addEventListener('click', function(){ selectProfile(idx); });
+      profiles.appendChild(btn);
+    })(i);
+  }
 }
 
-function selectProfile(idx) {
-  loginPendingUser = MEMBRES[idx];
+function selectProfile(idx){
+  loginPendingIdx = idx;
+  var m = MEMBRES[idx];
   document.getElementById('login-profiles').style.display = 'none';
   document.getElementById('login-pwd-panel').style.display = 'block';
-  document.getElementById('login-pwd-name').textContent = loginPendingUser.nom;
+  document.getElementById('login-pwd-name').textContent = m.nom;
   document.getElementById('login-pwd-input').value = '';
   document.getElementById('login-pwd-error').style.display = 'none';
-  setTimeout(function(){ document.getElementById('login-pwd-input').focus(); }, 100);
+  setTimeout(function(){ document.getElementById('login-pwd-input').focus(); }, 150);
 }
 
-function backToProfiles() {
-  loginPendingUser = null;
+function backToProfiles(){
+  loginPendingIdx = -1;
   document.getElementById('login-profiles').style.display = 'grid';
   document.getElementById('login-pwd-panel').style.display = 'none';
-  document.getElementById('login-pwd-input').value = '';
   document.getElementById('login-pwd-error').style.display = 'none';
+  document.getElementById('login-pwd-input').value = '';
 }
 
-function confirmLogin() {
-  if (!loginPendingUser) return;
+function confirmLogin(){
+  if(loginPendingIdx < 0) return;
+  var m = MEMBRES[loginPendingIdx];
   var saisi = document.getElementById('login-pwd-input').value;
-  if (saisi === loginPendingUser.mdp) {
-    currentUser = loginPendingUser;
-    loginPendingUser = null;
+  if(saisi === m.mdp){
+    currentUser = m;
+    loginPendingIdx = -1;
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('login-profiles').style.display = 'grid';
     document.getElementById('login-pwd-panel').style.display = 'none';
@@ -891,8 +887,8 @@ function confirmLogin() {
 }
 
 function getRoleLabel(roles){
-  if(roles.includes('admin'))return'Admin';
-  const labels=[];
+  if(roles.includes('admin'))return 'Admin';
+  var labels=[];
   if(roles.includes('tractoriste'))labels.push('Tractoriste');
   if(roles.includes('ouvrier'))labels.push('Ouvrier');
   if(roles.includes('saisonnier'))labels.push('Saisonnier');
@@ -901,7 +897,7 @@ function getRoleLabel(roles){
 
 function logout(){
   currentUser=null;
-  loginPendingUser=null;
+  loginPendingIdx=-1;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.style.display='');
@@ -911,12 +907,12 @@ function logout(){
   document.getElementById('login-screen').style.display='flex';
 }
 
-function isAdmin(){return (currentUser && currentUser.roles.includes('admin'));}
-function isTractoriste(){return (currentUser && currentUser.roles.includes('tractoriste'));}
-function canSeePhyto(){return (currentUser && currentUser.roles.includes('admin'));}
+function isAdmin(){return currentUser?.roles.includes('admin');}
+function isTractoriste(){return currentUser?.roles.includes('tractoriste');}
+function canSeePhyto(){return currentUser?.roles.includes('admin');}
 
 function applyRoles(){
-  // Phyto - admin seulement
+  // Phyto — admin seulement
   document.querySelectorAll('.nb[data-p=phyto]').forEach(b=>b.style.display=canSeePhyto()?'':'none');
   document.querySelectorAll('.nb[data-p=reglages]').forEach(b=>b.style.display=isAdmin()?'':'none');
   // Tracteur readonly
@@ -942,7 +938,7 @@ function updateNavForRoles(){
   document.getElementById('nav-bar').style.gridTemplateColumns=`repeat(${visible},1fr)`;
 }
 
-// MÉTÉO ====
+// ════ MÉTÉO ════
 let meteoData=null;
 async function fetchMeteo(){
   try{
@@ -979,11 +975,11 @@ async function fetchMeteo(){
         }
       }
     }
-    // Stocker météo mais NE PAS l'insérer dans le journal automatiquement
-    // Elle sera ajoutée dans le journal uniquement quand un travail est enregistré ce jour
+    // Enregistrer dans journal
     const existant=METEO_JOURNAL.find(m=>m.date===meteoData.date);
     if(!existant){
       METEO_JOURNAL.push({...meteoData});
+      JOURNAL.unshift({id:'meteo-'+Date.now(),date:meteoData.date,parcelle:'Domaine',tache:'Météo',qui:'Auto',statut:'Info',equipe:false,meteo:true,temp,desc,wind,emoji});
     }
   }catch(e){
     const mc=document.getElementById('hv2-meteo-card');
@@ -993,7 +989,7 @@ async function fetchMeteo(){
 function wmoDesc(c){const m={0:'Dégagé',1:'Peu nuageux',2:'Partiellement nuageux',3:'Couvert',45:'Brouillard',48:'Brouillard givrant',51:'Bruine légère',53:'Bruine modérée',55:'Bruine forte',61:'Pluie légère',63:'Pluie modérée',65:'Pluie forte',71:'Neige légère',73:'Neige modérée',75:'Neige forte',80:'Averses légères',81:'Averses modérées',82:'Averses fortes',95:'Orage',96:'Orage avec grêle'};return m[c]||'Variable';}
 function wmoEmoji(c){if(c===0)return'☀️';if(c<=2)return'🌤️';if(c===3)return'☁️';if(c<=48)return'🌫️';if(c<=65)return'🌧️';if(c<=77)return'❄️';if(c<=82)return'🌦️';return'⛈️';}
 
-// SAISON ACTIVE ====
+// ════ SAISON ACTIVE ════
 function getSaisonActive(){return SAISONS.find(s=>s.active)||SAISONS[SAISONS.length-1];}
 function getTachesSaison(){
   const s=getSaisonActive();
@@ -1002,7 +998,7 @@ function getTachesSaison(){
   return TACHES.filter(t=>t.saison===nomSaison||nomSaison.includes(t.saison));
 }
 
-// HEURES ====
+// ════ HEURES ════
 function calcHeures(){
   const tachesSaison=getTachesSaison();
   let totalReste=0,totalTotal=0;
@@ -1017,7 +1013,7 @@ function calcHeures(){
 function renderHeuresCard(containerId){
   const {data,totalReste}=calcHeures();
   const c=document.getElementById(containerId);
-  c.innerHTML=`<div class="hc-head"><div class="hc-title">Avancement - ${getSaisonActive().nom}</div><div class="hc-total"><div class="hc-total-val">${totalReste}h</div><div class="hc-total-lbl">Restantes</div></div></div>`
+  c.innerHTML=`<div class="hc-head"><div class="hc-title">Avancement — ${getSaisonActive().nom}</div><div class="hc-total"><div class="hc-total-val">${totalReste}h</div><div class="hc-total-lbl">Restantes</div></div></div>`
     +data.map(t=>{
       const col=t.pct===100?'var(--vert-med)':t.pct>=50?'var(--or)':'var(--orange)';
       return `<div class="htache-row">
@@ -1031,7 +1027,7 @@ function renderHeuresCard(containerId){
     }).join('');
 }
 
-// NAVIGATION ====
+// ════ NAVIGATION ════
 function goTo(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
@@ -1047,7 +1043,7 @@ function goTo(page){
   if(page==='reglages')renderReglages();
 }
 
-// ACCUEIL ====
+// ════ ACCUEIL ════
 function renderHome(){
   const {totalReste}=calcHeures();
   const saison=getSaisonActive();
@@ -1097,12 +1093,12 @@ function renderHome(){
   // Heures card
   renderHeuresCard('heures-card-home');
 
-  // Derniers travaux - nouveau markup
+  // Derniers travaux — nouveau markup
   const dt=document.getElementById('derniers-travaux');
   const recent=JOURNAL.filter(j=>!j.meteo).slice(0,4);
   dt.innerHTML=recent.map(r=>{
     const isEq=r.equipe||r.qui==='Equipe';
-    const quiAff=isEq&&r.qui&&r.qui!=='Equipe'?`Équipe (${r.qui})`:isEq?'Équipe':r.qui||'-';
+    const quiAff=isEq&&r.qui&&r.qui!=='Equipe'?`Équipe (${r.qui})`:isEq?'Équipe':r.qui||'—';
     const isVal=r.statut==='Validé';
     const isFait=r.statut==='Fait';
     const dotCls=isVal?'hv2-dot-v':isFait?'hv2-dot-f':'hv2-dot-e';
@@ -1121,12 +1117,12 @@ function renderHome(){
   }).join('');
 }
 
-// PARCELLES ====
+// ════ PARCELLES ════
 function getPCls(p){
-  const tachesSaison=getTachesSaison();
-  // Toutes les tâches de la saison, même celles non encore renseignées dans p.taches
-  const nbTotal=tachesSaison.length;
-  const nbDone=tachesSaison.filter(t=>(p.taches[t.nom]||'Non démarré')==='Validé').length;
+  const tachesSaison=getTachesSaison().map(t=>t.nom);
+  const tachesParcelle=Object.entries(p.taches).filter(([t])=>tachesSaison.includes(t));
+  const nbTotal=tachesParcelle.length;
+  const nbDone=tachesParcelle.filter(([,s])=>s==='Validé').length;
   const pct=nbTotal>0?Math.round(nbDone/nbTotal*100):0;
   if(p.statut==='Arrachee')return{a:'ava-x',d:'dr',cl:'pr',col:'var(--rouge)',fill:'var(--rouge)',em:'🚫',pct};
   if(pct===100)return{a:'ava-c',d:'dc',cl:'pv',col:'var(--vert-med)',fill:'linear-gradient(90deg,var(--vert),var(--vert-clair))',em:'✅',pct};
@@ -1157,11 +1153,11 @@ function renderParcelles(){
   });
   const cont=document.getElementById('pList');
   if(!data.length){cont.innerHTML='<div class="empty-state"><div class="ei">🔍</div><p>Aucun résultat.</p></div>';return;}
-  const tachesSaison=getTachesSaison();
+  const tachesSaison=getTachesSaison().map(t=>t.nom);
+  cont.innerHTML=data.map(p=>{
     const cl=getPCls(p);
-    // Toutes les tâches de la saison, y compris celles non renseignées (=Non démarré)
-    const tps=tachesSaison.map(t=>({nom:t.nom,stat:p.taches[t.nom]||'Non démarré'}));
-    const chips=tps.slice(0,4).map(({nom,stat})=>`<span class="tc ${stat==='Validé'?'tcv':stat==='Fait'?'tcf':stat==='En cours'?'tce':'tcm'}">${nom}</span>`).join('');
+    const tps=Object.entries(p.taches).filter(([t])=>tachesSaison.includes(t));
+    const chips=tps.slice(0,4).map(([t,s])=>`<span class="tc ${s==='Validé'?'tcv':s==='Fait'?'tcf':'tce'}">${t}</span>`).join('');
     const more=tps.length>4?`<span class="tc tcm">+${tps.length-4}</span>`:'';
     return `<div class="pcard" onclick="openDP('${p.nom}')">
       <div class="pc-main">
@@ -1188,36 +1184,27 @@ function openDP(nom){
   const tachesSaison=getTachesSaison();
   let hReste=0;
   tachesSaison.forEach(t=>{
-    const stat=p.taches[t.nom]||'Non démarré';
+    const stat=p.taches[t.nom];
     if(stat!=='Validé')hReste+=t.hha*p.surface;
   });
   document.getElementById('dp-hreste').textContent=Math.round(hReste)+'h';
   document.getElementById('dp-saison-label').textContent=getSaisonActive().nom;
-  // Bouton GPS
-  const gpsBtn=document.getElementById('dp-gps-btn');
-  if(gpsBtn){
-    if(p.lat&&p.lng){
-      gpsBtn.style.display='flex';
-      gpsBtn.onclick=()=>openGPS(p.lat,p.lng,p.nom);
-    }else{
-      gpsBtn.style.display='none';
-    }
-  }
-  // Tâches : toutes les tâches de la saison, même à 0%
-  const canEdit=isAdmin()||(currentUser && currentUser.roles.includes('ouvrier'));
+  const ovLabel=document.getElementById('dp-saison-label');
+  if(ovLabel)ovLabel.textContent=getSaisonActive().nom;
+  // Tâches avec toggle validation
+  const canEdit=isAdmin()||currentUser?.roles.includes('ouvrier');
   document.getElementById('dp-taches').innerHTML=tachesSaison.map(t=>{
     const stat=p.taches[t.nom]||'Non démarré';
     const isOn=stat==='Validé';
     const hEstim=Math.round(t.hha*p.surface*10)/10;
-    const statCls=isOn?'jsv':stat==='Fait'?'jsf':stat==='En cours'?'jse':'';
     return `<div class="val-row">
       <div class="val-left">
         <div>
           <div class="val-nom">${TEMOJI[t.nom]||'🌿'} ${t.nom}</div>
-          <div class="val-hha">${t.hha}h/ha · ~${hEstim}h ici${stat==='Non démarré'?'':' · <span style="color:'+(isOn?'var(--vert)':'var(--orange)')+'">'+stat+'</span>'}</div>
+          <div class="val-hha">${t.hha}h/ha · ~${hEstim}h pour cette parcelle</div>
         </div>
       </div>
-      ${canEdit?`<button class="val-toggle ${isOn?'on':'off'}" onclick="toggleTravail('${p.nom}','${t.nom}',this)">${isOn?'✓':''}</button>`:`<span class="jst ${statCls||'tcm'}">${stat}</span>`}
+      ${canEdit?`<button class="val-toggle ${isOn?'on':'off'}" onclick="toggleTravail('${p.nom}','${t.nom}',this)">${isOn?'✓':''}</button>`:`<span class="jst ${isOn?'jsv':'jse'}">${stat}</span>`}
     </div>`;
   }).join('');
   openOv('ovParcelle');
@@ -1233,15 +1220,7 @@ function toggleTravail(nomParcelle,nomTache,btn){
   btn.textContent=isOn?'':'✓';
   // Ajouter au journal
   if(!isOn){
-    const today=new Date().toISOString().split('T')[0];
-    JOURNAL.unshift({id:Date.now().toString(16),date:today,parcelle:nomParcelle,tache:nomTache,qui:currentUser.nom,statut:'Validé',equipe:false});
-    // Insérer météo dans le journal si c'est le premier travail de la journée et qu'on a la météo
-    const meteoExisteDansJournal=JOURNAL.find(j=>j.meteo&&j.date===today);
-    const meteoDisponible=METEO_JOURNAL.find(m=>m.date===today);
-    if(!meteoExisteDansJournal&&meteoDisponible){
-      const m=meteoDisponible;
-      JOURNAL.push({id:'meteo-'+today,date:today,parcelle:'Domaine',tache:'Météo',qui:'Auto',statut:'Info',equipe:false,meteo:true,temp:m.temp,desc:m.desc,wind:m.wind,emoji:m.emoji});
-    }
+    JOURNAL.unshift({id:Date.now().toString(16),date:new Date().toISOString().split('T')[0],parcelle:nomParcelle,tache:nomTache,qui:currentUser.nom,statut:'Validé',equipe:false});
     // Mettre à jour TRAVAUX
     recalcTravaux(nomTache);
   }
@@ -1283,8 +1262,8 @@ function loadKML(input){
     try{
       const kml=new DOMParser().parseFromString(e.target.result,'text/xml');
       kml.querySelectorAll('Placemark').forEach(pm=>{
-        const name=(pm.querySelector('name') ? pm.querySelector('name').textContent : '');
-        const coords=(pm.querySelector('coordinates') ? (pm.querySelector('coordinates').textContent || '').trim() : '');
+        const name=pm.querySelector('name')?.textContent||'';
+        const coords=pm.querySelector('coordinates')?.textContent?.trim()||'';
         if(!coords)return;
         const pts=coords.split(/\s+/).map(c=>{const[lng,lat]=c.split(',');return[parseFloat(lat),parseFloat(lng)];}).filter(p=>!isNaN(p[0]));
         if(pts.length<3)return;
@@ -1300,18 +1279,18 @@ function loadKML(input){
 document.querySelectorAll('.fchip').forEach(c=>c.addEventListener('click',function(){document.querySelectorAll('.fchip').forEach(x=>x.classList.remove('active'));this.classList.add('active');pFilter=this.dataset.filter;renderParcelles();}));
 document.getElementById('pSearch').addEventListener('input',function(){pSearch=this.value;renderParcelles();});
 
-// JOURNAL ====
-function fmtDate(d){if(!d)return'-';const[y,m,j]=d.split('-');return`${parseInt(j)} ${['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'][parseInt(m)-1]}`;}
+// ════ JOURNAL ════
+function fmtDate(d){if(!d)return'—';const[y,m,j]=d.split('-');return`${parseInt(j)} ${['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'][parseInt(m)-1]}`;}
 function renderJournal(){
   // Stats ouvriers
   const byQui={};
   JOURNAL.filter(j=>!j.meteo&&j.qui).forEach(j=>{byQui[j.qui]=(byQui[j.qui]||0)+1;});
   const sorted=Object.entries(byQui).sort((a,b)=>b[1]-a[1]).slice(0,4);
-  const maxV=(sorted[0] ? sorted[0][1] : 1);
+  const maxV=sorted[0]?.[1]||1;
   const ostc=document.getElementById('ouvrier-stats-card');
   ostc.innerHTML=`<div class="ost-title">Travaux par ouvrier</div>`+sorted.map(([n,v])=>{
     const m=MEMBRES.find(x=>x.nom===n);
-    return `<div class="ostr"><div class="ostn">${n}</div><div class="ostb"><div class="ostbf" style="width:${v/maxV*100}%;background:${(m ? m.couleur : '#888')}"></div></div><div class="ostc">${v}</div></div>`;
+    return `<div class="ostr"><div class="ostn">${n}</div><div class="ostb"><div class="ostbf" style="width:${v/maxV*100}%;background:${m?.couleur||'#888'}"></div></div><div class="ostc">${v}</div></div>`;
   }).join('');
   // Chips ouvriers
   const orow=document.getElementById('ouvrier-chips-row');
@@ -1354,7 +1333,7 @@ function renderJournalList(){
         const sc=r.statut==='Validé'?'jdv':r.statut==='Fait'?'jdf':r.statut==='Info'?'jdm':'jde';
         const sb=r.statut==='Validé'?'jsv':r.statut==='Fait'?'jsf':r.statut==='Info'?'jsm':'jse';
         const m=MEMBRES.find(x=>x.nom===r.qui);
-        const col=(m ? m.couleur : COULEURS_MBR[r.qui])||'#888';
+        const col=m?.couleur||COULEURS_MBR[r.qui]||'#888';
         const isEq=r.equipe||r.qui==='Equipe';
         const quiAff=isEq&&r.qui&&r.qui!=='Equipe'?`Équipe (${r.qui})`:isEq?'Équipe':r.qui||'Non assigné';
         return `<div class="jitem"><div class="jdotcol"><div class="jdot ${sc}"></div>${i<items.length-1?'<div class="jlinev"></div>':''}</div><div class="jcard"><div class="jtop"><div class="jtache">${TEMOJI[r.tache]||'📋'} ${r.tache}</div><div class="jst ${sb}">${r.statut}</div></div><div class="jparcelle">📍 ${r.parcelle}</div><div class="jbottom"><div class="jqui"><div class="java" style="background:${col}">${(r.qui||'?')[0]}</div>${quiAff}${isEq?'<span class="eq-tag">👥</span>':''}</div></div></div></div>`;
@@ -1363,7 +1342,7 @@ function renderJournalList(){
 }
 document.getElementById('jSearch').addEventListener('input',function(){jSearch=this.value;renderJournalList();});
 
-// TRACTEUR ====
+// ════ TRACTEUR ════
 function renderTracteur(){
   const tot=SESSIONS.length,ter=SESSIONS.filter(s=>s.statut==='Terminé'||s.statut==='Validé').length,enc=SESSIONS.filter(s=>s.statut==='En cours').length;
   document.getElementById('st-t').textContent=tot;
@@ -1380,7 +1359,7 @@ function renderTracteur(){
   if(!data.length){sl.innerHTML='<div class="empty-state"><div class="ei">🚜</div><p>Aucune session.</p></div>';return;}
   const amap=ACTIVITES.reduce((m,a)=>{m[a.nom]=a;return m},{});
   sl.innerHTML=data.map(s=>{
-    const em=(amap[s.activite] ? amap[s.activite].emoji : '🚜');
+    const em=amap[s.activite]?.emoji||'🚜';
     const sc=s.statut==='Validé'?'ssval':s.statut==='En cours'?'ssenc':'sster';
     const pct=s.avancement||100;
     return `<div class="scard"><div class="sc-hd"><div class="sc-ico">${em}</div><div class="sc-info"><div class="sc-act">${s.activite}</div><div class="sc-meta"><span class="sc-date">📅 ${fmtDate(s.date)}</span><span class="sc-cond">👤 ${s.conducteur}</span></div></div><div class="sc-right"><div class="sc-st ${sc}">${s.statut}</div><div class="sc-pct">${pct}%</div></div></div><div class="sc-bwrap"><div class="sc-blbl"><span>Avancement domaine</span><span>${pct===100?'45/45':Math.round(pct/100*45)+'/45'} parcelles</span></div><div class="sc-btrack"><div class="sc-bfill" style="width:${pct}%"></div></div></div>${s.note?`<div style="padding:0 16px 12px;font-size:11px;color:var(--texte-doux)">💬 ${s.note}</div>`:''}</div>`;
@@ -1397,7 +1376,7 @@ function saveSession(){
   if(!date){alert('Date obligatoire');return;}
   const pct=parseInt(document.getElementById('s-av').value)||100;
   const condEl=document.querySelector('#s-cond-pick .pchk.sel');
-  SESSIONS.push({id:Date.now().toString(16),activite:a,date,conducteur:condEl?condEl.textContent.trim():(CONDUCTEURS[0] ? CONDUCTEURS[0].nom : ''),statut:document.getElementById('s-st').value,avancement:pct,note:document.getElementById('s-note').value});
+  SESSIONS.push({id:Date.now().toString(16),activite:a,date,conducteur:condEl?condEl.textContent.trim():CONDUCTEURS[0]?.nom,statut:document.getElementById('s-st').value,avancement:pct,note:document.getElementById('s-note').value});
   document.getElementById('ovSession').classList.remove('open');
   renderTracteur();
 }
@@ -1429,7 +1408,7 @@ function editCond(nom){
 function saveEditCond(){const nom=document.getElementById('ec-nom').value;const c=CONDUCTEURS.find(x=>x.nom===nom);if(c)c.statut=document.getElementById('ec-st').value;document.getElementById('ovEditCond').classList.remove('open');renderTracteur();}
 function deleteCond(){const nom=document.getElementById('ec-nom').value;if(nom==='Nico'){alert('Impossible.');return;}if(!confirm('Supprimer '+nom+'?'))return;CONDUCTEURS=CONDUCTEURS.filter(c=>c.nom!==nom);document.getElementById('ovEditCond').classList.remove('open');renderTracteur();}
 
-// PHYTO ====
+// ════ PHYTO ════
 function renderPhyto(){
   if(!canSeePhyto()){document.getElementById('page-phyto').innerHTML='<div class="empty-state" style="margin-top:100px"><div class="ei">🔒</div><p>Accès réservé à l\'administrateur</p></div>';return;}
   const tot=TRAITEMENTS.length,cu=TRAITEMENTS.filter(t=>t.type==='Cuivre').length,so=TRAITEMENTS.filter(t=>t.type==='Soufre').length;
@@ -1448,19 +1427,19 @@ function renderPhyto(){
   else reg.innerHTML=data.map(t=>{
     const prod=CATALOGUE.find(p=>p.nom===t.produit);
     const darR=prod?Math.max(0,prod.dar-Math.floor((today-new Date(t.date))/86400000)):null;
-    return `<div class="phcard"><div class="ph-hd"><div class="ph-ico">${TEMJ[t.type]||'🧪'}</div><div class="ph-info"><div class="ph-prod">${t.produit}</div><div class="ph-meta"><span class="ph-date">📅 ${fmtDate(t.date)}</span><span class="ph-type ${TCLS[t.type]||'tfc'}">${t.type}</span>${t.operateur?`<span class="ph-op">👤 ${t.operateur}</span>`:''}</div>${t.note?`<div style="font-size:10px;color:var(--texte-doux);margin-top:3px">💬 ${t.note}</div>`:''}</div><div class="ph-right">${prod&&prod.dar>0?`<div class="ph-dar">DAR <strong>${darR}j</strong></div>`:'<div style="font-size:10px;color:var(--vert-med);font-weight:600">✅ Libre</div>'}<div class="ph-dose">${t.dose||(prod ? prod.dose : '-')}</div></div></div>${prod?`<div class="ph-amm">AMM ${prod.amm} · Dose max : ${prod.dose}</div>`:''}</div>`;
+    return `<div class="phcard"><div class="ph-hd"><div class="ph-ico">${TEMJ[t.type]||'🧪'}</div><div class="ph-info"><div class="ph-prod">${t.produit}</div><div class="ph-meta"><span class="ph-date">📅 ${fmtDate(t.date)}</span><span class="ph-type ${TCLS[t.type]||'tfc'}">${t.type}</span>${t.operateur?`<span class="ph-op">👤 ${t.operateur}</span>`:''}</div>${t.note?`<div style="font-size:10px;color:var(--texte-doux);margin-top:3px">💬 ${t.note}</div>`:''}</div><div class="ph-right">${prod&&prod.dar>0?`<div class="ph-dar">DAR <strong>${darR}j</strong></div>`:'<div style="font-size:10px;color:var(--vert-med);font-weight:600">✅ Libre</div>'}<div class="ph-dose">${t.dose||prod?.dose||'—'}</div></div></div>${prod?`<div class="ph-amm">AMM ${prod.amm} · Dose max : ${prod.dose}</div>`:''}</div>`;
   }).join('');
   const catF=phFilter==='tous'?CATALOGUE:CATALOGUE.filter(p=>p.type===phFilter);
   document.getElementById('catalogue-list').innerHTML=catF.map(p=>`<div class="catitem" onclick="selFromCat('${p.nom}')"><div class="cat-l"><div class="cat-nom">${TEMJ[p.type]} ${p.nom}</div><div class="cat-det">AMM ${p.amm} · ${p.dose}</div></div><div class="cat-r"><span class="cat-db ${TCLS[p.type]||'tfc'}">${p.type}</span><span style="font-size:10px;color:var(--texte-doux)">DAR ${p.dar}j</span></div></div>`).join('');
-  document.getElementById('p-prod').innerHTML=`<option value="">- Choisir -</option>`+CATALOGUE.map(p=>`<option value="${p.nom}">${TEMJ[p.type]} ${p.nom}</option>`).join('');
+  document.getElementById('p-prod').innerHTML=`<option value="">— Choisir —</option>`+CATALOGUE.map(p=>`<option value="${p.nom}">${TEMJ[p.type]} ${p.nom}</option>`).join('');
 }
 function switchPhTab(tab){phTab=tab;document.getElementById('tb-reg').classList.toggle('active',tab==='reg');document.getElementById('tb-cat').classList.toggle('active',tab==='cat');document.getElementById('tab-reg').classList.toggle('vis',tab==='reg');document.getElementById('tab-cat').classList.toggle('vis',tab==='cat');}
 function selFromCat(nom){switchPhTab('reg');openOv('ovPhyto');setTimeout(()=>{document.getElementById('p-prod').value=nom;onProdChange();},100);}
 function onProdChange(){const nom=document.getElementById('p-prod').value;const prod=CATALOGUE.find(p=>p.nom===nom);const ib=document.getElementById('p-infobox');if(prod){document.getElementById('p-amm').textContent='AMM : '+prod.amm+' · Dose max : '+prod.dose;document.getElementById('p-dar-info').textContent='DAR : '+prod.dar+' jours';ib.style.display='block';}else ib.style.display='none';}
-function saveTraitement(){const prod=document.getElementById('p-prod').value,date=document.getElementById('p-date').value;if(!prod||!date){alert('Produit et date obligatoires');return;}const p=CATALOGUE.find(x=>x.nom===prod);TRAITEMENTS.push({produit:prod,type:(p ? p.type : 'Fongicide'),date,dose:document.getElementById('p-dose').value,operateur:document.getElementById('p-op').value,note:document.getElementById('p-note').value});document.getElementById('ovPhyto').classList.remove('open');['p-dose','p-op','p-note'].forEach(id=>document.getElementById(id).value='');document.getElementById('p-prod').value='';document.getElementById('p-infobox').style.display='none';renderPhyto();}
+function saveTraitement(){const prod=document.getElementById('p-prod').value,date=document.getElementById('p-date').value;if(!prod||!date){alert('Produit et date obligatoires');return;}const p=CATALOGUE.find(x=>x.nom===prod);TRAITEMENTS.push({produit:prod,type:p?.type||'Fongicide',date,dose:document.getElementById('p-dose').value,operateur:document.getElementById('p-op').value,note:document.getElementById('p-note').value});document.getElementById('ovPhyto').classList.remove('open');['p-dose','p-op','p-note'].forEach(id=>document.getElementById(id).value='');document.getElementById('p-prod').value='';document.getElementById('p-infobox').style.display='none';renderPhyto();}
 function saveProduit(){const nom=document.getElementById('np-nom').value.trim();if(!nom){alert('Nom obligatoire');return;}CATALOGUE.push({nom,type:document.getElementById('np-type').value,amm:document.getElementById('np-amm').value,dar:parseInt(document.getElementById('np-dar').value)||0,dose:document.getElementById('np-dose').value});document.getElementById('ovProduit').classList.remove('open');['np-nom','np-amm','np-dar','np-dose'].forEach(id=>document.getElementById(id).value='');renderPhyto();}
 
-// RÉGLAGES ====
+// ════ RÉGLAGES ════
 function renderReglages(){
   // Saisons
   const sl=document.getElementById('saisons-list');
@@ -1487,113 +1466,23 @@ function toggleRole(r){rolesTemp[r]=!rolesTemp[r];const el=document.getElementBy
 function saveMembre(){const nom=document.getElementById('nm-nom').value.trim();if(!nom)return;const roles=Object.entries(rolesTemp).filter(([,v])=>v).map(([k])=>k);if(roles.length===0)roles.push('ouvrier');const couleurs=['#B85A1A','#C0392B','#1A5276','#7D3C98','#2C3E50'];MEMBRES.push({nom,email:document.getElementById('nm-email').value,roles,statut:'Actif',couleur:couleurs[MEMBRES.length%couleurs.length]});document.getElementById('ovMembre').classList.remove('open');document.getElementById('nm-nom').value='';document.getElementById('nm-email').value='';rolesTemp={ouvrier:true,tractoriste:false,saisonnier:false};['ouvrier','tractoriste','saisonnier'].forEach(r=>{const el=document.getElementById('rc-'+r);el.classList.toggle('on',rolesTemp[r]);el.textContent=rolesTemp[r]?'✓':'';});renderReglages();}
 function editMembre(nom){const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;document.getElementById('em-title').textContent='✏️ '+nom;document.getElementById('em-nom').value=nom;document.getElementById('em-statut').value=m.statut;const er=document.getElementById('em-roles');const allRoles=['admin','ouvrier','tractoriste','saisonnier'];er.innerHTML=allRoles.map(r=>`<div class="role-check-row"><span class="role-check-name">${r}</span><div class="role-chk ${m.roles.includes(r)?'on':''}" id="erc-${r}" onclick="toggleEmRole('${r}',this)">${m.roles.includes(r)?'✓':''}</div></div>`).join('');openOv('ovEditMembre');}
 function toggleEmRole(r,el){el.classList.toggle('on');el.textContent=el.classList.contains('on')?'✓':'';}
-function saveEditMembre(){const nom=document.getElementById('em-nom').value;const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;m.statut=document.getElementById('em-statut').value;const allRoles=['admin','ouvrier','tractoriste','saisonnier'];m.roles=allRoles.filter(r=>(document.getElementById('erc-'+r) ? document.getElementById('erc-'+r).classList.contains('on') : false));document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
+function saveEditMembre(){const nom=document.getElementById('em-nom').value;const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;m.statut=document.getElementById('em-statut').value;const allRoles=['admin','ouvrier','tractoriste','saisonnier'];m.roles=allRoles.filter(r=>document.getElementById('erc-'+r)?.classList.contains('on'));document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
 function deleteMembre(){const nom=document.getElementById('em-nom').value;if(nom==='Nico'){alert('Impossible de supprimer le compte principal.');return;}if(!confirm('Supprimer '+nom+'?'))return;MEMBRES=MEMBRES.filter(m=>m.nom!==nom);document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
 
-// GPS ====
-function openGPS(lat,lng,nom){
-  // Essaie d'ouvrir l'app GPS native (Plans sur iOS, Maps sur Android/desktop)
-  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
-  const isAndroid=/Android/.test(navigator.userAgent);
-  let url;
-  if(isIOS){
-    // Apple Plans
-    url=`maps://maps.apple.com/?q=${encodeURIComponent(nom)}&ll=${lat},${lng}&z=17`;
-  }else if(isAndroid){
-    // Google Maps intention
-    url=`geo:${lat},${lng}?q=${lat},${lng}(${encodeURIComponent(nom)})`;
-  }else{
-    // Web fallback Google Maps
-    url=`https://maps.google.com/?q=${lat},${lng}`;
-  }
-  window.open(url,'_blank');
-}
-
-// NOTIFICATIONS ====
-async function toggleNotifications(){
-  if(!('Notification' in window)){
-    alert('Les notifications ne sont pas supportées par ce navigateur.');
-    return;
-  }
-  if(Notification.permission==='granted'){
-    alert('✅ Notifications déjà activées.\n\nVous recevrez des alertes pour :\n• Risques de gel\n• DAR arrivant à expiration\n• Travaux en attente de validation');
-    return;
-  }
-  if(Notification.permission==='denied'){
-    alert('🔒 Notifications bloquées.\n\nPour les activer :\n• iOS : Réglages → Safari → Notifications\n• Android : Paramètres → Applications → Safari/Chrome → Notifications\n• Desktop : cliquez sur 🔒 dans la barre d\'adresse');
-    return;
-  }
-  const perm=await Notification.requestPermission();
-  if(perm==='granted'){
-    new Notification('Ma Vigne 🍇',{body:'Notifications activées ! Vous serez alerté des risques de gel et des DAR.',icon:'icon-192.png'});
-    alert('✅ Notifications activées !');
-  }else{
-    alert('Notifications refusées. Vous pouvez les activer dans les réglages du navigateur.');
-  }
-}
-
-// EXPORT ====
-function exporterDonnees(){
-  const menu=`Choisissez le format d'export :\n\n1 - Journal (CSV)\n2 - Registre phyto (CSV)\n3 - Tout (JSON)`;
-  const choix=prompt(menu,'1');
-  if(!choix)return;
-  if(choix==='1')exportCSVJournal();
-  else if(choix==='2')exportCSVPhyto();
-  else if(choix==='3')exportJSON();
-  else alert('Choix invalide');
-}
-function exportCSVJournal(){
-  const rows=[['Date','Parcelle','Tâche','Ouvrier','Statut','Équipe']];
-  JOURNAL.filter(j=>!j.meteo).forEach(j=>{
-    rows.push([j.date,j.parcelle,j.tache,j.qui||'',j.statut,j.equipe?'Oui':'Non']);
-  });
-  telechargerCSV(rows,'journal_travaux.csv');
-}
-function exportCSVPhyto(){
-  const rows=[['Date','Produit','Type','N°AMM','Dose','DAR','Opérateur','Note']];
-  TRAITEMENTS.forEach(t=>{
-    const prod=CATALOGUE.find(p=>p.nom===t.produit);
-    rows.push([t.date,t.produit,t.type||'',(prod ? prod.amm : ''),t.dose||(prod ? prod.dose : ''),(prod ? prod.dar : ''),t.operateur||'',t.note||'']);
-  });
-  telechargerCSV(rows,'registre_phyto.csv');
-}
-function exportJSON(){
-  const data={domaine:'Ma Vigne',export_date:new Date().toISOString(),parcelles:PARCELLES,journal:JOURNAL.filter(j=>!j.meteo),traitements:TRAITEMENTS,sessions:SESSIONS,membres:MEMBRES.map(m=>({nom:m.nom,roles:m.roles,statut:m.statut}))};
-  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='mavigne_export_'+new Date().toISOString().split('T')[0]+'.json';
-  a.click();
-}
-function telechargerCSV(rows,filename){
-  const csv=rows.map(r=>r.map(v=>'"'+(String(v).replace(/"/g,'""'))+'"').join(',')).join('\n');
-  const bom='\uFEFF';
-  const blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=filename;
-  a.click();
-}
-
-// OVERLAYS ====
+// ════ OVERLAYS ════
 function openOv(id){document.getElementById(id).classList.add('open');}
 function closeOv(e,id){if(e.target===document.getElementById(id))document.getElementById(id).classList.remove('open');}
 function pickVal(el,hid,cls){el.parentElement.querySelectorAll('.pchk').forEach(x=>{x.classList.remove('sel','vert','acre','phyt');});el.classList.add('sel',cls);document.getElementById(hid).value=el.dataset.val;}
-document.addEventListener('DOMContentLoaded', function() {
+
+// ════ INIT ════
+document.addEventListener('DOMContentLoaded', function(){
   var todayStr = new Date().toISOString().split('T')[0];
-  var sdate = document.getElementById('s-date');
-  var pdate = document.getElementById('p-date');
-  if(sdate) sdate.value = todayStr;
-  if(pdate) pdate.value = todayStr;
-
+  var sd = document.getElementById('s-date'); if(sd) sd.value = todayStr;
+  var pd = document.getElementById('p-date'); if(pd) pd.value = todayStr;
   initLogin();
-
-  var btnLogin = document.getElementById('login-pwd-btn');
-  if(btnLogin) btnLogin.addEventListener('click', confirmLogin);
-  var inputLogin = document.getElementById('login-pwd-input');
-  if(inputLogin) inputLogin.addEventListener('keydown', function(e){
-    if(e.key === 'Enter') confirmLogin();
-  });
+  document.getElementById('login-back-btn').addEventListener('click', backToProfiles);
+  document.getElementById('login-pwd-btn').addEventListener('click', confirmLogin);
+  document.getElementById('login-pwd-input').addEventListener('keydown', function(e){ if(e.key==='Enter') confirmLogin(); });
 });
 </script>
 </body>
