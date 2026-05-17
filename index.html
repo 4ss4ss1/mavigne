@@ -13,10 +13,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<!-- Firebase SDK -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+<!-- Firebase SDK compat (script classique, pas de module, compatible tous navigateurs) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+// ════════════════════════════════════
+// FIREBASE — initialisation
+// ════════════════════════════════════
+console.log('🔥 Firebase compat chargé');
 
 const firebaseConfig = {
   apiKey: "AIzaSyBtMdRk1ubHowIgXuZqB4NTWMNn7fD3I7Y",
@@ -27,204 +32,131 @@ const firebaseConfig = {
   appId: "1:171431979576:web:76f291373b187b0ce514cd"
 };
 
-const fbApp = initializeApp(firebaseConfig);
-const db = getFirestore(fbApp);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-// ── Clés Firestore : 1 document par collection de données ──
-const DOCS = {
-  parcelles:   doc(db, 'mavigne', 'parcelles'),
-  journal:     doc(db, 'mavigne', 'journal'),
-  sessions:    doc(db, 'mavigne', 'sessions'),
-  travaux:     doc(db, 'mavigne', 'travaux'),
-  traitements: doc(db, 'mavigne', 'traitements'),
-  catalogue:   doc(db, 'mavigne', 'catalogue'),
-  conducteurs: doc(db, 'mavigne', 'conducteurs'),
-  activites:   doc(db, 'mavigne', 'activites'),
-  membres:     doc(db, 'mavigne', 'membres'),
-  saisons:     doc(db, 'mavigne', 'saisons'),
-  taches:      doc(db, 'mavigne', 'taches'),
-};
+const COLLECTIONS = ['parcelles','journal','sessions','travaux','traitements',
+                     'catalogue','conducteurs','activites','membres','saisons','taches'];
 
-// Expose sur window pour accès depuis le JS non-module
-window._fbDb = db;
-window._fbDocs = DOCS;
-window._fbSetDoc = setDoc;
-window._fbGetDoc = getDoc;
-window._fbOnSnapshot = onSnapshot;
+function fbDoc(key) { return db.collection('mavigne').doc(key); }
 
-// ── Chargement initial depuis Firestore ──
-async function fbLoad() {
-  try {
-    showSyncBadge('⏳ Connexion…', '#B8913A');
-    const snap = await getDoc(DOCS.parcelles);
-    if (!snap.exists()) {
-      // Premier démarrage : pousser les données initiales vers Firestore
-      await fbPushAll();
-      showSyncBadge('☁️ Données initiales envoyées', '#3D6B27');
-    } else {
-      // Charger depuis Firestore
-      await fbPullAll();
-      showSyncBadge('✅ Synchronisé', '#3D6B27');
-    }
-    // Écoute en temps réel (synchro multi-appareils)
-    fbListen();
-  } catch(e) {
-    console.warn('Firebase load error:', e);
-    showSyncBadge('⚠️ Hors ligne', '#A0291E');
-    // Fallback localStorage
-    if(window.loadData) window.loadData();
-  }
-  // Signaler que Firebase est prêt
-  window._fbReady = true;
-  if(window._fbReadyCb) window._fbReadyCb();
-}
-
-async function fbPullAll() {
-  const keys = Object.keys(DOCS);
-  for(const k of keys) {
-    const s = await getDoc(DOCS[k]);
-    if(!s.exists()) continue;
-    const d = s.data();
-    applyFbData(k, d.value);
-  }
-}
-
-async function fbPushAll() {
-  const map = {
-    parcelles:   window.PARCELLES,
-    journal:     window.JOURNAL,
-    sessions:    window.SESSIONS,
-    travaux:     window.TRAVAUX,
-    traitements: window.TRAITEMENTS,
-    catalogue:   window.CATALOGUE,
-    conducteurs: window.CONDUCTEURS,
-    activites:   window.ACTIVITES,
-    membres:     window.MEMBRES,
-    saisons:     window.SAISONS,
-    taches:      window.TACHES,
-  };
-  for(const [k,v] of Object.entries(map)) {
-    if(v !== undefined) await setDoc(DOCS[k], { value: JSON.parse(JSON.stringify(v)) });
-  }
-}
-
-// ── Après chaque applyFbData, resynchroniser les variables locales du script principal ──
-function syncLocalVars() {
-  // Injecté via le script principal exposé sur window
-  if(window._syncLocalVars) window._syncLocalVars();
-}
-
-function applyFbData(key, value) {
-  if(value === undefined || value === null) return;
-  switch(key) {
-    case 'parcelles':
-      // PARCELLES est const donc on mute le tableau en place
-      if(window.PARCELLES){ window.PARCELLES.length=0; value.forEach(x=>window.PARCELLES.push(x)); }
-      break;
-    // Pour les autres : réassigner window.* ET la variable globale via un trick
-    // Le script principal lit window.JOURNAL etc. via les alias exposés
-    case 'journal':
-      window.JOURNAL = value;
-      try { JOURNAL = value; } catch(e) {}
-      break;
-    case 'sessions':
-      window.SESSIONS = value;
-      try { SESSIONS = value; } catch(e) {}
-      break;
-    case 'travaux':
-      window.TRAVAUX = value;
-      try { TRAVAUX = value; } catch(e) {}
-      break;
-    case 'traitements':
-      window.TRAITEMENTS = value;
-      try { TRAITEMENTS = value; } catch(e) {}
-      break;
-    case 'catalogue':
-      window.CATALOGUE = value;
-      try { CATALOGUE = value; } catch(e) {}
-      break;
-    case 'conducteurs':
-      window.CONDUCTEURS = value;
-      try { CONDUCTEURS = value; } catch(e) {}
-      break;
-    case 'activites':
-      window.ACTIVITES = value;
-      try { ACTIVITES = value; } catch(e) {}
-      break;
-    case 'membres':
-      window.MEMBRES = value;
-      try { MEMBRES = value; } catch(e) {}
-      break;
-    case 'saisons':
-      window.SAISONS = value;
-      try { SAISONS = value; } catch(e) {}
-      break;
-    case 'taches':
-      window.TACHES = value;
-      try { TACHES = value; } catch(e) {}
-      break;
-  }
-  syncLocalVars();
-}
-
-// ── Écoute temps réel : mise à jour auto si un autre appareil modifie ──
-let _ignoreNext = {};
-function fbListen() {
-  Object.entries(DOCS).forEach(([key, ref]) => {
-    onSnapshot(ref, snap => {
-      if(!snap.exists()) return;
-      if(_ignoreNext[key]) { _ignoreNext[key]=false; return; }
-      const val = snap.data().value;
-      applyFbData(key, val);
-      // Re-render si la page correspondante est active
-      if(window.currentUser) {
-        const p = document.querySelector('.page.active');
-        if(p) {
-          const pid = p.id;
-          if((key==='parcelles'||key==='journal'||key==='travaux') && (pid==='page-home'||pid==='page-parcelles'||pid==='page-journal')) {
-            if(window.renderHome) window.renderHome();
-            if(window.renderParcelles) window.renderParcelles();
-            if(window.computePStats) window.computePStats();
-            if(pid==='page-journal'&&window.renderJournalList) window.renderJournalList();
-          }
-          if(key==='sessions' && pid==='page-tracteur' && window.renderTracteur) window.renderTracteur();
-          if((key==='traitements'||key==='catalogue') && pid==='page-phyto' && window.renderPhyto) window.renderPhyto();
-          if((key==='membres'||key==='saisons'||key==='taches') && pid==='page-reglages' && window.renderReglages) window.renderReglages();
-        }
-        showSyncBadge('🔄 Mis à jour', '#1A4A7A');
-        setTimeout(()=>showSyncBadge('✅ Synchronisé','#3D6B27'), 1500);
-      }
-    });
-  });
-}
-
-// ── saveData : écrit dans Firestore (appelé depuis le JS principal) ──
-window.fbSave = async function(key, value) {
-  try {
-    _ignoreNext[key] = true;
-    await setDoc(DOCS[key], { value: JSON.parse(JSON.stringify(value)) });
-    showSyncBadge('✅ Sauvegardé', '#3D6B27');
-  } catch(e) {
-    console.warn('fbSave error:', e);
-    showSyncBadge('⚠️ Erreur sync', '#A0291E');
-    // Fallback localStorage
-    if(window.saveData) window.saveData();
-  }
-};
-
-// ── Badge de statut synchro (affiché en haut de l'écran) ──
+// ── Badge de statut synchro ──
 function showSyncBadge(msg, color) {
-  let badge = document.getElementById('sync-badge');
+  var badge = document.getElementById('sync-badge');
   if(!badge) return;
   badge.textContent = msg;
   badge.style.background = color;
   badge.style.opacity = '1';
   clearTimeout(badge._t);
-  badge._t = setTimeout(()=>{ badge.style.opacity='0'; }, 2500);
+  badge._t = setTimeout(function(){ badge.style.opacity='0'; }, 2500);
 }
 
-// Lancer après que le DOM et les données JS soient prêts
-window._fbLoad = fbLoad;
+// ── Applique les données Firebase dans les variables globales ──
+function applyFbData(key, value) {
+  if(value === undefined || value === null) return;
+  if(key === 'parcelles') {
+    var arr = window.PARCELLES;
+    if(arr){ arr.length = 0; value.forEach(function(x){ arr.push(x); }); }
+  } else {
+    window[key.toUpperCase()] = value;
+  }
+  // Resynchroniser les let locaux du script principal
+  if(window._syncLocalVars) window._syncLocalVars();
+}
+
+// ── Charger toutes les collections depuis Firestore ──
+async function fbPullAll() {
+  for(var i=0; i<COLLECTIONS.length; i++) {
+    var key = COLLECTIONS[i];
+    try {
+      var snap = await fbDoc(key).get();
+      if(snap.exists) applyFbData(key, snap.data().value);
+    } catch(e) { console.warn('fbPullAll error', key, e); }
+  }
+}
+
+// ── Pousser toutes les variables locales vers Firestore (premier démarrage) ──
+async function fbPushAll() {
+  var map = {
+    parcelles: window.PARCELLES, journal: window.JOURNAL,
+    sessions: window.SESSIONS, travaux: window.TRAVAUX,
+    traitements: window.TRAITEMENTS, catalogue: window.CATALOGUE,
+    conducteurs: window.CONDUCTEURS, activites: window.ACTIVITES,
+    membres: window.MEMBRES, saisons: window.SAISONS, taches: window.TACHES
+  };
+  for(var key in map) {
+    if(map[key] !== undefined) {
+      try { await fbDoc(key).set({ value: JSON.parse(JSON.stringify(map[key])) }); }
+      catch(e) { console.warn('fbPushAll error', key, e); }
+    }
+  }
+}
+
+// ── Écoute temps réel ──
+var _ignoreNext = {};
+function fbListen() {
+  COLLECTIONS.forEach(function(key) {
+    fbDoc(key).onSnapshot(function(snap) {
+      if(!snap.exists) return;
+      if(_ignoreNext[key]) { _ignoreNext[key] = false; return; }
+      applyFbData(key, snap.data().value);
+      if(window.currentUser) {
+        var p = document.querySelector('.page.active');
+        if(p) {
+          var pid = p.id;
+          if((key==='parcelles'||key==='journal'||key==='travaux') &&
+             (pid==='page-home'||pid==='page-parcelles'||pid==='page-journal')) {
+            if(window.renderHome) window.renderHome();
+            if(window.renderParcelles) window.renderParcelles();
+            if(window.computePStats) window.computePStats();
+            if(pid==='page-journal'&&window.renderJournalList) window.renderJournalList();
+          }
+          if(key==='sessions'&&pid==='page-tracteur'&&window.renderTracteur) window.renderTracteur();
+          if((key==='traitements'||key==='catalogue')&&pid==='page-phyto'&&window.renderPhyto) window.renderPhyto();
+          if((key==='membres'||key==='saisons'||key==='taches')&&pid==='page-reglages'&&window.renderReglages) window.renderReglages();
+        }
+        showSyncBadge('🔄 Mis à jour', '#1A4A7A');
+        setTimeout(function(){ showSyncBadge('✅ Synchronisé','#3D6B27'); }, 1500);
+      }
+    }, function(e){ console.warn('onSnapshot error', key, e); });
+  });
+}
+
+// ── Sauvegarder une collection dans Firestore ──
+window.fbSave = async function(key, value) {
+  _ignoreNext[key] = true;
+  try {
+    await fbDoc(key).set({ value: JSON.parse(JSON.stringify(value)) });
+    showSyncBadge('✅ Sauvegardé', '#3D6B27');
+  } catch(e) {
+    console.warn('fbSave error', key, e);
+    showSyncBadge('⚠️ Erreur sync', '#A0291E');
+  }
+};
+
+// ── Point d'entrée appelé par DOMContentLoaded ──
+window._fbLoad = async function() {
+  showSyncBadge('⏳ Connexion…', '#B8913A');
+  try {
+    var snap = await fbDoc('parcelles').get();
+    if(!snap.exists) {
+      console.log('🔥 Premier démarrage — envoi données initiales');
+      await fbPushAll();
+      showSyncBadge('☁️ Données envoyées', '#3D6B27');
+    } else {
+      console.log('🔥 Chargement depuis Firebase');
+      await fbPullAll();
+      showSyncBadge('✅ Synchronisé', '#3D6B27');
+    }
+    fbListen();
+  } catch(e) {
+    console.warn('🔥 Firebase load error:', e);
+    showSyncBadge('⚠️ Mode hors ligne', '#A0291E');
+    if(window.loadData) window.loadData();
+  }
+};
+
+console.log('🔥 Firebase prêt, en attente de _fbLoad()');
 </script>
 <style>
 :root{
