@@ -755,11 +755,8 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 <div class="overlay" id="ovEditMembre" onclick="closeOv(event,'ovEditMembre')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="em-title">✏️ Modifier membre</div></div><input type="hidden" id="em-nom"><div class="modal-body"><div class="fl">Rôles</div><div class="roles-check" id="em-roles"></div><div class="fl">Statut</div><div class="ppicker"><div class="pchk sel vert" data-val="Actif" onclick="pickVal(this,'em-statut','vert')">✅ Actif</div><div class="pchk" data-val="Inactif" onclick="pickVal(this,'em-statut','vert')">⏸ Inactif</div></div><input type="hidden" id="em-statut" value="Actif"><button class="mbtn verte" onclick="saveEditMembre()">Enregistrer</button><button class="mbtn-del" onclick="deleteMembre()">Supprimer</button></div></div></div>
 
 <script>
-// ════════════════════════════════════
-// DONNÉES
-// ════════════════════════════════════
-
-let MEMBRES = [
+// // DONNÉES
+// let MEMBRES = [
   {nom:'Nico', email:'gueret.nicolas@gmail.com', roles:['admin','ouvrier','tractoriste'], statut:'Actif', couleur:'#3D6B27', mdp:'vigne21'},
   {nom:'Victor', email:'leravictor904@gmail.com', roles:['ouvrier','tractoriste'], statut:'Actif', couleur:'#1A4A7A', mdp:'victor21'},
   {nom:'Dessi', email:'dessi.9332@yahoo.com', roles:['ouvrier'], statut:'Actif', couleur:'#7A4F2E', mdp:'dessi21'},
@@ -770,8 +767,8 @@ let MEMBRES = [
 ];
 
 let SAISONS = [
-  {nom:'Hiver 2025–2026', periode:'Déc 2025 – Fév 2026', active:false},
-  {nom:'Printemps 2026', periode:'Mar – Mai 2026', active:true},
+  {nom:'Hiver 2025-2026', periode:'Déc 2025 - Fév 2026', active:false},
+  {nom:'Printemps 2026', periode:'Mar - Mai 2026', active:true},
 ];
 
 let TACHES = [
@@ -816,7 +813,7 @@ let JOURNAL=[{"id":"0b550083","date":"2026-05-15","parcelle":"Songe du Haut","ta
 let ACTIVITES=[{nom:'Griffage',emoji:'🚜'},{nom:'Intercep',emoji:'✂️'},{nom:'Rognage',emoji:'✂️'},{nom:'Buttage',emoji:'🌱'},{nom:'Débuttage',emoji:'🌱'},{nom:'Minibuttage',emoji:'🌱'}];
 let CONDUCTEURS=[{nom:'Nico',statut:'Formé'},{nom:'Etienne',statut:'Formé'}];
 let SESSIONS=[{id:'0b81fe25',activite:'Griffage',date:'2026-03-03',conducteur:'Nico',statut:'Validé',avancement:100,note:''},{id:'bf8d7558',activite:'Minibuttage',date:'2026-04-10',conducteur:'Nico',statut:'Terminé',avancement:100,note:''},{id:'4b6e4fb0',activite:'Intercep',date:'2026-04-26',conducteur:'Nico',statut:'En cours',avancement:71,note:'13 parcelles restantes (zone sud)'}];
-let CATALOGUE=[{nom:'Bouillie bordelaise 20 WG',type:'Cuivre',amm:'2010001',dar:21,dose:'4 kg/ha'},{nom:'Nordox 75 WG',type:'Cuivre',amm:'9200386',dar:56,dose:'0,6 kg/ha'},{nom:'Microthiol Special Disperss',type:'Soufre',amm:'2020014',dar:35,dose:'5 kg/ha'},{nom:'Thiovit Jet',type:'Soufre',amm:'8900225',dar:56,dose:'3–5 kg/ha'},{nom:'Mildicut',type:'Fongicide',amm:'2100435',dar:21,dose:'2,5 L/ha'},{nom:'Equation Pro',type:'Fongicide',amm:'2030218',dar:21,dose:'0,4 kg/ha'},{nom:'Pergado F',type:'Fongicide',amm:'2130033',dar:28,dose:'2 kg/ha'},{nom:'Switch',type:'Fongicide',amm:'9900455',dar:7,dose:'0,8 kg/ha'},{nom:'Karate Zeon',type:'Insecticide',amm:'9200556',dar:7,dose:'0,1 L/ha'},{nom:'Serenade ASO',type:'Biocontrôle',amm:'2110156',dar:0,dose:'4 L/ha'},{nom:'Sonata',type:'Biocontrôle',amm:'2120044',dar:0,dose:'8 L/ha'}];
+let CATALOGUE=[{nom:'Bouillie bordelaise 20 WG',type:'Cuivre',amm:'2010001',dar:21,dose:'4 kg/ha'},{nom:'Nordox 75 WG',type:'Cuivre',amm:'9200386',dar:56,dose:'0,6 kg/ha'},{nom:'Microthiol Special Disperss',type:'Soufre',amm:'2020014',dar:35,dose:'5 kg/ha'},{nom:'Thiovit Jet',type:'Soufre',amm:'8900225',dar:56,dose:'3-5 kg/ha'},{nom:'Mildicut',type:'Fongicide',amm:'2100435',dar:21,dose:'2,5 L/ha'},{nom:'Equation Pro',type:'Fongicide',amm:'2030218',dar:21,dose:'0,4 kg/ha'},{nom:'Pergado F',type:'Fongicide',amm:'2130033',dar:28,dose:'2 kg/ha'},{nom:'Switch',type:'Fongicide',amm:'9900455',dar:7,dose:'0,8 kg/ha'},{nom:'Karate Zeon',type:'Insecticide',amm:'9200556',dar:7,dose:'0,1 L/ha'},{nom:'Serenade ASO',type:'Biocontrôle',amm:'2110156',dar:0,dose:'4 L/ha'},{nom:'Sonata',type:'Biocontrôle',amm:'2120044',dar:0,dose:'8 L/ha'}];
 let TRAITEMENTS=[];
 let METEO_JOURNAL=[];
 
@@ -832,7 +829,7 @@ const TCLS={Cuivre:'tcc',Soufre:'tsc',Fongicide:'tfc',Insecticide:'tic',Herbicid
 const TEMJ={Cuivre:'🔵',Soufre:'🟡',Fongicide:'🟢',Insecticide:'🟠',Herbicide:'🟤','Biocontrôle':'🟣'};
 const TEMOJI={Taille:'🌿',Tirage:'🔄',Brulage:'🔥',Pliage:'🔗',Reparation:'🛠️',Plantation:'🌱',Ebourgeonnage1:'🌾',Ebourgeonnage2:'🌾',Pioche1:'⛏️',Pioche2:'⛏️',Relevage:'↑',Accolage:'🔗',Palissage:'🪵'};
 
-// ════ LOGIN ════
+// LOGIN ====
 let loginPendingUser = null;
 
 function initLogin(){
@@ -912,7 +909,7 @@ function isTractoriste(){return currentUser?.roles.includes('tractoriste');}
 function canSeePhyto(){return currentUser?.roles.includes('admin');}
 
 function applyRoles(){
-  // Phyto — admin seulement
+  // Phyto - admin seulement
   document.querySelectorAll('.nb[data-p=phyto]').forEach(b=>b.style.display=canSeePhyto()?'':'none');
   document.querySelectorAll('.nb[data-p=reglages]').forEach(b=>b.style.display=isAdmin()?'':'none');
   // Tracteur readonly
@@ -938,7 +935,7 @@ function updateNavForRoles(){
   document.getElementById('nav-bar').style.gridTemplateColumns=`repeat(${visible},1fr)`;
 }
 
-// ════ MÉTÉO ════
+// MÉTÉO ====
 let meteoData=null;
 async function fetchMeteo(){
   try{
@@ -989,7 +986,7 @@ async function fetchMeteo(){
 function wmoDesc(c){const m={0:'Dégagé',1:'Peu nuageux',2:'Partiellement nuageux',3:'Couvert',45:'Brouillard',48:'Brouillard givrant',51:'Bruine légère',53:'Bruine modérée',55:'Bruine forte',61:'Pluie légère',63:'Pluie modérée',65:'Pluie forte',71:'Neige légère',73:'Neige modérée',75:'Neige forte',80:'Averses légères',81:'Averses modérées',82:'Averses fortes',95:'Orage',96:'Orage avec grêle'};return m[c]||'Variable';}
 function wmoEmoji(c){if(c===0)return'☀️';if(c<=2)return'🌤️';if(c===3)return'☁️';if(c<=48)return'🌫️';if(c<=65)return'🌧️';if(c<=77)return'❄️';if(c<=82)return'🌦️';return'⛈️';}
 
-// ════ SAISON ACTIVE ════
+// SAISON ACTIVE ====
 function getSaisonActive(){return SAISONS.find(s=>s.active)||SAISONS[SAISONS.length-1];}
 function getTachesSaison(){
   const s=getSaisonActive();
@@ -998,7 +995,7 @@ function getTachesSaison(){
   return TACHES.filter(t=>t.saison===nomSaison||nomSaison.includes(t.saison));
 }
 
-// ════ HEURES ════
+// HEURES ====
 function calcHeures(){
   const tachesSaison=getTachesSaison();
   let totalReste=0,totalTotal=0;
@@ -1013,7 +1010,7 @@ function calcHeures(){
 function renderHeuresCard(containerId){
   const {data,totalReste}=calcHeures();
   const c=document.getElementById(containerId);
-  c.innerHTML=`<div class="hc-head"><div class="hc-title">Avancement — ${getSaisonActive().nom}</div><div class="hc-total"><div class="hc-total-val">${totalReste}h</div><div class="hc-total-lbl">Restantes</div></div></div>`
+  c.innerHTML=`<div class="hc-head"><div class="hc-title">Avancement - ${getSaisonActive().nom}</div><div class="hc-total"><div class="hc-total-val">${totalReste}h</div><div class="hc-total-lbl">Restantes</div></div></div>`
     +data.map(t=>{
       const col=t.pct===100?'var(--vert-med)':t.pct>=50?'var(--or)':'var(--orange)';
       return `<div class="htache-row">
@@ -1027,7 +1024,7 @@ function renderHeuresCard(containerId){
     }).join('');
 }
 
-// ════ NAVIGATION ════
+// NAVIGATION ====
 function goTo(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
@@ -1043,7 +1040,7 @@ function goTo(page){
   if(page==='reglages')renderReglages();
 }
 
-// ════ ACCUEIL ════
+// ACCUEIL ====
 function renderHome(){
   const {totalReste}=calcHeures();
   const saison=getSaisonActive();
@@ -1093,12 +1090,12 @@ function renderHome(){
   // Heures card
   renderHeuresCard('heures-card-home');
 
-  // Derniers travaux — nouveau markup
+  // Derniers travaux - nouveau markup
   const dt=document.getElementById('derniers-travaux');
   const recent=JOURNAL.filter(j=>!j.meteo).slice(0,4);
   dt.innerHTML=recent.map(r=>{
     const isEq=r.equipe||r.qui==='Equipe';
-    const quiAff=isEq&&r.qui&&r.qui!=='Equipe'?`Équipe (${r.qui})`:isEq?'Équipe':r.qui||'—';
+    const quiAff=isEq&&r.qui&&r.qui!=='Equipe'?`Équipe (${r.qui})`:isEq?'Équipe':r.qui||'-';
     const isVal=r.statut==='Validé';
     const isFait=r.statut==='Fait';
     const dotCls=isVal?'hv2-dot-v':isFait?'hv2-dot-f':'hv2-dot-e';
@@ -1117,7 +1114,7 @@ function renderHome(){
   }).join('');
 }
 
-// ════ PARCELLES ════
+// PARCELLES ====
 function getPCls(p){
   const tachesSaison=getTachesSaison();
   // Toutes les tâches de la saison, même celles non encore renseignées dans p.taches
@@ -1296,8 +1293,8 @@ function loadKML(input){
 document.querySelectorAll('.fchip').forEach(c=>c.addEventListener('click',function(){document.querySelectorAll('.fchip').forEach(x=>x.classList.remove('active'));this.classList.add('active');pFilter=this.dataset.filter;renderParcelles();}));
 document.getElementById('pSearch').addEventListener('input',function(){pSearch=this.value;renderParcelles();});
 
-// ════ JOURNAL ════
-function fmtDate(d){if(!d)return'—';const[y,m,j]=d.split('-');return`${parseInt(j)} ${['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'][parseInt(m)-1]}`;}
+// JOURNAL ====
+function fmtDate(d){if(!d)return'-';const[y,m,j]=d.split('-');return`${parseInt(j)} ${['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'][parseInt(m)-1]}`;}
 function renderJournal(){
   // Stats ouvriers
   const byQui={};
@@ -1359,7 +1356,7 @@ function renderJournalList(){
 }
 document.getElementById('jSearch').addEventListener('input',function(){jSearch=this.value;renderJournalList();});
 
-// ════ TRACTEUR ════
+// TRACTEUR ====
 function renderTracteur(){
   const tot=SESSIONS.length,ter=SESSIONS.filter(s=>s.statut==='Terminé'||s.statut==='Validé').length,enc=SESSIONS.filter(s=>s.statut==='En cours').length;
   document.getElementById('st-t').textContent=tot;
@@ -1425,7 +1422,7 @@ function editCond(nom){
 function saveEditCond(){const nom=document.getElementById('ec-nom').value;const c=CONDUCTEURS.find(x=>x.nom===nom);if(c)c.statut=document.getElementById('ec-st').value;document.getElementById('ovEditCond').classList.remove('open');renderTracteur();}
 function deleteCond(){const nom=document.getElementById('ec-nom').value;if(nom==='Nico'){alert('Impossible.');return;}if(!confirm('Supprimer '+nom+'?'))return;CONDUCTEURS=CONDUCTEURS.filter(c=>c.nom!==nom);document.getElementById('ovEditCond').classList.remove('open');renderTracteur();}
 
-// ════ PHYTO ════
+// PHYTO ====
 function renderPhyto(){
   if(!canSeePhyto()){document.getElementById('page-phyto').innerHTML='<div class="empty-state" style="margin-top:100px"><div class="ei">🔒</div><p>Accès réservé à l\'administrateur</p></div>';return;}
   const tot=TRAITEMENTS.length,cu=TRAITEMENTS.filter(t=>t.type==='Cuivre').length,so=TRAITEMENTS.filter(t=>t.type==='Soufre').length;
@@ -1444,11 +1441,11 @@ function renderPhyto(){
   else reg.innerHTML=data.map(t=>{
     const prod=CATALOGUE.find(p=>p.nom===t.produit);
     const darR=prod?Math.max(0,prod.dar-Math.floor((today-new Date(t.date))/86400000)):null;
-    return `<div class="phcard"><div class="ph-hd"><div class="ph-ico">${TEMJ[t.type]||'🧪'}</div><div class="ph-info"><div class="ph-prod">${t.produit}</div><div class="ph-meta"><span class="ph-date">📅 ${fmtDate(t.date)}</span><span class="ph-type ${TCLS[t.type]||'tfc'}">${t.type}</span>${t.operateur?`<span class="ph-op">👤 ${t.operateur}</span>`:''}</div>${t.note?`<div style="font-size:10px;color:var(--texte-doux);margin-top:3px">💬 ${t.note}</div>`:''}</div><div class="ph-right">${prod&&prod.dar>0?`<div class="ph-dar">DAR <strong>${darR}j</strong></div>`:'<div style="font-size:10px;color:var(--vert-med);font-weight:600">✅ Libre</div>'}<div class="ph-dose">${t.dose||prod?.dose||'—'}</div></div></div>${prod?`<div class="ph-amm">AMM ${prod.amm} · Dose max : ${prod.dose}</div>`:''}</div>`;
+    return `<div class="phcard"><div class="ph-hd"><div class="ph-ico">${TEMJ[t.type]||'🧪'}</div><div class="ph-info"><div class="ph-prod">${t.produit}</div><div class="ph-meta"><span class="ph-date">📅 ${fmtDate(t.date)}</span><span class="ph-type ${TCLS[t.type]||'tfc'}">${t.type}</span>${t.operateur?`<span class="ph-op">👤 ${t.operateur}</span>`:''}</div>${t.note?`<div style="font-size:10px;color:var(--texte-doux);margin-top:3px">💬 ${t.note}</div>`:''}</div><div class="ph-right">${prod&&prod.dar>0?`<div class="ph-dar">DAR <strong>${darR}j</strong></div>`:'<div style="font-size:10px;color:var(--vert-med);font-weight:600">✅ Libre</div>'}<div class="ph-dose">${t.dose||prod?.dose||'-'}</div></div></div>${prod?`<div class="ph-amm">AMM ${prod.amm} · Dose max : ${prod.dose}</div>`:''}</div>`;
   }).join('');
   const catF=phFilter==='tous'?CATALOGUE:CATALOGUE.filter(p=>p.type===phFilter);
   document.getElementById('catalogue-list').innerHTML=catF.map(p=>`<div class="catitem" onclick="selFromCat('${p.nom}')"><div class="cat-l"><div class="cat-nom">${TEMJ[p.type]} ${p.nom}</div><div class="cat-det">AMM ${p.amm} · ${p.dose}</div></div><div class="cat-r"><span class="cat-db ${TCLS[p.type]||'tfc'}">${p.type}</span><span style="font-size:10px;color:var(--texte-doux)">DAR ${p.dar}j</span></div></div>`).join('');
-  document.getElementById('p-prod').innerHTML=`<option value="">— Choisir —</option>`+CATALOGUE.map(p=>`<option value="${p.nom}">${TEMJ[p.type]} ${p.nom}</option>`).join('');
+  document.getElementById('p-prod').innerHTML=`<option value="">- Choisir -</option>`+CATALOGUE.map(p=>`<option value="${p.nom}">${TEMJ[p.type]} ${p.nom}</option>`).join('');
 }
 function switchPhTab(tab){phTab=tab;document.getElementById('tb-reg').classList.toggle('active',tab==='reg');document.getElementById('tb-cat').classList.toggle('active',tab==='cat');document.getElementById('tab-reg').classList.toggle('vis',tab==='reg');document.getElementById('tab-cat').classList.toggle('vis',tab==='cat');}
 function selFromCat(nom){switchPhTab('reg');openOv('ovPhyto');setTimeout(()=>{document.getElementById('p-prod').value=nom;onProdChange();},100);}
@@ -1456,7 +1453,7 @@ function onProdChange(){const nom=document.getElementById('p-prod').value;const 
 function saveTraitement(){const prod=document.getElementById('p-prod').value,date=document.getElementById('p-date').value;if(!prod||!date){alert('Produit et date obligatoires');return;}const p=CATALOGUE.find(x=>x.nom===prod);TRAITEMENTS.push({produit:prod,type:p?.type||'Fongicide',date,dose:document.getElementById('p-dose').value,operateur:document.getElementById('p-op').value,note:document.getElementById('p-note').value});document.getElementById('ovPhyto').classList.remove('open');['p-dose','p-op','p-note'].forEach(id=>document.getElementById(id).value='');document.getElementById('p-prod').value='';document.getElementById('p-infobox').style.display='none';renderPhyto();}
 function saveProduit(){const nom=document.getElementById('np-nom').value.trim();if(!nom){alert('Nom obligatoire');return;}CATALOGUE.push({nom,type:document.getElementById('np-type').value,amm:document.getElementById('np-amm').value,dar:parseInt(document.getElementById('np-dar').value)||0,dose:document.getElementById('np-dose').value});document.getElementById('ovProduit').classList.remove('open');['np-nom','np-amm','np-dar','np-dose'].forEach(id=>document.getElementById(id).value='');renderPhyto();}
 
-// ════ RÉGLAGES ════
+// RÉGLAGES ====
 function renderReglages(){
   // Saisons
   const sl=document.getElementById('saisons-list');
@@ -1486,7 +1483,7 @@ function toggleEmRole(r,el){el.classList.toggle('on');el.textContent=el.classLis
 function saveEditMembre(){const nom=document.getElementById('em-nom').value;const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;m.statut=document.getElementById('em-statut').value;const allRoles=['admin','ouvrier','tractoriste','saisonnier'];m.roles=allRoles.filter(r=>document.getElementById('erc-'+r)?.classList.contains('on'));document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
 function deleteMembre(){const nom=document.getElementById('em-nom').value;if(nom==='Nico'){alert('Impossible de supprimer le compte principal.');return;}if(!confirm('Supprimer '+nom+'?'))return;MEMBRES=MEMBRES.filter(m=>m.nom!==nom);document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
 
-// ════ GPS ════
+// GPS ====
 function openGPS(lat,lng,nom){
   // Essaie d'ouvrir l'app GPS native (Plans sur iOS, Maps sur Android/desktop)
   const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -1505,7 +1502,7 @@ function openGPS(lat,lng,nom){
   window.open(url,'_blank');
 }
 
-// ════ NOTIFICATIONS ════
+// NOTIFICATIONS ====
 async function toggleNotifications(){
   if(!('Notification' in window)){
     alert('Les notifications ne sont pas supportées par ce navigateur.');
@@ -1528,9 +1525,9 @@ async function toggleNotifications(){
   }
 }
 
-// ════ EXPORT ════
+// EXPORT ====
 function exporterDonnees(){
-  const menu=`Choisissez le format d'export :\n\n1 — Journal (CSV)\n2 — Registre phyto (CSV)\n3 — Tout (JSON)`;
+  const menu=`Choisissez le format d'export :\n\n1 - Journal (CSV)\n2 - Registre phyto (CSV)\n3 - Tout (JSON)`;
   const choix=prompt(menu,'1');
   if(!choix)return;
   if(choix==='1')exportCSVJournal();
@@ -1571,7 +1568,7 @@ function telechargerCSV(rows,filename){
   a.click();
 }
 
-// ════ OVERLAYS ════
+// OVERLAYS ====
 function openOv(id){document.getElementById(id).classList.add('open');}
 function closeOv(e,id){if(e.target===document.getElementById(id))document.getElementById(id).classList.remove('open');}
 function pickVal(el,hid,cls){el.parentElement.querySelectorAll('.pchk').forEach(x=>{x.classList.remove('sel','vert','acre','phyt');});el.classList.add('sel',cls);document.getElementById(hid).value=el.dataset.val;}
