@@ -451,6 +451,17 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
   <div class="login-title">Ma Vigne</div>
   <div class="login-sub">Choisissez votre profil</div>
   <div class="login-profiles" id="login-profiles"></div>
+  <!-- Panneau mot de passe (masqué par défaut) -->
+  <div id="login-pwd-panel" style="display:none;width:100%;margin-top:20px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <button onclick="backToProfiles()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:8px 12px;color:white;font-size:13px;cursor:pointer">← Retour</button>
+      <div id="login-pwd-name" style="color:white;font-size:16px;font-weight:600"></div>
+    </div>
+    <div class="login-label">Mot de passe</div>
+    <input type="password" id="login-pwd-input" class="login-input" placeholder="Votre mot de passe" autocomplete="current-password">
+    <div id="login-pwd-error" style="color:#FF8A80;font-size:12px;margin-top:-8px;margin-bottom:10px;display:none">❌ Mot de passe incorrect</div>
+    <button class="login-btn" id="login-pwd-btn">Se connecter</button>
+  </div>
 </div>
 
 <!-- ══════ PAGE ACCUEIL ══════ -->
@@ -749,13 +760,13 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 // ════════════════════════════════════
 
 let MEMBRES = [
-  {nom:'Nico', email:'gueret.nicolas@gmail.com', roles:['admin','ouvrier','tractoriste'], statut:'Actif', couleur:'#3D6B27'},
-  {nom:'Victor', email:'leravictor904@gmail.com', roles:['ouvrier','tractoriste'], statut:'Actif', couleur:'#1A4A7A'},
-  {nom:'Dessi', email:'dessi.9332@yahoo.com', roles:['ouvrier'], statut:'Actif', couleur:'#7A4F2E'},
-  {nom:'Etienne', email:'etienne.marchand.21@gmail.com', roles:['ouvrier','tractoriste'], statut:'Actif', couleur:'#5B2D8E'},
-  {nom:'Chloé', email:'tonnelierchloe21@gmail.com', roles:['ouvrier'], statut:'Actif', couleur:'#B8913A'},
-  {nom:'Shana', email:'nana.badyka@gmail.com', roles:['ouvrier'], statut:'Actif', couleur:'#C0392B'},
-  {nom:'Alicia', email:'alicia.dupont58@live.fr', roles:['ouvrier'], statut:'Actif', couleur:'#1A5276'},
+  {nom:'Nico', email:'gueret.nicolas@gmail.com', roles:['admin','ouvrier','tractoriste'], statut:'Actif', couleur:'#3D6B27', mdp:'vigne21'},
+  {nom:'Victor', email:'leravictor904@gmail.com', roles:['ouvrier','tractoriste'], statut:'Actif', couleur:'#1A4A7A', mdp:'victor21'},
+  {nom:'Dessi', email:'dessi.9332@yahoo.com', roles:['ouvrier'], statut:'Actif', couleur:'#7A4F2E', mdp:'dessi21'},
+  {nom:'Etienne', email:'etienne.marchand.21@gmail.com', roles:['ouvrier','tractoriste'], statut:'Actif', couleur:'#5B2D8E', mdp:'etienne21'},
+  {nom:'Chloe', email:'tonnelierchloe21@gmail.com', roles:['ouvrier'], statut:'Actif', couleur:'#B8913A', mdp:'chloe21'},
+  {nom:'Shana', email:'nana.badyka@gmail.com', roles:['ouvrier'], statut:'Actif', couleur:'#C0392B', mdp:'shana21'},
+  {nom:'Alicia', email:'alicia.dupont58@live.fr', roles:['ouvrier'], statut:'Actif', couleur:'#1A5276', mdp:'alicia21'},
 ];
 
 let SAISONS = [
@@ -822,14 +833,59 @@ const TEMJ={Cuivre:'🔵',Soufre:'🟡',Fongicide:'🟢',Insecticide:'🟠',Herb
 const TEMOJI={Taille:'🌿',Tirage:'🔄',Brulage:'🔥',Pliage:'🔗',Reparation:'🛠️',Plantation:'🌱',Ebourgeonnage1:'🌾',Ebourgeonnage2:'🌾',Pioche1:'⛏️',Pioche2:'⛏️',Relevage:'↑',Accolage:'🔗',Palissage:'🪵'};
 
 // ════ LOGIN ════
+let loginPendingUser = null;
+
 function initLogin(){
-  const profiles=document.getElementById('login-profiles');
-  profiles.innerHTML=MEMBRES.map(m=>`
-    <div class="lp-btn" onclick="login('${m.nom}')">
-      <div class="lp-name">${m.nom}</div>
-      <div class="lp-role">${getRoleLabel(m.roles)}</div>
-    </div>`).join('');
+  const profiles = document.getElementById('login-profiles');
+  profiles.innerHTML = '';
+  MEMBRES.forEach(function(m, idx) {
+    var btn = document.createElement('div');
+    btn.className = 'lp-btn';
+    btn.innerHTML = '<div class="lp-name">' + m.nom + '</div><div class="lp-role">' + getRoleLabel(m.roles) + '</div>';
+    btn.addEventListener('click', function(){ selectProfile(idx); });
+    profiles.appendChild(btn);
+  });
 }
+
+function selectProfile(idx) {
+  loginPendingUser = MEMBRES[idx];
+  document.getElementById('login-profiles').style.display = 'none';
+  document.getElementById('login-pwd-panel').style.display = 'block';
+  document.getElementById('login-pwd-name').textContent = loginPendingUser.nom;
+  document.getElementById('login-pwd-input').value = '';
+  document.getElementById('login-pwd-error').style.display = 'none';
+  setTimeout(function(){ document.getElementById('login-pwd-input').focus(); }, 100);
+}
+
+function backToProfiles() {
+  loginPendingUser = null;
+  document.getElementById('login-profiles').style.display = 'grid';
+  document.getElementById('login-pwd-panel').style.display = 'none';
+  document.getElementById('login-pwd-input').value = '';
+  document.getElementById('login-pwd-error').style.display = 'none';
+}
+
+function confirmLogin() {
+  if (!loginPendingUser) return;
+  var saisi = document.getElementById('login-pwd-input').value;
+  if (saisi === loginPendingUser.mdp) {
+    currentUser = loginPendingUser;
+    loginPendingUser = null;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('login-profiles').style.display = 'grid';
+    document.getElementById('login-pwd-panel').style.display = 'none';
+    document.getElementById('login-pwd-input').value = '';
+    applyRoles();
+    updateNavForRoles();
+    goTo('home');
+    fetchMeteo();
+  } else {
+    document.getElementById('login-pwd-error').style.display = 'block';
+    document.getElementById('login-pwd-input').value = '';
+    document.getElementById('login-pwd-input').focus();
+  }
+}
+
 function getRoleLabel(roles){
   if(roles.includes('admin'))return'Admin';
   const labels=[];
@@ -838,22 +894,16 @@ function getRoleLabel(roles){
   if(roles.includes('saisonnier'))labels.push('Saisonnier');
   return labels.join(' · ')||'Membre';
 }
-function login(nom){
-  currentUser=MEMBRES.find(m=>m.nom===nom);
-  document.getElementById('login-screen').style.display='none';
-  applyRoles();
-  updateNavForRoles();
-  goTo('home');
-  fetchMeteo();
-}
+
 function logout(){
   currentUser=null;
-  // Réinitialiser toutes les pages
+  loginPendingUser=null;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
-  // Réafficher tous les onglets (sera filtré au prochain login)
   document.querySelectorAll('.nb').forEach(b=>b.style.display='');
   document.getElementById('nav-bar').style.gridTemplateColumns='repeat(6,1fr)';
+  document.getElementById('login-profiles').style.display = 'grid';
+  document.getElementById('login-pwd-panel').style.display = 'none';
   document.getElementById('login-screen').style.display='flex';
 }
 
@@ -1528,6 +1578,12 @@ function pickVal(el,hid,cls){el.parentElement.querySelectorAll('.pchk').forEach(
 const todayStr=new Date().toISOString().split('T')[0];
 ['s-date','p-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=todayStr;});
 initLogin();
+
+// Bouton connexion et touche Entree
+document.getElementById('login-pwd-btn').addEventListener('click', confirmLogin);
+document.getElementById('login-pwd-input').addEventListener('keydown', function(e){
+  if(e.key === 'Enter') confirmLogin();
+});
 </script>
 </body>
 </html>
