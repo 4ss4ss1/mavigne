@@ -807,7 +807,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
     <div class="ph-top">
       <div style="font-size:26px">🚜</div>
       <div><div class="ph-title">Tracteur</div><div class="ph-sub">Sessions & passages domaine</div></div>
-      <button class="ph-add" id="trac-add-btn" onclick="openOv('ovSession')">＋ Session</button>
+      <button class="ph-add" id="trac-add-btn" onclick="openNewSession()">＋ Session</button>
     </div>
   </div>
   <div class="sband c3">
@@ -1937,13 +1937,17 @@ function closeSessionDetail(){
 }
 function openEditSession(id){
   if(!(currentUser&&currentUser.roles&&currentUser.roles.includes('admin'))){alert('Accès admin requis.');return;}
-  const s=SESSIONS.find(x=>x.id===id);if(!s)return;
+  var s=SESSIONS.find(function(x){return x.id===id;});if(!s)return;
   document.getElementById('es-id').value=id;
-  document.getElementById('es-act').innerHTML=ACTIVITES.map(a=>`<option ${a.nom===s.activite?'selected':''}>${a.emoji} ${a.nom}</option>`).join('');
+  var actHtml='';
+  ACTIVITES.forEach(function(a){actHtml+='<option'+(a.nom===s.activite?' selected':'')+'>'+a.emoji+' '+a.nom+'</option>';});
+  document.getElementById('es-act').innerHTML=actHtml;
   document.getElementById('es-date').value=s.date;
-  document.getElementById('es-cond-pick').innerHTML=CONDUCTEURS.map(c=>`<div class="pchk ${c.nom===s.conducteur?'sel acre':''}" onclick="pickVal(this,'es-cond','acre')" data-val="${c.nom}">${c.nom}</div>`).join('');
+  var condHtml='';
+  CONDUCTEURS.forEach(function(c){condHtml+='<div class="pchk'+(c.nom===s.conducteur?' sel acre':'')+'" onclick="pickVal(this,\'es-cond\',\'acre\')" data-val="'+c.nom+'">'+c.nom+'</div>';});
+  document.getElementById('es-cond-pick').innerHTML=condHtml;
   document.getElementById('es-cond').value=s.conducteur;
-  document.querySelectorAll('#es-st-pick .pchk').forEach(el=>{el.classList.toggle('sel',el.dataset.val===s.statut);el.classList.toggle('acre',el.dataset.val===s.statut);});
+  document.querySelectorAll('#es-st-pick .pchk').forEach(function(el){el.classList.toggle('sel',el.dataset.val===s.statut);el.classList.toggle('acre',el.dataset.val===s.statut);});
   document.getElementById('es-st').value=s.statut;
   document.getElementById('es-av').value=s.avancement||100;
   document.getElementById('es-note').value=s.note||'';
@@ -1973,6 +1977,22 @@ function deleteSession(){
   saveData('sessions');
   document.getElementById('ovEditSession').classList.remove('open');
   renderTracteur();
+}
+function pickCond(el){var parent=el.parentElement;parent.querySelectorAll('.pchk').forEach(function(x){x.classList.remove('sel','acre');});el.classList.add('sel','acre');}
+function openNewSession(){
+  if(!isTractoriste()){alert('Accès réservé aux tractoristes.');return;}
+  var actHtml='';
+  ACTIVITES.forEach(function(a){actHtml+='<option>'+a.emoji+' '+a.nom+'</option>';});
+  document.getElementById('s-act').innerHTML=actHtml;
+  var condHtml='';
+  CONDUCTEURS.forEach(function(c,i){condHtml+='<div class="pchk'+(i===0?' sel acre':'')+'" onclick="pickCond(this)">'+c.nom+'</div>';});
+  document.getElementById('s-cond-pick').innerHTML=condHtml;
+  document.getElementById('s-st').value='Terminé';
+  document.querySelectorAll('#ovSession #s-cond-pick .pchk').forEach(function(el,i){el.classList.toggle('sel',i===0);el.classList.toggle('acre',i===0);});
+  document.getElementById('s-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('s-av').value=100;
+  document.getElementById('s-note').value='';
+  openOv('ovSession');
 }
 function pickEmoji(el){document.querySelectorAll('#emoji-pick .pchk').forEach(x=>{x.classList.remove('sel','acre');});el.classList.add('sel','acre');selEmoji=el.dataset.val;}
 function saveSession(){
