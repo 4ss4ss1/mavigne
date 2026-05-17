@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Ma Vigne</title>
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -200,7 +200,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 .lp-role{color:rgba(255,255,255,0.5);font-size:10px;margin-top:2px;}
 
 /* ══ NAV ══ */
-.nav-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:white;border-top:1px solid var(--gris-clair);display:grid;grid-template-columns:repeat(6,1fr);height:var(--nav-h);padding:6px 0 14px;box-shadow:0 -4px 24px rgba(0,0,0,0.09);z-index:1000;transition:grid-template-columns 0.3s;}
+.nav-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:white;border-top:1px solid var(--gris-clair);display:grid;grid-template-columns:repeat(6,1fr);height:calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));padding:6px 0 calc(14px + env(safe-area-inset-bottom, 0px));box-shadow:0 -4px 24px rgba(0,0,0,0.09);z-index:1000;transition:grid-template-columns 0.3s;}
 .nb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;transition:transform 0.15s;}
 .nb:active{transform:scale(0.86);}
 .nb-icon{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;transition:background 0.2s;}
@@ -220,7 +220,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 .nb[data-p=reglages].active .nb-label{color:var(--texte-med);}
 
 /* ══ PAGES ══ */
-.page{display:none;min-height:100vh;padding-bottom:calc(var(--nav-h)+12px);animation:pageIn 0.22s ease forwards;}
+.page{display:none;min-height:100vh;padding-bottom:calc(var(--nav-h) + 24px + env(safe-area-inset-bottom, 0px));animation:pageIn 0.22s ease forwards;}
 .page.active{display:block;}
 @keyframes pageIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
 
@@ -231,7 +231,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 .ph.phyto{background:var(--phyto);}
 .ph.gris{background:#3A3A32;}
 .ph::before{content:'';position:absolute;top:-60px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,0.04);}
-.ph-top{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+.ph-top{display:flex;align-items:center;gap:12px;margin-bottom:8px;position:relative;z-index:2;}
 .ph-name{font-family:'Cormorant Garamond',serif;color:white;font-size:24px;font-weight:600;}
 .ph-domain{color:rgba(255,255,255,0.5);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-top:-2px;}
 .ph-notif{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;position:relative;margin-left:auto;}
@@ -251,7 +251,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 .locked-badge{font-size:9px;background:rgba(255,200,0,0.2);border:1px solid rgba(255,200,0,0.4);color:#FFD700;padding:2px 8px;border-radius:8px;font-weight:600;}
 
 /* ══ STAT BAND ══ */
-.sband{background:white;margin:0 16px;border-radius:16px;box-shadow:var(--shadow-md);transform:translateY(-16px);display:grid;overflow:hidden;}
+.sband{background:white;margin:0 16px;border-radius:16px;box-shadow:var(--shadow-md);transform:translateY(-16px);display:grid;overflow:hidden;position:relative;z-index:1;}
 .sband.c3{grid-template-columns:1fr 1fr 1fr;}
 .sband.c4{grid-template-columns:1fr 1fr 1fr 1fr;}
 .sband.c5{grid-template-columns:1fr 1fr 1fr 1fr 1fr;}
@@ -468,7 +468,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 /* ══ OVERLAYS ══ */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;display:none;align-items:flex-end;max-width:430px;margin:0 auto;}
 .overlay.open{display:flex;}
-.modal{background:white;border-radius:24px 24px 0 0;width:100%;padding:0 0 40px;max-height:88vh;overflow-y:auto;animation:slideUp 0.28s cubic-bezier(.32,1.2,.32,1);}
+.modal{background:white;border-radius:24px 24px 0 0;width:100%;padding:0 0 60px;max-height:88vh;overflow-y:auto;animation:slideUp 0.28s cubic-bezier(.32,1.2,.32,1);}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal-handle{width:36px;height:4px;background:var(--gris);border-radius:4px;margin:12px auto 0;}
 .modal-hd{padding:16px 20px 14px;border-bottom:1px solid var(--gris-clair);}
@@ -662,12 +662,12 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
   <!-- GRANDES STAT CARDS -->
   <div class="hv2-section-label">Aperçu du domaine</div>
   <div class="hv2-grid2">
-    <div class="hv2-card hv2-card-vert" onclick="goTo('parcelles')">
-      <div class="hv2-card-picto">🌿</div>
-      <div class="hv2-card-val">45</div>
-      <div class="hv2-card-label">Parcelles actives</div>
-      <div class="hv2-card-sub">11,76 ha au total</div>
-      <div class="hv2-chip hv2-chip-vert">Domaine</div>
+    <div class="hv2-card hv2-card-vert" id="home-stat-card" onclick="toggleHomeCard()">
+      <div class="hv2-card-picto" id="home-stat-picto">🌿</div>
+      <div class="hv2-card-val" id="home-stat-val">—</div>
+      <div class="hv2-card-label" id="home-stat-label">Avancement saison</div>
+      <div class="hv2-card-sub" id="home-stat-sub">Calcul…</div>
+      <div class="hv2-chip hv2-chip-vert" id="home-stat-chip">Domaine</div>
     </div>
     <div class="hv2-card hv2-card-terre" onclick="goTo('journal')">
       <div class="hv2-card-picto">⏱</div>
@@ -767,7 +767,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 
 <!-- Overlay détail + validation parcelle -->
 <div class="overlay" id="ovParcelle" onclick="closeOv(event,'ovParcelle')">
-  <div class="modal">
+  <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
     <div class="modal-hd">
       <div style="float:right;font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600" id="dp-pct"></div>
@@ -864,7 +864,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
     <div class="ph-top"><div><div class="ph-title">Réglages</div><div class="ph-sub">Ma Vigne v4.0</div></div></div>
   </div>
   <div style="height:14px"></div>
-  <div class="dom-badge"><div class="db-logo">🍇 Ma Vigne</div><div class="db-sub">Domaine · 45 parcelles · 11,76 ha actifs</div></div>
+  <div class="dom-badge"><div class="db-logo">🍇 Ma Vigne</div><div class="db-sub" id="dom-badge-sub">Domaine · 11,76 ha actifs</div></div>
 
   <div class="set-sec">
     <div class="set-title">Saison active</div>
@@ -910,21 +910,21 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 
 <!-- ══════ OVERLAYS ══════ -->
 
-<div class="overlay" id="ovSession" onclick="closeOv(event,'ovSession')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">🚜 Nouvelle session</div></div><div class="modal-body"><div class="fl">Activité</div><select class="fsel ac" id="s-act"></select><div class="fl">Date</div><input type="date" class="fi ac" id="s-date"><div class="fl">Conducteur</div><div class="ppicker" id="s-cond-pick"></div><div class="fl">Statut</div><div class="ppicker"><div class="pchk sel acre" data-val="Terminé" onclick="pickVal(this,'s-st','acre')">✅ Terminé</div><div class="pchk" data-val="En cours" onclick="pickVal(this,'s-st','acre')">🔄 En cours</div></div><input type="hidden" id="s-st" value="Terminé"><div class="fl">Avancement (%)</div><input type="number" class="fi ac" id="s-av" placeholder="100" min="0" max="100"><div class="fl">Note</div><input type="text" class="fi ac" id="s-note" placeholder="Conditions, zone…"><button class="mbtn acre" onclick="saveSession()">Enregistrer</button></div></div></div>
+<div class="overlay" id="ovSession" onclick="closeOv(event,'ovSession')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">🚜 Nouvelle session</div><div class="modal-sub">Avancement calculé depuis les parcelles</div></div><div class="modal-body"><div class="fl">Activité</div><select class="fsel ac" id="s-act"></select><div class="fl">Date</div><input type="date" class="fi ac" id="s-date"><div class="fl">Conducteur</div><div class="ppicker" id="s-cond-pick"></div><div class="fl">Note</div><input type="text" class="fi ac" id="s-note" placeholder="Conditions, zone…"><button class="mbtn acre" onclick="saveSession()">Créer la session</button></div></div></div>
 
-<div class="overlay" id="ovActivite" onclick="closeOv(event,'ovActivite')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">⚙️ Nouvelle activité tracteur</div></div><div class="modal-body"><div class="fl">Nom</div><input type="text" class="fi ac" id="new-act" placeholder="Ex : Oreille de cochon…"><div class="fl">Icône</div><div class="ppicker" id="emoji-pick"><div class="pchk sel acre" data-val="🚜" onclick="pickEmoji(this)">🚜</div><div class="pchk" data-val="✂️" onclick="pickEmoji(this)">✂️</div><div class="pchk" data-val="🌱" onclick="pickEmoji(this)">🌱</div><div class="pchk" data-val="💧" onclick="pickEmoji(this)">💧</div><div class="pchk" data-val="🔧" onclick="pickEmoji(this)">🔧</div><div class="pchk" data-val="🌾" onclick="pickEmoji(this)">🌾</div></div><button class="mbtn acre" onclick="saveActivite()">Créer</button></div></div></div>
+<div class="overlay" id="ovActivite" onclick="closeOv(event,'ovActivite')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">⚙️ Nouvelle activité tracteur</div></div><div class="modal-body"><div class="fl">Nom</div><input type="text" class="fi ac" id="new-act" placeholder="Ex : Oreille de cochon…"><div class="fl">Icône</div><div class="ppicker" id="emoji-pick"><div class="pchk sel acre" data-val="🚜" onclick="pickEmoji(this)">🚜</div><div class="pchk" data-val="✂️" onclick="pickEmoji(this)">✂️</div><div class="pchk" data-val="🌱" onclick="pickEmoji(this)">🌱</div><div class="pchk" data-val="💧" onclick="pickEmoji(this)">💧</div><div class="pchk" data-val="🔧" onclick="pickEmoji(this)">🔧</div><div class="pchk" data-val="🌾" onclick="pickEmoji(this)">🌾</div></div><button class="mbtn acre" onclick="saveActivite()">Créer</button></div></div></div>
 
-<div class="overlay" id="ovConducteur" onclick="closeOv(event,'ovConducteur')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">👤 Nouveau conducteur</div></div><div class="modal-body"><div class="fl">Prénom</div><input type="text" class="fi ac" id="new-cond" placeholder="Prénom"><div class="fl">Statut</div><div class="ppicker"><div class="pchk sel acre" data-val="Formé" onclick="pickVal(this,'nc-st','acre')">✅ Formé</div><div class="pchk" data-val="En formation" onclick="pickVal(this,'nc-st','acre')">🎓 En formation</div></div><input type="hidden" id="nc-st" value="Formé"><button class="mbtn acre" onclick="saveConducteur()">Ajouter</button></div></div></div>
+<div class="overlay" id="ovConducteur" onclick="closeOv(event,'ovConducteur')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">👤 Nouveau conducteur</div></div><div class="modal-body"><div class="fl">Prénom</div><input type="text" class="fi ac" id="new-cond" placeholder="Prénom"><div class="fl">Statut</div><div class="ppicker"><div class="pchk sel acre" data-val="Formé" onclick="pickVal(this,'nc-st','acre')">✅ Formé</div><div class="pchk" data-val="En formation" onclick="pickVal(this,'nc-st','acre')">🎓 En formation</div></div><input type="hidden" id="nc-st" value="Formé"><button class="mbtn acre" onclick="saveConducteur()">Ajouter</button></div></div></div>
 
-<div class="overlay" id="ovEditCond" onclick="closeOv(event,'ovEditCond')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="ec-title">✏️ Modifier</div></div><input type="hidden" id="ec-nom"><div class="modal-body"><div class="fl">Statut</div><div class="ppicker" id="ec-st-pick"><div class="pchk" data-val="Formé" onclick="pickVal(this,'ec-st','acre')">✅ Formé</div><div class="pchk" data-val="En formation" onclick="pickVal(this,'ec-st','acre')">🎓 En formation</div><div class="pchk" data-val="Suspendu" onclick="pickVal(this,'ec-st','acre')">⏸ Suspendu</div></div><input type="hidden" id="ec-st"><button class="mbtn acre" onclick="saveEditCond()">Enregistrer</button><button class="mbtn-del" onclick="deleteCond()">Supprimer</button></div></div></div>
+<div class="overlay" id="ovEditCond" onclick="closeOv(event,'ovEditCond')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="ec-title">✏️ Modifier</div></div><input type="hidden" id="ec-nom"><div class="modal-body"><div class="fl">Statut</div><div class="ppicker" id="ec-st-pick"><div class="pchk" data-val="Formé" onclick="pickVal(this,'ec-st','acre')">✅ Formé</div><div class="pchk" data-val="En formation" onclick="pickVal(this,'ec-st','acre')">🎓 En formation</div><div class="pchk" data-val="Suspendu" onclick="pickVal(this,'ec-st','acre')">⏸ Suspendu</div></div><input type="hidden" id="ec-st"><button class="mbtn acre" onclick="saveEditCond()">Enregistrer</button><button class="mbtn-del" onclick="deleteCond()">Supprimer</button></div></div></div>
 
-<div class="overlay" id="ovEditSession" onclick="closeOv(event,'ovEditSession')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">✏️ Modifier la session</div><div class="modal-sub">Admin uniquement</div></div><input type="hidden" id="es-id"><div class="modal-body"><div class="fl">Activité</div><select class="fsel ac" id="es-act"></select><div class="fl">Date</div><input type="date" class="fi ac" id="es-date"><div class="fl">Conducteur</div><div class="ppicker" id="es-cond-pick"></div><input type="hidden" id="es-cond"><div class="fl">Statut</div><div class="ppicker" id="es-st-pick"><div class="pchk" data-val="Terminé" onclick="pickVal(this,'es-st','acre')">✅ Terminé</div><div class="pchk" data-val="En cours" onclick="pickVal(this,'es-st','acre')">🔄 En cours</div></div><input type="hidden" id="es-st" value="Terminé"><div class="fl">Avancement (%)</div><input type="number" class="fi ac" id="es-av" placeholder="100" min="0" max="100"><div class="fl">Note</div><input type="text" class="fi ac" id="es-note" placeholder="Conditions, zone…"><button class="mbtn acre" onclick="saveEditSession()">Enregistrer</button><button class="mbtn-del" onclick="deleteSession()">🗑 Supprimer cette session</button></div></div></div>
+<div class="overlay" id="ovEditSession" onclick="closeOv(event,'ovEditSession')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">✏️ Modifier la session</div><div class="modal-sub">Admin uniquement</div></div><input type="hidden" id="es-id"><div class="modal-body"><div class="fl">Activité</div><select class="fsel ac" id="es-act"></select><div class="fl">Date</div><input type="date" class="fi ac" id="es-date"><div class="fl">Conducteur</div><div class="ppicker" id="es-cond-pick"></div><input type="hidden" id="es-cond"><div class="fl">Statut</div><div class="ppicker" id="es-st-pick"><div class="pchk" data-val="Terminé" onclick="pickVal(this,'es-st','acre')">✅ Terminé</div><div class="pchk" data-val="En cours" onclick="pickVal(this,'es-st','acre')">🔄 En cours</div></div><input type="hidden" id="es-st" value="Terminé"><div class="fl">Avancement (%)</div><input type="number" class="fi ac" id="es-av" placeholder="100" min="0" max="100"><div class="fl">Note</div><input type="text" class="fi ac" id="es-note" placeholder="Conditions, zone…"><button class="mbtn acre" onclick="saveEditSession()">Enregistrer</button><button class="mbtn-del" id="es-del-btn" onclick="confirmDeleteSession(this)">🗑 Supprimer cette session</button></div></div></div>
 
-<div class="overlay" id="ovPhyto" onclick="closeOv(event,'ovPhyto')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">🧪 Nouveau traitement</div></div><div class="modal-body"><div class="fl">Produit</div><select class="fsel" id="p-prod" onchange="onProdChange()"></select><div class="infobx" id="p-infobox"><div id="p-amm"></div><div id="p-dar-info" style="margin-top:3px;font-weight:600"></div></div><div class="fl">Date</div><input type="date" class="fi ph" id="p-date"><div class="fl">Dose utilisée</div><input type="text" class="fi ph" id="p-dose" placeholder="Ex : 300 g/ha"><div class="fl">Opérateur</div><input type="text" class="fi ph" id="p-op" placeholder="Prénom"><div class="fl">Note</div><input type="text" class="fi ph" id="p-note" placeholder="Stade, conditions…"><button class="mbtn phyte" onclick="saveTraitement()">Enregistrer</button></div></div></div>
+<div class="overlay" id="ovPhyto" onclick="closeOv(event,'ovPhyto')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">🧪 Nouveau traitement</div></div><div class="modal-body"><div class="fl">Produit</div><select class="fsel" id="p-prod" onchange="onProdChange()"></select><div class="infobx" id="p-infobox"><div id="p-amm"></div><div id="p-dar-info" style="margin-top:3px;font-weight:600"></div></div><div class="fl">Date</div><input type="date" class="fi ph" id="p-date"><div class="fl">Dose utilisée</div><input type="text" class="fi ph" id="p-dose" placeholder="Ex : 300 g/ha"><div class="fl">Opérateur</div><input type="text" class="fi ph" id="p-op" placeholder="Prénom"><div class="fl">Note</div><input type="text" class="fi ph" id="p-note" placeholder="Stade, conditions…"><button class="mbtn phyte" onclick="saveTraitement()">Enregistrer</button></div></div></div>
 
-<div class="overlay" id="ovProduit" onclick="closeOv(event,'ovProduit')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">📦 Nouveau produit</div></div><div class="modal-body"><div class="fl">Nom commercial</div><input type="text" class="fi ph" id="np-nom" placeholder="Ex : Bordeaux B…"><div class="fl">Type</div><select class="fsel" id="np-type"><option>Cuivre</option><option>Soufre</option><option>Fongicide</option><option>Insecticide</option><option>Herbicide</option><option>Biocontrôle</option></select><div class="fl">N° AMM</div><input type="text" class="fi ph" id="np-amm"><div class="fl">DAR (jours)</div><input type="number" class="fi ph" id="np-dar" placeholder="21"><div class="fl">Dose max</div><input type="text" class="fi ph" id="np-dose"><button class="mbtn phyte" onclick="saveProduit()">Ajouter</button></div></div></div>
+<div class="overlay" id="ovProduit" onclick="closeOv(event,'ovProduit')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">📦 Nouveau produit</div></div><div class="modal-body"><div class="fl">Nom commercial</div><input type="text" class="fi ph" id="np-nom" placeholder="Ex : Bordeaux B…"><div class="fl">Type</div><select class="fsel" id="np-type"><option>Cuivre</option><option>Soufre</option><option>Fongicide</option><option>Insecticide</option><option>Herbicide</option><option>Biocontrôle</option></select><div class="fl">N° AMM</div><input type="text" class="fi ph" id="np-amm"><div class="fl">DAR (jours)</div><input type="number" class="fi ph" id="np-dar" placeholder="21"><div class="fl">Dose max</div><input type="text" class="fi ph" id="np-dose"><button class="mbtn phyte" onclick="saveProduit()">Ajouter</button></div></div></div>
 
-<div class="overlay" id="ovExport" onclick="closeOv(event,'ovExport')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">📤 Exporter les données</div><div class="modal-sub">Choisissez le format d'export</div></div><div class="modal-body">
+<div class="overlay" id="ovExport" onclick="closeOv(event,'ovExport')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">📤 Exporter les données</div><div class="modal-sub">Choisissez le format d'export</div></div><div class="modal-body">
   <div style="display:flex;flex-direction:column;gap:10px">
     <div style="background:var(--rouge-pale);border-radius:14px;padding:14px 16px">
       <div style="font-size:13px;font-weight:700;color:var(--rouge);margin-bottom:10px">🖨️ Rapport PDF mensuel</div>
@@ -966,7 +966,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 </div></div>
 
 <!-- Overlay priorité -->
-<div class="overlay" id="ovPriority" onclick="closeOv(event,'ovPriority')"><div class="modal"><div class="modal-handle"></div>
+<div class="overlay" id="ovPriority" onclick="closeOv(event,'ovPriority')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div>
   <div class="modal-hd"><div class="modal-title">⚡ Message priorité</div><div class="modal-sub">Visible par toute l'équipe dans l'onglet Parcelles</div></div>
   <div class="modal-body">
     <div class="fl">Message</div>
@@ -976,7 +976,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
   </div>
 </div></div>
 
-<div class="overlay" id="ovValidation" onclick="closeOv(event,'ovValidation')"><div class="modal"><div class="modal-handle"></div>
+<div class="overlay" id="ovValidation" onclick="closeOv(event,'ovValidation')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div>
   <div class="modal-hd">
     <div class="modal-title" id="vp-titre">Valider tâche</div>
     <div class="modal-sub" id="vp-parcelle"></div>
@@ -994,13 +994,13 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
   </div>
 </div></div>
 
-<div class="overlay" id="ovSaison" onclick="closeOv(event,'ovSaison')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">📅 Nouvelle saison</div></div><div class="modal-body"><div class="fl">Nom de la saison</div><input type="text" class="fi" id="ns-nom" placeholder="Ex : Été 2026, Hiver 2026…"><div class="fl">Période</div><input type="text" class="fi" id="ns-periode" placeholder="Ex : Juin–Août 2026"><button class="mbtn verte" onclick="saveSaison()">Créer la saison</button></div></div></div>
+<div class="overlay" id="ovSaison" onclick="closeOv(event,'ovSaison')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">📅 Nouvelle saison</div></div><div class="modal-body"><div class="fl">Nom de la saison</div><input type="text" class="fi" id="ns-nom" placeholder="Ex : Été 2026, Hiver 2026…"><div class="fl">Période</div><input type="text" class="fi" id="ns-periode" placeholder="Ex : Juin–Août 2026"><button class="mbtn verte" onclick="saveSaison()">Créer la saison</button></div></div></div>
 
-<div class="overlay" id="ovTache" onclick="closeOv(event,'ovTache')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">🌿 Nouvelle tâche</div></div><div class="modal-body"><div class="fl">Nom de la tâche</div><input type="text" class="fi" id="nt-nom" placeholder="Ex : Relevage, Accolage…"><div class="fl">Heures par hectare</div><input type="number" class="fi" id="nt-hha" placeholder="Ex : 50" min="0"><div class="fl">Saison</div><select class="fsel" id="nt-saison"></select><button class="mbtn verte" onclick="saveTache()">Ajouter la tâche</button></div></div></div>
+<div class="overlay" id="ovTache" onclick="closeOv(event,'ovTache')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">🌿 Nouvelle tâche</div></div><div class="modal-body"><div class="fl">Nom de la tâche</div><input type="text" class="fi" id="nt-nom" placeholder="Ex : Relevage, Accolage…"><div class="fl">Heures par hectare</div><input type="number" class="fi" id="nt-hha" placeholder="Ex : 50" min="0"><div class="fl">Saison</div><select class="fsel" id="nt-saison"></select><button class="mbtn verte" onclick="saveTache()">Ajouter la tâche</button></div></div></div>
 
-<div class="overlay" id="ovMembre" onclick="closeOv(event,'ovMembre')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">👤 Nouveau membre</div></div><div class="modal-body"><div class="fl">Prénom</div><input type="text" class="fi" id="nm-nom" placeholder="Prénom"><div class="fl">Email</div><input type="email" class="fi" id="nm-email" placeholder="email@domaine.fr"><div class="fl">Rôles</div><div class="roles-check" id="nm-roles"><div class="role-check-row"><span class="role-check-name">🌿 Ouvrier</span><div class="role-chk on" id="rc-ouvrier" onclick="toggleRole('ouvrier')">✓</div></div><div class="role-check-row"><span class="role-check-name">🚜 Tractoriste</span><div class="role-chk" id="rc-tractoriste" onclick="toggleRole('tractoriste')"></div></div><div class="role-check-row"><span class="role-check-name">🎟 Saisonnier</span><div class="role-chk" id="rc-saisonnier" onclick="toggleRole('saisonnier')"></div></div></div><div class="fl">Période (si saisonnier)</div><input type="text" class="fi" id="nm-periode" placeholder="Ex : Juin–Août 2026"><button class="mbtn verte" onclick="saveMembre()">Ajouter</button></div></div></div>
+<div class="overlay" id="ovMembre" onclick="closeOv(event,'ovMembre')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">👤 Nouveau membre</div></div><div class="modal-body"><div class="fl">Prénom</div><input type="text" class="fi" id="nm-nom" placeholder="Prénom"><div class="fl">Email</div><input type="email" class="fi" id="nm-email" placeholder="email@domaine.fr"><div class="fl">Rôles</div><div class="roles-check" id="nm-roles"><div class="role-check-row"><span class="role-check-name">🌿 Ouvrier</span><div class="role-chk on" id="rc-ouvrier" onclick="toggleRole('ouvrier')">✓</div></div><div class="role-check-row"><span class="role-check-name">🚜 Tractoriste</span><div class="role-chk" id="rc-tractoriste" onclick="toggleRole('tractoriste')"></div></div><div class="role-check-row"><span class="role-check-name">🎟 Saisonnier</span><div class="role-chk" id="rc-saisonnier" onclick="toggleRole('saisonnier')"></div></div></div><div class="fl">Période (si saisonnier)</div><input type="text" class="fi" id="nm-periode" placeholder="Ex : Juin–Août 2026"><button class="mbtn verte" onclick="saveMembre()">Ajouter</button></div></div></div>
 
-<div class="overlay" id="ovEditMembre" onclick="closeOv(event,'ovEditMembre')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="em-title">✏️ Modifier membre</div></div><input type="hidden" id="em-nom"><div class="modal-body"><div class="fl">Rôles</div><div class="roles-check" id="em-roles"></div><div class="fl">Statut</div><div class="ppicker"><div class="pchk sel vert" data-val="Actif" onclick="pickVal(this,'em-statut','vert')">✅ Actif</div><div class="pchk" data-val="Inactif" onclick="pickVal(this,'em-statut','vert')">⏸ Inactif</div></div><input type="hidden" id="em-statut" value="Actif"><button class="mbtn verte" onclick="saveEditMembre()">Enregistrer</button><button class="mbtn-del" onclick="deleteMembre()">Supprimer</button></div></div></div>
+<div class="overlay" id="ovEditMembre" onclick="closeOv(event,'ovEditMembre')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="em-title">✏️ Modifier membre</div></div><input type="hidden" id="em-nom"><div class="modal-body"><div class="fl">Rôles</div><div class="roles-check" id="em-roles"></div><div class="fl">Statut</div><div class="ppicker"><div class="pchk sel vert" data-val="Actif" onclick="pickVal(this,'em-statut','vert')">✅ Actif</div><div class="pchk" data-val="Inactif" onclick="pickVal(this,'em-statut','vert')">⏸ Inactif</div></div><input type="hidden" id="em-statut" value="Actif"><button class="mbtn verte" onclick="saveEditMembre()">Enregistrer</button><button class="mbtn-del" onclick="deleteMembre()">Supprimer</button></div></div></div>
 
 <script>
 // ════════════════════════════════════
@@ -1235,6 +1235,7 @@ function confirmLogin(){
   var saisi = document.getElementById('login-pwd-input').value;
   if(saisi === m.mdp){
     currentUser = m;
+    console.log('✅ Login OK:', m.nom, 'roles:', m.roles);
     loginPendingIdx = -1;
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('login-profiles').style.display = 'grid';
@@ -1280,12 +1281,10 @@ function applyRoles(){
   // Phyto — admin seulement
   document.querySelectorAll('.nb[data-p=phyto]').forEach(b=>b.style.display=canSeePhyto()?'':'none');
   document.querySelectorAll('.nb[data-p=reglages]').forEach(b=>b.style.display=isAdmin()?'':'none');
-  // Tracteur readonly
+  // Tracteur readonly banner
   const isReadOnly=!isTractoriste();
-  const addBtn=document.getElementById('trac-add-btn');
   const condAddBtn=document.getElementById('cond-add-btn');
   const actAddBtn=document.getElementById('act-add-btn');
-  if(addBtn)addBtn.style.display=isReadOnly?'none':'flex';
   if(condAddBtn)condAddBtn.style.display=isReadOnly?'none':'block';
   if(actAddBtn)actAddBtn.style.display=isReadOnly?'none':'block';
   document.getElementById('trac-readonly').style.display=isReadOnly?'flex':'none';
@@ -1410,12 +1409,88 @@ function goTo(page){
 }
 
 // ════ ACCUEIL ════
+let homeCardMode = 0; // 0 = avancement global, 1 = tâche en cours
+
+function getHomeCardData(){
+  const tachesSaison = getTachesSaison();
+  const parcActives = PARCELLES.filter(p=>p.statut!=='Arrachee');
+  // Avancement global
+  const totalCases = tachesSaison.length * parcActives.length;
+  const totalVal = parcActives.reduce((sum,p)=>sum+tachesSaison.filter(t=>p.taches&&p.taches[t.nom]==='Validé').length, 0);
+  const pctGlobal = totalCases>0 ? Math.round(totalVal/totalCases*100) : 0;
+  // Tâches en cours (commencées mais pas finies)
+  const tachesAvec = tachesSaison.map(t=>{
+    const val = parcActives.filter(p=>p.taches&&p.taches[t.nom]==='Validé').length;
+    const enc = parcActives.filter(p=>p.taches&&p.taches[t.nom]==='En cours').length;
+    const pct = Math.round(val/parcActives.length*100);
+    return {nom:t.nom, val, enc, pct, total:parcActives.length};
+  }).filter(t=>t.val>0&&t.pct<100);
+  const tacheLaMoinsAvancee = tachesAvec.length>0 ? tachesAvec.sort((a,b)=>a.pct-b.pct)[0] : null;
+  const tacheLaPlusAvancee  = tachesAvec.length>0 ? tachesAvec.sort((a,b)=>b.pct-a.pct)[0] : null;
+  return {pctGlobal, tacheLaMoinsAvancee, tacheLaPlusAvancee, parcActives};
+}
+
+function renderHomeCard(){
+  const {pctGlobal, tacheLaMoinsAvancee, tacheLaPlusAvancee, parcActives} = getHomeCardData();
+  const saison = getSaisonActive();
+  if(homeCardMode===0){
+    document.getElementById('home-stat-picto').textContent='🌿';
+    document.getElementById('home-stat-val').textContent=pctGlobal+'%';
+    document.getElementById('home-stat-label').textContent='Avancement saison';
+    document.getElementById('home-stat-sub').textContent=parcActives.length+' parcelles · 11,76 ha';
+    document.getElementById('home-stat-chip').textContent=saison.nom;
+  } else if(homeCardMode===1){
+    const t = tacheLaMoinsAvancee;
+    if(t){
+      document.getElementById('home-stat-picto').textContent=TEMOJI[t.nom]||'🌾';
+      document.getElementById('home-stat-val').textContent=t.pct+'%';
+      document.getElementById('home-stat-label').textContent=t.nom;
+      document.getElementById('home-stat-sub').textContent=t.val+'/'+t.total+' parcelles';
+      document.getElementById('home-stat-chip').textContent='À prioriser';
+    } else {
+      document.getElementById('home-stat-picto').textContent='✅';
+      document.getElementById('home-stat-val').textContent='100%';
+      document.getElementById('home-stat-label').textContent='Toutes tâches';
+      document.getElementById('home-stat-sub').textContent='Saison complète !';
+      document.getElementById('home-stat-chip').textContent=saison.nom;
+    }
+  } else {
+    const t = tacheLaPlusAvancee;
+    if(t){
+      document.getElementById('home-stat-picto').textContent=TEMOJI[t.nom]||'🌾';
+      document.getElementById('home-stat-val').textContent=t.pct+'%';
+      document.getElementById('home-stat-label').textContent=t.nom;
+      document.getElementById('home-stat-sub').textContent=t.val+'/'+t.total+' parcelles';
+      document.getElementById('home-stat-chip').textContent='Presque fini';
+    } else {
+      document.getElementById('home-stat-picto').textContent='✅';
+      document.getElementById('home-stat-val').textContent='100%';
+      document.getElementById('home-stat-label').textContent='Toutes tâches';
+      document.getElementById('home-stat-sub').textContent='Saison complète !';
+      document.getElementById('home-stat-chip').textContent=saison.nom;
+    }
+  }
+  // Animation flip
+  const card=document.getElementById('home-stat-card');
+  card.style.transition='transform 0.15s';
+  card.style.transform='scale(0.96)';
+  setTimeout(()=>{card.style.transform='scale(1)';},150);
+}
+
+function toggleHomeCard(){
+  homeCardMode = (homeCardMode+1) % 3;
+  renderHomeCard();
+}
+
 function renderHome(){
   const {totalReste}=calcHeures();
   const saison=getSaisonActive();
 
   // Saison badge
   document.getElementById('saison-badge-home').textContent=saison.nom;
+
+  // Carte stat domaine
+  renderHomeCard();
 
   // Date
   const jours=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
@@ -1527,6 +1602,10 @@ function renderParcelles(){
     if(pFilter==='arrachee'&&p.statut!=='Arrachee')return false;
     if(pSearch&&!p.nom.toLowerCase().includes(pSearch.toLowerCase()))return false;
     return true;
+  }).sort((a,b)=>{
+    const pa=getPCls(a).pct, pb=getPCls(b).pct;
+    if(pa!==pb)return pa-pb;
+    return a.nom.localeCompare(b.nom,'fr');
   });
   const cont=document.getElementById('pList');
   if(!data.length){cont.innerHTML='<div class="empty-state"><div class="ei">🔍</div><p>Aucun résultat.</p></div>';return;}
@@ -1865,7 +1944,7 @@ function renderTracteur(){
   sl.innerHTML=data.map(s=>{
     const em=amap[s.activite]?.emoji||'🚜';
     const sc=s.statut==='En cours'?'ssenc':'sster';
-    const pct=s.avancement||100;
+    const pct=s.avancement!=null?s.avancement:0;
     const parcellesFaites=(s.parcellesFaites||[]).length;
     const total=PARCELLES.filter(p=>p.statut!=='Arrachee').length;
     const clk=isTractoriste()?`onclick="openSessionDetail('${s.id}')" style="cursor:pointer"`:'';
@@ -1938,6 +2017,7 @@ function closeSessionDetail(){
   renderTracteur();
 }
 function openEditSession(id){
+  console.log('openEditSession appelé, id=', id, 'isAdmin=', currentUser?.roles?.includes('admin'));
   if(!(currentUser&&currentUser.roles&&currentUser.roles.includes('admin'))){alert('Accès admin requis.');return;}
   var s=SESSIONS.find(function(x){return x.id===id;});if(!s)return;
   document.getElementById('es-id').value=id;
@@ -1970,10 +2050,28 @@ function saveEditSession(){
   document.getElementById('ovEditSession').classList.remove('open');
   renderTracteur();
 }
+function confirmDeleteSession(btn){
+  if(btn.dataset.confirm==='1'){
+    deleteSession();
+  } else {
+    btn.dataset.confirm='1';
+    btn.textContent='⚠️ Confirmer la suppression';
+    btn.style.background='var(--rouge)';
+    btn.style.color='white';
+    setTimeout(function(){
+      btn.dataset.confirm='';
+      btn.textContent='🗑 Supprimer cette session';
+      btn.style.background='';
+      btn.style.color='';
+    }, 3000);
+  }
+}
 function deleteSession(){
   const id=document.getElementById('es-id').value;
-  const s=SESSIONS.find(x=>x.id===id);if(!s)return;
-  if(!confirm(`Supprimer la session "${s.activite}" du ${fmtDate(s.date)} ?`))return;
+  console.log('deleteSession appelé, id=', id);
+  const s=SESSIONS.find(x=>x.id===id);
+  console.log('session trouvée=', s);
+  if(!s)return;
   const idx=SESSIONS.findIndex(x=>x.id===id);
   if(idx>=0)SESSIONS.splice(idx,1);
   saveData('sessions');
@@ -1982,6 +2080,7 @@ function deleteSession(){
 }
 function pickCond(el){var parent=el.parentElement;parent.querySelectorAll('.pchk').forEach(function(x){x.classList.remove('sel','acre');});el.classList.add('sel','acre');}
 function openNewSession(){
+  console.log('openNewSession appelé, currentUser=', currentUser, 'isTractoriste=', isTractoriste());
   if(!isTractoriste()){alert('Accès réservé aux tractoristes.');return;}
   var actHtml='';
   ACTIVITES.forEach(function(a){actHtml+='<option>'+a.emoji+' '+a.nom+'</option>';});
@@ -1989,10 +2088,7 @@ function openNewSession(){
   var condHtml='';
   CONDUCTEURS.forEach(function(c,i){condHtml+='<div class="pchk'+(i===0?' sel acre':'')+'" onclick="pickCond(this)">'+c.nom+'</div>';});
   document.getElementById('s-cond-pick').innerHTML=condHtml;
-  document.getElementById('s-st').value='Terminé';
-  document.querySelectorAll('#ovSession #s-cond-pick .pchk').forEach(function(el,i){el.classList.toggle('sel',i===0);el.classList.toggle('acre',i===0);});
   document.getElementById('s-date').value=new Date().toISOString().split('T')[0];
-  document.getElementById('s-av').value=100;
   document.getElementById('s-note').value='';
   openOv('ovSession');
 }
@@ -2002,9 +2098,17 @@ function saveSession(){
   const a=document.getElementById('s-act').value.replace(/^[^\s]+ /,'');
   const date=document.getElementById('s-date').value;
   if(!date){alert('Date obligatoire');return;}
-  const pct=parseInt(document.getElementById('s-av').value)||100;
   const condEl=document.querySelector('#s-cond-pick .pchk.sel');
-  SESSIONS.push({id:Date.now().toString(16),activite:a,date,conducteur:condEl?condEl.textContent.trim():CONDUCTEURS[0]?.nom,statut:document.getElementById('s-st').value,avancement:pct,note:document.getElementById('s-note').value});
+  SESSIONS.push({
+    id:Date.now().toString(16),
+    activite:a,
+    date,
+    conducteur:condEl?condEl.textContent.trim():CONDUCTEURS[0]?.nom,
+    statut:'En cours',
+    avancement:0,
+    parcellesFaites:[],
+    note:document.getElementById('s-note').value
+  });
   saveData('sessions');
   document.getElementById('ovSession').classList.remove('open');
   renderTracteur();
@@ -2072,6 +2176,15 @@ function saveProduit(){const nom=document.getElementById('np-nom').value.trim();
 
 // ════ RÉGLAGES ════
 function renderReglages(){
+  // Aperçu domaine — avancement global saison
+  const tachesSaison=getTachesSaison();
+  const parcActives=PARCELLES.filter(p=>p.statut!=='Arrachee');
+  const totalCases=tachesSaison.length*parcActives.length;
+  const totalVal=parcActives.reduce((sum,p)=>sum+tachesSaison.filter(t=>p.taches&&p.taches[t.nom]==='Validé').length,0);
+  const pctGlobal=totalCases>0?Math.round(totalVal/totalCases*100):0;
+  const saison=getSaisonActive();
+  const sub=document.getElementById('dom-badge-sub');
+  if(sub)sub.textContent=`${saison.nom} · ${pctGlobal}% accompli · ${parcActives.length} parcelles · 11,76 ha`;
   // Saisons
   const sl=document.getElementById('saisons-list');
   sl.innerHTML=SAISONS.map(s=>`<div class="saison-card" onclick="activateSaison('${s.nom}')"><div><div class="sc-nom">${s.nom}</div><div class="sc-periode">${s.periode}</div></div>${s.active?'<div class="sc-active-badge">✅ Active</div>':''}</div>`).join('');
@@ -2315,6 +2428,36 @@ function exportPDFMois(){
 
   const fmtD=d=>{if(!d)return'—';const[y,m,j]=d.split('-');return`${parseInt(j)} ${moisNoms[parseInt(m)-1].slice(0,3)} ${y}`;};
 
+  // ── Sessions tracteur du mois ──
+  const sessionsMois=SESSIONS.filter(s=>s.date&&s.date.startsWith(moisVal)).sort((a,b)=>a.date.localeCompare(b.date));
+  const amapPdf=ACTIVITES.reduce((m,a)=>{m[a.nom]=a;return m},{});
+  let tracteurSection='';
+  if(sessionsMois.length>0){
+    const lignesSessions=sessionsMois.map(s=>{
+      const em=amapPdf[s.activite]?.emoji||'🚜';
+      const pct=s.avancement!=null?s.avancement:0;
+      const statCls=s.statut==='En cours'?'trac-enc':'trac-ter';
+      const fillCls=s.statut==='En cours'?'trac-fill-enc':'trac-fill';
+      const total=PARCELLES.filter(p=>p.statut!=='Arrachee').length;
+      const faites=(s.parcellesFaites||[]).length;
+      return `<tr>
+        <td>${em} <strong>${s.activite}</strong></td>
+        <td>${fmtD(s.date)}</td>
+        <td>${s.conducteur||'—'}</td>
+        <td><span class="trac-badge ${statCls}">${s.statut}</span></td>
+        <td><div class="trac-bar-wrap"><div class="trac-bar"><div class="${fillCls}" style="width:${pct}%"></div></div><span style="font-size:10px;font-weight:700;color:${s.statut==='En cours'?'#B85A1A':'#2C3E50'}">${pct}%</span></div></td>
+        <td style="font-size:10px;color:#7A7A6A">${faites}/${total} parcelles${s.note?` · ${s.note}`:''}</td>
+      </tr>`;
+    }).join('');
+    tracteurSection=`<div class="section">
+  <div class="section-title">🚜 Activité tracteur — ${moisNom}</div>
+  <table class="trac-table">
+    <thead><tr><th>Activité</th><th>Date</th><th>Conducteur</th><th>Statut</th><th>Avancement</th><th>Détail</th></tr></thead>
+    <tbody>${lignesSessions}</tbody>
+  </table>
+</div>`;
+  };
+
   const html=`<!DOCTYPE html>
 <html lang="fr"><head><meta charset="UTF-8">
 <title>Rapport Ma Vigne — ${moisNom}</title>
@@ -2379,6 +2522,16 @@ function exportPDFMois(){
   .ouvrier-nom{font-weight:700;font-size:12px;}
   .ouvrier-nb{font-size:18px;font-weight:700;color:#1E3A12;margin-top:2px;}
   .footer{border-top:1px solid #EFEDE8;padding:12px 24px;font-size:9px;color:#7A7A6A;display:flex;justify-content:space-between;}
+  /* Tracteur */
+  .trac-table{width:100%;border-collapse:collapse;margin-top:4px;}
+  .trac-table th{font-size:9px;font-weight:700;text-transform:uppercase;color:#7A7A6A;padding:6px 8px;text-align:left;border-bottom:2px solid #ECF0F4;}
+  .trac-table td{padding:8px;border-bottom:1px solid #F5F5F0;font-size:11px;vertical-align:middle;}
+  .trac-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;}
+  .trac-ter{background:#ECF0F4;color:#2C3E50;}.trac-enc{background:#FBF0E6;color:#B85A1A;}
+  .trac-bar-wrap{display:flex;align-items:center;gap:6px;}
+  .trac-bar{width:80px;height:6px;background:#EFEDE8;border-radius:4px;overflow:hidden;display:inline-block;vertical-align:middle;}
+  .trac-fill{height:100%;border-radius:4px;background:#2C3E50;}
+  .trac-fill-enc{background:#B85A1A;}
   @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
 </style></head><body>
 
@@ -2419,6 +2572,9 @@ function exportPDFMois(){
   <div class="section-title">💬 Commentaire mensuel</div>
   ${commentaire?`<div class="commentaire-box">${commentaire}</div>`:'<p style="color:#7A7A6A;font-style:italic">Aucun commentaire saisi.</p>'}
 </div>
+
+<!-- ── 5. TRACTEUR ── -->
+${tracteurSection}
 
 <!-- ── TRAVAUX PAR OUVRIER ── -->
 ${Object.keys(ouvrierStats).length>0?`
