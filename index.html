@@ -586,6 +586,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
       <div style="float:right;font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600" id="dp-pct"></div>
       <div class="modal-title" id="dp-nom"></div>
       <div class="modal-sub" id="dp-sub"></div>
+      <button id="dp-gps-btn" style="display:none;margin-top:10px;background:var(--bleu);color:white;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;align-items:center;gap:6px;">📍 Ouvrir dans GPS</button>
     </div>
     <div class="modal-body">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
@@ -702,8 +703,8 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
   <div class="set-sec">
     <div class="set-title">Application</div>
     <div style="margin:0 16px">
-      <div class="set-row" style="border-radius:16px 16px 0 0"><div class="sr-l"><div class="sr-ico" style="background:var(--terre-pale)">🔔</div><div><div class="sr-lbl">Notifications</div><div class="sr-sub">Alertes gel, DAR, validations</div></div></div><div class="sr-arr">›</div></div>
-      <div class="set-row"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">📤</div><div><div class="sr-lbl">Exporter données</div><div class="sr-sub">PDF · Excel · Registre phyto</div></div></div><div class="sr-arr">›</div></div>
+      <div class="set-row" style="border-radius:16px 16px 0 0" onclick="toggleNotifications()"><div class="sr-l"><div class="sr-ico" style="background:var(--terre-pale)">🔔</div><div><div class="sr-lbl">Notifications</div><div class="sr-sub" id="notif-sub">Alertes gel, DAR, validations</div></div></div><div class="sr-arr">›</div></div>
+      <div class="set-row" onclick="exporterDonnees()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">📤</div><div><div class="sr-lbl">Exporter données</div><div class="sr-sub">Journal CSV · Phyto CSV · JSON</div></div></div><div class="sr-arr">›</div></div>
       <div class="set-row" style="border-radius:0 0 16px 16px" onclick="logout()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🚪</div><div><div class="sr-lbl" style="color:var(--rouge)">Se déconnecter</div></div></div><div class="sr-arr">›</div></div>
     </div>
   </div>
@@ -924,11 +925,11 @@ async function fetchMeteo(){
         }
       }
     }
-    // Enregistrer dans journal
+    // Stocker météo mais NE PAS l'insérer dans le journal automatiquement
+    // Elle sera ajoutée dans le journal uniquement quand un travail est enregistré ce jour
     const existant=METEO_JOURNAL.find(m=>m.date===meteoData.date);
     if(!existant){
       METEO_JOURNAL.push({...meteoData});
-      JOURNAL.unshift({id:'meteo-'+Date.now(),date:meteoData.date,parcelle:'Domaine',tache:'Météo',qui:'Auto',statut:'Info',equipe:false,meteo:true,temp,desc,wind,emoji});
     }
   }catch(e){
     const mc=document.getElementById('hv2-meteo-card');
@@ -1068,10 +1069,10 @@ function renderHome(){
 
 // ════ PARCELLES ════
 function getPCls(p){
-  const tachesSaison=getTachesSaison().map(t=>t.nom);
-  const tachesParcelle=Object.entries(p.taches).filter(([t])=>tachesSaison.includes(t));
-  const nbTotal=tachesParcelle.length;
-  const nbDone=tachesParcelle.filter(([,s])=>s==='Validé').length;
+  const tachesSaison=getTachesSaison();
+  // Toutes les tâches de la saison, même celles non encore renseignées dans p.taches
+  const nbTotal=tachesSaison.length;
+  const nbDone=tachesSaison.filter(t=>(p.taches[t.nom]||'Non démarré')==='Validé').length;
   const pct=nbTotal>0?Math.round(nbDone/nbTotal*100):0;
   if(p.statut==='Arrachee')return{a:'ava-x',d:'dr',cl:'pr',col:'var(--rouge)',fill:'var(--rouge)',em:'🚫',pct};
   if(pct===100)return{a:'ava-c',d:'dc',cl:'pv',col:'var(--vert-med)',fill:'linear-gradient(90deg,var(--vert),var(--vert-clair))',em:'✅',pct};
@@ -1102,11 +1103,11 @@ function renderParcelles(){
   });
   const cont=document.getElementById('pList');
   if(!data.length){cont.innerHTML='<div class="empty-state"><div class="ei">🔍</div><p>Aucun résultat.</p></div>';return;}
-  const tachesSaison=getTachesSaison().map(t=>t.nom);
-  cont.innerHTML=data.map(p=>{
+  const tachesSaison=getTachesSaison();
     const cl=getPCls(p);
-    const tps=Object.entries(p.taches).filter(([t])=>tachesSaison.includes(t));
-    const chips=tps.slice(0,4).map(([t,s])=>`<span class="tc ${s==='Validé'?'tcv':s==='Fait'?'tcf':'tce'}">${t}</span>`).join('');
+    // Toutes les tâches de la saison, y compris celles non renseignées (=Non démarré)
+    const tps=tachesSaison.map(t=>({nom:t.nom,stat:p.taches[t.nom]||'Non démarré'}));
+    const chips=tps.slice(0,4).map(({nom,stat})=>`<span class="tc ${stat==='Validé'?'tcv':stat==='Fait'?'tcf':stat==='En cours'?'tce':'tcm'}">${nom}</span>`).join('');
     const more=tps.length>4?`<span class="tc tcm">+${tps.length-4}</span>`:'';
     return `<div class="pcard" onclick="openDP('${p.nom}')">
       <div class="pc-main">
@@ -1133,27 +1134,36 @@ function openDP(nom){
   const tachesSaison=getTachesSaison();
   let hReste=0;
   tachesSaison.forEach(t=>{
-    const stat=p.taches[t.nom];
+    const stat=p.taches[t.nom]||'Non démarré';
     if(stat!=='Validé')hReste+=t.hha*p.surface;
   });
   document.getElementById('dp-hreste').textContent=Math.round(hReste)+'h';
   document.getElementById('dp-saison-label').textContent=getSaisonActive().nom;
-  const ovLabel=document.getElementById('dp-saison-label');
-  if(ovLabel)ovLabel.textContent=getSaisonActive().nom;
-  // Tâches avec toggle validation
+  // Bouton GPS
+  const gpsBtn=document.getElementById('dp-gps-btn');
+  if(gpsBtn){
+    if(p.lat&&p.lng){
+      gpsBtn.style.display='flex';
+      gpsBtn.onclick=()=>openGPS(p.lat,p.lng,p.nom);
+    }else{
+      gpsBtn.style.display='none';
+    }
+  }
+  // Tâches : toutes les tâches de la saison, même à 0%
   const canEdit=isAdmin()||currentUser?.roles.includes('ouvrier');
   document.getElementById('dp-taches').innerHTML=tachesSaison.map(t=>{
     const stat=p.taches[t.nom]||'Non démarré';
     const isOn=stat==='Validé';
     const hEstim=Math.round(t.hha*p.surface*10)/10;
+    const statCls=isOn?'jsv':stat==='Fait'?'jsf':stat==='En cours'?'jse':'';
     return `<div class="val-row">
       <div class="val-left">
         <div>
           <div class="val-nom">${TEMOJI[t.nom]||'🌿'} ${t.nom}</div>
-          <div class="val-hha">${t.hha}h/ha · ~${hEstim}h pour cette parcelle</div>
+          <div class="val-hha">${t.hha}h/ha · ~${hEstim}h ici${stat==='Non démarré'?'':' · <span style="color:'+(isOn?'var(--vert)':'var(--orange)')+'">'+stat+'</span>'}</div>
         </div>
       </div>
-      ${canEdit?`<button class="val-toggle ${isOn?'on':'off'}" onclick="toggleTravail('${p.nom}','${t.nom}',this)">${isOn?'✓':''}</button>`:`<span class="jst ${isOn?'jsv':'jse'}">${stat}</span>`}
+      ${canEdit?`<button class="val-toggle ${isOn?'on':'off'}" onclick="toggleTravail('${p.nom}','${t.nom}',this)">${isOn?'✓':''}</button>`:`<span class="jst ${statCls||'tcm'}">${stat}</span>`}
     </div>`;
   }).join('');
   openOv('ovParcelle');
@@ -1169,7 +1179,15 @@ function toggleTravail(nomParcelle,nomTache,btn){
   btn.textContent=isOn?'':'✓';
   // Ajouter au journal
   if(!isOn){
-    JOURNAL.unshift({id:Date.now().toString(16),date:new Date().toISOString().split('T')[0],parcelle:nomParcelle,tache:nomTache,qui:currentUser.nom,statut:'Validé',equipe:false});
+    const today=new Date().toISOString().split('T')[0];
+    JOURNAL.unshift({id:Date.now().toString(16),date:today,parcelle:nomParcelle,tache:nomTache,qui:currentUser.nom,statut:'Validé',equipe:false});
+    // Insérer météo dans le journal si c'est le premier travail de la journée et qu'on a la météo
+    const meteoExisteDansJournal=JOURNAL.find(j=>j.meteo&&j.date===today);
+    const meteoDisponible=METEO_JOURNAL.find(m=>m.date===today);
+    if(!meteoExisteDansJournal&&meteoDisponible){
+      const m=meteoDisponible;
+      JOURNAL.push({id:'meteo-'+today,date:today,parcelle:'Domaine',tache:'Météo',qui:'Auto',statut:'Info',equipe:false,meteo:true,temp:m.temp,desc:m.desc,wind:m.wind,emoji:m.emoji});
+    }
     // Mettre à jour TRAVAUX
     recalcTravaux(nomTache);
   }
@@ -1418,12 +1436,95 @@ function toggleEmRole(r,el){el.classList.toggle('on');el.textContent=el.classLis
 function saveEditMembre(){const nom=document.getElementById('em-nom').value;const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;m.statut=document.getElementById('em-statut').value;const allRoles=['admin','ouvrier','tractoriste','saisonnier'];m.roles=allRoles.filter(r=>document.getElementById('erc-'+r)?.classList.contains('on'));document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
 function deleteMembre(){const nom=document.getElementById('em-nom').value;if(nom==='Nico'){alert('Impossible de supprimer le compte principal.');return;}if(!confirm('Supprimer '+nom+'?'))return;MEMBRES=MEMBRES.filter(m=>m.nom!==nom);document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
 
+// ════ GPS ════
+function openGPS(lat,lng,nom){
+  // Essaie d'ouvrir l'app GPS native (Plans sur iOS, Maps sur Android/desktop)
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isAndroid=/Android/.test(navigator.userAgent);
+  let url;
+  if(isIOS){
+    // Apple Plans
+    url=`maps://maps.apple.com/?q=${encodeURIComponent(nom)}&ll=${lat},${lng}&z=17`;
+  }else if(isAndroid){
+    // Google Maps intention
+    url=`geo:${lat},${lng}?q=${lat},${lng}(${encodeURIComponent(nom)})`;
+  }else{
+    // Web fallback Google Maps
+    url=`https://maps.google.com/?q=${lat},${lng}`;
+  }
+  window.open(url,'_blank');
+}
+
+// ════ NOTIFICATIONS ════
+async function toggleNotifications(){
+  if(!('Notification' in window)){
+    alert('Les notifications ne sont pas supportées par ce navigateur.');
+    return;
+  }
+  if(Notification.permission==='granted'){
+    alert('✅ Notifications déjà activées.\n\nVous recevrez des alertes pour :\n• Risques de gel\n• DAR arrivant à expiration\n• Travaux en attente de validation');
+    return;
+  }
+  if(Notification.permission==='denied'){
+    alert('🔒 Notifications bloquées.\n\nPour les activer :\n• iOS : Réglages → Safari → Notifications\n• Android : Paramètres → Applications → Safari/Chrome → Notifications\n• Desktop : cliquez sur 🔒 dans la barre d\'adresse');
+    return;
+  }
+  const perm=await Notification.requestPermission();
+  if(perm==='granted'){
+    new Notification('Ma Vigne 🍇',{body:'Notifications activées ! Vous serez alerté des risques de gel et des DAR.',icon:'icon-192.png'});
+    alert('✅ Notifications activées !');
+  }else{
+    alert('Notifications refusées. Vous pouvez les activer dans les réglages du navigateur.');
+  }
+}
+
+// ════ EXPORT ════
+function exporterDonnees(){
+  const menu=`Choisissez le format d'export :\n\n1 — Journal (CSV)\n2 — Registre phyto (CSV)\n3 — Tout (JSON)`;
+  const choix=prompt(menu,'1');
+  if(!choix)return;
+  if(choix==='1')exportCSVJournal();
+  else if(choix==='2')exportCSVPhyto();
+  else if(choix==='3')exportJSON();
+  else alert('Choix invalide');
+}
+function exportCSVJournal(){
+  const rows=[['Date','Parcelle','Tâche','Ouvrier','Statut','Équipe']];
+  JOURNAL.filter(j=>!j.meteo).forEach(j=>{
+    rows.push([j.date,j.parcelle,j.tache,j.qui||'',j.statut,j.equipe?'Oui':'Non']);
+  });
+  telechargerCSV(rows,'journal_travaux.csv');
+}
+function exportCSVPhyto(){
+  const rows=[['Date','Produit','Type','N°AMM','Dose','DAR','Opérateur','Note']];
+  TRAITEMENTS.forEach(t=>{
+    const prod=CATALOGUE.find(p=>p.nom===t.produit);
+    rows.push([t.date,t.produit,t.type||'',prod?.amm||'',t.dose||prod?.dose||'',prod?.dar||'',t.operateur||'',t.note||'']);
+  });
+  telechargerCSV(rows,'registre_phyto.csv');
+}
+function exportJSON(){
+  const data={domaine:'Ma Vigne',export_date:new Date().toISOString(),parcelles:PARCELLES,journal:JOURNAL.filter(j=>!j.meteo),traitements:TRAITEMENTS,sessions:SESSIONS,membres:MEMBRES.map(m=>({nom:m.nom,roles:m.roles,statut:m.statut}))};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='mavigne_export_'+new Date().toISOString().split('T')[0]+'.json';
+  a.click();
+}
+function telechargerCSV(rows,filename){
+  const csv=rows.map(r=>r.map(v=>'"'+(String(v).replace(/"/g,'""'))+'"').join(',')).join('\n');
+  const bom='\uFEFF';
+  const blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=filename;
+  a.click();
+}
+
 // ════ OVERLAYS ════
 function openOv(id){document.getElementById(id).classList.add('open');}
 function closeOv(e,id){if(e.target===document.getElementById(id))document.getElementById(id).classList.remove('open');}
 function pickVal(el,hid,cls){el.parentElement.querySelectorAll('.pchk').forEach(x=>{x.classList.remove('sel','vert','acre','phyt');});el.classList.add('sel',cls);document.getElementById(hid).value=el.dataset.val;}
-
-// ════ INIT ════
 const todayStr=new Date().toISOString().split('T')[0];
 ['s-date','p-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=todayStr;});
 initLogin();
