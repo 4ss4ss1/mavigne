@@ -13,6 +13,179 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBtMdRk1ubHowIgXuZqB4NTWMNn7fD3I7Y",
+  authDomain: "mavigne-a0fd5.firebaseapp.com",
+  projectId: "mavigne-a0fd5",
+  storageBucket: "mavigne-a0fd5.firebasestorage.app",
+  messagingSenderId: "171431979576",
+  appId: "1:171431979576:web:76f291373b187b0ce514cd"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+
+// ── Clés Firestore : 1 document par collection de données ──
+const DOCS = {
+  parcelles:   doc(db, 'mavigne', 'parcelles'),
+  journal:     doc(db, 'mavigne', 'journal'),
+  sessions:    doc(db, 'mavigne', 'sessions'),
+  travaux:     doc(db, 'mavigne', 'travaux'),
+  traitements: doc(db, 'mavigne', 'traitements'),
+  catalogue:   doc(db, 'mavigne', 'catalogue'),
+  conducteurs: doc(db, 'mavigne', 'conducteurs'),
+  activites:   doc(db, 'mavigne', 'activites'),
+  membres:     doc(db, 'mavigne', 'membres'),
+  saisons:     doc(db, 'mavigne', 'saisons'),
+  taches:      doc(db, 'mavigne', 'taches'),
+};
+
+// Expose sur window pour accès depuis le JS non-module
+window._fbDb = db;
+window._fbDocs = DOCS;
+window._fbSetDoc = setDoc;
+window._fbGetDoc = getDoc;
+window._fbOnSnapshot = onSnapshot;
+
+// ── Chargement initial depuis Firestore ──
+async function fbLoad() {
+  try {
+    showSyncBadge('⏳ Connexion…', '#B8913A');
+    const snap = await getDoc(DOCS.parcelles);
+    if (!snap.exists()) {
+      // Premier démarrage : pousser les données initiales vers Firestore
+      await fbPushAll();
+      showSyncBadge('☁️ Données initiales envoyées', '#3D6B27');
+    } else {
+      // Charger depuis Firestore
+      await fbPullAll();
+      showSyncBadge('✅ Synchronisé', '#3D6B27');
+    }
+    // Écoute en temps réel (synchro multi-appareils)
+    fbListen();
+  } catch(e) {
+    console.warn('Firebase load error:', e);
+    showSyncBadge('⚠️ Hors ligne', '#A0291E');
+    // Fallback localStorage
+    if(window.loadData) window.loadData();
+  }
+  // Signaler que Firebase est prêt
+  window._fbReady = true;
+  if(window._fbReadyCb) window._fbReadyCb();
+}
+
+async function fbPullAll() {
+  const keys = Object.keys(DOCS);
+  for(const k of keys) {
+    const s = await getDoc(DOCS[k]);
+    if(!s.exists()) continue;
+    const d = s.data();
+    applyFbData(k, d.value);
+  }
+}
+
+async function fbPushAll() {
+  const map = {
+    parcelles:   window.PARCELLES,
+    journal:     window.JOURNAL,
+    sessions:    window.SESSIONS,
+    travaux:     window.TRAVAUX,
+    traitements: window.TRAITEMENTS,
+    catalogue:   window.CATALOGUE,
+    conducteurs: window.CONDUCTEURS,
+    activites:   window.ACTIVITES,
+    membres:     window.MEMBRES,
+    saisons:     window.SAISONS,
+    taches:      window.TACHES,
+  };
+  for(const [k,v] of Object.entries(map)) {
+    if(v !== undefined) await setDoc(DOCS[k], { value: JSON.parse(JSON.stringify(v)) });
+  }
+}
+
+function applyFbData(key, value) {
+  if(value === undefined || value === null) return;
+  switch(key) {
+    case 'parcelles':
+      if(window.PARCELLES){ window.PARCELLES.length=0; value.forEach(x=>window.PARCELLES.push(x)); }
+      break;
+    case 'journal':     window.JOURNAL     = value; break;
+    case 'sessions':    window.SESSIONS    = value; break;
+    case 'travaux':     window.TRAVAUX     = value; break;
+    case 'traitements': window.TRAITEMENTS = value; break;
+    case 'catalogue':   window.CATALOGUE   = value; break;
+    case 'conducteurs': window.CONDUCTEURS = value; break;
+    case 'activites':   window.ACTIVITES   = value; break;
+    case 'membres':     window.MEMBRES     = value; break;
+    case 'saisons':     window.SAISONS     = value; break;
+    case 'taches':      window.TACHES      = value; break;
+  }
+}
+
+// ── Écoute temps réel : mise à jour auto si un autre appareil modifie ──
+let _ignoreNext = {};
+function fbListen() {
+  Object.entries(DOCS).forEach(([key, ref]) => {
+    onSnapshot(ref, snap => {
+      if(!snap.exists()) return;
+      if(_ignoreNext[key]) { _ignoreNext[key]=false; return; }
+      const val = snap.data().value;
+      applyFbData(key, val);
+      // Re-render si la page correspondante est active
+      if(window.currentUser) {
+        const p = document.querySelector('.page.active');
+        if(p) {
+          const pid = p.id;
+          if((key==='parcelles'||key==='journal'||key==='travaux') && (pid==='page-home'||pid==='page-parcelles'||pid==='page-journal')) {
+            if(window.renderHome) window.renderHome();
+            if(window.renderParcelles) window.renderParcelles();
+            if(window.computePStats) window.computePStats();
+            if(pid==='page-journal'&&window.renderJournalList) window.renderJournalList();
+          }
+          if(key==='sessions' && pid==='page-tracteur' && window.renderTracteur) window.renderTracteur();
+          if((key==='traitements'||key==='catalogue') && pid==='page-phyto' && window.renderPhyto) window.renderPhyto();
+          if((key==='membres'||key==='saisons'||key==='taches') && pid==='page-reglages' && window.renderReglages) window.renderReglages();
+        }
+        showSyncBadge('🔄 Mis à jour', '#1A4A7A');
+        setTimeout(()=>showSyncBadge('✅ Synchronisé','#3D6B27'), 1500);
+      }
+    });
+  });
+}
+
+// ── saveData : écrit dans Firestore (appelé depuis le JS principal) ──
+window.fbSave = async function(key, value) {
+  try {
+    _ignoreNext[key] = true;
+    await setDoc(DOCS[key], { value: JSON.parse(JSON.stringify(value)) });
+    showSyncBadge('✅ Sauvegardé', '#3D6B27');
+  } catch(e) {
+    console.warn('fbSave error:', e);
+    showSyncBadge('⚠️ Erreur sync', '#A0291E');
+    // Fallback localStorage
+    if(window.saveData) window.saveData();
+  }
+};
+
+// ── Badge de statut synchro (affiché en haut de l'écran) ──
+function showSyncBadge(msg, color) {
+  let badge = document.getElementById('sync-badge');
+  if(!badge) return;
+  badge.textContent = msg;
+  badge.style.background = color;
+  badge.style.opacity = '1';
+  clearTimeout(badge._t);
+  badge._t = setTimeout(()=>{ badge.style.opacity='0'; }, 2500);
+}
+
+// Lancer après que le DOM et les données JS soient prêts
+window._fbLoad = fbLoad;
+</script>
 <style>
 :root{
   --vert:#1E3A12;--vert-med:#3D6B27;--vert-clair:#6BA34A;--vert-pale:#EAF3E2;
@@ -455,6 +628,8 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 <body>
 
 <!-- ══════ LOGIN ══════ -->
+<div id="sync-badge" style="position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#3D6B27;color:white;font-size:11px;font-weight:600;font-family:'Outfit',sans-serif;padding:5px 14px;border-radius:20px;z-index:99999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.2)"></div>
+
 <div id="login-screen">
   <div class="login-logo">🍇</div>
   <div class="login-title">Ma Vigne</div>
@@ -734,10 +909,11 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
     <div style="margin:0 16px">
       <div class="set-row" style="border-radius:16px 16px 0 0" onclick="requestNotifications()"><div class="sr-l"><div class="sr-ico" style="background:var(--terre-pale)">🔔</div><div><div class="sr-lbl">Notifications</div><div class="sr-sub" id="notif-status">Alertes gel, DAR, validations</div></div></div><div class="sr-arr" id="notif-arr">›</div></div>
       <div class="set-row" onclick="openExport()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">📤</div><div><div class="sr-lbl">Exporter données</div><div class="sr-sub">JSON complet · CSV journal · CSV parcelles</div></div></div><div class="sr-arr">›</div></div>
+      <div class="set-row" onclick="resetData()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🗑️</div><div><div class="sr-lbl" style="color:var(--rouge)">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr">›</div></div>
       <div class="set-row" style="border-radius:0 0 16px 16px" onclick="logout()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🚪</div><div><div class="sr-lbl" style="color:var(--rouge)">Se déconnecter</div></div></div><div class="sr-arr">›</div></div>
     </div>
   </div>
-  <div class="ver-tag">Ma Vigne v4.0 · Tous droits réservés 🍇</div>
+  <div class="ver-tag">Ma Vigne v4.0 · Sauvegarde automatique 💾</div>
 </div>
 
 <!-- ══════ NAV ══════ -->
@@ -907,6 +1083,82 @@ let SESSIONS=[{id:'0b81fe25',activite:'Griffage',date:'2026-03-03',conducteur:'N
 let CATALOGUE=[{nom:'Bouillie bordelaise 20 WG',type:'Cuivre',amm:'2010001',dar:21,dose:'4 kg/ha'},{nom:'Nordox 75 WG',type:'Cuivre',amm:'9200386',dar:56,dose:'0,6 kg/ha'},{nom:'Microthiol Special Disperss',type:'Soufre',amm:'2020014',dar:35,dose:'5 kg/ha'},{nom:'Thiovit Jet',type:'Soufre',amm:'8900225',dar:56,dose:'3–5 kg/ha'},{nom:'Mildicut',type:'Fongicide',amm:'2100435',dar:21,dose:'2,5 L/ha'},{nom:'Equation Pro',type:'Fongicide',amm:'2030218',dar:21,dose:'0,4 kg/ha'},{nom:'Pergado F',type:'Fongicide',amm:'2130033',dar:28,dose:'2 kg/ha'},{nom:'Switch',type:'Fongicide',amm:'9900455',dar:7,dose:'0,8 kg/ha'},{nom:'Karate Zeon',type:'Insecticide',amm:'9200556',dar:7,dose:'0,1 L/ha'},{nom:'Serenade ASO',type:'Biocontrôle',amm:'2110156',dar:0,dose:'4 L/ha'},{nom:'Sonata',type:'Biocontrôle',amm:'2120044',dar:0,dose:'8 L/ha'}];
 let TRAITEMENTS=[];
 let METEO_JOURNAL=[];
+
+// Exposer les variables sur window pour accès depuis le module Firebase
+window.PARCELLES  = PARCELLES;
+window.JOURNAL    = JOURNAL;
+window.SESSIONS   = SESSIONS;
+window.TRAVAUX    = TRAVAUX;
+window.TRAITEMENTS= TRAITEMENTS;
+window.CATALOGUE  = CATALOGUE;
+window.CONDUCTEURS= CONDUCTEURS;
+window.ACTIVITES  = ACTIVITES;
+window.MEMBRES    = MEMBRES;
+window.SAISONS    = SAISONS;
+window.TACHES     = TACHES;
+
+// ════════════════════════════════════
+// PERSISTANCE — Firebase (primaire) + localStorage (fallback)
+// ════════════════════════════════════
+const LS_KEY = 'mavigne_data_v1';
+
+// Appelé à chaque modification : écrit dans Firebase ET localStorage
+function saveData(keyHint) {
+  // localStorage fallback (immédiat)
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      PARCELLES,JOURNAL,SESSIONS,TRAVAUX,TRAITEMENTS,
+      CATALOGUE,CONDUCTEURS,ACTIVITES,MEMBRES,SAISONS,TACHES,
+      savedAt:Date.now()
+    }));
+  } catch(e) {}
+
+  // Firebase (async, ne bloque pas l'UI)
+  if(window.fbSave) {
+    const map = {
+      parcelles:PARCELLES, journal:JOURNAL, sessions:SESSIONS,
+      travaux:TRAVAUX, traitements:TRAITEMENTS, catalogue:CATALOGUE,
+      conducteurs:CONDUCTEURS, activites:ACTIVITES, membres:MEMBRES,
+      saisons:SAISONS, taches:TACHES
+    };
+    if(keyHint && map[keyHint] !== undefined) {
+      // Sauvegarder uniquement la collection modifiée (plus rapide)
+      window.fbSave(keyHint, map[keyHint]);
+    } else {
+      // Sauvegarder tout
+      Object.entries(map).forEach(([k,v]) => window.fbSave(k, v));
+    }
+  }
+}
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return false;
+    const d = JSON.parse(raw);
+    if (d.PARCELLES)    { PARCELLES.length=0; d.PARCELLES.forEach(x=>PARCELLES.push(x)); }
+    if (d.JOURNAL)      { JOURNAL = d.JOURNAL; window.JOURNAL = JOURNAL; }
+    if (d.SESSIONS)     { SESSIONS = d.SESSIONS; window.SESSIONS = SESSIONS; }
+    if (d.TRAVAUX)      { TRAVAUX = d.TRAVAUX; window.TRAVAUX = TRAVAUX; }
+    if (d.TRAITEMENTS)  { TRAITEMENTS = d.TRAITEMENTS; window.TRAITEMENTS = TRAITEMENTS; }
+    if (d.CATALOGUE)    { CATALOGUE = d.CATALOGUE; window.CATALOGUE = CATALOGUE; }
+    if (d.CONDUCTEURS)  { CONDUCTEURS = d.CONDUCTEURS; window.CONDUCTEURS = CONDUCTEURS; }
+    if (d.ACTIVITES)    { ACTIVITES = d.ACTIVITES; window.ACTIVITES = ACTIVITES; }
+    if (d.MEMBRES)      { MEMBRES = d.MEMBRES; window.MEMBRES = MEMBRES; }
+    if (d.SAISONS)      { SAISONS = d.SAISONS; window.SAISONS = SAISONS; }
+    if (d.TACHES)       { TACHES = d.TACHES; window.TACHES = TACHES; }
+    return true;
+  } catch(e) { return false; }
+}
+
+function resetData() {
+  if(!confirm('⚠️ Effacer toutes les données locales ? (Firebase non affecté)')) return;
+  localStorage.removeItem(LS_KEY);
+  location.reload();
+}
+
+// Exposer loadData pour le module Firebase
+window.loadData = loadData;
 
 // État
 let currentUser=null;
@@ -1391,6 +1643,7 @@ function marquerEnCours(nomParcelle,nomTache,btn){
     JOURNAL.unshift({id:Date.now().toString(16),date:today,parcelle:nomParcelle,tache:nomTache,qui:currentUser.nom,statut:'En cours',equipe:false});
     injectMeteoIfNeeded(today);
   }
+  saveData('parcelles'); saveData('journal');
   renderParcelles();computePStats();
   openDP(nomParcelle);
 }
@@ -1417,6 +1670,7 @@ function toggleTravail(nomParcelle,nomTache,btn){
     p.taches[nomTache]='En cours';
     btn.classList.remove('on');btn.classList.add('off');btn.textContent='';
     btn.title='Cliquer pour valider';
+    saveData('parcelles');
     renderParcelles();computePStats();
   } else {
     // Ouvrir le mini-panneau de validation avec choix équipe/seul
@@ -1444,6 +1698,7 @@ function confirmValidation(){
   JOURNAL.unshift({id:Date.now().toString(16),date,parcelle:_validParcelle,tache:_validTache,qui:currentUser.nom,statut:'Validé',equipe});
   recalcTravaux(_validTache);
   injectMeteoIfNeeded(date);
+  saveData('parcelles'); saveData('journal'); saveData('travaux');
   document.getElementById('ovValidation').classList.remove('open');
   renderParcelles();computePStats();
 }
@@ -1639,6 +1894,7 @@ function toggleSessionParcelle(nom,row){
   const idx=s.parcellesFaites.indexOf(nom);
   if(idx>=0){s.parcellesFaites.splice(idx,1);}
   else{s.parcellesFaites.push(nom);}
+  saveData('sessions');
   renderSessionProgress();
   renderSDParcelles(); // re-render (may hide the row if not showing done)
 }
@@ -1667,6 +1923,7 @@ function saveSession(){
   const pct=parseInt(document.getElementById('s-av').value)||100;
   const condEl=document.querySelector('#s-cond-pick .pchk.sel');
   SESSIONS.push({id:Date.now().toString(16),activite:a,date,conducteur:condEl?condEl.textContent.trim():CONDUCTEURS[0]?.nom,statut:document.getElementById('s-st').value,avancement:pct,note:document.getElementById('s-note').value});
+  saveData('sessions');
   document.getElementById('ovSession').classList.remove('open');
   renderTracteur();
 }
@@ -1675,6 +1932,7 @@ function saveActivite(){
   const nom=document.getElementById('new-act').value.trim();
   if(!nom){alert('Nom obligatoire');return;}
   ACTIVITES.push({nom,emoji:selEmoji});
+  saveData('activites');
   document.getElementById('ovActivite').classList.remove('open');
   document.getElementById('new-act').value='';
   renderTracteur();
@@ -1683,6 +1941,7 @@ function saveConducteur(){
   const nom=document.getElementById('new-cond').value.trim();
   if(!nom){alert('Prénom obligatoire');return;}
   CONDUCTEURS.push({nom,statut:document.getElementById('nc-st').value});
+  saveData('conducteurs');
   document.getElementById('ovConducteur').classList.remove('open');
   document.getElementById('new-cond').value='';
   renderTracteur();
@@ -1695,8 +1954,8 @@ function editCond(nom){
   document.getElementById('ec-st').value=c.statut;
   openOv('ovEditCond');
 }
-function saveEditCond(){const nom=document.getElementById('ec-nom').value;const c=CONDUCTEURS.find(x=>x.nom===nom);if(c)c.statut=document.getElementById('ec-st').value;document.getElementById('ovEditCond').classList.remove('open');renderTracteur();}
-function deleteCond(){const nom=document.getElementById('ec-nom').value;if(nom==='Nico'){alert('Impossible.');return;}if(!confirm('Supprimer '+nom+'?'))return;CONDUCTEURS=CONDUCTEURS.filter(c=>c.nom!==nom);document.getElementById('ovEditCond').classList.remove('open');renderTracteur();}
+function saveEditCond(){const nom=document.getElementById('ec-nom').value;const c=CONDUCTEURS.find(x=>x.nom===nom);if(c)c.statut=document.getElementById('ec-st').value;saveData('conducteurs');document.getElementById('ovEditCond').classList.remove('open');renderTracteur();}
+function deleteCond(){const nom=document.getElementById('ec-nom').value;if(nom==='Nico'){alert('Impossible.');return;}if(!confirm('Supprimer '+nom+'?'))return;CONDUCTEURS=CONDUCTEURS.filter(c=>c.nom!==nom);saveData('conducteurs');document.getElementById('ovEditCond').classList.remove('open');renderTracteur();}
 
 // ════ PHYTO ════
 function renderPhyto(){
@@ -1726,8 +1985,8 @@ function renderPhyto(){
 function switchPhTab(tab){phTab=tab;document.getElementById('tb-reg').classList.toggle('active',tab==='reg');document.getElementById('tb-cat').classList.toggle('active',tab==='cat');document.getElementById('tab-reg').classList.toggle('vis',tab==='reg');document.getElementById('tab-cat').classList.toggle('vis',tab==='cat');}
 function selFromCat(nom){switchPhTab('reg');openOv('ovPhyto');setTimeout(()=>{document.getElementById('p-prod').value=nom;onProdChange();},100);}
 function onProdChange(){const nom=document.getElementById('p-prod').value;const prod=CATALOGUE.find(p=>p.nom===nom);const ib=document.getElementById('p-infobox');if(prod){document.getElementById('p-amm').textContent='AMM : '+prod.amm+' · Dose max : '+prod.dose;document.getElementById('p-dar-info').textContent='DAR : '+prod.dar+' jours';ib.style.display='block';}else ib.style.display='none';}
-function saveTraitement(){const prod=document.getElementById('p-prod').value,date=document.getElementById('p-date').value;if(!prod||!date){alert('Produit et date obligatoires');return;}const p=CATALOGUE.find(x=>x.nom===prod);TRAITEMENTS.push({produit:prod,type:p?.type||'Fongicide',date,dose:document.getElementById('p-dose').value,operateur:document.getElementById('p-op').value,note:document.getElementById('p-note').value});document.getElementById('ovPhyto').classList.remove('open');['p-dose','p-op','p-note'].forEach(id=>document.getElementById(id).value='');document.getElementById('p-prod').value='';document.getElementById('p-infobox').style.display='none';renderPhyto();}
-function saveProduit(){const nom=document.getElementById('np-nom').value.trim();if(!nom){alert('Nom obligatoire');return;}CATALOGUE.push({nom,type:document.getElementById('np-type').value,amm:document.getElementById('np-amm').value,dar:parseInt(document.getElementById('np-dar').value)||0,dose:document.getElementById('np-dose').value});document.getElementById('ovProduit').classList.remove('open');['np-nom','np-amm','np-dar','np-dose'].forEach(id=>document.getElementById(id).value='');renderPhyto();}
+function saveTraitement(){const prod=document.getElementById('p-prod').value,date=document.getElementById('p-date').value;if(!prod||!date){alert('Produit et date obligatoires');return;}const p=CATALOGUE.find(x=>x.nom===prod);TRAITEMENTS.push({produit:prod,type:p?.type||'Fongicide',date,dose:document.getElementById('p-dose').value,operateur:document.getElementById('p-op').value,note:document.getElementById('p-note').value});saveData('traitements');document.getElementById('ovPhyto').classList.remove('open');['p-dose','p-op','p-note'].forEach(id=>document.getElementById(id).value='');document.getElementById('p-prod').value='';document.getElementById('p-infobox').style.display='none';renderPhyto();}
+function saveProduit(){const nom=document.getElementById('np-nom').value.trim();if(!nom){alert('Nom obligatoire');return;}CATALOGUE.push({nom,type:document.getElementById('np-type').value,amm:document.getElementById('np-amm').value,dar:parseInt(document.getElementById('np-dar').value)||0,dose:document.getElementById('np-dose').value});saveData('catalogue');document.getElementById('ovProduit').classList.remove('open');['np-nom','np-amm','np-dar','np-dose'].forEach(id=>document.getElementById(id).value='');renderPhyto();}
 
 // ════ RÉGLAGES ════
 function renderReglages(){
@@ -1746,18 +2005,18 @@ function renderReglages(){
   // Update select saisons dans modal tâche
   document.getElementById('nt-saison').innerHTML=['Hiver','Printemps','Été','Automne'].map(s=>`<option value="${s}" ${s===saisonNom?'selected':''}>${s}</option>`).join('');
 }
-function activateSaison(nom){SAISONS.forEach(s=>s.active=s.nom===nom);renderReglages();renderParcelles();computePStats();}
-function saveSaison(){const nom=document.getElementById('ns-nom').value.trim();if(!nom)return;SAISONS.push({nom,periode:document.getElementById('ns-periode').value,active:false});document.getElementById('ovSaison').classList.remove('open');document.getElementById('ns-nom').value='';document.getElementById('ns-periode').value='';renderReglages();}
-function saveTache(){const nom=document.getElementById('nt-nom').value.trim(),hha=parseInt(document.getElementById('nt-hha').value)||30,saison=document.getElementById('nt-saison').value;if(!nom)return;TACHES.push({nom,hha,saison});document.getElementById('ovTache').classList.remove('open');document.getElementById('nt-nom').value='';document.getElementById('nt-hha').value='';renderReglages();}
-function deleteTache(nom){if(!confirm(`Supprimer la tâche "${nom}" ?`))return;TACHES=TACHES.filter(t=>t.nom!==nom);renderReglages();}
+function activateSaison(nom){SAISONS.forEach(s=>s.active=s.nom===nom);saveData('saisons');renderReglages();renderParcelles();computePStats();}
+function saveSaison(){const nom=document.getElementById('ns-nom').value.trim();if(!nom)return;SAISONS.push({nom,periode:document.getElementById('ns-periode').value,active:false});saveData('saisons');document.getElementById('ovSaison').classList.remove('open');document.getElementById('ns-nom').value='';document.getElementById('ns-periode').value='';renderReglages();}
+function saveTache(){const nom=document.getElementById('nt-nom').value.trim(),hha=parseInt(document.getElementById('nt-hha').value)||30,saison=document.getElementById('nt-saison').value;if(!nom)return;TACHES.push({nom,hha,saison});saveData('taches');document.getElementById('ovTache').classList.remove('open');document.getElementById('nt-nom').value='';document.getElementById('nt-hha').value='';renderReglages();}
+function deleteTache(nom){if(!confirm(`Supprimer la tâche "${nom}" ?`))return;TACHES=TACHES.filter(t=>t.nom!==nom);saveData('taches');renderReglages();}
 
 // Membres
 function toggleRole(r){rolesTemp[r]=!rolesTemp[r];const el=document.getElementById('rc-'+r);el.classList.toggle('on',rolesTemp[r]);el.textContent=rolesTemp[r]?'✓':'';}
-function saveMembre(){const nom=document.getElementById('nm-nom').value.trim();if(!nom)return;const roles=Object.entries(rolesTemp).filter(([,v])=>v).map(([k])=>k);if(roles.length===0)roles.push('ouvrier');const couleurs=['#B85A1A','#C0392B','#1A5276','#7D3C98','#2C3E50'];MEMBRES.push({nom,email:document.getElementById('nm-email').value,roles,statut:'Actif',couleur:couleurs[MEMBRES.length%couleurs.length]});document.getElementById('ovMembre').classList.remove('open');document.getElementById('nm-nom').value='';document.getElementById('nm-email').value='';rolesTemp={ouvrier:true,tractoriste:false,saisonnier:false};['ouvrier','tractoriste','saisonnier'].forEach(r=>{const el=document.getElementById('rc-'+r);el.classList.toggle('on',rolesTemp[r]);el.textContent=rolesTemp[r]?'✓':'';});renderReglages();}
+function saveMembre(){const nom=document.getElementById('nm-nom').value.trim();if(!nom)return;const roles=Object.entries(rolesTemp).filter(([,v])=>v).map(([k])=>k);if(roles.length===0)roles.push('ouvrier');const couleurs=['#B85A1A','#C0392B','#1A5276','#7D3C98','#2C3E50'];MEMBRES.push({nom,email:document.getElementById('nm-email').value,roles,statut:'Actif',couleur:couleurs[MEMBRES.length%couleurs.length]});saveData('membres');document.getElementById('ovMembre').classList.remove('open');document.getElementById('nm-nom').value='';document.getElementById('nm-email').value='';rolesTemp={ouvrier:true,tractoriste:false,saisonnier:false};['ouvrier','tractoriste','saisonnier'].forEach(r=>{const el=document.getElementById('rc-'+r);el.classList.toggle('on',rolesTemp[r]);el.textContent=rolesTemp[r]?'✓':'';});renderReglages();}
 function editMembre(nom){const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;document.getElementById('em-title').textContent='✏️ '+nom;document.getElementById('em-nom').value=nom;document.getElementById('em-statut').value=m.statut;const er=document.getElementById('em-roles');const allRoles=['admin','ouvrier','tractoriste','saisonnier'];er.innerHTML=allRoles.map(r=>`<div class="role-check-row"><span class="role-check-name">${r}</span><div class="role-chk ${m.roles.includes(r)?'on':''}" id="erc-${r}" onclick="toggleEmRole('${r}',this)">${m.roles.includes(r)?'✓':''}</div></div>`).join('');openOv('ovEditMembre');}
 function toggleEmRole(r,el){el.classList.toggle('on');el.textContent=el.classList.contains('on')?'✓':'';}
-function saveEditMembre(){const nom=document.getElementById('em-nom').value;const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;m.statut=document.getElementById('em-statut').value;const allRoles=['admin','ouvrier','tractoriste','saisonnier'];m.roles=allRoles.filter(r=>document.getElementById('erc-'+r)?.classList.contains('on'));document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
-function deleteMembre(){const nom=document.getElementById('em-nom').value;if(nom==='Nico'){alert('Impossible de supprimer le compte principal.');return;}if(!confirm('Supprimer '+nom+'?'))return;MEMBRES=MEMBRES.filter(m=>m.nom!==nom);document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
+function saveEditMembre(){const nom=document.getElementById('em-nom').value;const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;m.statut=document.getElementById('em-statut').value;const allRoles=['admin','ouvrier','tractoriste','saisonnier'];m.roles=allRoles.filter(r=>document.getElementById('erc-'+r)?.classList.contains('on'));saveData('membres');document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
+function deleteMembre(){const nom=document.getElementById('em-nom').value;if(nom==='Nico'){alert('Impossible de supprimer le compte principal.');return;}if(!confirm('Supprimer '+nom+'?'))return;MEMBRES=MEMBRES.filter(m=>m.nom!==nom);saveData('membres');document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
 
 // ════ OVERLAYS ════
 function openOv(id){document.getElementById(id).classList.add('open');}
@@ -2127,15 +2386,38 @@ document.addEventListener('DOMContentLoaded', function(){
   var sd = document.getElementById('s-date'); if(sd) sd.value = todayStr;
   var pd = document.getElementById('p-date'); if(pd) pd.value = todayStr;
   var pm = document.getElementById('pdf-mois'); if(pm) pm.value = todayStr.slice(0,7);
-  initLogin();
+
+  // Exposer les fonctions render sur window pour le module Firebase
+  window.renderHome      = renderHome;
+  window.renderParcelles = renderParcelles;
+  window.computePStats   = computePStats;
+  window.renderJournalList = renderJournalList;
+  window.renderTracteur  = renderTracteur;
+  window.renderPhyto     = renderPhyto;
+  window.renderReglages  = renderReglages;
+
+  // Initialisation : Firebase en priorité, localStorage en fallback
+  if(window._fbLoad) {
+    // Firebase dispo — charger depuis le cloud
+    window._fbLoad().then(() => {
+      initLogin();
+    }).catch(() => {
+      // Erreur Firebase : utiliser localStorage
+      loadData();
+      initLogin();
+    });
+  } else {
+    // Module Firebase pas encore chargé (rare) — attendre ou fallback
+    loadData();
+    initLogin();
+  }
+
   document.getElementById('login-back-btn').addEventListener('click', backToProfiles);
   document.getElementById('login-pwd-btn').addEventListener('click', confirmLogin);
   document.getElementById('login-pwd-input').addEventListener('keydown', function(e){ if(e.key==='Enter') confirmLogin(); });
-  // Listeners déplacés ici pour garantir que le DOM est prêt
   document.querySelectorAll('.fchip').forEach(c=>c.addEventListener('click',function(){document.querySelectorAll('.fchip').forEach(x=>x.classList.remove('active'));this.classList.add('active');pFilter=this.dataset.filter;renderParcelles();}));
   document.getElementById('pSearch').addEventListener('input',function(){pSearch=this.value;renderParcelles();});
   document.getElementById('jSearch').addEventListener('input',function(){jSearch=this.value;renderJournalList();});
-  // Mettre à jour l'état des notifications si déjà accordées
   if('Notification' in window&&Notification.permission==='granted'){
     updateNotifUI('granted');
     scheduleNotifCheck();
