@@ -498,6 +498,9 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 .sdp-row.sdp-done{background:var(--vert-pale);border-radius:8px;padding:11px 8px;border-color:transparent;margin:1px 0;}
 .sdp-check{width:22px;height:22px;border-radius:7px;border:2px solid var(--gris);background:white;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0;transition:all 0.15s;}
 .sdp-check.on{background:var(--vert-med);border-color:var(--vert-med);}
+.sc-edit-btn{background:var(--acier-pale);border:1.5px solid var(--acier);border-radius:8px;padding:4px 9px;font-size:13px;cursor:pointer;color:var(--acier);margin-right:6px;flex-shrink:0;transition:background 0.15s;}
+.sc-edit-btn:active{background:var(--acier);color:white;}
+.sc-bfill-enc{background:var(--orange)!important;}
 .sdp-nom{font-size:13px;font-weight:600;flex:1;}
 .sdp-done .sdp-nom{color:var(--vert);}
 .sdp-surf{font-size:11px;color:var(--texte-doux);flex-shrink:0;}
@@ -913,6 +916,8 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 
 <div class="overlay" id="ovEditCond" onclick="closeOv(event,'ovEditCond')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="ec-title">✏️ Modifier</div></div><input type="hidden" id="ec-nom"><div class="modal-body"><div class="fl">Statut</div><div class="ppicker" id="ec-st-pick"><div class="pchk" data-val="Formé" onclick="pickVal(this,'ec-st','acre')">✅ Formé</div><div class="pchk" data-val="En formation" onclick="pickVal(this,'ec-st','acre')">🎓 En formation</div><div class="pchk" data-val="Suspendu" onclick="pickVal(this,'ec-st','acre')">⏸ Suspendu</div></div><input type="hidden" id="ec-st"><button class="mbtn acre" onclick="saveEditCond()">Enregistrer</button><button class="mbtn-del" onclick="deleteCond()">Supprimer</button></div></div></div>
 
+<div class="overlay" id="ovEditSession" onclick="closeOv(event,'ovEditSession')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">✏️ Modifier la session</div><div class="modal-sub">Admin uniquement</div></div><input type="hidden" id="es-id"><div class="modal-body"><div class="fl">Activité</div><select class="fsel ac" id="es-act"></select><div class="fl">Date</div><input type="date" class="fi ac" id="es-date"><div class="fl">Conducteur</div><div class="ppicker" id="es-cond-pick"></div><input type="hidden" id="es-cond"><div class="fl">Statut</div><div class="ppicker" id="es-st-pick"><div class="pchk" data-val="Terminé" onclick="pickVal(this,'es-st','acre')">✅ Terminé</div><div class="pchk" data-val="En cours" onclick="pickVal(this,'es-st','acre')">🔄 En cours</div></div><input type="hidden" id="es-st" value="Terminé"><div class="fl">Avancement (%)</div><input type="number" class="fi ac" id="es-av" placeholder="100" min="0" max="100"><div class="fl">Note</div><input type="text" class="fi ac" id="es-note" placeholder="Conditions, zone…"><button class="mbtn acre" onclick="saveEditSession()">Enregistrer</button><button class="mbtn-del" onclick="deleteSession()">🗑 Supprimer cette session</button></div></div></div>
+
 <div class="overlay" id="ovPhyto" onclick="closeOv(event,'ovPhyto')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">🧪 Nouveau traitement</div></div><div class="modal-body"><div class="fl">Produit</div><select class="fsel" id="p-prod" onchange="onProdChange()"></select><div class="infobx" id="p-infobox"><div id="p-amm"></div><div id="p-dar-info" style="margin-top:3px;font-weight:600"></div></div><div class="fl">Date</div><input type="date" class="fi ph" id="p-date"><div class="fl">Dose utilisée</div><input type="text" class="fi ph" id="p-dose" placeholder="Ex : 300 g/ha"><div class="fl">Opérateur</div><input type="text" class="fi ph" id="p-op" placeholder="Prénom"><div class="fl">Note</div><input type="text" class="fi ph" id="p-note" placeholder="Stade, conditions…"><button class="mbtn phyte" onclick="saveTraitement()">Enregistrer</button></div></div></div>
 
 <div class="overlay" id="ovProduit" onclick="closeOv(event,'ovProduit')"><div class="modal"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">📦 Nouveau produit</div></div><div class="modal-body"><div class="fl">Nom commercial</div><input type="text" class="fi ph" id="np-nom" placeholder="Ex : Bordeaux B…"><div class="fl">Type</div><select class="fsel" id="np-type"><option>Cuivre</option><option>Soufre</option><option>Fongicide</option><option>Insecticide</option><option>Herbicide</option><option>Biocontrôle</option></select><div class="fl">N° AMM</div><input type="text" class="fi ph" id="np-amm"><div class="fl">DAR (jours)</div><input type="number" class="fi ph" id="np-dar" placeholder="21"><div class="fl">Dose max</div><input type="text" class="fi ph" id="np-dose"><button class="mbtn phyte" onclick="saveProduit()">Ajouter</button></div></div></div>
@@ -1056,7 +1061,7 @@ let JOURNAL=[{"id":"0b550083","date":"2026-05-15","parcelle":"Songe du Haut","ta
 
 let ACTIVITES=[{nom:'Griffage',emoji:'🚜'},{nom:'Intercep',emoji:'✂️'},{nom:'Rognage',emoji:'✂️'},{nom:'Buttage',emoji:'🌱'},{nom:'Débuttage',emoji:'🌱'},{nom:'Minibuttage',emoji:'🌱'}];
 let CONDUCTEURS=[{nom:'Nico',statut:'Formé'},{nom:'Etienne',statut:'Formé'}];
-let SESSIONS=[{id:'0b81fe25',activite:'Griffage',date:'2026-03-03',conducteur:'Nico',statut:'Validé',avancement:100,note:''},{id:'bf8d7558',activite:'Minibuttage',date:'2026-04-10',conducteur:'Nico',statut:'Terminé',avancement:100,note:''},{id:'4b6e4fb0',activite:'Intercep',date:'2026-04-26',conducteur:'Nico',statut:'En cours',avancement:71,note:'13 parcelles restantes (zone sud)'}];
+let SESSIONS=[{id:'0b81fe25',activite:'Griffage',date:'2026-03-03',conducteur:'Nico',statut:'Terminé',avancement:100,note:''},{id:'bf8d7558',activite:'Minibuttage',date:'2026-04-10',conducteur:'Nico',statut:'Terminé',avancement:100,note:''},{id:'4b6e4fb0',activite:'Intercep',date:'2026-04-26',conducteur:'Nico',statut:'En cours',avancement:71,note:'13 parcelles restantes (zone sud)'}];
 let CATALOGUE=[{nom:'Bouillie bordelaise 20 WG',type:'Cuivre',amm:'2010001',dar:21,dose:'4 kg/ha'},{nom:'Nordox 75 WG',type:'Cuivre',amm:'9200386',dar:56,dose:'0,6 kg/ha'},{nom:'Microthiol Special Disperss',type:'Soufre',amm:'2020014',dar:35,dose:'5 kg/ha'},{nom:'Thiovit Jet',type:'Soufre',amm:'8900225',dar:56,dose:'3–5 kg/ha'},{nom:'Mildicut',type:'Fongicide',amm:'2100435',dar:21,dose:'2,5 L/ha'},{nom:'Equation Pro',type:'Fongicide',amm:'2030218',dar:21,dose:'0,4 kg/ha'},{nom:'Pergado F',type:'Fongicide',amm:'2130033',dar:28,dose:'2 kg/ha'},{nom:'Switch',type:'Fongicide',amm:'9900455',dar:7,dose:'0,8 kg/ha'},{nom:'Karate Zeon',type:'Insecticide',amm:'9200556',dar:7,dose:'0,1 L/ha'},{nom:'Serenade ASO',type:'Biocontrôle',amm:'2110156',dar:0,dose:'4 L/ha'},{nom:'Sonata',type:'Biocontrôle',amm:'2120044',dar:0,dose:'8 L/ha'}];
 let TRAITEMENTS=[];
 let METEO_JOURNAL=[];
@@ -1838,7 +1843,9 @@ function renderJournalList(){
 
 // ════ TRACTEUR ════
 function renderTracteur(){
-  const tot=SESSIONS.length,ter=SESSIONS.filter(s=>s.statut==='Terminé'||s.statut==='Validé').length,enc=SESSIONS.filter(s=>s.statut==='En cours').length;
+  // Normaliser les anciens "Validé" en "Terminé" à la volée
+  SESSIONS.forEach(s=>{if(s.statut==='Validé')s.statut='Terminé';});
+  const tot=SESSIONS.length,ter=SESSIONS.filter(s=>s.statut==='Terminé').length,enc=SESSIONS.filter(s=>s.statut==='En cours').length;
   document.getElementById('st-t').textContent=tot;
   document.getElementById('st-ter').textContent=ter;
   document.getElementById('st-enc').textContent=enc;
@@ -1852,14 +1859,16 @@ function renderTracteur(){
   const sl=document.getElementById('sessions-list');
   if(!data.length){sl.innerHTML='<div class="empty-state"><div class="ei">🚜</div><p>Aucune session.</p></div>';return;}
   const amap=ACTIVITES.reduce((m,a)=>{m[a.nom]=a;return m},{});
+  const isAdmin=currentUser&&currentUser.roles&&currentUser.roles.includes('admin');
   sl.innerHTML=data.map(s=>{
     const em=amap[s.activite]?.emoji||'🚜';
-    const sc=s.statut==='Validé'?'ssval':s.statut==='En cours'?'ssenc':'sster';
+    const sc=s.statut==='En cours'?'ssenc':'sster';
     const pct=s.avancement||100;
     const parcellesFaites=(s.parcellesFaites||[]).length;
     const total=PARCELLES.filter(p=>p.statut!=='Arrachee').length;
     const clk=isTractoriste()?`onclick="openSessionDetail('${s.id}')" style="cursor:pointer"`:'';
-    return `<div class="scard" ${clk}><div class="sc-hd"><div class="sc-ico">${em}</div><div class="sc-info"><div class="sc-act">${s.activite}</div><div class="sc-meta"><span class="sc-date">📅 ${fmtDate(s.date)}</span><span class="sc-cond">👤 ${s.conducteur}</span></div></div><div class="sc-right"><div class="sc-st ${sc}">${s.statut}</div><div class="sc-pct">${pct}%</div></div></div><div class="sc-bwrap"><div class="sc-blbl"><span>Avancement domaine</span><span>${parcellesFaites}/${total} parcelles</span></div><div class="sc-btrack"><div class="sc-bfill" style="width:${pct}%"></div></div></div>${s.note?`<div style="padding:0 16px 12px;font-size:11px;color:var(--texte-doux)">💬 ${s.note}</div>`:''}</div>`;
+    const editBtn=isAdmin?`<button class="sc-edit-btn" onclick="event.stopPropagation();openEditSession('${s.id}')">✏️</button>`:'';
+    return `<div class="scard" ${clk}><div class="sc-hd"><div class="sc-ico">${em}</div><div class="sc-info"><div class="sc-act">${s.activite}</div><div class="sc-meta"><span class="sc-date">📅 ${fmtDate(s.date)}</span><span class="sc-cond">👤 ${s.conducteur}</span></div></div><div class="sc-right">${editBtn}<div class="sc-st ${sc}">${s.statut}</div><div class="sc-pct">${pct}%</div></div></div><div class="sc-bwrap"><div class="sc-blbl"><span>Avancement domaine</span><span>${parcellesFaites}/${total} parcelles</span></div><div class="sc-btrack"><div class="sc-bfill ${s.statut==='En cours'?'sc-bfill-enc':''}" style="width:${pct}%"></div></div></div>${s.note?`<div style="padding:0 16px 12px;font-size:11px;color:var(--texte-doux)">💬 ${s.note}</div>`:''}</div>`;
   }).join('');
   document.getElementById('s-act').innerHTML=ACTIVITES.map(a=>`<option>${a.emoji} ${a.nom}</option>`).join('');
   document.getElementById('s-cond-pick').innerHTML=CONDUCTEURS.map((c,i)=>`<div class="pchk ${i===0?'sel acre':''}" onclick="pickCond(this)">${c.nom}</div>`).join('');
@@ -1924,6 +1933,45 @@ function renderSessionProgress(){
 }
 function closeSessionDetail(){
   document.getElementById('ovSessionDetail').classList.remove('open');
+  renderTracteur();
+}
+function openEditSession(id){
+  if(!(currentUser&&currentUser.roles&&currentUser.roles.includes('admin'))){alert('Accès admin requis.');return;}
+  const s=SESSIONS.find(x=>x.id===id);if(!s)return;
+  document.getElementById('es-id').value=id;
+  document.getElementById('es-act').innerHTML=ACTIVITES.map(a=>`<option ${a.nom===s.activite?'selected':''}>${a.emoji} ${a.nom}</option>`).join('');
+  document.getElementById('es-date').value=s.date;
+  document.getElementById('es-cond-pick').innerHTML=CONDUCTEURS.map(c=>`<div class="pchk ${c.nom===s.conducteur?'sel acre':''}" onclick="pickVal(this,'es-cond','acre')" data-val="${c.nom}">${c.nom}</div>`).join('');
+  document.getElementById('es-cond').value=s.conducteur;
+  document.querySelectorAll('#es-st-pick .pchk').forEach(el=>{el.classList.toggle('sel',el.dataset.val===s.statut);el.classList.toggle('acre',el.dataset.val===s.statut);});
+  document.getElementById('es-st').value=s.statut;
+  document.getElementById('es-av').value=s.avancement||100;
+  document.getElementById('es-note').value=s.note||'';
+  openOv('ovEditSession');
+}
+function saveEditSession(){
+  const id=document.getElementById('es-id').value;
+  const s=SESSIONS.find(x=>x.id===id);if(!s)return;
+  const rawAct=document.getElementById('es-act').value;
+  s.activite=rawAct.replace(/^[^\s]+\s/,'').trim();
+  s.date=document.getElementById('es-date').value;
+  const condVal=document.getElementById('es-cond').value;
+  if(condVal)s.conducteur=condVal;
+  s.statut=document.getElementById('es-st').value;
+  s.avancement=parseInt(document.getElementById('es-av').value)||100;
+  s.note=document.getElementById('es-note').value;
+  saveData('sessions');
+  document.getElementById('ovEditSession').classList.remove('open');
+  renderTracteur();
+}
+function deleteSession(){
+  const id=document.getElementById('es-id').value;
+  const s=SESSIONS.find(x=>x.id===id);if(!s)return;
+  if(!confirm(`Supprimer la session "${s.activite}" du ${fmtDate(s.date)} ?`))return;
+  const idx=SESSIONS.findIndex(x=>x.id===id);
+  if(idx>=0)SESSIONS.splice(idx,1);
+  saveData('sessions');
+  document.getElementById('ovEditSession').classList.remove('open');
   renderTracteur();
 }
 function pickEmoji(el){document.querySelectorAll('#emoji-pick .pchk').forEach(x=>{x.classList.remove('sel','acre');});el.classList.add('sel','acre');selEmoji=el.dataset.val;}
