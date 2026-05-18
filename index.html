@@ -988,6 +988,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
         <div style="background:var(--gris-clair);border-radius:12px;padding:12px"><div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">H restantes</div><div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;margin-top:2px;color:var(--orange)" id="dp-hreste"></div></div>
       </div>
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--texte-doux);margin-bottom:10px">Tâches — <span id="dp-saison-label"></span></div>
+      <div id="dp-drae-alert" style="display:none;background:#FFF3CD;border:1.5px solid #F0AD00;border-radius:12px;padding:12px 14px;margin-bottom:14px;gap:10px;align-items:flex-start;font-size:12px;color:#856404;font-weight:600;line-height:1.5"></div>
       <div id="dp-taches"></div>
     </div>
   </div>
@@ -1136,6 +1137,8 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 <div class="overlay" id="ovEditCond" onclick="closeOv(event,'ovEditCond')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="ec-title">✏️ Modifier</div></div><input type="hidden" id="ec-nom"><div class="modal-body"><div class="fl">Statut</div><div class="ppicker" id="ec-st-pick"><div class="pchk" data-val="Formé" onclick="pickVal(this,'ec-st','acre')">✅ Formé</div><div class="pchk" data-val="En formation" onclick="pickVal(this,'ec-st','acre')">🎓 En formation</div><div class="pchk" data-val="Suspendu" onclick="pickVal(this,'ec-st','acre')">⏸ Suspendu</div></div><input type="hidden" id="ec-st"><button class="mbtn acre" onclick="saveEditCond()">Enregistrer</button><button class="mbtn-del" onclick="deleteCond()">Supprimer</button></div></div></div>
 
 <div class="overlay" id="ovEditSession" onclick="closeOv(event,'ovEditSession')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">✏️ Modifier la session</div><div class="modal-sub">Admin uniquement</div></div><input type="hidden" id="es-id"><div class="modal-body"><div class="fl">Activité</div><select class="fsel ac" id="es-act"></select><div class="fl">Date</div><input type="date" class="fi ac" id="es-date"><div class="fl">Conducteur</div><div class="ppicker" id="es-cond-pick"></div><input type="hidden" id="es-cond"><div class="fl">Statut</div><div class="ppicker" id="es-st-pick"><div class="pchk" data-val="Terminé" onclick="pickVal(this,'es-st','acre')">✅ Terminé</div><div class="pchk" data-val="En cours" onclick="pickVal(this,'es-st','acre')">🔄 En cours</div></div><input type="hidden" id="es-st" value="Terminé"><div class="fl">Avancement (%)</div><input type="number" class="fi ac" id="es-av" placeholder="100" min="0" max="100"><div class="fl">Note</div><input type="text" class="fi ac" id="es-note" placeholder="Conditions, zone…"><button class="mbtn acre" onclick="saveEditSession()">Enregistrer</button><button class="mbtn-del" id="es-del-btn" onclick="confirmDeleteSession(this)">🗑 Supprimer cette session</button></div></div></div>
+
+<div class="overlay" id="ovTraitDetail" onclick="closeOv(event,'ovTraitDetail')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="otd-title">🧪 Traitement</div><div class="modal-sub" id="otd-sub"></div></div><div class="modal-body"><div id="otd-body"></div><button class="mbtn-del" style="margin-top:18px" onclick="confirmDeleteTraitement()">🗑 Supprimer ce traitement</button></div></div></div>
 
 <div class="overlay" id="ovPhyto" onclick="closeOv(event,'ovPhyto')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">🧪 Nouveau traitement</div></div><div class="modal-body"><div class="fl">Produit</div><select class="fsel" id="p-prod" onchange="onProdChange()"></select><div class="infobx" id="p-infobox"><div id="p-amm"></div><div id="p-dar-info" style="margin-top:3px;font-weight:600"></div></div><div class="fl">Date</div><input type="date" class="fi ph" id="p-date"><div class="fl">Dose utilisée</div><input type="text" class="fi ph" id="p-dose" placeholder="Ex : 300 g/ha"><div class="fl">Opérateur</div><input type="text" class="fi ph" id="p-op" placeholder="Prénom"><div class="fl">Note</div><input type="text" class="fi ph" id="p-note" placeholder="Stade, conditions…"><button class="mbtn phyte" onclick="saveTraitement()">Enregistrer</button></div></div></div>
 
@@ -1342,7 +1345,7 @@ let JOURNAL=[{"id":"0b550083","date":"2026-05-15","parcelle":"Songe du Haut","ta
 let ACTIVITES=[{nom:'Griffage',emoji:'🚜'},{nom:'Intercep',emoji:'✂️'},{nom:'Rognage',emoji:'✂️'},{nom:'Buttage',emoji:'🌱'},{nom:'Débuttage',emoji:'🌱'},{nom:'Minibuttage',emoji:'🌱'}];
 let CONDUCTEURS=[{nom:'Nico',statut:'Formé'},{nom:'Etienne',statut:'Formé'}];
 let SESSIONS=[{id:'0b81fe25',activite:'Griffage',date:'2026-03-03',conducteur:'Nico',statut:'Terminé',avancement:100,note:''},{id:'bf8d7558',activite:'Minibuttage',date:'2026-04-10',conducteur:'Nico',statut:'Terminé',avancement:100,note:''},{id:'4b6e4fb0',activite:'Intercep',date:'2026-04-26',conducteur:'Nico',statut:'En cours',avancement:71,note:'13 parcelles restantes (zone sud)'}];
-let CATALOGUE=[{nom:'Bouillie bordelaise 20 WG',type:'Cuivre',amm:'2010001',dar:21,dose:'4 kg/ha'},{nom:'Nordox 75 WG',type:'Cuivre',amm:'9200386',dar:56,dose:'0,6 kg/ha'},{nom:'Microthiol Special Disperss',type:'Soufre',amm:'2020014',dar:35,dose:'5 kg/ha'},{nom:'Thiovit Jet',type:'Soufre',amm:'8900225',dar:56,dose:'3–5 kg/ha'},{nom:'Mildicut',type:'Fongicide',amm:'2100435',dar:21,dose:'2,5 L/ha'},{nom:'Equation Pro',type:'Fongicide',amm:'2030218',dar:21,dose:'0,4 kg/ha'},{nom:'Pergado F',type:'Fongicide',amm:'2130033',dar:28,dose:'2 kg/ha'},{nom:'Switch',type:'Fongicide',amm:'9900455',dar:7,dose:'0,8 kg/ha'},{nom:'Karate Zeon',type:'Insecticide',amm:'9200556',dar:7,dose:'0,1 L/ha'},{nom:'Serenade ASO',type:'Biocontrôle',amm:'2110156',dar:0,dose:'4 L/ha'},{nom:'Sonata',type:'Biocontrôle',amm:'2120044',dar:0,dose:'8 L/ha'}];
+let CATALOGUE=[{nom:'Bouillie bordelaise 20 WG',type:'Cuivre',amm:'2010001',dar:21,drae:24,dose:'4 kg/ha'},{nom:'Nordox 75 WG',type:'Cuivre',amm:'9200386',dar:56,drae:24,dose:'0,6 kg/ha'},{nom:'Microthiol Special Disperss',type:'Soufre',amm:'2020014',dar:35,drae:6,dose:'5 kg/ha'},{nom:'Thiovit Jet',type:'Soufre',amm:'8900225',dar:56,drae:6,dose:'3–5 kg/ha'},{nom:'Mildicut',type:'Fongicide',amm:'2100435',dar:21,drae:24,dose:'2,5 L/ha'},{nom:'Equation Pro',type:'Fongicide',amm:'2030218',dar:21,drae:24,dose:'0,4 kg/ha'},{nom:'Pergado F',type:'Fongicide',amm:'2130033',dar:28,drae:24,dose:'2 kg/ha'},{nom:'Switch',type:'Fongicide',amm:'9900455',dar:7,drae:24,dose:'0,8 kg/ha'},{nom:'Karate Zeon',type:'Insecticide',amm:'9200556',dar:7,drae:48,dose:'0,1 L/ha'},{nom:'Serenade ASO',type:'Biocontrôle',amm:'2110156',dar:0,drae:0,dose:'4 L/ha'},{nom:'Sonata',type:'Biocontrôle',amm:'2120044',dar:0,drae:0,dose:'8 L/ha'}];
 let TRAITEMENTS=[];
 let METEO_JOURNAL=[];
 let HISTORIQUE=[]; // Snapshots archivés par saison
@@ -1953,6 +1956,26 @@ function openDP(nom){
   document.getElementById('dp-saison-label').textContent=getSaisonActive().nom;
   const ovLabel=document.getElementById('dp-saison-label');
   if(ovLabel)ovLabel.textContent=getSaisonActive().nom;
+  // ── Bandeau DRAE ── dernier traitement avec DRAE actif
+  const today2=new Date();
+  const traitementsActifs=TRAITEMENTS.filter(t=>{
+    const pr=CATALOGUE.find(c=>c.nom===t.produit);
+    if(!pr||!pr.drae)return false;
+    const draeR=pr.drae-Math.floor((today2-new Date(t.date))/3600000);
+    return draeR>0;
+  }).sort((a,b)=>b.date.localeCompare(a.date));
+  const draeEl=document.getElementById('dp-drae-alert');
+  if(draeEl){
+    if(traitementsActifs.length>0){
+      const tLast=traitementsActifs[0];
+      const prLast=CATALOGUE.find(c=>c.nom===tLast.produit);
+      const draeRLast=Math.max(0,prLast.drae-Math.floor((today2-new Date(tLast.date))/3600000));
+      draeEl.style.display='flex';
+      draeEl.innerHTML=`<span style="font-size:18px">⚠️</span><div><strong>DRAE en cours — ${draeRLast}h restantes</strong><div style="font-size:11px;margin-top:2px;opacity:0.85">${tLast.produit} · traité le ${fmtDate(tLast.date)} · Pas d'entrée équipe sol</div></div>`;
+    } else {
+      draeEl.style.display='none';
+    }
+  }
   // Tâches : afficher toutes, exclues en grisé
   const canEdit=isAdmin()||currentUser?.roles.includes('ouvrier');
   const nomParcelle=p.nom;
@@ -2554,10 +2577,16 @@ function renderPhyto(){
   let data=TRAITEMENTS.filter(t=>phFilter==='tous'||t.type===phFilter).sort((a,b)=>b.date.localeCompare(a.date));
   const reg=document.getElementById('traitements-list');
   if(!data.length)reg.innerHTML='<div class="empty-state"><div class="ei">🧪</div><p>Aucun traitement.<br>Appuyez sur <strong>＋ Traitement</strong></p></div>';
-  else reg.innerHTML=data.map(t=>{
+  else reg.innerHTML=data.map((t,i)=>{
     const prod=CATALOGUE.find(p=>p.nom===t.produit);
     const darR=prod?Math.max(0,prod.dar-Math.floor((today-new Date(t.date))/86400000)):null;
-    return `<div class="phcard"><div class="ph-hd"><div class="ph-ico">${TEMJ[t.type]||'🧪'}</div><div class="ph-info"><div class="ph-prod">${t.produit}</div><div class="ph-meta"><span class="ph-date">📅 ${fmtDate(t.date)}</span><span class="ph-type ${TCLS[t.type]||'tfc'}">${t.type}</span>${t.operateur?`<span class="ph-op">👤 ${t.operateur}</span>`:''}</div>${t.note?`<div style="font-size:10px;color:var(--texte-doux);margin-top:3px">💬 ${t.note}</div>`:''}</div><div class="ph-right">${prod&&prod.dar>0?`<div class="ph-dar">DAR <strong>${darR}j</strong></div>`:'<div style="font-size:10px;color:var(--vert-med);font-weight:600">✅ Libre</div>'}<div class="ph-dose">${t.dose||prod?.dose||'—'}</div></div></div>${prod?`<div class="ph-amm">AMM ${prod.amm} · Dose max : ${prod.dose}</div>`:''}</div>`;
+    const draeH=prod?.drae||0;
+    const draeMs=draeH*3600000;
+    const draeR=draeH>0?Math.max(0,draeH-Math.floor((today-new Date(t.date))/3600000)):0;
+    const draeActif=draeR>0;
+    const idx=TRAITEMENTS.indexOf(t);
+    const draeTag=draeActif?`<div style="font-size:10px;background:#FFF3CD;color:#856404;border-radius:6px;padding:2px 7px;font-weight:700;margin-top:4px;display:inline-block">⏳ DRAE ${draeR}h restantes</div>`:(draeH>0?`<div style="font-size:10px;color:var(--vert-med);font-weight:600;margin-top:4px">✅ Réentrée libre</div>`:'');
+    return `<div class="phcard" onclick="openTraitDetail(${idx})" style="cursor:pointer"><div class="ph-hd"><div class="ph-ico">${TEMJ[t.type]||'🧪'}</div><div class="ph-info"><div class="ph-prod">${t.produit}</div><div class="ph-meta"><span class="ph-date">📅 ${fmtDate(t.date)}</span><span class="ph-type ${TCLS[t.type]||'tfc'}">${t.type}</span>${t.operateur?`<span class="ph-op">👤 ${t.operateur}</span>`:''}</div>${t.note?`<div style="font-size:10px;color:var(--texte-doux);margin-top:3px">💬 ${t.note}</div>`:''}</div><div class="ph-right">${prod&&prod.dar>0?`<div class="ph-dar">DAR <strong>${darR}j</strong></div>`:'<div style="font-size:10px;color:var(--vert-med);font-weight:600">✅ Libre</div>'}<div class="ph-dose">${t.dose||prod?.dose||'—'}</div></div></div>${prod?`<div class="ph-amm">AMM ${prod.amm} · Dose max : ${prod.dose}${draeH>0?` · DRAE ${draeH}h`:''}</div>`:''}${draeTag}</div>`;
   }).join('');
   const catF=phFilter==='tous'?CATALOGUE:CATALOGUE.filter(p=>p.type===phFilter);
   document.getElementById('catalogue-list').innerHTML=catF.map(p=>`<div class="catitem" onclick="selFromCat('${p.nom}')"><div class="cat-l"><div class="cat-nom">${TEMJ[p.type]} ${p.nom}</div><div class="cat-det">AMM ${p.amm} · ${p.dose}</div></div><div class="cat-r"><span class="cat-db ${TCLS[p.type]||'tfc'}">${p.type}</span><span style="font-size:10px;color:var(--texte-doux)">DAR ${p.dar}j</span></div></div>`).join('');
@@ -2567,7 +2596,57 @@ function switchPhTab(tab){phTab=tab;document.getElementById('tb-reg').classList.
 function selFromCat(nom){switchPhTab('reg');openOv('ovPhyto');setTimeout(()=>{document.getElementById('p-prod').value=nom;onProdChange();},100);}
 function onProdChange(){const nom=document.getElementById('p-prod').value;const prod=CATALOGUE.find(p=>p.nom===nom);const ib=document.getElementById('p-infobox');if(prod){document.getElementById('p-amm').textContent='AMM : '+prod.amm+' · Dose max : '+prod.dose;document.getElementById('p-dar-info').textContent='DAR : '+prod.dar+' jours';ib.style.display='block';}else ib.style.display='none';}
 function saveTraitement(){const prod=document.getElementById('p-prod').value,date=document.getElementById('p-date').value;if(!prod||!date){alert('Produit et date obligatoires');return;}const p=CATALOGUE.find(x=>x.nom===prod);TRAITEMENTS.push({produit:prod,type:p?.type||'Fongicide',date,dose:document.getElementById('p-dose').value,operateur:document.getElementById('p-op').value,note:document.getElementById('p-note').value});saveData('traitements');document.getElementById('ovPhyto').classList.remove('open');['p-dose','p-op','p-note'].forEach(id=>document.getElementById(id).value='');document.getElementById('p-prod').value='';document.getElementById('p-infobox').style.display='none';renderPhyto();}
-function saveProduit(){const nom=document.getElementById('np-nom').value.trim();if(!nom){alert('Nom obligatoire');return;}CATALOGUE.push({nom,type:document.getElementById('np-type').value,amm:document.getElementById('np-amm').value,dar:parseInt(document.getElementById('np-dar').value)||0,dose:document.getElementById('np-dose').value});saveData('catalogue');document.getElementById('ovProduit').classList.remove('open');['np-nom','np-amm','np-dar','np-dose'].forEach(id=>document.getElementById(id).value='');renderPhyto();}
+function saveProduit(){const nom=document.getElementById('np-nom').value.trim();if(!nom){alert('Nom obligatoire');return;}CATALOGUE.push({nom,type:document.getElementById('np-type').value,amm:document.getElementById('np-amm').value,dar:parseInt(document.getElementById('np-dar').value)||0,drae:parseInt(document.getElementById('np-drae')?.value)||0,dose:document.getElementById('np-dose').value});saveData('catalogue');document.getElementById('ovProduit').classList.remove('open');['np-nom','np-amm','np-dar','np-dose'].forEach(id=>document.getElementById(id).value='');renderPhyto();}
+
+// ── Détail + suppression traitement ──
+let _traitDetailIdx=null;
+function openTraitDetail(idx){
+  _traitDetailIdx=idx;
+  const t=TRAITEMENTS[idx];
+  if(!t)return;
+  const prod=CATALOGUE.find(p=>p.nom===t.produit);
+  const today=new Date();
+  const darR=prod&&prod.dar>0?Math.max(0,prod.dar-Math.floor((today-new Date(t.date))/86400000)):null;
+  const draeH=prod?.drae||0;
+  const draeR=draeH>0?Math.max(0,draeH-Math.floor((today-new Date(t.date))/3600000)):0;
+  document.getElementById('otd-title').textContent=(TEMJ[t.type]||'🧪')+' '+t.produit;
+  document.getElementById('otd-sub').textContent=fmtDate(t.date)+(t.operateur?' · 👤 '+t.operateur:'');
+  document.getElementById('otd-body').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div style="background:var(--gris-clair);border-radius:12px;padding:12px">
+        <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">Dose</div>
+        <div style="font-size:16px;font-weight:700;margin-top:4px">${t.dose||prod?.dose||'—'}</div>
+      </div>
+      <div style="background:var(--gris-clair);border-radius:12px;padding:12px">
+        <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">N° AMM</div>
+        <div style="font-size:13px;font-weight:600;margin-top:4px;font-family:monospace">${prod?.amm||'—'}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div style="background:${darR>0?'var(--rouge-pale)':'var(--vert-pale)'};border-radius:12px;padding:12px">
+        <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">DAR récolte</div>
+        <div style="font-size:16px;font-weight:700;margin-top:4px;color:${darR>0?'var(--rouge)':'var(--vert)'}">${darR!==null?(darR>0?darR+'j restants':'✅ Libre'):'—'}</div>
+      </div>
+      <div style="background:${draeR>0?'#FFF3CD':'var(--vert-pale)'};border-radius:12px;padding:12px">
+        <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">DRAE équipe sol</div>
+        <div style="font-size:16px;font-weight:700;margin-top:4px;color:${draeR>0?'#856404':'var(--vert)'}">${draeH>0?(draeR>0?draeR+'h restantes':'✅ Libre'):'—'}</div>
+      </div>
+    </div>
+    ${t.note?`<div style="background:var(--gris-clair);border-radius:12px;padding:12px;font-size:12px;color:var(--texte-doux);font-style:italic">💬 ${t.note}</div>`:''}
+  `;
+  openOv('ovTraitDetail');
+}
+function confirmDeleteTraitement(){
+  if(_traitDetailIdx===null)return;
+  const t=TRAITEMENTS[_traitDetailIdx];
+  if(!t)return;
+  if(!confirm(`Supprimer le traitement ?\n\n${t.produit} — ${fmtDate(t.date)}\n\nCette action est irréversible.`))return;
+  TRAITEMENTS.splice(_traitDetailIdx,1);
+  saveData('traitements');
+  closeOv(null,'ovTraitDetail');
+  _traitDetailIdx=null;
+  renderPhyto();
+}
 
 // ════ RÉGLAGES ════
 function renderReglages(){
