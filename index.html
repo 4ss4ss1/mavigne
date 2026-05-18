@@ -45,7 +45,7 @@ db.enablePersistence({ synchronizeTabs: true }).catch(function(err) {
 });
 
 const COLLECTIONS = ['parcelles','journal','sessions','travaux','traitements',
-                     'catalogue','conducteurs','activites','membres','saisons','taches','config'];
+                     'catalogue','conducteurs','activites','membres','saisons','taches','config','historique'];
 
 function fbDoc(key) { return db.collection('mavigne').doc(key); }
 
@@ -744,6 +744,60 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 .hv2-hcard-wrap{padding:0 16px;margin-bottom:4px;overflow:hidden;transition:max-height 0.35s ease;}
 .hv2-hcard-wrap.hv2-collapsed{max-height:0;}
 
+/* ══ HISTORIQUE MULTI-SAISONS ══ */
+.histo-header{background:linear-gradient(135deg,var(--vert) 0%,var(--acier) 100%);padding:20px;border-radius:16px;margin:0 16px 16px;color:white;position:relative;overflow:hidden;}
+.histo-header::before{content:'';position:absolute;top:-30px;right:-20px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.06);}
+.histo-header-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;margin-bottom:4px;}
+.histo-header-sub{font-size:11px;opacity:0.65;letter-spacing:0.5px;}
+.histo-sel-row{display:flex;gap:8px;padding:0 16px;margin-bottom:16px;flex-wrap:wrap;}
+.histo-sel-btn{padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid var(--gris);background:white;color:var(--texte-doux);cursor:pointer;transition:all 0.15s;font-family:'Outfit',sans-serif;}
+.histo-sel-btn.actif{border-color:var(--vert);background:var(--vert-pale);color:var(--vert);}
+.histo-sel-btn.actif2{border-color:var(--acier);background:var(--acier-pale);color:var(--acier);}
+.histo-compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px;margin-bottom:16px;}
+.histo-col{background:white;border-radius:14px;padding:14px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);}
+.histo-col-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;}
+.histo-col.col-a .histo-col-title{color:var(--vert);}
+.histo-col.col-b .histo-col-title{color:var(--acier);}
+.histo-col-pct{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;line-height:1;}
+.histo-col.col-a .histo-col-pct{color:var(--vert);}
+.histo-col.col-b .histo-col-pct{color:var(--acier);}
+.histo-col-sub{font-size:10px;color:var(--texte-doux);margin-top:4px;}
+.histo-col-bar{height:5px;background:var(--gris-clair);border-radius:4px;margin-top:10px;overflow:hidden;}
+.histo-col.col-a .histo-col-bar-fill{background:var(--vert-med);height:100%;border-radius:4px;transition:width 0.5s ease;}
+.histo-col.col-b .histo-col-bar-fill{background:var(--acier);height:100%;border-radius:4px;transition:width 0.5s ease;}
+.histo-tache-compare{padding:0 16px;margin-bottom:16px;}
+.htc-row{background:white;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);}
+.htc-nom{font-size:13px;font-weight:600;margin-bottom:8px;}
+.htc-bars{display:flex;flex-direction:column;gap:5px;}
+.htc-bar-row{display:flex;align-items:center;gap:8px;}
+.htc-bar-label{font-size:10px;font-weight:600;width:70px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.htc-bar-label.la{color:var(--vert);}
+.htc-bar-label.lb{color:var(--acier);}
+.htc-bar-track{flex:1;height:6px;background:var(--gris-clair);border-radius:4px;overflow:hidden;}
+.htc-bar-fill-a{height:100%;background:var(--vert-med);border-radius:4px;transition:width 0.5s ease;}
+.htc-bar-fill-b{height:100%;background:var(--acier);border-radius:4px;transition:width 0.5s ease;}
+.htc-pct{font-size:11px;font-weight:700;width:32px;text-align:right;flex-shrink:0;}
+.htc-pct.la{color:var(--vert);}
+.htc-pct.lb{color:var(--acier);}
+.histo-stat-band{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:0 16px;margin-bottom:16px;}
+.hsb-item{background:white;border-radius:12px;padding:12px 10px;text-align:center;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);}
+.hsb-val{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--texte);}
+.hsb-lbl{font-size:9px;color:var(--texte-doux);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
+.histo-archive-btn{display:flex;align-items:center;gap:10px;background:white;border-radius:14px;padding:14px 16px;margin:0 16px 16px;box-shadow:var(--shadow-sm);border:1.5px dashed var(--gris);cursor:pointer;transition:all 0.15s;font-family:'Outfit',sans-serif;}
+.histo-archive-btn:active{background:var(--vert-pale);}
+.hab-ico{font-size:20px;}
+.hab-txt{flex:1;}
+.hab-lbl{font-size:13px;font-weight:600;color:var(--vert);}
+.hab-sub{font-size:11px;color:var(--texte-doux);margin-top:1px;}
+.histo-empty{text-align:center;padding:40px 20px;color:var(--texte-doux);}
+.histo-empty .ei{font-size:40px;margin-bottom:10px;}
+.histo-journal-row{background:white;border-radius:12px;padding:11px 14px;margin:0 16px 8px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);display:flex;align-items:center;gap:12px;}
+.hjr-dot{width:32px;height:32px;border-radius:9px;background:var(--vert-pale);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.hjr-corps{flex:1;min-width:0;}
+.hjr-tache{font-size:12px;font-weight:600;}
+.hjr-meta{font-size:10px;color:var(--texte-doux);margin-top:1px;}
+.hjr-date{font-size:10px;color:var(--texte-doux);flex-shrink:0;}
+
 </style>
 </head>
 <body>
@@ -1014,7 +1068,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 <!-- ══════ PAGE RÉGLAGES ══════ -->
 <div class="page" id="page-reglages">
   <div class="ph gris" style="padding-bottom:16px">
-    <div class="ph-top"><div><div class="ph-title">Réglages</div><div class="ph-sub">Ma Vigne v4.0</div></div></div>
+    <div class="ph-top"><div><div class="ph-title">Réglages</div><div class="ph-sub">Ma Vigne v4.1</div></div></div>
   </div>
   <div style="height:14px"></div>
   <div class="dom-badge"><div class="db-logo">🍇 Ma Vigne</div><div class="db-sub" id="dom-badge-sub">Domaine · 11,76 ha actifs</div></div>
@@ -1029,7 +1083,10 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
   <div class="set-sec">
     <div class="set-title">Saison active</div>
     <div id="saisons-list" style="padding:0 16px"></div>
-    <div style="padding:0 16px;margin-top:8px"><button class="mbtn verte" style="margin-top:0;font-size:13px;padding:10px" onclick="openOv('ovSaison')">＋ Nouvelle saison</button></div>
+    <div style="padding:0 16px;margin-top:8px;display:flex;gap:8px">
+      <button class="mbtn verte" style="margin-top:0;font-size:13px;padding:10px;flex:1" onclick="openOv('ovSaison')">＋ Nouvelle saison</button>
+      <button class="mbtn" style="margin-top:0;font-size:13px;padding:10px;flex:1;background:var(--acier-pale);color:var(--acier);border:1.5px solid var(--acier);border-radius:12px;font-family:'Outfit',sans-serif;font-weight:700;cursor:pointer" onclick="openOv('ovHistorique');renderHistorique()">📊 Historique</button>
+    </div>
   </div>
 
   <div class="set-sec">
@@ -1055,7 +1112,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
       <div class="set-row" style="border-radius:0 0 16px 16px" onclick="logout()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🚪</div><div><div class="sr-lbl" style="color:var(--rouge)">Se déconnecter</div></div></div><div class="sr-arr">›</div></div>
     </div>
   </div>
-  <div class="ver-tag">Ma Vigne v4.0 · Sauvegarde automatique 💾</div>
+  <div class="ver-tag">Ma Vigne v4.1 · Historique multi-saisons 📊</div>
 </div>
 
 <!-- ══════ NAV ══════ -->
@@ -1210,6 +1267,11 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
   <div style="font-size:11px;color:var(--texte-doux);text-align:center;margin-top:8px">Le mot de passe temporaire sera valable pour une seule connexion</div>
 </div></div></div>
 
+<div class="overlay" id="ovHistorique" onclick="closeOv(event,'ovHistorique')"><div class="modal" onclick="event.stopPropagation()" style="max-height:92vh;padding-bottom:30px"><div class="modal-handle"></div>
+  <div class="modal-hd"><div class="modal-title">📊 Historique multi-saisons</div><div class="modal-sub" id="histo-modal-sub">Comparaison entre saisons</div></div>
+  <div id="histo-body" style="padding-bottom:20px"></div>
+</div></div>
+
 <div class="overlay" id="ovSaison" onclick="closeOv(event,'ovSaison')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">📅 Nouvelle saison</div></div><div class="modal-body"><div class="fl">Nom de la saison</div><input type="text" class="fi" id="ns-nom" placeholder="Ex : Été 2026, Hiver 2026…"><div class="fl">Période</div><input type="text" class="fi" id="ns-periode" placeholder="Ex : Juin–Août 2026"><button class="mbtn verte" onclick="saveSaison()">Créer la saison</button></div></div></div>
 
 <div class="overlay" id="ovTache" onclick="closeOv(event,'ovTache')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">🌿 Nouvelle tâche</div></div><div class="modal-body"><div class="fl">Nom de la tâche</div><input type="text" class="fi" id="nt-nom" placeholder="Ex : Relevage, Accolage…"><div class="fl">Heures par hectare</div><input type="number" class="fi" id="nt-hha" placeholder="Ex : 50" min="0"><div class="fl">Saison</div><select class="fsel" id="nt-saison"></select><button class="mbtn verte" onclick="saveTache()">Ajouter la tâche</button></div></div></div>
@@ -1283,6 +1345,7 @@ let SESSIONS=[{id:'0b81fe25',activite:'Griffage',date:'2026-03-03',conducteur:'N
 let CATALOGUE=[{nom:'Bouillie bordelaise 20 WG',type:'Cuivre',amm:'2010001',dar:21,dose:'4 kg/ha'},{nom:'Nordox 75 WG',type:'Cuivre',amm:'9200386',dar:56,dose:'0,6 kg/ha'},{nom:'Microthiol Special Disperss',type:'Soufre',amm:'2020014',dar:35,dose:'5 kg/ha'},{nom:'Thiovit Jet',type:'Soufre',amm:'8900225',dar:56,dose:'3–5 kg/ha'},{nom:'Mildicut',type:'Fongicide',amm:'2100435',dar:21,dose:'2,5 L/ha'},{nom:'Equation Pro',type:'Fongicide',amm:'2030218',dar:21,dose:'0,4 kg/ha'},{nom:'Pergado F',type:'Fongicide',amm:'2130033',dar:28,dose:'2 kg/ha'},{nom:'Switch',type:'Fongicide',amm:'9900455',dar:7,dose:'0,8 kg/ha'},{nom:'Karate Zeon',type:'Insecticide',amm:'9200556',dar:7,dose:'0,1 L/ha'},{nom:'Serenade ASO',type:'Biocontrôle',amm:'2110156',dar:0,dose:'4 L/ha'},{nom:'Sonata',type:'Biocontrôle',amm:'2120044',dar:0,dose:'8 L/ha'}];
 let TRAITEMENTS=[];
 let METEO_JOURNAL=[];
+let HISTORIQUE=[]; // Snapshots archivés par saison
 
 // Exposer les variables sur window pour accès depuis le module Firebase
 window.PARCELLES  = PARCELLES;
@@ -1296,6 +1359,7 @@ window.ACTIVITES  = ACTIVITES;
 window.MEMBRES    = MEMBRES;
 window.SAISONS    = SAISONS;
 window.TACHES     = TACHES;
+window.HISTORIQUE = HISTORIQUE;
 
 // Resynchronise les variables locales `let` depuis window.* après une mise à jour Firebase
 // (nécessaire car le module Firebase réassigne window.JOURNAL etc. mais pas les let locaux)
@@ -1310,6 +1374,7 @@ window._syncLocalVars = function() {
   if(window.MEMBRES     !== undefined) MEMBRES     = window.MEMBRES;
   if(window.SAISONS     !== undefined) SAISONS     = window.SAISONS;
   if(window.TACHES      !== undefined) TACHES      = window.TACHES;
+  if(window.HISTORIQUE  !== undefined) HISTORIQUE  = window.HISTORIQUE;
   if(window.priorityMessage !== undefined) priorityMessage = window.priorityMessage;
   // PARCELLES est const : muté en place, pas besoin de réassigner
 };
@@ -1334,6 +1399,7 @@ function saveData(keyHint) {
     membres:     window.MEMBRES     || MEMBRES,
     saisons:     window.SAISONS     || SAISONS,
     taches:      window.TACHES      || TACHES,
+    historique:  window.HISTORIQUE  || HISTORIQUE,
   };
 
   // localStorage fallback (immédiat, hors ligne)
@@ -1342,7 +1408,8 @@ function saveData(keyHint) {
       PARCELLES:W.parcelles, JOURNAL:W.journal, SESSIONS:W.sessions,
       TRAVAUX:W.travaux, TRAITEMENTS:W.traitements, CATALOGUE:W.catalogue,
       CONDUCTEURS:W.conducteurs, ACTIVITES:W.activites, MEMBRES:W.membres,
-      SAISONS:W.saisons, TACHES:W.taches, priorityMessage:priorityMessage,
+      SAISONS:W.saisons, TACHES:W.taches, HISTORIQUE:W.historique,
+      priorityMessage:priorityMessage,
       savedAt:Date.now()
     }));
   } catch(e) {}
@@ -1373,6 +1440,7 @@ function loadData() {
     if (d.MEMBRES)      { MEMBRES = d.MEMBRES; window.MEMBRES = MEMBRES; }
     if (d.SAISONS)      { SAISONS = d.SAISONS; window.SAISONS = SAISONS; }
     if (d.TACHES)       { TACHES = d.TACHES; window.TACHES = TACHES; }
+    if (d.HISTORIQUE)   { HISTORIQUE = d.HISTORIQUE; window.HISTORIQUE = HISTORIQUE; }
     if (d.priorityMessage !== undefined) { priorityMessage = d.priorityMessage; window.priorityMessage = priorityMessage; }
     return true;
   } catch(e) { return false; }
@@ -2854,6 +2922,259 @@ function notifyPriorityChange(){
   new Notification('⚡ Nouvelle priorité',{body:priorityMessage,icon:'icon192.png'});
 }
 
+// ════ HISTORIQUE MULTI-SAISONS ════
+
+// Crée un snapshot de la saison active et l'archive dans HISTORIQUE
+function archiveSaisonActive(){
+  const saison = getSaisonActive();
+  // Vérifie si un snapshot existe déjà pour cette saison
+  const existing = HISTORIQUE.findIndex(h=>h.saisonNom===saison.nom);
+  const msg = existing>=0
+    ? `🔄 Écraser le snapshot de "${saison.nom}" avec l'état actuel ?`
+    : `📦 Archiver "${saison.nom}" dans l'historique ?\n\nCela sauvegarde l'état actuel des parcelles, du journal et des sessions.`;
+  if(!confirm(msg)) return;
+
+  const snapshot = {
+    saisonNom: saison.nom,
+    periode: saison.periode,
+    archivedAt: new Date().toISOString(),
+    // Snapshot complet
+    parcelles: JSON.parse(JSON.stringify(PARCELLES)),
+    journal: JSON.parse(JSON.stringify(JOURNAL.filter(j=>!j.meteo))),
+    sessions: JSON.parse(JSON.stringify(SESSIONS)),
+    taches: JSON.parse(JSON.stringify(getTachesSaison())),
+    travaux: JSON.parse(JSON.stringify(TRAVAUX)),
+    // Calculs récap
+    stats: _calcHistoStats(
+      PARCELLES, JOURNAL.filter(j=>!j.meteo), getTachesSaison(), TRAVAUX
+    )
+  };
+
+  if(existing>=0) HISTORIQUE[existing] = snapshot;
+  else HISTORIQUE.unshift(snapshot);
+
+  window.HISTORIQUE = HISTORIQUE;
+  saveData('historique');
+
+  // Fermer et re-rendre
+  renderHistorique();
+  const el = document.getElementById('histo-archive-feedback');
+  if(el){ el.textContent='✅ Snapshot enregistré !'; el.style.display='block'; setTimeout(()=>el.style.display='none',2500); }
+}
+
+// Calcule les stats d'un snapshot
+function _calcHistoStats(parcelles, journal, taches, travaux){
+  const parcActives = parcelles.filter(p=>p.statut!=='Arrachee');
+  const totalCases = taches.length * parcActives.length;
+  const totalVal = parcActives.reduce((s,p)=>s+taches.filter(t=>p.taches&&p.taches[t.nom]==='Validé').length,0);
+  const pctGlobal = totalCases>0 ? Math.round(totalVal/totalCases*100) : 0;
+  const nbEntries = journal.length;
+  const nbParcellesTouchees = [...new Set(journal.map(j=>j.parcelle))].length;
+  // Heures totales faites
+  const hFaites = Object.values(travaux||{}).reduce((s,t)=>s+(t.h_done||0),0);
+  // Tâches par avancement
+  const tachesStats = taches.map(t=>{
+    const tw = travaux[t.nom];
+    return {nom:t.nom, pct:tw?tw.pct:0, h_done:tw?tw.h_done:0, h_total:tw?tw.h_total:0};
+  });
+  return {pctGlobal, nbEntries, nbParcellesTouchees, hFaites:Math.round(hFaites), tachesStats};
+}
+
+// Récupère les stats de la saison active courante (sans snapshot)
+function _getCurrentStats(){
+  const taches = getTachesSaison();
+  return {
+    saisonNom: getSaisonActive().nom,
+    periode: getSaisonActive().periode,
+    stats: _calcHistoStats(PARCELLES, JOURNAL.filter(j=>!j.meteo), taches, TRAVAUX),
+    taches
+  };
+}
+
+// Rend le panneau historique
+let histoSelA=null, histoSelB=null; // Saisons sélectionnées pour comparaison
+
+function renderHistorique(){
+  const body = document.getElementById('histo-body');
+  if(!body) return;
+
+  const cur = _getCurrentStats();
+  // Liste des snapshots + saison courante
+  const allSaisons = [
+    {saisonNom:cur.saisonNom+' (actuelle)', saisonKey:cur.saisonNom, periode:cur.periode, stats:cur.stats, isCurrent:true},
+    ...HISTORIQUE.map(h=>({...h, saisonKey:h.saisonNom, isCurrent:false}))
+  ];
+
+  // Init sélection par défaut : 2 premières
+  if(!histoSelA || !allSaisons.find(s=>s.saisonKey===histoSelA)) histoSelA = allSaisons[0]?.saisonKey||null;
+  if(!histoSelB || !allSaisons.find(s=>s.saisonKey===histoSelB)) histoSelB = allSaisons[1]?.saisonKey||null;
+
+  const sA = allSaisons.find(s=>s.saisonKey===histoSelA);
+  const sB = allSaisons.find(s=>s.saisonKey===histoSelB);
+
+  const fmtDate = iso => iso ? new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}) : '—';
+
+  let html = '';
+
+  // ── En-tête ──
+  html += `<div class="histo-header" style="margin:16px 16px 12px">
+    <div class="histo-header-title">📊 Comparaison multi-saisons</div>
+    <div class="histo-header-sub">${allSaisons.length} saison${allSaisons.length>1?'s':''} disponible${allSaisons.length>1?'s':''}</div>
+  </div>`;
+
+  // ── Bouton archiver saison active ──
+  html += `<div class="histo-archive-btn" onclick="archiveSaisonActive()">
+    <div class="hab-ico">📦</div>
+    <div class="hab-txt">
+      <div class="hab-lbl">Archiver ${cur.saisonNom}</div>
+      <div class="hab-sub">Créer un snapshot de l'état actuel</div>
+    </div>
+    <div style="font-size:20px;color:var(--texte-doux)">›</div>
+  </div>
+  <div id="histo-archive-feedback" style="display:none;margin:0 16px 12px;background:var(--vert-pale);color:var(--vert);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600"></div>`;
+
+  if(allSaisons.length < 2){
+    html += `<div class="histo-empty"><div class="ei">📦</div><div style="font-size:14px;font-weight:600;margin-bottom:6px">Pas encore d'historique</div><div style="font-size:12px">Archivez la saison active pour commencer à comparer les années.</div></div>`;
+    body.innerHTML = html;
+    return;
+  }
+
+  // ── Sélecteurs de saisons ──
+  html += `<div style="padding:0 16px;margin-bottom:8px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--texte-doux);margin-bottom:8px">Saison A — référence</div>
+    <div class="histo-sel-row" style="padding:0;margin-bottom:12px">
+      ${allSaisons.map(s=>`<button class="histo-sel-btn ${s.saisonKey===histoSelA?'actif':''}" onclick="histoSelectA('${s.saisonKey}')">${s.saisonNom.replace(' (actuelle)','')}</button>`).join('')}
+    </div>
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--texte-doux);margin-bottom:8px">Saison B — comparaison</div>
+    <div class="histo-sel-row" style="padding:0;margin-bottom:4px">
+      ${allSaisons.map(s=>`<button class="histo-sel-btn ${s.saisonKey===histoSelB?'actif2':''}" onclick="histoSelectB('${s.saisonKey}')">${s.saisonNom.replace(' (actuelle)','')}</button>`).join('')}
+    </div>
+  </div>`;
+
+  if(!sA || !sB){
+    html += `<div style="padding:20px;text-align:center;color:var(--texte-doux);font-size:13px">Sélectionnez 2 saisons pour comparer</div>`;
+    body.innerHTML = html;
+    return;
+  }
+
+  const stA = sA.stats, stB = sB.stats;
+
+  // ── Comparaison avancement global ──
+  const diffPct = stA.pctGlobal - stB.pctGlobal;
+  const diffSign = diffPct>0?'▲':diffPct<0?'▼':'=';
+  const diffCol = diffPct>0?'var(--vert-med)':diffPct<0?'var(--rouge)':'var(--texte-doux)';
+
+  html += `<div style="padding:0 16px;margin-bottom:6px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--texte-doux)">Avancement global</div>
+      <div style="font-size:11px;font-weight:700;color:${diffCol}">${diffSign} ${Math.abs(diffPct)}% d'écart</div>
+    </div>
+    <div class="histo-compare-grid" style="padding:0">
+      <div class="histo-col col-a">
+        <div class="histo-col-title">${sA.saisonNom.replace(' (actuelle)','')}</div>
+        <div class="histo-col-pct">${stA.pctGlobal}%</div>
+        <div class="histo-col-sub">${stA.nbEntries} entrées · ${stA.nbParcellesTouchees} parcelles</div>
+        <div class="histo-col-bar"><div class="histo-col-bar-fill" style="width:${stA.pctGlobal}%"></div></div>
+      </div>
+      <div class="histo-col col-b">
+        <div class="histo-col-title">${sB.saisonNom.replace(' (actuelle)','')}</div>
+        <div class="histo-col-pct">${stB.pctGlobal}%</div>
+        <div class="histo-col-sub">${stB.nbEntries} entrées · ${stB.nbParcellesTouchees} parcelles</div>
+        <div class="histo-col-bar"><div class="histo-col-bar-fill" style="width:${stB.pctGlobal}%"></div></div>
+      </div>
+    </div>
+  </div>`;
+
+  // ── Stats en bande ──
+  const diffH = stA.hFaites - stB.hFaites;
+  const diffHSign = diffH>0?'+':'';
+  html += `<div class="histo-stat-band" style="margin-bottom:14px">
+    <div class="hsb-item">
+      <div class="hsb-val" style="color:${diffH>0?'var(--vert-med)':diffH<0?'var(--rouge)':'var(--texte)'}">${diffHSign}${diffH}h</div>
+      <div class="hsb-lbl">Diff. heures</div>
+    </div>
+    <div class="hsb-item">
+      <div class="hsb-val" style="color:var(--vert)">${stA.hFaites}h</div>
+      <div class="hsb-lbl">${sA.saisonNom.replace(' (actuelle)','').split(' ').slice(0,1).join('')}</div>
+    </div>
+    <div class="hsb-item">
+      <div class="hsb-val" style="color:var(--acier)">${stB.hFaites}h</div>
+      <div class="hsb-lbl">${sB.saisonNom.replace(' (actuelle)','').split(' ').slice(0,1).join('')}</div>
+    </div>
+  </div>`;
+
+  // ── Comparaison tâche par tâche ──
+  // Fusionner tâches A et B
+  const toutesLesTaches = [...new Set([
+    ...(stA.tachesStats||[]).map(t=>t.nom),
+    ...(stB.tachesStats||[]).map(t=>t.nom)
+  ])];
+
+  if(toutesLesTaches.length>0){
+    html += `<div style="padding:0 16px;margin-bottom:8px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--texte-doux);margin-bottom:10px">Détail par tâche</div></div>
+    <div class="histo-tache-compare">`;
+    toutesLesTaches.forEach(nom=>{
+      const tA = (stA.tachesStats||[]).find(t=>t.nom===nom)||{pct:0,h_done:0};
+      const tB = (stB.tachesStats||[]).find(t=>t.nom===nom)||{pct:0,h_done:0};
+      const emoji = (window.TEMOJI&&TEMOJI[nom])||'🌿';
+      const dPct = tA.pct-tB.pct;
+      const dSign = dPct>0?'+':'';
+      const dCol = dPct>0?'var(--vert-med)':dPct<0?'var(--rouge)':'var(--texte-doux)';
+      html += `<div class="htc-row">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="htc-nom">${emoji} ${nom}</div>
+          <div style="font-size:10px;font-weight:700;color:${dCol}">${dSign}${dPct}%</div>
+        </div>
+        <div class="htc-bars">
+          <div class="htc-bar-row">
+            <div class="htc-bar-label la">${sA.saisonNom.replace(' (actuelle)','').split(' ').slice(0,2).join(' ')}</div>
+            <div class="htc-bar-track"><div class="htc-bar-fill-a" style="width:${tA.pct}%"></div></div>
+            <div class="htc-pct la">${tA.pct}%</div>
+          </div>
+          <div class="htc-bar-row">
+            <div class="htc-bar-label lb">${sB.saisonNom.replace(' (actuelle)','').split(' ').slice(0,2).join(' ')}</div>
+            <div class="htc-bar-track"><div class="htc-bar-fill-b" style="width:${tB.pct}%"></div></div>
+            <div class="htc-pct lb">${tB.pct}%</div>
+          </div>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // ── Dernier snapshot ──
+  if(!sA.isCurrent){
+    html += `<div style="padding:0 16px;margin-bottom:8px;font-size:10px;color:var(--texte-doux)">📸 Snapshot A : ${fmtDate(sA.archivedAt)}</div>`;
+  }
+  if(!sB.isCurrent){
+    html += `<div style="padding:0 16px;margin-bottom:16px;font-size:10px;color:var(--texte-doux)">📸 Snapshot B : ${fmtDate(sB.archivedAt)}</div>`;
+  }
+
+  // ── Supprimer snapshot ──
+  const archivesDeleteables = HISTORIQUE.filter(h=>h.saisonNom===histoSelA||h.saisonNom===histoSelB);
+  if(archivesDeleteables.length>0){
+    html += `<div style="padding:0 16px">`;
+    archivesDeleteables.forEach(h=>{
+      html += `<button onclick="deleteHistoSnapshot('${h.saisonNom}')" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid var(--rouge);background:transparent;color:var(--rouge);font-size:12px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;margin-bottom:8px">🗑 Supprimer le snapshot « ${h.saisonNom} »</button>`;
+    });
+    html += `</div>`;
+  }
+
+  body.innerHTML = html;
+}
+
+function histoSelectA(key){ histoSelA=key; renderHistorique(); }
+function histoSelectB(key){ histoSelB=key; renderHistorique(); }
+
+function deleteHistoSnapshot(nomSaison){
+  if(!confirm(`Supprimer le snapshot de "${nomSaison}" ? Cette action est irréversible.`)) return;
+  HISTORIQUE = HISTORIQUE.filter(h=>h.saisonNom!==nomSaison);
+  window.HISTORIQUE = HISTORIQUE;
+  if(histoSelA===nomSaison) histoSelA=null;
+  if(histoSelB===nomSaison) histoSelB=null;
+  saveData('historique');
+  renderHistorique();
+}
+
 // ════ EXPORT ════
 function openExport(){openOv('ovExport');}
 function dlFile(content,filename,mime){
@@ -2870,7 +3191,7 @@ function showExportFeedback(msg){
   setTimeout(()=>{el.style.display='none';},3000);
 }
 function exportJSON(){
-  const data={exportDate:new Date().toISOString(),version:'4.0',domaine:'Ma Vigne',parcelles:PARCELLES,journal:JOURNAL.filter(j=>!j.meteo),sessions:SESSIONS,traitements:TRAITEMENTS,membres:MEMBRES.map(m=>({nom:m.nom,roles:m.roles,statut:m.statut})),saisons:SAISONS,taches:TACHES};
+  const data={exportDate:new Date().toISOString(),version:'4.1',domaine:'Ma Vigne',parcelles:PARCELLES,journal:JOURNAL.filter(j=>!j.meteo),sessions:SESSIONS,traitements:TRAITEMENTS,membres:MEMBRES.map(m=>({nom:m.nom,roles:m.roles,statut:m.statut})),saisons:SAISONS,taches:TACHES,historique:HISTORIQUE};
   const date=new Date().toISOString().split('T')[0];
   dlFile(JSON.stringify(data,null,2),`mavigne_export_${date}.json`,'application/json');
   showExportFeedback('✅ Export JSON téléchargé !');
@@ -2904,11 +3225,12 @@ function importJSON(input){
     if(data.membres){MEMBRES=data.membres;window.MEMBRES=MEMBRES;}
     if(data.saisons){SAISONS=data.saisons;window.SAISONS=SAISONS;}
     if(data.taches){TACHES=data.taches;window.TACHES=TACHES;}
+    if(data.historique){HISTORIQUE=data.historique;window.HISTORIQUE=HISTORIQUE;}
     // Recalculer les travaux depuis les parcelles importées
     if(typeof recalcAllTravaux==='function')recalcAllTravaux();
     // Sauvegarder
     if(typeof saveData==='function'){
-      ['parcelles','journal','sessions','traitements','membres','saisons','taches'].forEach(k=>saveData(k));
+      ['parcelles','journal','sessions','traitements','membres','saisons','taches','historique'].forEach(k=>saveData(k));
     }
     // Rafraîchir l'UI
     if(typeof renderHome==='function')renderHome();
