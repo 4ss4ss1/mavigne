@@ -1215,7 +1215,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 
 <div class="overlay" id="ovMembre" onclick="closeOv(event,'ovMembre')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">👤 Nouveau membre</div></div><div class="modal-body"><div class="fl">Prénom</div><input type="text" class="fi" id="nm-nom" placeholder="Prénom"><div class="fl">Email</div><input type="email" class="fi" id="nm-email" placeholder="email@domaine.fr"><div class="fl">Rôles</div><div class="roles-check" id="nm-roles"><div class="role-check-row"><span class="role-check-name">🌿 Ouvrier</span><div class="role-chk on" id="rc-ouvrier" onclick="toggleRole('ouvrier')">✓</div></div><div class="role-check-row"><span class="role-check-name">🚜 Tractoriste</span><div class="role-chk" id="rc-tractoriste" onclick="toggleRole('tractoriste')"></div></div><div class="role-check-row"><span class="role-check-name">🎟 Saisonnier</span><div class="role-chk" id="rc-saisonnier" onclick="toggleRole('saisonnier')"></div></div></div><div class="fl">Période (si saisonnier)</div><input type="text" class="fi" id="nm-periode" placeholder="Ex : Juin–Août 2026"><button class="mbtn verte" onclick="saveMembre()">Ajouter</button></div></div></div>
 
-<div class="overlay" id="ovEditMembre" onclick="closeOv(event,'ovEditMembre')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="em-title">✏️ Modifier membre</div></div><input type="hidden" id="em-nom"><div class="modal-body"><div class="fl">Rôles</div><div class="roles-check" id="em-roles"></div><div class="fl">Statut</div><div class="ppicker"><div class="pchk sel vert" data-val="Actif" onclick="pickVal(this,'em-statut','vert')">✅ Actif</div><div class="pchk" data-val="Inactif" onclick="pickVal(this,'em-statut','vert')">⏸ Inactif</div></div><input type="hidden" id="em-statut" value="Actif"><button class="mbtn verte" onclick="saveEditMembre()">Enregistrer</button><button class="mbtn-del" onclick="deleteMembre()">Supprimer</button></div></div></div>
+<div class="overlay" id="ovEditMembre" onclick="closeOv(event,'ovEditMembre')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="em-title">✏️ Modifier membre</div></div><input type="hidden" id="em-nom"><div class="modal-body"><div class="fl">Adresse email</div><input type="email" class="fi" id="em-email" placeholder="email@domaine.fr"><div class="fl">Rôles</div><div class="roles-check" id="em-roles"></div><div class="fl">Statut</div><div class="ppicker"><div class="pchk sel vert" data-val="Actif" onclick="pickVal(this,'em-statut','vert')">✅ Actif</div><div class="pchk" data-val="Inactif" onclick="pickVal(this,'em-statut','vert')">⏸ Inactif</div></div><input type="hidden" id="em-statut" value="Actif"><button class="mbtn verte" onclick="saveEditMembre()">Enregistrer</button><button class="mbtn-del" onclick="deleteMembre()">Supprimer</button></div></div></div>
 
 <script>
 // ════════════════════════════════════
@@ -2534,9 +2534,9 @@ function deleteTache(nom){if(!confirm(`Supprimer la tâche "${nom}" ?`))return;T
 // Membres
 function toggleRole(r){rolesTemp[r]=!rolesTemp[r];const el=document.getElementById('rc-'+r);el.classList.toggle('on',rolesTemp[r]);el.textContent=rolesTemp[r]?'✓':'';}
 function saveMembre(){const nom=document.getElementById('nm-nom').value.trim();if(!nom)return;const roles=Object.entries(rolesTemp).filter(([,v])=>v).map(([k])=>k);if(roles.length===0)roles.push('ouvrier');const couleurs=['#B85A1A','#C0392B','#1A5276','#7D3C98','#2C3E50'];MEMBRES.push({nom,email:document.getElementById('nm-email').value,roles,statut:'Actif',couleur:couleurs[MEMBRES.length%couleurs.length]});saveData('membres');document.getElementById('ovMembre').classList.remove('open');document.getElementById('nm-nom').value='';document.getElementById('nm-email').value='';rolesTemp={ouvrier:true,tractoriste:false,saisonnier:false};['ouvrier','tractoriste','saisonnier'].forEach(r=>{const el=document.getElementById('rc-'+r);el.classList.toggle('on',rolesTemp[r]);el.textContent=rolesTemp[r]?'✓':'';});renderReglages();}
-function editMembre(nom){const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;document.getElementById('em-title').textContent='✏️ '+nom;document.getElementById('em-nom').value=nom;document.getElementById('em-statut').value=m.statut;const er=document.getElementById('em-roles');const allRoles=['admin','ouvrier','tractoriste','saisonnier'];er.innerHTML=allRoles.map(r=>`<div class="role-check-row"><span class="role-check-name">${r}</span><div class="role-chk ${m.roles.includes(r)?'on':''}" id="erc-${r}" onclick="toggleEmRole('${r}',this)">${m.roles.includes(r)?'✓':''}</div></div>`).join('');openOv('ovEditMembre');}
+function editMembre(nom){const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;document.getElementById('em-title').textContent='✏️ '+nom;document.getElementById('em-nom').value=nom;document.getElementById('em-email').value=m.email||'';document.getElementById('em-statut').value=m.statut;const er=document.getElementById('em-roles');const allRoles=['admin','ouvrier','tractoriste','saisonnier'];er.innerHTML=allRoles.map(r=>`<div class="role-check-row"><span class="role-check-name">${r}</span><div class="role-chk ${m.roles.includes(r)?'on':''}" id="erc-${r}" onclick="toggleEmRole('${r}',this)">${m.roles.includes(r)?'✓':''}</div></div>`).join('');openOv('ovEditMembre');}
 function toggleEmRole(r,el){el.classList.toggle('on');el.textContent=el.classList.contains('on')?'✓':'';}
-function saveEditMembre(){const nom=document.getElementById('em-nom').value;const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;m.statut=document.getElementById('em-statut').value;const allRoles=['admin','ouvrier','tractoriste','saisonnier'];m.roles=allRoles.filter(r=>document.getElementById('erc-'+r)?.classList.contains('on'));saveData('membres');document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
+function saveEditMembre(){const nom=document.getElementById('em-nom').value;const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;m.email=document.getElementById('em-email').value.trim();m.statut=document.getElementById('em-statut').value;const allRoles=['admin','ouvrier','tractoriste','saisonnier'];m.roles=allRoles.filter(r=>document.getElementById('erc-'+r)?.classList.contains('on'));saveData('membres');document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
 function deleteMembre(){const nom=document.getElementById('em-nom').value;if(nom==='Nico'){alert('Impossible de supprimer le compte principal.');return;}if(!confirm('Supprimer '+nom+'?'))return;MEMBRES=MEMBRES.filter(m=>m.nom!==nom);saveData('membres');document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
 
 // ════ OVERLAYS ════
@@ -3325,43 +3325,10 @@ document.addEventListener('DOMContentLoaded', function(){
 <script>
 // ── Enregistrement Service Worker (PWA offline) ──
 if ('serviceWorker' in navigator) {
-
-  // Écoute les messages du SW — dont SW_UPDATED qui déclenche le rechargement
-  navigator.serviceWorker.addEventListener('message', function(event) {
-    if (event.data && event.data.type === 'FLUSH_OFFLINE_QUEUE') {
-      if(window._flushQueue) window._flushQueue();
-    }
-    if (event.data && event.data.type === 'SW_UPDATED') {
-      // Nouvelle version détectée — recharger silencieusement
-      console.log('[SW] Nouvelle version', event.data.version, '— rechargement');
-      window.location.reload();
-    }
-  });
-
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('./sw.js').then(function(reg) {
       console.log('[SW] Enregistré :', reg.scope);
-
-      // Vérifier les mises à jour toutes les 60 secondes (en plus du check au chargement)
-      setInterval(function() { reg.update(); }, 60000);
-
-      // Si un nouveau SW attend déjà → l'activer immédiatement
-      if (reg.waiting) {
-        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-      }
-
-      // Nouveau SW installé pendant la session → l'activer dès qu'il est prêt
-      reg.addEventListener('updatefound', function() {
-        var newSW = reg.installing;
-        newSW.addEventListener('statechange', function() {
-          if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
-            console.log('[SW] Mise à jour disponible — activation');
-            newSW.postMessage({ type: 'SKIP_WAITING' });
-          }
-        });
-      });
-
-      // Background Sync si supporté
+      // Déclencher Background Sync si supporté (vide la queue au retour réseau)
       if ('sync' in reg) {
         reg.sync.register('mavigne-sync').catch(function(e) {
           console.warn('[SW] Background Sync non dispo :', e);
