@@ -2141,7 +2141,7 @@ function renderSDParcelles(){
   const actives=PARCELLES.filter(p=>p.statut!=='Arrachee');
   const done=s.parcellesFaites||[];
   // Par défaut : afficher seulement les non-faites (restantes)
-  const toShow=sdShowDone?actives:actives.filter(p=>!done.includes(p.nom));
+  const toShow=(sdShowDone?actives:actives.filter(p=>!done.includes(p.nom))).slice().sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
   const btn=document.getElementById('sd-show-done-btn');
   if(btn)btn.textContent=sdShowDone?'Masquer faites':'Voir toutes';
   document.getElementById('sd-parcelles').innerHTML=toShow.length===0
