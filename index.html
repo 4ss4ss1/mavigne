@@ -789,7 +789,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 <!-- ══════ PAGE JOURNAL ══════ -->
 <div class="page" id="page-journal">
   <div class="ph verde">
-    <div class="ph-top"><div><div class="ph-title">Journal des travaux</div><div class="ph-sub" id="j-sub">0 entrées</div></div></div>
+    <div class="ph-top"><div><div class="ph-title">Journal des travaux</div><div class="ph-sub" id="j-sub">0 entrées</div></div><button class="ph-add" onclick="openJournalEntry()">＋ Ajouter</button></div>
   </div>
   <div class="sband c4">
     <div class="sbi"><div class="sbi-val cv" id="js-tot">0</div><div class="sbi-lbl">Total</div></div>
@@ -890,7 +890,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
     <div class="set-title">Application</div>
     <div style="margin:0 16px">
       <div class="set-row" style="border-radius:16px 16px 0 0" onclick="requestNotifications()"><div class="sr-l"><div class="sr-ico" style="background:var(--terre-pale)">🔔</div><div><div class="sr-lbl">Notifications</div><div class="sr-sub" id="notif-status">Alertes gel, DAR, validations</div></div></div><div class="sr-arr" id="notif-arr">›</div></div>
-      <div class="set-row" onclick="openExport()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">📤</div><div><div class="sr-lbl">Exporter données</div><div class="sr-sub">JSON complet · CSV journal · CSV parcelles</div></div></div><div class="sr-arr">›</div></div>
+      <div class="set-row" onclick="openExport()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">📤</div><div><div class="sr-lbl">Exporter / Importer</div><div class="sr-sub">JSON · CSV journal · CSV parcelles · Restaurer</div></div></div><div class="sr-arr">›</div></div>
       <div class="set-row" onclick="resetData()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🗑️</div><div><div class="sr-lbl" style="color:var(--rouge)">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr">›</div></div>
       <div class="set-row" style="border-radius:0 0 16px 16px" onclick="logout()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🚪</div><div><div class="sr-lbl" style="color:var(--rouge)">Se déconnecter</div></div></div><div class="sr-arr">›</div></div>
     </div>
@@ -924,7 +924,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 
 <div class="overlay" id="ovProduit" onclick="closeOv(event,'ovProduit')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">📦 Nouveau produit</div></div><div class="modal-body"><div class="fl">Nom commercial</div><input type="text" class="fi ph" id="np-nom" placeholder="Ex : Bordeaux B…"><div class="fl">Type</div><select class="fsel" id="np-type"><option>Cuivre</option><option>Soufre</option><option>Fongicide</option><option>Insecticide</option><option>Herbicide</option><option>Biocontrôle</option></select><div class="fl">N° AMM</div><input type="text" class="fi ph" id="np-amm"><div class="fl">DAR (jours)</div><input type="number" class="fi ph" id="np-dar" placeholder="21"><div class="fl">Dose max</div><input type="text" class="fi ph" id="np-dose"><button class="mbtn phyte" onclick="saveProduit()">Ajouter</button></div></div></div>
 
-<div class="overlay" id="ovExport" onclick="closeOv(event,'ovExport')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">📤 Exporter les données</div><div class="modal-sub">Choisissez le format d'export</div></div><div class="modal-body">
+<div class="overlay" id="ovExport" onclick="closeOv(event,'ovExport')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">📤 Exporter · Importer</div><div class="modal-sub">Sauvegarde, restauration et rapports</div></div><div class="modal-body">
   <div style="display:flex;flex-direction:column;gap:10px">
     <div style="background:var(--rouge-pale);border-radius:14px;padding:14px 16px">
       <div style="font-size:13px;font-weight:700;color:var(--rouge);margin-bottom:10px">🖨️ Rapport PDF mensuel</div>
@@ -939,6 +939,9 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
     <button onclick="exportCSVJournal()" style="background:var(--vert);color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">📋 <div><div>Export CSV — Journal</div><div style="font-size:11px;opacity:0.75;font-weight:400">Tous les travaux avec date, parcelle, ouvrier, statut</div></div></button>
     <button onclick="exportCSVParcelles()" style="background:var(--or);color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">🗺️ <div><div>Export CSV — Parcelles</div><div style="font-size:11px;opacity:0.75;font-weight:400">Avancement par parcelle et par tâche</div></div></button>
     <button onclick="exportJSON()" style="background:var(--acier);color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">📦 <div><div>Export JSON complet</div><div style="font-size:11px;opacity:0.75;font-weight:400">Toutes les données — sauvegarde complète</div></div></button>
+    <div style="border-top:1px solid var(--gris);margin:4px 0"></div>
+    <button onclick="document.getElementById('import-json-input').click()" style="background:var(--bleu-pale);color:var(--bleu);border:2px dashed var(--bleu);border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">📂 <div><div>Charger un export JSON</div><div style="font-size:11px;opacity:0.75;font-weight:400">Restaurer une sauvegarde · remplace les données actuelles</div></div></button>
+    <input type="file" id="import-json-input" accept=".json,application/json" style="display:none" onchange="importJSON(this)">
   </div>
   <div id="export-feedback" style="display:none;margin-top:14px;background:var(--vert-pale);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--vert);font-weight:600"></div>
 </div></div></div>
@@ -984,15 +987,45 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
   <div class="modal-body">
     <div class="fl">Date du travail</div>
     <input type="date" class="fi" id="vp-date">
-    <div class="fl">Réalisé</div>
+    <div class="fl">Réalisé par</div>
     <div class="ppicker" id="vp-equipe-pick">
-      <div class="pchk sel vert" data-val="non" onclick="pickVal(this,'vp-equipe-val','vert')">👤 Seul</div>
-      <div class="pchk" data-val="oui" onclick="pickVal(this,'vp-equipe-val','vert')">👥 En équipe</div>
+      <div class="pchk sel vert" data-val="non" onclick="toggleEquipeMode('non')">👤 Seul</div>
+      <div class="pchk" data-val="oui" onclick="toggleEquipeMode('oui')">👥 En équipe</div>
     </div>
     <input type="hidden" id="vp-equipe-val" value="non">
+    <div id="vp-equipe-section" style="display:none;margin-top:4px">
+      <div class="fl">Membres présents</div>
+      <div id="vp-membres-pick" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px"></div>
+    </div>
     <button class="mbtn verte" onclick="confirmValidation()">✓ Valider le travail</button>
   </div>
 </div></div>
+
+<div class="overlay" id="ovJournalEntry" onclick="closeOv(event,'ovJournalEntry')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">📋 Nouvelle entrée journal</div><div class="modal-sub">Saisie directe sans passer par les parcelles</div></div><div class="modal-body">
+  <div class="fl">Parcelle</div>
+  <select class="fsel" id="je-parcelle"></select>
+  <div class="fl">Tâche</div>
+  <select class="fsel" id="je-tache"></select>
+  <div class="fl">Date</div>
+  <input type="date" class="fi" id="je-date">
+  <div class="fl">Statut</div>
+  <div class="ppicker">
+    <div class="pchk sel vert" data-val="Validé" onclick="pickVal(this,'je-statut','vert')">✅ Validé</div>
+    <div class="pchk" data-val="En cours" onclick="pickVal(this,'je-statut','vert')">🔄 En cours</div>
+  </div>
+  <input type="hidden" id="je-statut" value="Validé">
+  <div class="fl">Réalisé par</div>
+  <div class="ppicker" id="je-equipe-pick">
+    <div class="pchk sel vert" data-val="non" onclick="toggleJEMode('non')">👤 Seul</div>
+    <div class="pchk" data-val="oui" onclick="toggleJEMode('oui')">👥 En équipe</div>
+  </div>
+  <input type="hidden" id="je-equipe-val" value="non">
+  <div id="je-equipe-section" style="display:none;margin-top:4px">
+    <div class="fl">Membres présents</div>
+    <div id="je-membres-pick" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px"></div>
+  </div>
+  <button class="mbtn verte" onclick="saveJournalEntry()">＋ Ajouter au journal</button>
+</div></div></div>
 
 <div class="overlay" id="ovSaison" onclick="closeOv(event,'ovSaison')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">📅 Nouvelle saison</div></div><div class="modal-body"><div class="fl">Nom de la saison</div><input type="text" class="fi" id="ns-nom" placeholder="Ex : Été 2026, Hiver 2026…"><div class="fl">Période</div><input type="text" class="fi" id="ns-periode" placeholder="Ex : Juin–Août 2026"><button class="mbtn verte" onclick="saveSaison()">Créer la saison</button></div></div></div>
 
@@ -1175,7 +1208,7 @@ window.loadData = loadData;
 let currentUser=null;
 let pFilter='toutes',pSearch='',jQui='tous',jTache='toutes',jSearch='',phTab='reg',phFilter='tous';
 let fCond='tous',fAct='toutes',selEmoji='🚜';
-let mapInit=false,leafMap=null;
+let mapInit=false,leafMap=null,kmlPolygons=[];
 let rolesTemp={ouvrier:true,tractoriste:false,saisonnier:false};
 let priorityMessage=''; // Message priorité admin pour onglet Parcelles
 let tracSessionId=null; // Session tracteur actuellement ouverte dans le panneau détail
@@ -1394,6 +1427,8 @@ function renderHeuresCard(containerId){
 
 // ════ NAVIGATION ════
 function goTo(page){
+  // Détruire la carte Leaflet si on quitte la page parcelles (évite les bugs de rendu)
+  if(page!=='parcelles'&&leafMap){leafMap.remove();leafMap=null;mapInit=false;}
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
@@ -1746,6 +1781,7 @@ function savePriority(){
   priorityMessage=document.getElementById('prio-input').value.trim();
   document.getElementById('ovPriority').classList.remove('open');
   savePriorityData();
+  notifyPriorityChange();
   renderParcelles();
 }
 function clearPriority(){
@@ -1782,23 +1818,92 @@ function openValidationPanel(nomParcelle,nomTache,btn){
   document.getElementById('vp-titre').textContent=`${TEMOJI[nomTache]||'🌿'} ${nomTache}`;
   document.getElementById('vp-parcelle').textContent=nomParcelle;
   document.getElementById('vp-date').value=new Date().toISOString().split('T')[0];
-  // Pré-sélectionner Seul
+  // Reset mode Seul
   document.querySelectorAll('#vp-equipe-pick .pchk').forEach((el,i)=>{el.classList.toggle('sel',i===0);el.classList.toggle('vert',i===0);});
   document.getElementById('vp-equipe-val').value='non';
+  document.getElementById('vp-equipe-section').style.display='none';
+  // Préparer la liste des membres
+  _buildMembresCheckboxes('vp-membres-pick',nomParcelle);
   openOv('ovValidation');
+}
+function toggleEquipeMode(val){
+  document.querySelectorAll('#vp-equipe-pick .pchk').forEach(el=>{
+    const isTarget=el.dataset.val===val;
+    el.classList.toggle('sel',isTarget);el.classList.toggle('vert',isTarget);
+  });
+  document.getElementById('vp-equipe-val').value=val;
+  document.getElementById('vp-equipe-section').style.display=val==='oui'?'block':'none';
+}
+function toggleJEMode(val){
+  document.querySelectorAll('#je-equipe-pick .pchk').forEach(el=>{
+    const isTarget=el.dataset.val===val;
+    el.classList.toggle('sel',isTarget);el.classList.toggle('vert',isTarget);
+  });
+  document.getElementById('je-equipe-val').value=val;
+  document.getElementById('je-equipe-section').style.display=val==='oui'?'block':'none';
+}
+function _buildMembresCheckboxes(containerId,excludeNom){
+  const container=document.getElementById(containerId);
+  if(!container)return;
+  const membres=MEMBRES.filter(m=>m.statut==='Actif'&&m.nom!==(excludeNom||currentUser?.nom)&&m.nom!==currentUser?.nom);
+  container.innerHTML=membres.map(m=>`<div class="pchk mbr-chk" data-nom="${m.nom}" onclick="this.classList.toggle('sel');this.classList.toggle('vert')" style="display:flex;align-items:center;gap:6px"><div style="width:20px;height:20px;border-radius:50%;background:${m.couleur||'#888'};display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white">${m.nom[0]}</div>${m.nom}</div>`).join('');
+}
+function _getSelectedMembres(containerId){
+  return Array.from(document.querySelectorAll(`#${containerId} .pchk.sel`)).map(el=>el.dataset.nom).filter(Boolean);
 }
 function confirmValidation(){
   const p=PARCELLES.find(x=>x.nom===_validParcelle);if(!p)return;
   const equipe=document.getElementById('vp-equipe-val').value==='oui';
   const date=document.getElementById('vp-date').value||new Date().toISOString().split('T')[0];
+  const membresEquipe=equipe?_getSelectedMembres('vp-membres-pick'):[];
   p.taches[_validTache]='Validé';
   if(_validBtn){_validBtn.classList.add('on');_validBtn.classList.remove('off');_validBtn.textContent='✓';_validBtn.title='Validé — cliquer pour annuler';}
-  JOURNAL.unshift({id:Date.now().toString(16),date,parcelle:_validParcelle,tache:_validTache,qui:currentUser.nom,statut:'Validé',equipe});
+  JOURNAL.unshift({id:Date.now().toString(16),date,parcelle:_validParcelle,tache:_validTache,qui:currentUser.nom,statut:'Validé',equipe,membresEquipe});
   recalcTravaux(_validTache);
   injectMeteoIfNeeded(date);
   saveData('parcelles'); saveData('journal'); saveData('travaux');
   document.getElementById('ovValidation').classList.remove('open');
   renderParcelles();computePStats();
+}
+function openJournalEntry(){
+  // Remplir les selects
+  const ps=document.getElementById('je-parcelle');
+  ps.innerHTML=PARCELLES.filter(p=>p.statut!=='Arrachee').map(p=>`<option value="${p.nom}">${p.nom}</option>`).join('');
+  const ts=document.getElementById('je-tache');
+  const tachesSaison=getTachesSaison();
+  ts.innerHTML=tachesSaison.map(t=>`<option value="${t.nom}">${TEMOJI[t.nom]||''} ${t.nom}</option>`).join('');
+  document.getElementById('je-date').value=new Date().toISOString().split('T')[0];
+  // Reset équipe
+  document.querySelectorAll('#je-equipe-pick .pchk').forEach((el,i)=>{el.classList.toggle('sel',i===0);el.classList.toggle('vert',i===0);});
+  document.getElementById('je-equipe-val').value='non';
+  document.getElementById('je-equipe-section').style.display='none';
+  document.getElementById('je-statut').value='Validé';
+  _buildMembresCheckboxes('je-membres-pick','');
+  openOv('ovJournalEntry');
+}
+function saveJournalEntry(){
+  const parcelle=document.getElementById('je-parcelle').value;
+  const tache=document.getElementById('je-tache').value;
+  const date=document.getElementById('je-date').value||new Date().toISOString().split('T')[0];
+  const statut=document.getElementById('je-statut').value;
+  const equipe=document.getElementById('je-equipe-val').value==='oui';
+  const membresEquipe=equipe?_getSelectedMembres('je-membres-pick'):[];
+  if(!parcelle||!tache)return;
+  JOURNAL.unshift({id:Date.now().toString(16),date,parcelle,tache,qui:currentUser.nom,statut,equipe,membresEquipe});
+  // Mettre à jour le statut de la parcelle si validé
+  if(statut==='Validé'||statut==='En cours'){
+    const p=PARCELLES.find(x=>x.nom===parcelle);
+    if(p&&p.taches){
+      const actuel=p.taches[tache]||'Non démarré';
+      if(statut==='Validé'&&actuel!=='Validé'){p.taches[tache]='Validé';recalcTravaux(tache);saveData('parcelles');saveData('travaux');}
+      else if(statut==='En cours'&&actuel==='Non démarré'){p.taches[tache]='En cours';saveData('parcelles');}
+    }
+  }
+  injectMeteoIfNeeded(date);
+  saveData('journal');
+  document.getElementById('ovJournalEntry').classList.remove('open');
+  renderJournalList();
+  renderHome();
 }
 
 function injectMeteoIfNeeded(date){
@@ -1824,7 +1929,10 @@ function switchPTab(tab){
   document.getElementById('tbc').classList.toggle('active',tab==='carte');
   document.getElementById('pwrapliste').classList.toggle('vis',tab==='liste');
   document.getElementById('pwrapcarte').classList.toggle('vis',tab==='carte');
-  if(tab==='carte'&&!mapInit){initMap();mapInit=true;}
+  if(tab==='carte'){
+    if(!mapInit){initMap();mapInit=true;}
+    else if(leafMap){setTimeout(function(){leafMap.invalidateSize();},100);}
+  }
 }
 function initMap(){
   leafMap=L.map('map').setView([47.21,4.972],12);
@@ -1836,12 +1944,25 @@ function initMap(){
       .addTo(leafMap).bindPopup(`<b>${p.nom}</b><br>${p.surface} ha · ${cl.pct}%`)
       .on('click',()=>openDP(p.nom));
   });
+  // Recharger les polygones KML deja memorises
+  kmlPolygons.forEach(function(k){
+    const p=PARCELLES.find(function(x){return x.nom.toLowerCase()===k.name.toLowerCase();});
+    const col=p?getPCls(p).col:'var(--vert-med)';
+    L.polygon(k.pts,{color:col,fillOpacity:0.3,weight:2}).addTo(leafMap)
+      .bindPopup('<b>'+k.name+'</b>'+(p?'<br>'+p.surface+' ha · '+getPCls(p).pct+'%':''));
+  });
+  if(kmlPolygons.length>0){
+    const kz=document.querySelector('.kml-zone');
+    if(kz)kz.innerHTML='<div style="font-size:24px">✅</div><p style="color:var(--vert-med);font-weight:600">'+kmlPolygons.length+' parcelles KML</p>';
+  }
 }
 function loadKML(input){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=e=>{
-    if(!mapInit){initMap();mapInit=true;}
+    // Si la map existe déjà, la détruire pour forcer une réinitialisation propre
+    if(leafMap){leafMap.remove();leafMap=null;mapInit=false;}
+    kmlPolygons=[];
     try{
       const kml=new DOMParser().parseFromString(e.target.result,'text/xml');
       kml.querySelectorAll('Placemark').forEach(pm=>{
@@ -1850,11 +1971,12 @@ function loadKML(input){
         if(!coords)return;
         const pts=coords.split(/\s+/).map(c=>{const[lng,lat]=c.split(',');return[parseFloat(lat),parseFloat(lng)];}).filter(p=>!isNaN(p[0]));
         if(pts.length<3)return;
-        const p=PARCELLES.find(x=>x.nom.toLowerCase()===name.toLowerCase());
-        const col=p?getPCls(p).col:'var(--vert-med)';
-        L.polygon(pts,{color:col,fillOpacity:0.3,weight:2}).addTo(leafMap).bindPopup(`<b>${name}</b>${p?`<br>${p.surface} ha · ${getPCls(p).pct}%`:''}`);
+        kmlPolygons.push({name,pts});
       });
-      document.querySelector('.kml-zone').innerHTML='<div style="font-size:24px">✅</div><p style="color:var(--vert-med);font-weight:600">KML chargé</p>';
+      // Initialiser la carte avec les polygones déjà dans kmlPolygons
+      initMap();mapInit=true;
+      const kz=document.querySelector('.kml-zone');
+      if(kz)kz.innerHTML='<div style="font-size:24px">✅</div><p style="color:var(--vert-med);font-weight:600">'+kmlPolygons.length+' parcelles KML</p>';
     }catch(err){alert('Erreur lecture KML');}
   };
   reader.readAsText(file);
@@ -1864,6 +1986,8 @@ function loadKML(input){
 // ════ JOURNAL ════
 function fmtDate(d){if(!d)return'—';const[y,m,j]=d.split('-');return`${parseInt(j)} ${['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'][parseInt(m)-1]}`;}
 function renderJournal(){
+  // Remplir les selects de l'overlay saisie directe dès qu'on entre dans le Journal
+  openJournalEntry._ready=false; // lazy — sera peuplé à l'ouverture
   // Stats ouvriers
   const byQui={};
   JOURNAL.filter(j=>!j.meteo&&j.qui).forEach(j=>{byQui[j.qui]=(byQui[j.qui]||0)+1;});
@@ -1915,7 +2039,8 @@ function renderJournalList(){
         const m=MEMBRES.find(x=>x.nom===r.qui);
         const col=m?.couleur||COULEURS_MBR[r.qui]||'#888';
         const isEq=r.equipe||r.qui==='Equipe';
-        const quiAff=isEq&&r.qui&&r.qui!=='Equipe'?`Équipe (${r.qui})`:isEq?'Équipe':r.qui||'Non assigné';
+        const membresStr=isEq&&r.membresEquipe&&r.membresEquipe.length>0?` + ${r.membresEquipe.join(', ')}`:isEq?' + équipe':'';
+        const quiAff=isEq&&r.qui&&r.qui!=='Equipe'?`Équipe (${r.qui}${membresStr})`:isEq?'Équipe':r.qui||'Non assigné';
         return `<div class="jitem"><div class="jdotcol"><div class="jdot ${sc}"></div>${i<items.length-1?'<div class="jlinev"></div>':''}</div><div class="jcard"><div class="jtop"><div class="jtache">${TEMOJI[r.tache]||'📋'} ${r.tache}</div><div class="jst ${sb}">${r.statut}</div></div><div class="jparcelle">📍 ${r.parcelle}</div><div class="jbottom"><div class="jqui"><div class="java" style="background:${col}">${(r.qui||'?')[0]}</div>${quiAff}${isEq?'<span class="eq-tag">👥</span>':''}</div></div></div></div>`;
       }).join('')}
     </div>`).join('');
@@ -2244,21 +2369,21 @@ function updateNotifUI(perm){
   const sub=document.getElementById('notif-status');
   const arr=document.getElementById('notif-arr');
   if(!sub)return;
-  if(perm==='granted'){sub.textContent='✅ Activées — alertes gel et DAR';if(arr)arr.textContent='✓';}
+  if(perm==='granted'){sub.textContent='✅ Activées — alertes gel, DAR et priorités';if(arr)arr.textContent='✓';}
   else if(perm==='denied'){sub.textContent='🚫 Bloquées par le navigateur';if(arr)arr.textContent='✗';}
   else{sub.textContent='Alertes gel, DAR, validations';}
 }
 function sendTestNotif(){
-  new Notification('🍇 Ma Vigne',{body:'Notifications activées ! Vous recevrez les alertes gel et DAR.',icon:'icon192.png'});
+  new Notification('🍇 Ma Vigne',{body:'Notifications activées ! Vous recevrez les alertes gel, DAR et priorités.',icon:'icon192.png'});
 }
 function scheduleNotifCheck(){
-  // Vérifier alertes DAR toutes les heures
   setInterval(checkNotifAlerts,3600000);
   checkNotifAlerts();
 }
 function checkNotifAlerts(){
   if(Notification.permission!=='granted')return;
   const today=new Date();
+  // Alertes DAR
   TRAITEMENTS.forEach(t=>{
     const prod=CATALOGUE.find(p=>p.nom===t.produit);
     if(!prod||prod.dar===0)return;
@@ -2267,6 +2392,15 @@ function checkNotifAlerts(){
       new Notification('⚠️ DAR Ma Vigne',{body:`${t.produit} : ${darR}j avant récolte possible`,icon:'icon192.png'});
     }
   });
+  // Alerte priorité du moment (si définie)
+  if(priorityMessage&&priorityMessage.trim()){
+    new Notification('⚡ Priorité Ma Vigne',{body:priorityMessage,icon:'icon192.png'});
+  }
+}
+// Appelé après savePriority() pour notifier si activé
+function notifyPriorityChange(){
+  if(Notification.permission!=='granted'||!priorityMessage)return;
+  new Notification('⚡ Nouvelle priorité',{body:priorityMessage,icon:'icon192.png'});
 }
 
 // ════ EXPORT ════
@@ -2289,6 +2423,81 @@ function exportJSON(){
   const date=new Date().toISOString().split('T')[0];
   dlFile(JSON.stringify(data,null,2),`mavigne_export_${date}.json`,'application/json');
   showExportFeedback('✅ Export JSON téléchargé !');
+}
+function importJSON(input){
+  const file=input.files[0];
+  if(!file){return;}
+  // Réinitialiser l'input pour permettre de recharger le même fichier
+  input.value='';
+  const reader=new FileReader();
+  reader.onload=function(e){
+    let data;
+    try{data=JSON.parse(e.target.result);}
+    catch(err){
+      showImportFeedback('❌ Fichier JSON invalide — vérifiez le fichier.','var(--rouge-pale)','var(--rouge)');
+      return;
+    }
+    // Validation minimale
+    if(!data.parcelles||!Array.isArray(data.parcelles)){
+      showImportFeedback('❌ Format non reconnu — ce fichier n\'est pas un export Ma Vigne.','var(--rouge-pale)','var(--rouge)');
+      return;
+    }
+    const nb=data.parcelles.length;
+    const date=data.exportDate?new Date(data.exportDate).toLocaleDateString('fr-FR'):'inconnue';
+    if(!confirm(`📂 Charger cet export ?\n\n• ${nb} parcelles\n• Export du ${date}\n\n⚠️ Les données actuelles seront remplacées.`)){return;}
+    // Appliquer les données
+    if(data.parcelles){PARCELLES.length=0;data.parcelles.forEach(p=>PARCELLES.push(p));}
+    if(data.journal){JOURNAL=data.journal;window.JOURNAL=JOURNAL;}
+    if(data.sessions){SESSIONS=data.sessions;window.SESSIONS=SESSIONS;}
+    if(data.traitements){TRAITEMENTS=data.traitements;window.TRAITEMENTS=TRAITEMENTS;}
+    if(data.membres){MEMBRES=data.membres;window.MEMBRES=MEMBRES;}
+    if(data.saisons){SAISONS=data.saisons;window.SAISONS=SAISONS;}
+    if(data.taches){TACHES=data.taches;window.TACHES=TACHES;}
+    // Recalculer les travaux depuis les parcelles importées
+    if(typeof recalcAllTravaux==='function')recalcAllTravaux();
+    // Sauvegarder
+    if(typeof saveData==='function'){
+      ['parcelles','journal','sessions','traitements','membres','saisons','taches'].forEach(k=>saveData(k));
+    }
+    // Rafraîchir l'UI
+    if(typeof renderHome==='function')renderHome();
+    if(typeof renderParcelles==='function')renderParcelles();
+    if(typeof computePStats==='function')computePStats();
+    if(typeof renderReglages==='function')renderReglages();
+    closeOv(null,'ovExport');
+    showImportFeedback(`✅ Import réussi — ${nb} parcelles chargées depuis l'export du ${date}.`,'var(--vert-pale)','var(--vert)');
+  };
+  reader.onerror=function(){
+    showImportFeedback('❌ Erreur de lecture du fichier.','var(--rouge-pale)','var(--rouge)');
+  };
+  reader.readAsText(file);
+}
+function showImportFeedback(msg,bg,color){
+  // Afficher dans l'overlay s'il est ouvert, sinon en toast en bas
+  const el=document.getElementById('export-feedback');
+  if(el&&document.getElementById('ovExport').classList.contains('open')){
+    el.textContent=msg;el.style.background=bg;el.style.color=color;el.style.display='block';
+    setTimeout(()=>{el.style.display='none';el.style.background='var(--vert-pale)';el.style.color='var(--vert)';},4000);
+  } else {
+    // Toast flottant si l'overlay est fermé
+    let toast=document.createElement('div');
+    toast.textContent=msg;
+    toast.style.cssText=`position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:${bg};color:${color};border-radius:12px;padding:12px 20px;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.15);max-width:340px;text-align:center;`;
+    document.body.appendChild(toast);
+    setTimeout(()=>toast.remove(),4000);
+  }
+}
+function recalcAllTravaux(){
+  if(!TRAVAUX||!PARCELLES)return;
+  Object.keys(TRAVAUX).forEach(nomTache=>{
+    const t=TRAVAUX[nomTache];if(!t)return;
+    const validees=PARCELLES.filter(p=>p.taches&&p.taches[nomTache]==='Validé');
+    const surfDone=validees.reduce((s,p)=>s+(p.surface||0),0);
+    t.surf_done=Math.round(surfDone*100)/100;
+    t.h_done=Math.round(t.h_ha*surfDone*10)/10;
+    t.h_reste=Math.round((t.h_total-t.h_done)*10)/10;
+    t.pct=t.surf_total>0?Math.round(surfDone/t.surf_total*100):0;
+  });
 }
 function exportCSVJournal(){
   const travaux=JOURNAL.filter(j=>!j.meteo);
