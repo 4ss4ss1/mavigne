@@ -153,6 +153,18 @@ function applyFbData(key, value) {
       window.priorityMessage = value.priorityMessage;
       if(window._syncLocalVars) window._syncLocalVars();
     }
+  } else if(key === 'membres') {
+    // ⚠️ Protection du champ mdp :
+    // Si Firebase renvoie des membres sans mdp (ex : sauvegarde ancienne),
+    // on préserve les mdp actuellement en mémoire pour ne pas les perdre.
+    var current = window.MEMBRES || [];
+    var mdpMap = {};
+    current.forEach(function(m) { if(m.mdp) mdpMap[m.nom] = m.mdp; });
+    var merged = value.map(function(m) {
+      if(!m.mdp && mdpMap[m.nom]) m.mdp = mdpMap[m.nom];
+      return m;
+    });
+    window.MEMBRES = merged;
   } else {
     window[key.toUpperCase()] = value;
   }
@@ -259,6 +271,21 @@ window._fbLoad = async function() {
     } else {
       console.log('🔥 Chargement depuis Firebase');
       await fbPullAll();
+      // ── Réparation automatique des mdp manquants ──
+      var MDP_SOURCE = {Nico:'vigne21',Victor:'victor21',Dessi:'dessi21',Etienne:'etienne21',Chloe:'chloe21',Shana:'shana21',Alicia:'alicia21'};
+      var membresFb = window.MEMBRES || [];
+      var repaired = false;
+      membresFb.forEach(function(m) {
+        if(!m.mdp && MDP_SOURCE[m.nom]) {
+          m.mdp = MDP_SOURCE[m.nom];
+          repaired = true;
+          console.log('[MDP] Réparation automatique pour', m.nom);
+        }
+      });
+      if(repaired && window.fbSave) {
+        window.fbSave('membres', membresFb);
+        console.log('[MDP] Membres resauvegardés avec mdp réparés');
+      }
       showSyncBadge('✅ Synchronisé', '#3D6B27');
     }
     fbListen();
