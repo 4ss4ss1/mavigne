@@ -324,7 +324,7 @@ console.log('🔥 Firebase prêt, en attente de _fbLoad()');
 body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;}
 
 /* ══ LOGIN ══ */
-#login-screen{position:fixed;inset:0;background:var(--vert);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:40px 30px;}
+#login-screen{position:fixed;inset:0;background:var(--vert);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;z-index:9999;padding:60px 30px 40px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .login-logo{font-size:60px;margin-bottom:16px;}
 .login-title{font-family:'Cormorant Garamond',serif;color:white;font-size:32px;font-weight:600;margin-bottom:6px;}
 .login-sub{color:rgba(255,255,255,0.6);font-size:13px;margin-bottom:40px;letter-spacing:0.5px;}
@@ -754,7 +754,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 <div id="login-screen">
   <div class="login-logo">🍇</div>
   <div class="login-title">Ma Vigne</div>
-  <div class="login-sub">Choisissez votre profil</div>
+  <div class="login-sub" id="login-sub-txt">Choisissez votre profil</div>
   <div class="login-profiles" id="login-profiles"></div>
   <div id="login-pwd-panel" style="display:none;width:100%;margin-top:20px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
@@ -767,7 +767,6 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
     <button class="login-btn" id="login-pwd-btn">Se connecter</button>
     <div id="login-forgot-link" style="text-align:center;margin-top:14px;color:rgba(255,255,255,0.5);font-size:12px;cursor:pointer;text-decoration:underline" onclick="showForgotPanel()">Mot de passe oublié ?</div>
   </div>
-  <!-- Panneau mot de passe oublié — dans le même écran login, même z-index -->
   <div id="login-forgot-panel" style="display:none;width:100%;margin-top:20px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
       <button onclick="hideForgotPanel()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:8px 12px;color:white;font-size:13px;cursor:pointer">← Retour</button>
@@ -777,7 +776,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
     <div class="login-label">Votre adresse email</div>
     <input type="email" id="login-forgot-email" class="login-input" placeholder="email@domaine.fr" autocomplete="email">
     <div id="login-forgot-error" style="color:#FF8A80;font-size:12px;margin-top:-8px;margin-bottom:10px;display:none"></div>
-    <div id="login-forgot-ok" style="color:#A8E6A3;font-size:12px;margin-top:-8px;margin-bottom:10px;display:none"></div>
+    <div id="login-forgot-ok" style="color:#A8E6A3;font-size:12px;margin-top:-8px;margin-bottom:10px;padding:8px 0;display:none"></div>
     <button class="login-btn" id="login-forgot-btn" onclick="submitForgotLogin()">📧 Envoyer le mot de passe temporaire</button>
     <div style="text-align:center;margin-top:12px;color:rgba(255,255,255,0.4);font-size:11px">Un mot de passe temporaire à usage unique vous sera envoyé</div>
   </div>
@@ -1430,20 +1429,24 @@ function selectProfile(idx){
   loginPendingIdx = idx;
   var m = MEMBRES[idx];
   document.getElementById('login-profiles').style.display = 'none';
+  document.getElementById('login-sub-txt').style.display = 'none';
   document.getElementById('login-pwd-panel').style.display = 'block';
   document.getElementById('login-pwd-name').textContent = m.nom;
   document.getElementById('login-pwd-input').value = '';
   document.getElementById('login-pwd-error').style.display = 'none';
+  document.getElementById('login-screen').scrollTop = 0;
   setTimeout(function(){ document.getElementById('login-pwd-input').focus(); }, 150);
 }
 
 function backToProfiles(){
   loginPendingIdx = -1;
   document.getElementById('login-profiles').style.display = 'grid';
+  document.getElementById('login-sub-txt').style.display = 'block';
   document.getElementById('login-pwd-panel').style.display = 'none';
   document.getElementById('login-forgot-panel').style.display = 'none';
   document.getElementById('login-pwd-error').style.display = 'none';
   document.getElementById('login-pwd-input').value = '';
+  document.getElementById('login-screen').scrollTop = 0;
 }
 
 async function confirmLogin(){
@@ -2637,11 +2640,16 @@ function showForgotPanel() {
   btn.textContent = '📧 Envoyer le mot de passe temporaire';
   document.getElementById('login-pwd-panel').style.display = 'none';
   document.getElementById('login-forgot-panel').style.display = 'block';
+  // Scroll en haut pour que le panneau soit visible sur mobile
+  setTimeout(() => { document.getElementById('login-screen').scrollTop = 0; }, 50);
 }
+
 function hideForgotPanel() {
   document.getElementById('login-forgot-panel').style.display = 'none';
   document.getElementById('login-pwd-panel').style.display = 'block';
+  document.getElementById('login-screen').scrollTop = 0;
 }
+
 async function submitForgotLogin() {
   const emailSaisi = document.getElementById('login-forgot-email').value.trim().toLowerCase();
   const errEl = document.getElementById('login-forgot-error');
@@ -2677,25 +2685,23 @@ async function submitForgotLogin() {
         from: RESEND_FROM,
         to: [m.email],
         subject: '🍇 Ma Vigne — Mot de passe temporaire',
-        html: `
-          <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px 24px">
-            <div style="font-size:32px;margin-bottom:8px">🍇</div>
-            <h2 style="color:#1E3A12;margin:0 0 8px">Ma Vigne</h2>
-            <p style="color:#4A4A3A;margin:0 0 24px">Bonjour <strong>${m.nom}</strong>,</p>
-            <p style="color:#4A4A3A;margin:0 0 16px">Vous avez demandé un mot de passe temporaire pour accéder à Ma Vigne.</p>
-            <div style="background:#EAF3E2;border-radius:12px;padding:20px;text-align:center;margin:0 0 24px">
-              <div style="font-size:11px;color:#3D6B27;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Mot de passe temporaire</div>
-              <div style="font-size:28px;font-weight:700;color:#1E3A12;letter-spacing:4px;font-family:monospace">${tempPwd}</div>
-            </div>
-            <p style="color:#7A7A6A;font-size:13px;margin:0 0 8px">⚠️ Ce mot de passe est à usage unique. Vous serez invité à en choisir un nouveau dès votre connexion.</p>
-            <p style="color:#7A7A6A;font-size:13px;margin:0">Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.</p>
-            <hr style="border:none;border-top:1px solid #EFEDE8;margin:24px 0">
-            <p style="color:#AAAAAA;font-size:11px;margin:0">Ma Vigne · Gestion viticole</p>
-          </div>`
+        html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px 24px">
+          <div style="font-size:32px;margin-bottom:8px">🍇</div>
+          <h2 style="color:#1E3A12;margin:0 0 8px">Ma Vigne</h2>
+          <p style="color:#4A4A3A;margin:0 0 24px">Bonjour <strong>${m.nom}</strong>,</p>
+          <p style="color:#4A4A3A;margin:0 0 16px">Vous avez demandé un mot de passe temporaire.</p>
+          <div style="background:#EAF3E2;border-radius:12px;padding:20px;text-align:center;margin:0 0 24px">
+            <div style="font-size:11px;color:#3D6B27;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Mot de passe temporaire</div>
+            <div style="font-size:28px;font-weight:700;color:#1E3A12;letter-spacing:4px;font-family:monospace">${tempPwd}</div>
+          </div>
+          <p style="color:#7A7A6A;font-size:13px;margin:0 0 8px">⚠️ Usage unique — vous devrez le changer à la connexion.</p>
+          <hr style="border:none;border-top:1px solid #EFEDE8;margin:24px 0">
+          <p style="color:#AAAAAA;font-size:11px;margin:0">Ma Vigne · Gestion viticole</p>
+        </div>`
       })
     });
     if(res.ok) {
-      okEl.textContent = '✅ Email envoyé à ' + m.email + ' — vérifiez votre boîte.';
+      okEl.textContent = '✅ Email envoyé à ' + m.email;
       okEl.style.display = 'block';
       btn.textContent = '✅ Email envoyé';
     } else {
@@ -2703,12 +2709,13 @@ async function submitForgotLogin() {
       throw new Error(err.message || res.status);
     }
   } catch(e) {
-    okEl.innerHTML = '⚠️ Envoi échoué. MDP temporaire : <strong style="letter-spacing:2px">' + tempPwd + '</strong>';
+    okEl.innerHTML = '⚠️ Envoi échoué. MDP temporaire : <strong style="letter-spacing:2px;font-family:monospace">' + tempPwd + '</strong>';
     okEl.style.display = 'block';
     btn.textContent = '⚠️ Voir MDP ci-dessus';
   }
 }
-// Alias pour compatibilité avec l'overlay dans l'app (Réglages)
+
+// Alias — l'overlay ovForgotPwd dans l'app reste pour usage depuis Réglages si besoin
 function openForgotFromLogin() { showForgotPanel(); }
 
 function generateTempPwd() {
