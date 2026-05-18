@@ -1099,6 +1099,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
     <button onclick="exportCSVJournal()" style="background:var(--vert);color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">📋 <div><div>Export CSV — Journal</div><div style="font-size:11px;opacity:0.75;font-weight:400">Tous les travaux avec date, parcelle, ouvrier, statut</div></div></button>
     <button onclick="exportCSVParcelles()" style="background:var(--or);color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">🗺️ <div><div>Export CSV — Parcelles</div><div style="font-size:11px;opacity:0.75;font-weight:400">Avancement par parcelle et par tâche</div></div></button>
     <button onclick="exportJSON()" style="background:var(--acier);color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">📦 <div><div>Export JSON complet</div><div style="font-size:11px;opacity:0.75;font-weight:400">Toutes les données — sauvegarde complète</div></div></button>
+    <button onclick="exportPDFPhyto()" style="background:#4A2060;color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">🧪 <div><div>Registre phyto PDF</div><div style="font-size:11px;opacity:0.75;font-weight:400">Registre réglementaire complet — toute la saison</div></div></button>
     <div style="border-top:1px solid var(--gris);margin:4px 0"></div>
     <button onclick="document.getElementById('import-json-input').click()" style="background:var(--bleu-pale);color:var(--bleu);border:2px dashed var(--bleu);border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">📂 <div><div>Charger un export JSON</div><div style="font-size:11px;opacity:0.75;font-weight:400">Restaurer une sauvegarde · remplace les données actuelles</div></div></button>
     <input type="file" id="import-json-input" accept=".json,application/json" style="display:none" onchange="importJSON(this)">
@@ -1215,7 +1216,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 
 <div class="overlay" id="ovMembre" onclick="closeOv(event,'ovMembre')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">👤 Nouveau membre</div></div><div class="modal-body"><div class="fl">Prénom</div><input type="text" class="fi" id="nm-nom" placeholder="Prénom"><div class="fl">Email</div><input type="email" class="fi" id="nm-email" placeholder="email@domaine.fr"><div class="fl">Rôles</div><div class="roles-check" id="nm-roles"><div class="role-check-row"><span class="role-check-name">🌿 Ouvrier</span><div class="role-chk on" id="rc-ouvrier" onclick="toggleRole('ouvrier')">✓</div></div><div class="role-check-row"><span class="role-check-name">🚜 Tractoriste</span><div class="role-chk" id="rc-tractoriste" onclick="toggleRole('tractoriste')"></div></div><div class="role-check-row"><span class="role-check-name">🎟 Saisonnier</span><div class="role-chk" id="rc-saisonnier" onclick="toggleRole('saisonnier')"></div></div></div><div class="fl">Période (si saisonnier)</div><input type="text" class="fi" id="nm-periode" placeholder="Ex : Juin–Août 2026"><button class="mbtn verte" onclick="saveMembre()">Ajouter</button></div></div></div>
 
-<div class="overlay" id="ovEditMembre" onclick="closeOv(event,'ovEditMembre')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="em-title">✏️ Modifier membre</div></div><input type="hidden" id="em-nom"><div class="modal-body"><div class="fl">Adresse email</div><input type="email" class="fi" id="em-email" placeholder="email@domaine.fr"><div class="fl">Rôles</div><div class="roles-check" id="em-roles"></div><div class="fl">Statut</div><div class="ppicker"><div class="pchk sel vert" data-val="Actif" onclick="pickVal(this,'em-statut','vert')">✅ Actif</div><div class="pchk" data-val="Inactif" onclick="pickVal(this,'em-statut','vert')">⏸ Inactif</div></div><input type="hidden" id="em-statut" value="Actif"><button class="mbtn verte" onclick="saveEditMembre()">Enregistrer</button><button class="mbtn-del" onclick="deleteMembre()">Supprimer</button></div></div></div>
+<div class="overlay" id="ovEditMembre" onclick="closeOv(event,'ovEditMembre')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="em-title">✏️ Modifier membre</div></div><input type="hidden" id="em-nom"><div class="modal-body"><div class="fl">Rôles</div><div class="roles-check" id="em-roles"></div><div class="fl">Statut</div><div class="ppicker"><div class="pchk sel vert" data-val="Actif" onclick="pickVal(this,'em-statut','vert')">✅ Actif</div><div class="pchk" data-val="Inactif" onclick="pickVal(this,'em-statut','vert')">⏸ Inactif</div></div><input type="hidden" id="em-statut" value="Actif"><button class="mbtn verte" onclick="saveEditMembre()">Enregistrer</button><button class="mbtn-del" onclick="deleteMembre()">Supprimer</button></div></div></div>
 
 <script>
 // ════════════════════════════════════
@@ -2534,9 +2535,9 @@ function deleteTache(nom){if(!confirm(`Supprimer la tâche "${nom}" ?`))return;T
 // Membres
 function toggleRole(r){rolesTemp[r]=!rolesTemp[r];const el=document.getElementById('rc-'+r);el.classList.toggle('on',rolesTemp[r]);el.textContent=rolesTemp[r]?'✓':'';}
 function saveMembre(){const nom=document.getElementById('nm-nom').value.trim();if(!nom)return;const roles=Object.entries(rolesTemp).filter(([,v])=>v).map(([k])=>k);if(roles.length===0)roles.push('ouvrier');const couleurs=['#B85A1A','#C0392B','#1A5276','#7D3C98','#2C3E50'];MEMBRES.push({nom,email:document.getElementById('nm-email').value,roles,statut:'Actif',couleur:couleurs[MEMBRES.length%couleurs.length]});saveData('membres');document.getElementById('ovMembre').classList.remove('open');document.getElementById('nm-nom').value='';document.getElementById('nm-email').value='';rolesTemp={ouvrier:true,tractoriste:false,saisonnier:false};['ouvrier','tractoriste','saisonnier'].forEach(r=>{const el=document.getElementById('rc-'+r);el.classList.toggle('on',rolesTemp[r]);el.textContent=rolesTemp[r]?'✓':'';});renderReglages();}
-function editMembre(nom){const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;document.getElementById('em-title').textContent='✏️ '+nom;document.getElementById('em-nom').value=nom;document.getElementById('em-email').value=m.email||'';document.getElementById('em-statut').value=m.statut;const er=document.getElementById('em-roles');const allRoles=['admin','ouvrier','tractoriste','saisonnier'];er.innerHTML=allRoles.map(r=>`<div class="role-check-row"><span class="role-check-name">${r}</span><div class="role-chk ${m.roles.includes(r)?'on':''}" id="erc-${r}" onclick="toggleEmRole('${r}',this)">${m.roles.includes(r)?'✓':''}</div></div>`).join('');openOv('ovEditMembre');}
+function editMembre(nom){const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;document.getElementById('em-title').textContent='✏️ '+nom;document.getElementById('em-nom').value=nom;document.getElementById('em-statut').value=m.statut;const er=document.getElementById('em-roles');const allRoles=['admin','ouvrier','tractoriste','saisonnier'];er.innerHTML=allRoles.map(r=>`<div class="role-check-row"><span class="role-check-name">${r}</span><div class="role-chk ${m.roles.includes(r)?'on':''}" id="erc-${r}" onclick="toggleEmRole('${r}',this)">${m.roles.includes(r)?'✓':''}</div></div>`).join('');openOv('ovEditMembre');}
 function toggleEmRole(r,el){el.classList.toggle('on');el.textContent=el.classList.contains('on')?'✓':'';}
-function saveEditMembre(){const nom=document.getElementById('em-nom').value;const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;m.email=document.getElementById('em-email').value.trim();m.statut=document.getElementById('em-statut').value;const allRoles=['admin','ouvrier','tractoriste','saisonnier'];m.roles=allRoles.filter(r=>document.getElementById('erc-'+r)?.classList.contains('on'));saveData('membres');document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
+function saveEditMembre(){const nom=document.getElementById('em-nom').value;const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;m.statut=document.getElementById('em-statut').value;const allRoles=['admin','ouvrier','tractoriste','saisonnier'];m.roles=allRoles.filter(r=>document.getElementById('erc-'+r)?.classList.contains('on'));saveData('membres');document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
 function deleteMembre(){const nom=document.getElementById('em-nom').value;if(nom==='Nico'){alert('Impossible de supprimer le compte principal.');return;}if(!confirm('Supprimer '+nom+'?'))return;MEMBRES=MEMBRES.filter(m=>m.nom!==nom);saveData('membres');document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
 
 // ════ OVERLAYS ════
@@ -3275,6 +3276,164 @@ ${Object.keys(ouvrierStats).length>0?`
   win.document.close();
   win.onload=()=>{win.focus();win.print();};
   showExportFeedback(`✅ Rapport ${moisNom} généré !`);
+}
+
+// ════ EXPORT PDF REGISTRE PHYTO ════
+function exportPDFPhyto(){
+  const saison=getSaisonActive();
+  const annee=saison.nom||new Date().getFullYear();
+  const today=new Date();
+  const moisNoms=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const fmtD=d=>{if(!d)return'—';const[y,m,j]=d.split('-');return`${parseInt(j)} ${moisNoms[parseInt(m)-1]} ${y}`;};
+
+  // Trier les traitements par date
+  const data=[...TRAITEMENTS].sort((a,b)=>a.date.localeCompare(b.date));
+
+  // Stats récap
+  const nbTotal=data.length;
+  const cuivreItems=data.filter(t=>{const p=CATALOGUE.find(c=>c.nom===t.produit);return p&&p.type==='Cuivre';});
+  const soufreItems=data.filter(t=>{const p=CATALOGUE.find(c=>c.nom===t.produit);return p&&p.type==='Soufre';});
+  const nbCuivre=cuivreItems.length;
+  const nbSoufre=soufreItems.length;
+  const darActifs=data.filter(t=>{const p=CATALOGUE.find(c=>c.nom===t.produit);if(!p||p.dar===0)return false;const darR=p.dar-Math.floor((today-new Date(t.date))/86400000);return darR>0;}).length;
+
+  // Tableau des lignes
+  const lignes=data.map((t,i)=>{
+    const prod=CATALOGUE.find(p=>p.nom===t.produit)||{type:'—',amm:'—',dar:0,dose:'—'};
+    const darR=prod.dar>0?Math.max(0,prod.dar-Math.floor((today-new Date(t.date))/86400000)):null;
+    const darCell=prod.dar>0?(darR>0?`<span class="dar-enc">${darR}j restants</span>`:'<span class="dar-ok">✅ Libre</span>'):'<span style="color:#7A7A6A">—</span>';
+    const typeColor={'Cuivre':'#1A4A7A','Soufre':'#7D6608','Fongicide':'#4A2060','Insecticide':'#A0291E','Herbicide':'#1E3A12','Biocontrôle':'#2C6E49','—':'#7A7A6A'};
+    const tc=typeColor[prod.type]||'#4A4A3A';
+    return `<tr>
+      <td class="td-num">${i+1}</td>
+      <td>${fmtD(t.date)}</td>
+      <td><strong>${t.produit||'—'}</strong></td>
+      <td style="color:${tc};font-weight:600;font-size:10px">${prod.type}</td>
+      <td class="td-mono">${prod.amm||'—'}</td>
+      <td>${t.dose||prod.dose||'—'}</td>
+      <td style="text-align:center">${prod.dar||'—'}</td>
+      <td>${darCell}</td>
+      <td>${t.operateur||'—'}</td>
+      <td style="color:#7A7A6A;font-style:italic">${t.note||''}</td>
+    </tr>`;
+  }).join('');
+
+  const html=`<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8">
+<title>Registre Phytosanitaire — ${annee}</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1A1A14;background:white;font-size:11px;}
+  .cover{background:#2D0B45;color:white;padding:36px 40px 28px;position:relative;}
+  .cover-picto{font-size:32px;margin-bottom:8px;}
+  .cover-brand{font-size:9px;letter-spacing:3px;text-transform:uppercase;opacity:0.45;margin-bottom:6px;}
+  .cover-title{font-size:28px;font-weight:700;margin-bottom:4px;letter-spacing:-0.5px;}
+  .cover-sub{opacity:0.55;font-size:12px;}
+  .cover-meta{position:absolute;top:36px;right:40px;text-align:right;opacity:0.5;font-size:10px;line-height:1.6;}
+  .mention{background:#F3EEF8;border-left:3px solid #4A2060;padding:10px 16px;font-size:10px;color:#4A2060;line-height:1.6;margin:0;}
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:2px solid #F0EAF8;}
+  .stat{padding:14px 20px;border-right:1px solid #F0EAF8;}
+  .stat:last-child{border-right:none;}
+  .stat-val{font-size:26px;font-weight:700;color:#2D0B45;}
+  .stat-lbl{font-size:9px;color:#7A7A6A;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
+  .section{padding:16px 24px 24px;}
+  .section-title{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#7A7A6A;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #F0EAF8;}
+  table.reg{width:100%;border-collapse:collapse;}
+  table.reg thead tr{background:#2D0B45;color:white;}
+  table.reg th{padding:7px 8px;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;text-align:left;}
+  table.reg td{padding:7px 8px;border-bottom:1px solid #F5F0FA;vertical-align:middle;}
+  table.reg tr:nth-child(even) td{background:#FAF7FC;}
+  .td-num{color:#C0B0D0;font-size:9px;text-align:center;width:24px;}
+  .td-mono{font-family:monospace;font-size:10px;}
+  .dar-enc{background:#FBF0E6;color:#B85A1A;padding:2px 7px;border-radius:5px;font-size:9px;font-weight:700;}
+  .dar-ok{background:#EAF3E2;color:#1E3A12;padding:2px 7px;border-radius:5px;font-size:9px;font-weight:700;}
+  .recap-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+  .recap-box{background:#F5F0FA;border-radius:10px;padding:14px 16px;}
+  .rb-titre{font-size:10px;font-weight:700;color:#4A2060;margin-bottom:8px;}
+  .rb-item{display:flex;justify-content:space-between;padding:4px 0;font-size:10px;border-bottom:1px solid #EAE4F0;}
+  .rb-item:last-child{border-bottom:none;font-weight:700;}
+  .rb-val{font-weight:600;color:#2D0B45;}
+  .signature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:12px;}
+  .sig-box{border:1px solid #E0D8EC;border-radius:8px;padding:14px;height:80px;display:flex;flex-direction:column;justify-content:flex-end;}
+  .sig-lbl{font-size:9px;color:#7A7A6A;text-transform:uppercase;letter-spacing:0.5px;}
+  .footer{border-top:1px solid #F0EAF8;padding:10px 24px;font-size:8px;color:#7A7A6A;display:flex;justify-content:space-between;margin-top:16px;}
+  @media print{
+    body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .section{page-break-inside:avoid;}
+    table.reg tr{page-break-inside:avoid;}
+  }
+</style></head><body>
+
+<div class="cover">
+  <div class="cover-meta">Généré le ${today.toLocaleDateString('fr-FR')}<br>Document confidentiel</div>
+  <div class="cover-picto">🧪</div>
+  <div class="cover-brand">Ma Vigne · Registre réglementaire</div>
+  <div class="cover-title">Registre Phytosanitaire</div>
+  <div class="cover-sub">${annee} · Domaine · ${(PARCELLES.filter(p=>p.statut!=='Arrachee').reduce((s,p)=>s+(p.surface||0),0)).toFixed(2)} ha</div>
+</div>
+
+<div class="mention">
+  📋 <strong>Obligation réglementaire</strong> — Ce registre est établi conformément à l'article L.254-3-1 du Code rural et de la pêche maritime. Il consigne l'ensemble des utilisations de produits phytopharmaceutiques sur le domaine pour la campagne ${annee}. À conserver 5 ans minimum.
+</div>
+
+<div class="stats-row">
+  <div class="stat"><div class="stat-val">${nbTotal}</div><div class="stat-lbl">Traitements</div></div>
+  <div class="stat"><div class="stat-val" style="color:#1A4A7A">${nbCuivre}</div><div class="stat-lbl">Cuivre</div></div>
+  <div class="stat"><div class="stat-val" style="color:#7D6608">${nbSoufre}</div><div class="stat-lbl">Soufre</div></div>
+  <div class="stat"><div class="stat-val" style="color:${darActifs>0?'#A0291E':'#1E3A12'}">${darActifs}</div><div class="stat-lbl">DAR actifs</div></div>
+</div>
+
+<div class="section">
+  <div class="section-title">🌿 Ensemble des traitements — Campagne ${annee}</div>
+  ${data.length===0?'<p style="color:#7A7A6A;font-style:italic;padding:12px 0">Aucun traitement enregistré pour cette saison.</p>':`
+  <table class="reg">
+    <thead>
+      <tr>
+        <th>#</th><th>Date</th><th>Produit</th><th>Type</th><th>N° AMM</th><th>Dose utilisée</th><th>DAR (j)</th><th>Délai récolte</th><th>Opérateur</th><th>Observations</th>
+      </tr>
+    </thead>
+    <tbody>${lignes}</tbody>
+  </table>`}
+</div>
+
+<div class="section">
+  <div class="section-title">📊 Récapitulatif par type de produit</div>
+  <div class="recap-grid">
+    <div class="recap-box">
+      <div class="rb-titre">🔵 Cuivre</div>
+      ${cuivreItems.length===0?'<div class="rb-item"><span style="color:#7A7A6A;font-style:italic">Aucun traitement cuivre</span></div>':cuivreItems.map(t=>`<div class="rb-item"><span>${fmtD(t.date)} · ${t.produit}</span><span class="rb-val">${t.dose||'—'}</span></div>`).join('')}
+      <div class="rb-item"><span>Total</span><span class="rb-val">${nbCuivre} application${nbCuivre>1?'s':''}</span></div>
+    </div>
+    <div class="recap-box">
+      <div class="rb-titre">🟡 Soufre</div>
+      ${soufreItems.length===0?'<div class="rb-item"><span style="color:#7A7A6A;font-style:italic">Aucun traitement soufre</span></div>':soufreItems.map(t=>`<div class="rb-item"><span>${fmtD(t.date)} · ${t.produit}</span><span class="rb-val">${t.dose||'—'}</span></div>`).join('')}
+      <div class="rb-item"><span>Total</span><span class="rb-val">${nbSoufre} application${nbSoufre>1?'s':''}</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">✍️ Certification et signatures</div>
+  <p style="font-size:10px;color:#4A4A3A;margin-bottom:12px;line-height:1.6">Je soussigné(e), certifie l'exactitude des informations portées dans ce registre phytosanitaire pour la campagne ${annee}.</p>
+  <div class="signature-grid">
+    <div class="sig-box"><div class="sig-lbl">Responsable du domaine · Date</div></div>
+    <div class="sig-box"><div class="sig-lbl">Cachet du domaine</div></div>
+    <div class="sig-box"><div class="sig-lbl">Conseiller phyto (si applicable)</div></div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>Ma Vigne · Registre Phytosanitaire · Campagne ${annee}</span>
+  <span>Document réglementaire — Conservation obligatoire 5 ans</span>
+</div>
+
+</body></html>`;
+
+  const win=window.open('','_blank','width=1000,height=750');
+  win.document.write(html);
+  win.document.close();
+  win.onload=()=>{win.focus();win.print();};
+  showExportFeedback(`✅ Registre phyto ${annee} généré — ${nbTotal} traitement${nbTotal>1?'s':''} !`);
 }
 
 // ════ INIT ════

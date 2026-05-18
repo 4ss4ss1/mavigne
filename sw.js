@@ -5,7 +5,7 @@
 //             Background Sync pour les sauvegardes hors ligne
 // ════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'mavigne-v2';
+const CACHE_NAME = 'mavigne-v1.3';
 const SYNC_TAG   = 'mavigne-sync';
 
 // Fichiers à mettre en cache immédiatement (app shell)
