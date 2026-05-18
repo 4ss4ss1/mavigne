@@ -3325,10 +3325,43 @@ document.addEventListener('DOMContentLoaded', function(){
 <script>
 // ── Enregistrement Service Worker (PWA offline) ──
 if ('serviceWorker' in navigator) {
+
+  // Écoute les messages du SW — dont SW_UPDATED qui déclenche le rechargement
+  navigator.serviceWorker.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'FLUSH_OFFLINE_QUEUE') {
+      if(window._flushQueue) window._flushQueue();
+    }
+    if (event.data && event.data.type === 'SW_UPDATED') {
+      // Nouvelle version détectée — recharger silencieusement
+      console.log('[SW] Nouvelle version', event.data.version, '— rechargement');
+      window.location.reload();
+    }
+  });
+
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('./sw.js').then(function(reg) {
       console.log('[SW] Enregistré :', reg.scope);
-      // Déclencher Background Sync si supporté (vide la queue au retour réseau)
+
+      // Vérifier les mises à jour toutes les 60 secondes (en plus du check au chargement)
+      setInterval(function() { reg.update(); }, 60000);
+
+      // Si un nouveau SW attend déjà → l'activer immédiatement
+      if (reg.waiting) {
+        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
+
+      // Nouveau SW installé pendant la session → l'activer dès qu'il est prêt
+      reg.addEventListener('updatefound', function() {
+        var newSW = reg.installing;
+        newSW.addEventListener('statechange', function() {
+          if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+            console.log('[SW] Mise à jour disponible — activation');
+            newSW.postMessage({ type: 'SKIP_WAITING' });
+          }
+        });
+      });
+
+      // Background Sync si supporté
       if ('sync' in reg) {
         reg.sync.register('mavigne-sync').catch(function(e) {
           console.warn('[SW] Background Sync non dispo :', e);
