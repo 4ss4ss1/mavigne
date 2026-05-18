@@ -626,6 +626,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
     <input type="password" id="login-pwd-input" class="login-input" placeholder="Votre mot de passe" autocomplete="current-password">
     <div id="login-pwd-error" style="color:#FF8A80;font-size:12px;margin-top:-8px;margin-bottom:10px;display:none">❌ Mot de passe incorrect</div>
     <button class="login-btn" id="login-pwd-btn">Se connecter</button>
+    <div id="login-forgot-link" style="text-align:center;margin-top:14px;color:rgba(255,255,255,0.5);font-size:12px;cursor:pointer;text-decoration:underline" onclick="openForgotFromLogin()">Mot de passe oublié ?</div>
   </div>
 </div>
 
@@ -867,6 +868,13 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
   <div class="dom-badge"><div class="db-logo">🍇 Ma Vigne</div><div class="db-sub" id="dom-badge-sub">Domaine · 11,76 ha actifs</div></div>
 
   <div class="set-sec">
+    <div class="set-title">Mon compte</div>
+    <div style="margin:0 16px">
+      <div class="set-row" style="border-radius:16px" onclick="openChangePwd()"><div class="sr-l"><div class="sr-ico" style="background:var(--vert-pale)">🔑</div><div><div class="sr-lbl">Changer mon mot de passe</div><div class="sr-sub" id="pwd-change-sub">Sécurisez votre accès</div></div></div><div class="sr-arr">›</div></div>
+    </div>
+  </div>
+
+  <div class="set-sec">
     <div class="set-title">Saison active</div>
     <div id="saisons-list" style="padding:0 16px"></div>
     <div style="padding:0 16px;margin-top:8px"><button class="mbtn verte" style="margin-top:0;font-size:13px;padding:10px" onclick="openOv('ovSaison')">＋ Nouvelle saison</button></div>
@@ -1025,6 +1033,28 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
     <div id="je-membres-pick" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px"></div>
   </div>
   <button class="mbtn verte" onclick="saveJournalEntry()">＋ Ajouter au journal</button>
+</div></div></div>
+
+<div class="overlay" id="ovChangePwd" onclick="closeOv(event,'ovChangePwd')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">🔑 Changer mon mot de passe</div><div class="modal-sub" id="cpwd-sub">Votre nouveau mot de passe sera chiffré</div></div><div class="modal-body">
+  <div class="fl">Mot de passe actuel</div>
+  <input type="password" class="fi" id="cpwd-old" placeholder="Mot de passe actuel" autocomplete="current-password">
+  <div class="fl">Nouveau mot de passe</div>
+  <input type="password" class="fi" id="cpwd-new" placeholder="Nouveau mot de passe (min. 6 car.)" autocomplete="new-password">
+  <div class="fl">Confirmer le nouveau mot de passe</div>
+  <input type="password" class="fi" id="cpwd-confirm" placeholder="Répétez le nouveau mot de passe" autocomplete="new-password">
+  <div id="cpwd-error" style="display:none;color:var(--rouge);font-size:12px;margin:-6px 0 10px;padding:8px 12px;background:var(--rouge-pale);border-radius:10px"></div>
+  <div id="cpwd-ok" style="display:none;color:var(--vert);font-size:12px;margin:-6px 0 10px;padding:8px 12px;background:var(--vert-pale);border-radius:10px"></div>
+  <button class="mbtn verte" onclick="confirmChangePwd()">✓ Enregistrer le nouveau mot de passe</button>
+</div></div></div>
+
+<div class="overlay" id="ovForgotPwd" onclick="closeOv(event,'ovForgotPwd')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">📧 Mot de passe oublié</div><div class="modal-sub">Un mot de passe temporaire vous sera envoyé par email</div></div><div class="modal-body">
+  <div id="fpwd-name-display" style="background:var(--vert-pale);border-radius:12px;padding:12px 16px;font-size:14px;font-weight:600;color:var(--vert);margin-bottom:16px;text-align:center"></div>
+  <div class="fl">Adresse email du compte</div>
+  <input type="email" class="fi" id="fpwd-email" placeholder="Votre email enregistré">
+  <div id="fpwd-error" style="display:none;color:var(--rouge);font-size:12px;margin:-6px 0 10px;padding:8px 12px;background:var(--rouge-pale);border-radius:10px"></div>
+  <div id="fpwd-ok" style="display:none;color:var(--vert);font-size:12px;margin:-6px 0 10px;padding:8px 12px;background:var(--vert-pale);border-radius:10px"></div>
+  <button class="mbtn verte" id="fpwd-send-btn" onclick="sendForgotPwd()">📧 Envoyer le mot de passe temporaire</button>
+  <div style="font-size:11px;color:var(--texte-doux);text-align:center;margin-top:8px">Le mot de passe temporaire sera valable pour une seule connexion</div>
 </div></div></div>
 
 <div class="overlay" id="ovSaison" onclick="closeOv(event,'ovSaison')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">📅 Nouvelle saison</div></div><div class="modal-body"><div class="fl">Nom de la saison</div><input type="text" class="fi" id="ns-nom" placeholder="Ex : Été 2026, Hiver 2026…"><div class="fl">Période</div><input type="text" class="fi" id="ns-periode" placeholder="Ex : Juin–Août 2026"><button class="mbtn verte" onclick="saveSaison()">Créer la saison</button></div></div></div>
@@ -1262,11 +1292,12 @@ function backToProfiles(){
   document.getElementById('login-pwd-input').value = '';
 }
 
-function confirmLogin(){
+async function confirmLogin(){
   if(loginPendingIdx < 0) return;
   var m = MEMBRES[loginPendingIdx];
   var saisi = document.getElementById('login-pwd-input').value;
-  if(saisi === m.mdp){
+  const ok = await checkMdp(m, saisi);
+  if(ok){
     currentUser = m;
     console.log('✅ Login OK:', m.nom, 'roles:', m.roles);
     loginPendingIdx = -1;
@@ -1278,6 +1309,19 @@ function confirmLogin(){
     updateNavForRoles();
     goTo('home');
     fetchMeteo();
+    // Si MDP temporaire : forcer le changement
+    if(m._tempPwd) {
+      delete m._tempPwd;
+      saveData('membres');
+      setTimeout(() => {
+        openChangePwd();
+        const errEl = document.getElementById('cpwd-error');
+        // Petit message d'info
+        const okEl = document.getElementById('cpwd-ok');
+        okEl.textContent = '⚠️ Vous utilisez un mot de passe temporaire — veuillez en choisir un nouveau.';
+        okEl.style.display = 'block';
+      }, 600);
+    }
   } else {
     document.getElementById('login-pwd-error').style.display = 'block';
     document.getElementById('login-pwd-input').value = '';
@@ -2342,6 +2386,177 @@ function deleteMembre(){const nom=document.getElementById('em-nom').value;if(nom
 function openOv(id){document.getElementById(id).classList.add('open');}
 function closeOv(e,id){if(e.target===document.getElementById(id))document.getElementById(id).classList.remove('open');}
 function pickVal(el,hid,cls){el.parentElement.querySelectorAll('.pchk').forEach(x=>{x.classList.remove('sel','vert','acre','phyt');});el.classList.add('sel',cls);document.getElementById(hid).value=el.dataset.val;}
+
+// ════ MOT DE PASSE — SHA-256 + EmailJS ════
+
+// Hash SHA-256 via Web Crypto API (natif, sans lib)
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// Vérifie si une valeur est déjà un hash SHA-256 (64 hex chars)
+function isHashed(val) { return /^[0-9a-f]{64}$/.test(val||''); }
+
+// Vérifier le MDP saisi vs celui stocké (clair ou hashé)
+async function checkMdp(m, saisi) {
+  if(isHashed(m.mdp)) {
+    // MDP stocké est un hash — comparer avec hash du saisi
+    const h = await sha256(saisi);
+    return h === m.mdp;
+  } else {
+    // MDP en clair (legacy) — comparer directement puis migrer
+    if(saisi === m.mdp) {
+      // Migration automatique : hashage au premier login
+      m.mdp = await sha256(saisi);
+      saveData('membres');
+      return true;
+    }
+    return false;
+  }
+}
+
+// Ouvrir overlay changement de MDP
+function openChangePwd() {
+  if(!currentUser) return;
+  document.getElementById('cpwd-sub').textContent = `Compte : ${currentUser.nom}`;
+  document.getElementById('cpwd-old').value = '';
+  document.getElementById('cpwd-new').value = '';
+  document.getElementById('cpwd-confirm').value = '';
+  document.getElementById('cpwd-error').style.display = 'none';
+  document.getElementById('cpwd-ok').style.display = 'none';
+  openOv('ovChangePwd');
+}
+
+async function confirmChangePwd() {
+  const oldVal = document.getElementById('cpwd-old').value;
+  const newVal = document.getElementById('cpwd-new').value;
+  const confirmVal = document.getElementById('cpwd-confirm').value;
+  const errEl = document.getElementById('cpwd-error');
+  const okEl = document.getElementById('cpwd-ok');
+  errEl.style.display = 'none'; okEl.style.display = 'none';
+
+  if(!oldVal || !newVal || !confirmVal) {
+    errEl.textContent = '❌ Tous les champs sont obligatoires.';
+    errEl.style.display = 'block'; return;
+  }
+  if(newVal.length < 6) {
+    errEl.textContent = '❌ Le nouveau mot de passe doit faire au moins 6 caractères.';
+    errEl.style.display = 'block'; return;
+  }
+  if(newVal !== confirmVal) {
+    errEl.textContent = '❌ Les deux nouveaux mots de passe ne correspondent pas.';
+    errEl.style.display = 'block'; return;
+  }
+  const m = MEMBRES.find(x => x.nom === currentUser.nom);
+  if(!m) return;
+  const ok = await checkMdp(m, oldVal);
+  if(!ok) {
+    errEl.textContent = '❌ Mot de passe actuel incorrect.';
+    errEl.style.display = 'block'; return;
+  }
+  // Tout bon — hasher et sauvegarder
+  m.mdp = await sha256(newVal);
+  currentUser.mdp = m.mdp;
+  saveData('membres');
+  okEl.textContent = '✅ Mot de passe modifié avec succès !';
+  okEl.style.display = 'block';
+  document.getElementById('cpwd-old').value = '';
+  document.getElementById('cpwd-new').value = '';
+  document.getElementById('cpwd-confirm').value = '';
+  setTimeout(() => { document.getElementById('ovChangePwd').classList.remove('open'); }, 1800);
+}
+
+// ── Mot de passe oublié via Resend ──
+const RESEND_API_KEY = 're_gNQfG5qS_7t7CwFaDrdaezhpZwyNbbJao';
+const RESEND_FROM    = 'Ma Vigne <onboarding@resend.dev>';
+
+function openForgotFromLogin() {
+  if(loginPendingIdx < 0) return;
+  const m = MEMBRES[loginPendingIdx];
+  document.getElementById('fpwd-name-display').textContent = `👤 ${m.nom}`;
+  document.getElementById('fpwd-email').value = m.email || '';
+  document.getElementById('fpwd-error').style.display = 'none';
+  document.getElementById('fpwd-ok').style.display = 'none';
+  document.getElementById('fpwd-send-btn').disabled = false;
+  document.getElementById('fpwd-send-btn').textContent = '📧 Envoyer le mot de passe temporaire';
+  openOv('ovForgotPwd');
+}
+
+function generateTempPwd() {
+  const chars = 'abcdefghjkmnpqrstuvwxyz23456789';
+  let pwd = '';
+  for(let i=0; i<8; i++) pwd += chars[Math.floor(Math.random()*chars.length)];
+  return pwd;
+}
+
+async function sendForgotPwd() {
+  const emailSaisi = document.getElementById('fpwd-email').value.trim().toLowerCase();
+  const errEl = document.getElementById('fpwd-error');
+  const okEl  = document.getElementById('fpwd-ok');
+  const btn   = document.getElementById('fpwd-send-btn');
+  errEl.style.display = 'none'; okEl.style.display = 'none';
+
+  if(loginPendingIdx < 0) return;
+  const m = MEMBRES[loginPendingIdx];
+
+  if(!m.email || m.email.trim().toLowerCase() !== emailSaisi) {
+    errEl.textContent = '❌ Cet email ne correspond pas au compte sélectionné.';
+    errEl.style.display = 'block'; return;
+  }
+
+  const tempPwd = generateTempPwd();
+  const tempHash = await sha256(tempPwd);
+  m.mdp = tempHash;
+  m._tempPwd = true;
+  saveData('membres');
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Envoi en cours…';
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: RESEND_FROM,
+        to: [m.email],
+        subject: '🍇 Ma Vigne — Mot de passe temporaire',
+        html: `
+          <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px 24px">
+            <div style="font-size:32px;margin-bottom:8px">🍇</div>
+            <h2 style="color:#1E3A12;margin:0 0 8px">Ma Vigne</h2>
+            <p style="color:#4A4A3A;margin:0 0 24px">Bonjour <strong>${m.nom}</strong>,</p>
+            <p style="color:#4A4A3A;margin:0 0 16px">Vous avez demandé un mot de passe temporaire pour accéder à Ma Vigne.</p>
+            <div style="background:#EAF3E2;border-radius:12px;padding:20px;text-align:center;margin:0 0 24px">
+              <div style="font-size:11px;color:#3D6B27;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Mot de passe temporaire</div>
+              <div style="font-size:28px;font-weight:700;color:#1E3A12;letter-spacing:4px;font-family:monospace">${tempPwd}</div>
+            </div>
+            <p style="color:#7A7A6A;font-size:13px;margin:0 0 8px">⚠️ Ce mot de passe est à usage unique. Vous serez invité à le changer dès votre connexion.</p>
+            <p style="color:#7A7A6A;font-size:13px;margin:0">Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.</p>
+            <hr style="border:none;border-top:1px solid #EFEDE8;margin:24px 0">
+            <p style="color:#AAAAAA;font-size:11px;margin:0">Ma Vigne · Gestion viticole</p>
+          </div>`
+      })
+    });
+
+    if(res.ok) {
+      okEl.textContent = `✅ Mot de passe temporaire envoyé à ${m.email} — vérifiez vos emails.`;
+      okEl.style.display = 'block';
+      btn.textContent = '✅ Email envoyé';
+    } else {
+      const err = await res.json();
+      throw new Error(err.message || res.status);
+    }
+  } catch(e) {
+    okEl.innerHTML = `⚠️ Envoi échoué (${e.message}). MDP temporaire : <strong>${tempPwd}</strong><br><small>Notez-le et connectez-vous, puis changez votre mot de passe.</small>`;
+    okEl.style.display = 'block';
+    btn.textContent = '⚠️ Voir MDP ci-dessus';
+  }
+}
 
 // ════ NOTIFICATIONS ════
 function requestNotifications(){
