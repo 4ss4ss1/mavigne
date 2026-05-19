@@ -37,7 +37,7 @@ self.addEventListener('install', event => {
           CDN_URLS.map(url => cache.add(url).catch(() => {}))
         );
       });
-    }).then(() => self.skipWaiting())
+    }).then(() => self.skipWaiting()) // ← force l'activation immédiate sans attendre
   );
 });
 

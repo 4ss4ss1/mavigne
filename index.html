@@ -4305,7 +4305,6 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('./sw.js').then(function(reg) {
       console.log('[SW] Enregistré :', reg.scope);
-      // Déclencher Background Sync si supporté (vide la queue au retour réseau)
       if ('sync' in reg) {
         reg.sync.register('mavigne-sync').catch(function(e) {
           console.warn('[SW] Background Sync non dispo :', e);
@@ -4313,6 +4312,17 @@ if ('serviceWorker' in navigator) {
       }
     }).catch(function(err) {
       console.warn('[SW] Échec enregistrement :', err);
+    });
+
+    // ── Rechargement automatique quand un nouveau SW prend le contrôle ──
+    // skipWaiting() + clients.claim() → 'controllerchange' → reload
+    var refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function() {
+      if (!refreshing) {
+        refreshing = true;
+        console.log('[SW] Nouveau service worker actif — rechargement');
+        window.location.reload();
+      }
     });
   });
 }
