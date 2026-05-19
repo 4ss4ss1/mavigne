@@ -804,6 +804,480 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 </head>
 <body>
 
+<!-- ══════ SPLASH SCREEN ══════ -->
+<div id="splash-screen">
+<style>
+#splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  overflow: hidden;
+  background: #0A1A2E;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: splash-fadeout 0.45s ease-in 2.1s forwards;
+}
+@keyframes splash-fadeout {
+  to { opacity: 0; pointer-events: none; }
+}
+
+/* ── Ciel ── */
+#sp-sky {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    #0A1A2E 0%,
+    #1A2A4E 25%,
+    #3A6090 50%,
+    #E8A060 70%,
+    #C04020 85%,
+    #1A0A18 100%
+  );
+  animation: sky-cycle 2s ease-in-out forwards;
+}
+@keyframes sky-cycle {
+  0%   { background: linear-gradient(180deg, #020810 0%, #0A1A2E 40%, #1A2A4E 70%, #0A1020 100%); }
+  15%  { background: linear-gradient(180deg, #1A2A4E 0%, #3A507A 30%, #E8A060 65%, #C04020 85%, #3A1A08 100%); }
+  40%  { background: linear-gradient(180deg, #4A90D0 0%, #70B8E8 25%, #A8D8F0 55%, #D0E8F8 80%, #F0F8FF 100%); }
+  60%  { background: linear-gradient(180deg, #3A80C0 0%, #5898C8 25%, #90C8E8 55%, #C0DFF0 80%, #E0F0F8 100%); }
+  80%  { background: linear-gradient(180deg, #1A2A4E 0%, #3A4070 30%, #E88040 60%, #C04020 78%, #3A0810 100%); }
+  100% { background: linear-gradient(180deg, #080414 0%, #10081C 30%, #1A0A28 60%, #0A0410 100%); }
+}
+
+/* ── Étoiles (nuit → disparaissent) ── */
+#sp-stars {
+  position: absolute;
+  inset: 0;
+  animation: stars-fade 2s ease forwards;
+}
+@keyframes stars-fade {
+  0%   { opacity: 1; }
+  30%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+.sp-star {
+  position: absolute;
+  width: 2px; height: 2px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.8;
+}
+
+/* ── Soleil ── */
+#sp-sun {
+  position: absolute;
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #FFF8A0 0%, #FFD040 40%, #FF8020 100%);
+  box-shadow: 0 0 30px 12px rgba(255,200,60,0.45), 0 0 60px 24px rgba(255,150,20,0.2);
+  left: 50%;
+  transform: translateX(-50%);
+  animation: sun-journey 2s cubic-bezier(0.4,0,0.6,1) forwards;
+}
+/* Arc du soleil : monte depuis le bas-droite, pic au milieu, descend bas-gauche */
+@keyframes sun-journey {
+  0%   { bottom: -10%; left: 70%; opacity: 0; width: 44px; height: 44px;
+         box-shadow: 0 0 20px 8px rgba(255,140,40,0.5); }
+  10%  { opacity: 1; }
+  20%  { bottom: 28%; left: 62%;
+         box-shadow: 0 0 40px 16px rgba(255,200,60,0.5), 0 0 80px 32px rgba(255,120,20,0.2); }
+  40%  { bottom: 58%; left: 50%; width: 44px; height: 44px;
+         box-shadow: 0 0 50px 20px rgba(255,230,120,0.55), 0 0 100px 40px rgba(255,200,60,0.2); }
+  70%  { bottom: 30%; left: 38%; width: 46px; height: 46px;
+         box-shadow: 0 0 40px 16px rgba(255,160,60,0.5), 0 0 80px 32px rgba(220,80,20,0.25); }
+  88%  { bottom: 5%; left: 25%; opacity: 1;
+         box-shadow: 0 0 60px 30px rgba(220,80,20,0.4), 0 0 120px 60px rgba(180,40,10,0.2); }
+  95%  { bottom: -5%; left: 22%; opacity: 0.3; }
+  100% { bottom: -15%; left: 20%; opacity: 0; }
+}
+
+/* ── Lune (nuit initiale) ── */
+#sp-moon {
+  position: absolute;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: #E8E0C0;
+  box-shadow: 0 0 16px 6px rgba(220,210,160,0.3);
+  top: 18%;
+  left: 30%;
+  animation: moon-fade 2s ease forwards;
+}
+@keyframes moon-fade {
+  0%   { opacity: 0.85; }
+  20%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* ── Nuages ── */
+.sp-cloud {
+  position: absolute;
+  border-radius: 50px;
+  background: rgba(255,255,255,0.18);
+  animation: cloud-drift 2s ease forwards;
+}
+@keyframes cloud-drift {
+  0%   { opacity: 0; transform: translateX(0); }
+  35%  { opacity: 0.6; }
+  60%  { opacity: 0.5; }
+  100% { opacity: 0; transform: translateX(30px); }
+}
+
+/* ── Collines (horizon) ── */
+#sp-hills {
+  position: absolute;
+  bottom: 28%;
+  left: 0; right: 0;
+}
+
+/* ── Zone vigne ── */
+#sp-vineyard {
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+  height: 30%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0;
+  padding-bottom: 14%;
+}
+
+/* ── Sol ── */
+#sp-ground {
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+  height: 14%;
+  background: linear-gradient(180deg, #5C3A1E 0%, #3A2010 100%);
+}
+
+/* ── Ceps de vigne ── */
+.sp-cep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 42px;
+  position: relative;
+}
+/* Pied/tronc */
+.sp-trunk {
+  width: 6px;
+  height: 28px;
+  background: linear-gradient(180deg, #5A3A1A 0%, #3A2010 100%);
+  border-radius: 3px 3px 2px 2px;
+  position: relative;
+}
+/* Bras horizontal */
+.sp-arms {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 4px;
+  background: #5A3A1A;
+  border-radius: 2px;
+}
+/* Végétation — 4 états selon saison */
+.sp-veg {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: all 0.3s ease;
+}
+
+/* HIVER : taillée, bras nus, flocons */
+.sp-winter .sp-veg { display: none; }
+.sp-winter .sp-trunk { background: linear-gradient(180deg, #4A3218 0%, #2E1C0C 100%); }
+.sp-winter-snow {
+  position: absolute;
+  top: -10px; left: 50%;
+  transform: translateX(-50%);
+  width: 32px; height: 8px;
+  background: rgba(230,240,255,0.85);
+  border-radius: 10px;
+}
+
+/* PRINTEMPS : petites feuilles vertes tendres */
+.sp-spring .sp-veg {
+  display: block;
+  width: 22px; height: 14px;
+  background: radial-gradient(ellipse, #8BC85A 0%, #5A9A2A 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(100,180,60,0.3);
+}
+
+/* ÉTÉ : grappes */
+.sp-summer .sp-veg {
+  display: block;
+  width: 18px; height: 22px;
+  background: radial-gradient(ellipse at 50% 30%, #8040C0 0%, #6020A0 60%, #401060 100%);
+  border-radius: 50% 50% 60% 60%;
+  box-shadow: 0 2px 8px rgba(100,20,160,0.35);
+}
+.sp-summer .sp-veg::before {
+  content: '';
+  position: absolute;
+  top: -4px; left: 50%;
+  transform: translateX(-50%);
+  width: 3px; height: 6px;
+  background: #5A3A1A;
+  border-radius: 2px;
+}
+
+/* AUTOMNE : feuilles dorées/rouge */
+.sp-autumn .sp-veg {
+  display: block;
+  width: 24px; height: 18px;
+  background: radial-gradient(ellipse, #E8A030 0%, #C85818 60%, #A03010 100%);
+  border-radius: 40% 60% 50% 50%;
+  transform: translateX(-50%) rotate(-8deg);
+  animation: leaf-fall 0.4s ease-in-out infinite alternate;
+}
+@keyframes leaf-fall {
+  0%   { transform: translateX(-50%) rotate(-8deg) translateY(0); }
+  100% { transform: translateX(-50%) rotate(6deg) translateY(3px); }
+}
+
+/* ── Animation des ceps : cycle des 4 saisons ── */
+/* Hiver → Printemps → Été → Automne en 2 secondes */
+.sp-cep {
+  animation: cep-season 2s ease forwards;
+}
+/* On utilise des classes temporelles via JS */
+
+/* ── Flocons de neige ── */
+.sp-flake {
+  position: absolute;
+  color: rgba(200,220,255,0.7);
+  font-size: 10px;
+  animation: flake-fall 0.7s linear forwards;
+  pointer-events: none;
+}
+@keyframes flake-fall {
+  0%   { opacity: 0.8; transform: translateY(0) rotate(0deg); }
+  100% { opacity: 0; transform: translateY(40px) rotate(180deg); }
+}
+
+/* ── Logo Ma Vigne au centre ── */
+#sp-logo {
+  position: absolute;
+  bottom: 20%;
+  left: 0; right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  animation: logo-appear 2s ease forwards;
+  pointer-events: none;
+}
+@keyframes logo-appear {
+  0%   { opacity: 0; transform: translateY(8px); }
+  25%  { opacity: 0; transform: translateY(8px); }
+  45%  { opacity: 1; transform: translateY(0); }
+  80%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+#sp-logo-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: white;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+}
+#sp-logo-sub {
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+/* ── Particules de lumière (heure de pointe) ── */
+.sp-ray {
+  position: absolute;
+  width: 1px;
+  background: linear-gradient(180deg, rgba(255,220,100,0.0) 0%, rgba(255,220,100,0.25) 50%, rgba(255,220,100,0.0) 100%);
+  transform-origin: bottom center;
+  animation: ray-pulse 2s ease forwards;
+  pointer-events: none;
+}
+@keyframes ray-pulse {
+  0%   { opacity: 0; }
+  35%  { opacity: 0; }
+  50%  { opacity: 1; }
+  65%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+</style>
+
+<!-- Ciel -->
+<div id="sp-sky"></div>
+
+<!-- Étoiles initiales -->
+<div id="sp-stars">
+  <div class="sp-star" style="top:8%;left:15%"></div>
+  <div class="sp-star" style="top:12%;left:35%"></div>
+  <div class="sp-star" style="top:5%;left:55%;width:3px;height:3px;opacity:0.9"></div>
+  <div class="sp-star" style="top:18%;left:72%"></div>
+  <div class="sp-star" style="top:9%;left:82%"></div>
+  <div class="sp-star" style="top:22%;left:48%"></div>
+  <div class="sp-star" style="top:15%;left:90%"></div>
+  <div class="sp-star" style="top:6%;left:68%"></div>
+  <div class="sp-star" style="top:25%;left:20%"></div>
+  <div class="sp-star" style="top:3%;left:42%;width:3px;height:3px"></div>
+</div>
+
+<!-- Lune (nuit initiale) -->
+<div id="sp-moon"></div>
+
+<!-- Soleil -->
+<div id="sp-sun"></div>
+
+<!-- Rayons au pic -->
+<div class="sp-ray" id="sp-ray1" style="height:35vh;bottom:50%;left:calc(50% - 0px);transform:rotate(-20deg)"></div>
+<div class="sp-ray" id="sp-ray2" style="height:30vh;bottom:50%;left:calc(50% + 0px);transform:rotate(20deg)"></div>
+<div class="sp-ray" id="sp-ray3" style="height:40vh;bottom:50%;left:calc(50% - 0px);transform:rotate(0deg)"></div>
+
+<!-- Nuages -->
+<div class="sp-cloud" style="top:20%;left:10%;width:80px;height:20px;animation-delay:0.3s"></div>
+<div class="sp-cloud" style="top:30%;left:65%;width:60px;height:14px;animation-delay:0.5s"></div>
+<div class="sp-cloud" style="top:15%;left:45%;width:50px;height:12px;animation-delay:0.6s"></div>
+
+<!-- Collines -->
+<svg id="sp-hills" viewBox="0 0 375 80" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%">
+  <path d="M0,80 Q40,30 90,55 Q140,80 180,40 Q220,10 270,45 Q310,70 375,35 L375,80 Z" fill="#1A3A10" opacity="0.7"/>
+  <path d="M0,80 Q60,55 110,65 Q160,75 210,60 Q260,45 310,62 Q340,72 375,58 L375,80 Z" fill="#2A5018" opacity="0.85"/>
+</svg>
+
+<!-- Sol -->
+<div id="sp-ground"></div>
+
+<!-- Ceps de vigne -->
+<div id="sp-vineyard">
+  <div class="sp-cep" id="cep1">
+    <div class="sp-trunk">
+      <div class="sp-arms"></div>
+      <div class="sp-veg" id="veg1"></div>
+      <div class="sp-winter-snow" id="snow1"></div>
+    </div>
+  </div>
+  <div class="sp-cep" id="cep2">
+    <div class="sp-trunk">
+      <div class="sp-arms"></div>
+      <div class="sp-veg" id="veg2"></div>
+      <div class="sp-winter-snow" id="snow2"></div>
+    </div>
+  </div>
+  <div class="sp-cep" id="cep3">
+    <div class="sp-trunk">
+      <div class="sp-arms"></div>
+      <div class="sp-veg" id="veg3"></div>
+      <div class="sp-winter-snow" id="snow3"></div>
+    </div>
+  </div>
+  <div class="sp-cep" id="cep4">
+    <div class="sp-trunk">
+      <div class="sp-arms"></div>
+      <div class="sp-veg" id="veg4"></div>
+      <div class="sp-winter-snow" id="snow4"></div>
+    </div>
+  </div>
+  <div class="sp-cep" id="cep5">
+    <div class="sp-trunk">
+      <div class="sp-arms"></div>
+      <div class="sp-veg" id="veg5"></div>
+      <div class="sp-winter-snow" id="snow5"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Logo -->
+<div id="sp-logo">
+  <div id="sp-logo-name">Ma Vigne</div>
+  <div id="sp-logo-sub">Gestion viticole</div>
+</div>
+
+<script>
+(function() {
+  // ── Cycle des saisons sur les ceps ──
+  // 0-0.3s: Hiver (neige, taillé)
+  // 0.5-0.9s: Printemps (petites feuilles)
+  // 1.0-1.5s: Été (grappes)
+  // 1.6-2.0s: Automne (feuilles dorées qui tombent)
+
+  const ceps = [
+    { trunk: document.getElementById('cep1'), veg: document.getElementById('veg1'), snow: document.getElementById('snow1') },
+    { trunk: document.getElementById('cep2'), veg: document.getElementById('veg2'), snow: document.getElementById('snow2') },
+    { trunk: document.getElementById('cep3'), veg: document.getElementById('veg3'), snow: document.getElementById('snow3') },
+    { trunk: document.getElementById('cep4'), veg: document.getElementById('veg4'), snow: document.getElementById('snow4') },
+    { trunk: document.getElementById('cep5'), veg: document.getElementById('veg5'), snow: document.getElementById('snow5') },
+  ];
+
+  function setSeason(season) {
+    ceps.forEach(c => {
+      // Reset
+      c.veg.style.display = 'none';
+      c.snow.style.display = 'none';
+      c.veg.style.background = '';
+      c.veg.style.width = '';
+      c.veg.style.height = '';
+      c.veg.style.borderRadius = '';
+      c.veg.style.animation = '';
+      c.veg.style.transform = 'translateX(-50%)';
+
+      if (season === 'winter') {
+        c.snow.style.display = 'block';
+      } else if (season === 'spring') {
+        c.veg.style.display = 'block';
+        c.veg.style.width = '22px';
+        c.veg.style.height = '14px';
+        c.veg.style.background = 'radial-gradient(ellipse, #8BC85A 0%, #5A9A2A 100%)';
+        c.veg.style.borderRadius = '50%';
+        c.veg.style.boxShadow = '0 0 6px rgba(100,180,60,0.3)';
+      } else if (season === 'summer') {
+        c.veg.style.display = 'block';
+        c.veg.style.width = '18px';
+        c.veg.style.height = '22px';
+        c.veg.style.background = 'radial-gradient(ellipse at 50% 30%, #8040C0 0%, #6020A0 60%, #401060 100%)';
+        c.veg.style.borderRadius = '50% 50% 60% 60%';
+        c.veg.style.boxShadow = '0 2px 8px rgba(100,20,160,0.35)';
+      } else if (season === 'autumn') {
+        c.veg.style.display = 'block';
+        c.veg.style.width = '24px';
+        c.veg.style.height = '18px';
+        c.veg.style.background = 'radial-gradient(ellipse, #E8A030 0%, #C85818 60%, #A03010 100%)';
+        c.veg.style.borderRadius = '40% 60% 50% 50%';
+        c.veg.style.animation = 'leaf-fall 0.4s ease-in-out infinite alternate';
+      }
+    });
+  }
+
+  // Séquence temporelle — 2 secondes totales
+  setSeason('winter');
+
+  setTimeout(() => setSeason('spring'), 480);
+  setTimeout(() => setSeason('summer'), 950);
+  setTimeout(() => setSeason('autumn'), 1520);
+
+  // Masquer le splash et libérer les events après la fin
+  setTimeout(() => {
+    var el = document.getElementById('splash-screen');
+    if (el) {
+      el.style.pointerEvents = 'none';
+      // Retirer du DOM après fadeout
+      setTimeout(() => { if (el && el.parentNode) el.parentNode.removeChild(el); }, 500);
+    }
+  }, 2100);
+})();
+</script>
+</div>
+
 <!-- ══════ LOGIN ══════ -->
 <div id="sync-badge" style="position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#3D6B27;color:white;font-size:11px;font-weight:600;font-family:'Outfit',sans-serif;padding:5px 14px;border-radius:20px;z-index:99999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.2)"></div>
 
