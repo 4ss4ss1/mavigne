@@ -454,7 +454,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 .pc-bar-fill{height:100%;border-radius:4px;}
 .pc-tchips{display:flex;gap:4px;padding:0 14px 12px;flex-wrap:wrap;}
 .tc{font-size:9px;padding:3px 8px;border-radius:8px;font-weight:500;}
-.tcv{background:var(--vert-pale);color:var(--vert-med);}.tcf{background:var(--or-pale);color:var(--terre);}.tce{background:var(--orange-pale);color:var(--orange);}.tcm{background:var(--gris-clair);color:var(--texte-doux);}
+.tcv{background:var(--vert-pale);color:var(--vert-med);}.tcf{background:var(--or-pale);color:var(--terre);}.tce{background:var(--orange-pale);color:var(--orange);}.tcm{background:var(--gris-clair);color:var(--texte-doux);}.tc-nd{background:#F0F0F0;color:#888;border:1.5px solid #DDD;}
 
 /* Validation travaux */
 .val-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--gris-clair);}
@@ -479,7 +479,7 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 .tfilters::-webkit-scrollbar{display:none;}
 .tfchip{flex-shrink:0;padding:5px 12px;border-radius:16px;font-size:10px;font-weight:600;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:white;transition:all 0.15s;}
 .ptfchip{flex-shrink:0;padding:5px 12px;border-radius:16px;font-size:10px;font-weight:600;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:white;transition:all 0.15s;}
-.ptfchip.active{border-color:var(--or);background:var(--or);color:white;}
+.ptfchip.active{border-color:var(--vert);background:var(--vert);color:white;}
 .tfchip.active{border-color:var(--vert);background:var(--vert);color:white;}
 .ost-card{background:white;border-radius:14px;padding:14px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);margin:0 16px 14px;}
 .ost-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--texte-doux);margin-bottom:10px;}
@@ -2174,10 +2174,9 @@ function renderParcelles(){
   // Mettre à jour le filtre tâche
   const tachesSaisonF=getTachesSaison();
   const tfRow=document.getElementById('p-tache-filter-row');
-  if(tfRow&&tfRow.dataset.built!=='1'){
-    tfRow.dataset.built='1';
-    tfRow.innerHTML=`<div class="ptfchip active" data-t="toutes" onclick="setPTacheFilter('toutes',this)">Toutes tâches</div>`
-      +tachesSaisonF.map(t=>`<div class="ptfchip" data-t="${t.nom}" onclick="setPTacheFilter('${t.nom}',this)">${TEMOJI[t.nom]||'🌿'} ${t.nom}</div>`).join('');
+  if(tfRow){
+    tfRow.innerHTML=`<div class="ptfchip${pTacheFilter==='toutes'?' active':''}" data-t="toutes" onclick="setPTacheFilter('toutes',this)">Toutes tâches</div>`
+      +tachesSaisonF.map(t=>`<div class="ptfchip${pTacheFilter===t.nom?' active':''}" data-t="${t.nom}" onclick="setPTacheFilter('${t.nom}',this)">${TEMOJI[t.nom]||'🌿'} ${t.nom}${pTacheFilter===t.nom?' — À faire':''}</div>`).join('');
   }
   const data=PARCELLES.filter(p=>{
     const cl=getPCls(p);
@@ -2192,17 +2191,39 @@ function renderParcelles(){
     }
     return true;
   }).sort((a,b)=>{
+    if(pTacheFilter!=='toutes'){
+      // Tri par statut de la tâche filtrée : Non démarré > En cours
+      const ordre={'Non démarré':0,'En cours':1};
+      const sa=ordre[(a.taches&&a.taches[pTacheFilter])||'Non démarré']??0;
+      const sb=ordre[(b.taches&&b.taches[pTacheFilter])||'Non démarré']??0;
+      if(sa!==sb)return sa-sb;
+    }
     const pa=getPCls(a).pct, pb=getPCls(b).pct;
     if(pa!==pb)return pa-pb;
     return a.nom.localeCompare(b.nom,'fr');
   });
   const cont=document.getElementById('pList');
-  if(!data.length){cont.innerHTML='<div class="empty-state"><div class="ei">🔍</div><p>Aucun résultat.</p></div>';return;}
+  if(!data.length){
+    const msg=pTacheFilter!=='toutes'
+      ?`<div class="empty-state"><div class="ei">✅</div><p><strong>${pTacheFilter}</strong> terminé sur toutes les parcelles !</p></div>`
+      :'<div class="empty-state"><div class="ei">🔍</div><p>Aucun résultat.</p></div>';
+    cont.innerHTML=msg;return;
+  }
   cont.innerHTML=data.map(p=>{
     const cl=getPCls(p);
     const tps=getTachesSaison().map(t=>([t.nom,p.taches[t.nom]||'Non démarré']));
-    const chips=tps.slice(0,4).map(([t,s])=>`<span class="tc ${s==='Validé'?'tcv':'tce'}">${t}</span>`).join('');
-    const more=tps.length>4?`<span class="tc tcm">+${tps.length-4}</span>`:'';
+    let chips,more;
+    if(pTacheFilter!=='toutes'){
+      const statutFiltre=p.taches[pTacheFilter]||'Non démarré';
+      const badgeCls=statutFiltre==='En cours'?'tce':'tc-nd';
+      const badgeEmoji=statutFiltre==='En cours'?'⏳':'🔲';
+      chips=`<span class="tc ${badgeCls}" style="font-weight:700">${badgeEmoji} ${pTacheFilter} · ${statutFiltre}</span>`
+        +tps.filter(([t])=>t!==pTacheFilter).slice(0,2).map(([t,s])=>`<span class="tc ${s==='Validé'?'tcv':'tce'}">${t}</span>`).join('');
+      more='';
+    } else {
+      chips=tps.slice(0,4).map(([t,s])=>`<span class="tc ${s==='Validé'?'tcv':'tce'}">${t}</span>`).join('');
+      more=tps.length>4?`<span class="tc tcm">+${tps.length-4}</span>`:'';
+    }
     return `<div class="pcard" onclick="openDP('${p.nom}')">
       <div class="pc-main">
         <div class="pc-ava ${cl.a}">${cl.em}<div class="pc-dot ${cl.d}">${cl.pct}</div></div>
@@ -4327,8 +4348,6 @@ document.addEventListener('DOMContentLoaded', function(){
   this.classList.add('active');
   pFilter=this.dataset.filter;
   // Reset du filtre tâche lors du changement de catégorie statut
-  const tfRow=document.getElementById('p-tache-filter-row');
-  if(tfRow)tfRow.dataset.built='0';
   pTacheFilter='toutes';
   renderParcelles();
 }));
