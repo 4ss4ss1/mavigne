@@ -639,8 +639,13 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 .sdp-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--gris-clair);cursor:pointer;transition:background 0.1s;border-radius:6px;}
 .sdp-row:active{background:var(--gris-clair);}
 .sdp-row.sdp-done{background:var(--vert-pale);border-radius:8px;padding:11px 8px;border-color:transparent;margin:1px 0;}
+.sdp-row.sdp-skip{background:#FFF3F0;border-radius:8px;padding:11px 8px;border-color:transparent;margin:1px 0;opacity:0.75;}
 .sdp-check{width:22px;height:22px;border-radius:7px;border:2px solid var(--gris);background:white;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0;transition:all 0.15s;}
 .sdp-check.on{background:var(--vert-med);border-color:var(--vert-med);}
+.sdp-check.skip{background:#E0C0B8;border-color:#C89A90;color:#8B4A40;font-size:11px;}
+.sdp-skip-btn{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;border:none;cursor:pointer;flex-shrink:0;transition:all 0.15s;}
+.sdp-skip-btn.active{background:#F0D0C8;color:#8B3A28;}
+.sdp-skip-btn.inactive{background:#F0F0EC;color:#999;}
 .sc-edit-btn{background:var(--acier-pale);border:1.5px solid var(--acier);border-radius:8px;padding:4px 9px;font-size:13px;cursor:pointer;color:var(--acier);margin-right:6px;flex-shrink:0;transition:background 0.15s;}
 .sc-edit-btn:active{background:var(--acier);color:white;}
 .sc-bfill-enc{background:var(--orange)!important;}
@@ -804,476 +809,221 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 </head>
 <body>
 
+
 <!-- ══════ SPLASH SCREEN ══════ -->
 <div id="splash-screen">
 <style>
 #splash-screen {
-  position: fixed;
-  inset: 0;
-  z-index: 99999;
-  overflow: hidden;
-  background: #0A1A2E;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  animation: splash-fadeout 0.45s ease-in 2.1s forwards;
+  position:fixed; inset:0; z-index:99999; overflow:hidden;
+  display:flex; flex-direction:column; background:#1a2030;
 }
-@keyframes splash-fadeout {
-  to { opacity: 0; pointer-events: none; }
+#sp-ciel {
+  width:100%; height:38vh; position:relative; flex-shrink:0;
+  background:linear-gradient(180deg,#1a2030 0%,#2a3f60 100%);
 }
-
-/* ── Ciel ── */
-#sp-sky {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-    #0A1A2E 0%,
-    #1A2A4E 25%,
-    #3A6090 50%,
-    #E8A060 70%,
-    #C04020 85%,
-    #1A0A18 100%
-  );
-  animation: sky-cycle 2s ease-in-out forwards;
+#sp-soleil { position:absolute; border-radius:50%; pointer-events:none; }
+#sp-vignes { flex:1; display:flex; flex-direction:row; position:relative; }
+.sp-bande { flex:1; height:100%; position:relative; overflow:hidden; }
+.sp-bande+.sp-bande { border-left:1px solid rgba(0,0,0,0.3); }
+.sp-bande-automne   { background:linear-gradient(180deg,#8B3E10,#4A1E06); }
+.sp-bande-hiver     { background:linear-gradient(180deg,#3a4858,#1e2a36); }
+.sp-bande-printemps { background:linear-gradient(180deg,#3a6a1a,#1e3a0a); }
+.sp-bande-ete       { background:linear-gradient(180deg,#5a8a10,#2e4806); }
+.sp-rangee {
+  position:absolute; left:0; right:0;
+  display:flex; align-items:flex-end; justify-content:space-around; padding:0 2px;
 }
-@keyframes sky-cycle {
-  0%   { background: linear-gradient(180deg, #020810 0%, #0A1A2E 40%, #1A2A4E 70%, #0A1020 100%); }
-  15%  { background: linear-gradient(180deg, #1A2A4E 0%, #3A507A 30%, #E8A060 65%, #C04020 85%, #3A1A08 100%); }
-  40%  { background: linear-gradient(180deg, #4A90D0 0%, #70B8E8 25%, #A8D8F0 55%, #D0E8F8 80%, #F0F8FF 100%); }
-  60%  { background: linear-gradient(180deg, #3A80C0 0%, #5898C8 25%, #90C8E8 55%, #C0DFF0 80%, #E0F0F8 100%); }
-  80%  { background: linear-gradient(180deg, #1A2A4E 0%, #3A4070 30%, #E88040 60%, #C04020 78%, #3A0810 100%); }
-  100% { background: linear-gradient(180deg, #080414 0%, #10081C 30%, #1A0A28 60%, #0A0410 100%); }
-}
-
-/* ── Étoiles (nuit → disparaissent) ── */
-#sp-stars {
-  position: absolute;
-  inset: 0;
-  animation: stars-fade 2s ease forwards;
-}
-@keyframes stars-fade {
-  0%   { opacity: 1; }
-  30%  { opacity: 0; }
-  100% { opacity: 0; }
-}
-.sp-star {
-  position: absolute;
-  width: 2px; height: 2px;
-  background: white;
-  border-radius: 50%;
-  opacity: 0.8;
-}
-
-/* ── Soleil ── */
-#sp-sun {
-  position: absolute;
-  width: 48px; height: 48px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #FFF8A0 0%, #FFD040 40%, #FF8020 100%);
-  box-shadow: 0 0 30px 12px rgba(255,200,60,0.45), 0 0 60px 24px rgba(255,150,20,0.2);
-  left: 50%;
-  transform: translateX(-50%);
-  animation: sun-journey 2s cubic-bezier(0.4,0,0.6,1) forwards;
-}
-/* Arc du soleil : monte depuis le bas-droite, pic au milieu, descend bas-gauche */
-@keyframes sun-journey {
-  0%   { bottom: -10%; left: 70%; opacity: 0; width: 44px; height: 44px;
-         box-shadow: 0 0 20px 8px rgba(255,140,40,0.5); }
-  10%  { opacity: 1; }
-  20%  { bottom: 28%; left: 62%;
-         box-shadow: 0 0 40px 16px rgba(255,200,60,0.5), 0 0 80px 32px rgba(255,120,20,0.2); }
-  40%  { bottom: 58%; left: 50%; width: 44px; height: 44px;
-         box-shadow: 0 0 50px 20px rgba(255,230,120,0.55), 0 0 100px 40px rgba(255,200,60,0.2); }
-  70%  { bottom: 30%; left: 38%; width: 46px; height: 46px;
-         box-shadow: 0 0 40px 16px rgba(255,160,60,0.5), 0 0 80px 32px rgba(220,80,20,0.25); }
-  88%  { bottom: 5%; left: 25%; opacity: 1;
-         box-shadow: 0 0 60px 30px rgba(220,80,20,0.4), 0 0 120px 60px rgba(180,40,10,0.2); }
-  95%  { bottom: -5%; left: 22%; opacity: 0.3; }
-  100% { bottom: -15%; left: 20%; opacity: 0; }
-}
-
-/* ── Lune (nuit initiale) ── */
-#sp-moon {
-  position: absolute;
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  background: #E8E0C0;
-  box-shadow: 0 0 16px 6px rgba(220,210,160,0.3);
-  top: 18%;
-  left: 30%;
-  animation: moon-fade 2s ease forwards;
-}
-@keyframes moon-fade {
-  0%   { opacity: 0.85; }
-  20%  { opacity: 0; }
-  100% { opacity: 0; }
-}
-
-/* ── Nuages ── */
-.sp-cloud {
-  position: absolute;
-  border-radius: 50px;
-  background: rgba(255,255,255,0.18);
-  animation: cloud-drift 2s ease forwards;
-}
-@keyframes cloud-drift {
-  0%   { opacity: 0; transform: translateX(0); }
-  35%  { opacity: 0.6; }
-  60%  { opacity: 0.5; }
-  100% { opacity: 0; transform: translateX(30px); }
-}
-
-/* ── Collines (horizon) ── */
-#sp-hills {
-  position: absolute;
-  bottom: 28%;
-  left: 0; right: 0;
-}
-
-/* ── Zone vigne ── */
-#sp-vineyard {
-  position: absolute;
-  bottom: 0;
-  left: 0; right: 0;
-  height: 30%;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 0;
-  padding-bottom: 14%;
-}
-
-/* ── Sol ── */
-#sp-ground {
-  position: absolute;
-  bottom: 0;
-  left: 0; right: 0;
-  height: 14%;
-  background: linear-gradient(180deg, #5C3A1E 0%, #3A2010 100%);
-}
-
-/* ── Ceps de vigne ── */
-.sp-cep {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 42px;
-  position: relative;
-}
-/* Pied/tronc */
-.sp-trunk {
-  width: 6px;
-  height: 28px;
-  background: linear-gradient(180deg, #5A3A1A 0%, #3A2010 100%);
-  border-radius: 3px 3px 2px 2px;
-  position: relative;
-}
-/* Bras horizontal */
-.sp-arms {
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 28px;
-  height: 4px;
-  background: #5A3A1A;
-  border-radius: 2px;
-}
-/* Végétation — 4 états selon saison */
-.sp-veg {
-  position: absolute;
-  top: -2px;
-  left: 50%;
-  transform: translateX(-50%);
-  transition: all 0.3s ease;
-}
-
-/* HIVER : taillée, bras nus, flocons */
-.sp-winter .sp-veg { display: none; }
-.sp-winter .sp-trunk { background: linear-gradient(180deg, #4A3218 0%, #2E1C0C 100%); }
-.sp-winter-snow {
-  position: absolute;
-  top: -10px; left: 50%;
-  transform: translateX(-50%);
-  width: 32px; height: 8px;
-  background: rgba(230,240,255,0.85);
-  border-radius: 10px;
-}
-
-/* PRINTEMPS : petites feuilles vertes tendres */
-.sp-spring .sp-veg {
-  display: block;
-  width: 22px; height: 14px;
-  background: radial-gradient(ellipse, #8BC85A 0%, #5A9A2A 100%);
-  border-radius: 50%;
-  box-shadow: 0 0 6px rgba(100,180,60,0.3);
-}
-
-/* ÉTÉ : grappes */
-.sp-summer .sp-veg {
-  display: block;
-  width: 18px; height: 22px;
-  background: radial-gradient(ellipse at 50% 30%, #8040C0 0%, #6020A0 60%, #401060 100%);
-  border-radius: 50% 50% 60% 60%;
-  box-shadow: 0 2px 8px rgba(100,20,160,0.35);
-}
-.sp-summer .sp-veg::before {
-  content: '';
-  position: absolute;
-  top: -4px; left: 50%;
-  transform: translateX(-50%);
-  width: 3px; height: 6px;
-  background: #5A3A1A;
-  border-radius: 2px;
-}
-
-/* AUTOMNE : feuilles dorées/rouge */
-.sp-autumn .sp-veg {
-  display: block;
-  width: 24px; height: 18px;
-  background: radial-gradient(ellipse, #E8A030 0%, #C85818 60%, #A03010 100%);
-  border-radius: 40% 60% 50% 50%;
-  transform: translateX(-50%) rotate(-8deg);
-  animation: leaf-fall 0.4s ease-in-out infinite alternate;
-}
-@keyframes leaf-fall {
-  0%   { transform: translateX(-50%) rotate(-8deg) translateY(0); }
-  100% { transform: translateX(-50%) rotate(6deg) translateY(3px); }
-}
-
-/* ── Animation des ceps : cycle des 4 saisons ── */
-/* Hiver → Printemps → Été → Automne en 2 secondes */
-.sp-cep {
-  animation: cep-season 2s ease forwards;
-}
-/* On utilise des classes temporelles via JS */
-
-/* ── Flocons de neige ── */
-.sp-flake {
-  position: absolute;
-  color: rgba(200,220,255,0.7);
-  font-size: 10px;
-  animation: flake-fall 0.7s linear forwards;
-  pointer-events: none;
-}
-@keyframes flake-fall {
-  0%   { opacity: 0.8; transform: translateY(0) rotate(0deg); }
-  100% { opacity: 0; transform: translateY(40px) rotate(180deg); }
-}
-
-/* ── Logo Ma Vigne au centre ── */
+.sp-cep { position:relative; display:flex; flex-direction:column; align-items:center; }
+.sp-tronc { position:relative; border-radius:2px; margin:0 auto; }
+#sp-overlay { position:absolute; inset:0; pointer-events:none; z-index:10; opacity:0; }
 #sp-logo {
-  position: absolute;
-  bottom: 20%;
-  left: 0; right: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  animation: logo-appear 2s ease forwards;
-  pointer-events: none;
-}
-@keyframes logo-appear {
-  0%   { opacity: 0; transform: translateY(8px); }
-  25%  { opacity: 0; transform: translateY(8px); }
-  45%  { opacity: 1; transform: translateY(0); }
-  80%  { opacity: 1; }
-  100% { opacity: 0; }
+  position:absolute; bottom:6vh; left:0; right:0;
+  text-align:center; z-index:20; pointer-events:none;
 }
 #sp-logo-name {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 28px;
-  font-weight: 600;
-  color: white;
-  letter-spacing: 2px;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+  display:block; font-family:'Cormorant Garamond',serif; font-weight:600;
+  font-size:clamp(26px,8vw,42px); color:white; letter-spacing:.1em;
+  text-shadow:0 2px 20px rgba(0,0,0,.8);
 }
 #sp-logo-sub {
-  font-family: 'Outfit', sans-serif;
-  font-size: 11px;
-  font-weight: 300;
-  color: rgba(255,255,255,0.6);
-  letter-spacing: 3px;
-  text-transform: uppercase;
+  display:block; font-family:'Outfit',sans-serif; font-weight:300;
+  font-size:clamp(9px,2.5vw,14px); color:rgba(255,255,255,.5);
+  letter-spacing:.25em; text-transform:uppercase; margin-top:4px;
 }
-
-/* ── Particules de lumière (heure de pointe) ── */
-.sp-ray {
-  position: absolute;
-  width: 1px;
-  background: linear-gradient(180deg, rgba(255,220,100,0.0) 0%, rgba(255,220,100,0.25) 50%, rgba(255,220,100,0.0) 100%);
-  transform-origin: bottom center;
-  animation: ray-pulse 2s ease forwards;
-  pointer-events: none;
+@keyframes sp-tomber {
+  0%  { transform:translateY(0) rotate(0deg); opacity:.9; }
+  100%{ transform:translateY(70px) rotate(200deg); opacity:0; }
 }
-@keyframes ray-pulse {
-  0%   { opacity: 0; }
-  35%  { opacity: 0; }
-  50%  { opacity: 1; }
-  65%  { opacity: 0; }
-  100% { opacity: 0; }
+@keyframes sp-flocon {
+  0%  { transform:translateY(0) translateX(0); opacity:.8; }
+  100%{ transform:translateY(55px) translateX(6px); opacity:0; }
+}
+@keyframes sp-battre {
+  0%,100%{ transform:scaleY(1); } 50%{ transform:scaleY(.5); }
+}
+.sp-feuille {
+  position:absolute; width:7px; height:5px; border-radius:50% 0 50% 0;
+  animation:sp-tomber linear forwards; pointer-events:none;
+}
+.sp-flocon {
+  position:absolute; color:rgba(210,228,255,.7); font-size:8px;
+  animation:sp-flocon linear forwards; pointer-events:none;
 }
 </style>
 
-<!-- Ciel -->
-<div id="sp-sky"></div>
-
-<!-- Étoiles initiales -->
-<div id="sp-stars">
-  <div class="sp-star" style="top:8%;left:15%"></div>
-  <div class="sp-star" style="top:12%;left:35%"></div>
-  <div class="sp-star" style="top:5%;left:55%;width:3px;height:3px;opacity:0.9"></div>
-  <div class="sp-star" style="top:18%;left:72%"></div>
-  <div class="sp-star" style="top:9%;left:82%"></div>
-  <div class="sp-star" style="top:22%;left:48%"></div>
-  <div class="sp-star" style="top:15%;left:90%"></div>
-  <div class="sp-star" style="top:6%;left:68%"></div>
-  <div class="sp-star" style="top:25%;left:20%"></div>
-  <div class="sp-star" style="top:3%;left:42%;width:3px;height:3px"></div>
+<div id="sp-ciel"><div id="sp-soleil"></div></div>
+<div id="sp-vignes">
+  <div class="sp-bande sp-bande-automne"   id="sp-b-automne"></div>
+  <div class="sp-bande sp-bande-hiver"     id="sp-b-hiver"></div>
+  <div class="sp-bande sp-bande-printemps" id="sp-b-printemps"></div>
+  <div class="sp-bande sp-bande-ete"       id="sp-b-ete"></div>
 </div>
-
-<!-- Lune (nuit initiale) -->
-<div id="sp-moon"></div>
-
-<!-- Soleil -->
-<div id="sp-sun"></div>
-
-<!-- Rayons au pic -->
-<div class="sp-ray" id="sp-ray1" style="height:35vh;bottom:50%;left:calc(50% - 0px);transform:rotate(-20deg)"></div>
-<div class="sp-ray" id="sp-ray2" style="height:30vh;bottom:50%;left:calc(50% + 0px);transform:rotate(20deg)"></div>
-<div class="sp-ray" id="sp-ray3" style="height:40vh;bottom:50%;left:calc(50% - 0px);transform:rotate(0deg)"></div>
-
-<!-- Nuages -->
-<div class="sp-cloud" style="top:20%;left:10%;width:80px;height:20px;animation-delay:0.3s"></div>
-<div class="sp-cloud" style="top:30%;left:65%;width:60px;height:14px;animation-delay:0.5s"></div>
-<div class="sp-cloud" style="top:15%;left:45%;width:50px;height:12px;animation-delay:0.6s"></div>
-
-<!-- Collines -->
-<svg id="sp-hills" viewBox="0 0 375 80" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%">
-  <path d="M0,80 Q40,30 90,55 Q140,80 180,40 Q220,10 270,45 Q310,70 375,35 L375,80 Z" fill="#1A3A10" opacity="0.7"/>
-  <path d="M0,80 Q60,55 110,65 Q160,75 210,60 Q260,45 310,62 Q340,72 375,58 L375,80 Z" fill="#2A5018" opacity="0.85"/>
-</svg>
-
-<!-- Sol -->
-<div id="sp-ground"></div>
-
-<!-- Ceps de vigne -->
-<div id="sp-vineyard">
-  <div class="sp-cep" id="cep1">
-    <div class="sp-trunk">
-      <div class="sp-arms"></div>
-      <div class="sp-veg" id="veg1"></div>
-      <div class="sp-winter-snow" id="snow1"></div>
-    </div>
-  </div>
-  <div class="sp-cep" id="cep2">
-    <div class="sp-trunk">
-      <div class="sp-arms"></div>
-      <div class="sp-veg" id="veg2"></div>
-      <div class="sp-winter-snow" id="snow2"></div>
-    </div>
-  </div>
-  <div class="sp-cep" id="cep3">
-    <div class="sp-trunk">
-      <div class="sp-arms"></div>
-      <div class="sp-veg" id="veg3"></div>
-      <div class="sp-winter-snow" id="snow3"></div>
-    </div>
-  </div>
-  <div class="sp-cep" id="cep4">
-    <div class="sp-trunk">
-      <div class="sp-arms"></div>
-      <div class="sp-veg" id="veg4"></div>
-      <div class="sp-winter-snow" id="snow4"></div>
-    </div>
-  </div>
-  <div class="sp-cep" id="cep5">
-    <div class="sp-trunk">
-      <div class="sp-arms"></div>
-      <div class="sp-veg" id="veg5"></div>
-      <div class="sp-winter-snow" id="snow5"></div>
-    </div>
-  </div>
-</div>
-
-<!-- Logo -->
+<div id="sp-overlay"></div>
 <div id="sp-logo">
-  <div id="sp-logo-name">Ma Vigne</div>
-  <div id="sp-logo-sub">Gestion viticole</div>
+  <span id="sp-logo-name">Ma Vigne</span>
+  <span id="sp-logo-sub">Gestion viticole</span>
 </div>
 
 <script>
-(function() {
-  // ── Cycle des saisons sur les ceps ──
-  // 0-0.3s: Hiver (neige, taillé)
-  // 0.5-0.9s: Printemps (petites feuilles)
-  // 1.0-1.5s: Été (grappes)
-  // 1.6-2.0s: Automne (feuilles dorées qui tombent)
-
-  const ceps = [
-    { trunk: document.getElementById('cep1'), veg: document.getElementById('veg1'), snow: document.getElementById('snow1') },
-    { trunk: document.getElementById('cep2'), veg: document.getElementById('veg2'), snow: document.getElementById('snow2') },
-    { trunk: document.getElementById('cep3'), veg: document.getElementById('veg3'), snow: document.getElementById('snow3') },
-    { trunk: document.getElementById('cep4'), veg: document.getElementById('veg4'), snow: document.getElementById('snow4') },
-    { trunk: document.getElementById('cep5'), veg: document.getElementById('veg5'), snow: document.getElementById('snow5') },
+(function(){
+  const ROWS=[
+    {bot:1, s:1.00, n:5},{bot:14,s:0.80,n:5},{bot:25,s:0.64,n:5},{bot:34,s:0.51,n:5},
+    {bot:42,s:0.40,n:5},{bot:49,s:0.31,n:4},{bot:55,s:0.23,n:4},{bot:60,s:0.17,n:4}
   ];
+  const SAISONS=['automne','hiver','printemps','ete'];
+  const lerp=(a,b,t)=>a+(b-a)*t;
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const easeOut=t=>1-Math.pow(1-t,2.5);
+  const ri=(a,b,t)=>Math.round(lerp(a,b,t));
 
-  function setSeason(season) {
-    ceps.forEach(c => {
-      // Reset
-      c.veg.style.display = 'none';
-      c.snow.style.display = 'none';
-      c.veg.style.background = '';
-      c.veg.style.width = '';
-      c.veg.style.height = '';
-      c.veg.style.borderRadius = '';
-      c.veg.style.animation = '';
-      c.veg.style.transform = 'translateX(-50%)';
-
-      if (season === 'winter') {
-        c.snow.style.display = 'block';
-      } else if (season === 'spring') {
-        c.veg.style.display = 'block';
-        c.veg.style.width = '22px';
-        c.veg.style.height = '14px';
-        c.veg.style.background = 'radial-gradient(ellipse, #8BC85A 0%, #5A9A2A 100%)';
-        c.veg.style.borderRadius = '50%';
-        c.veg.style.boxShadow = '0 0 6px rgba(100,180,60,0.3)';
-      } else if (season === 'summer') {
-        c.veg.style.display = 'block';
-        c.veg.style.width = '18px';
-        c.veg.style.height = '22px';
-        c.veg.style.background = 'radial-gradient(ellipse at 50% 30%, #8040C0 0%, #6020A0 60%, #401060 100%)';
-        c.veg.style.borderRadius = '50% 50% 60% 60%';
-        c.veg.style.boxShadow = '0 2px 8px rgba(100,20,160,0.35)';
-      } else if (season === 'autumn') {
-        c.veg.style.display = 'block';
-        c.veg.style.width = '24px';
-        c.veg.style.height = '18px';
-        c.veg.style.background = 'radial-gradient(ellipse, #E8A030 0%, #C85818 60%, #A03010 100%)';
-        c.veg.style.borderRadius = '40% 60% 50% 50%';
-        c.veg.style.animation = 'leaf-fall 0.4s ease-in-out infinite alternate';
-      }
-    });
+  function mkCep(saison,s){
+    const tH=Math.max(4,Math.round(30*s)),tW=Math.max(2,Math.round(4*s));
+    const aW=Math.max(4,Math.round(28*s)),armTop=Math.round(tH*.40);
+    const wrap=document.createElement('div');
+    wrap.className='sp-cep'; wrap.style.width=Math.round(aW*1.1)+'px';
+    const tronc=document.createElement('div');
+    tronc.className='sp-tronc';
+    const tc=saison==='hiver'?'#4a5868':'#6B3A14';
+    tronc.style.cssText=`width:${tW}px;height:${tH}px;background:${tc};`;
+    const bras=document.createElement('div');
+    bras.style.cssText=`position:absolute;top:${armTop}px;left:${Math.round(tW/2-aW/2)}px;width:${aW}px;height:${Math.max(1,Math.round(2.5*s))}px;background:${tc};border-radius:1px;`;
+    tronc.appendChild(bras);
+    if(saison==='hiver'){
+      const n=document.createElement('div');
+      n.style.cssText=`position:absolute;top:${armTop-Math.max(1,Math.round(2*s))}px;left:${Math.round(tW/2-aW/2-1)}px;width:${aW+2}px;height:${Math.max(2,Math.round(3.5*s))}px;background:rgba(215,232,255,.92);border-radius:2px;`;
+      tronc.appendChild(n);
+    } else if(saison==='automne'){
+      [{dx:0,col:'#C85010',op:.92},{dx:-Math.round(5*s),col:'#D46018',op:.78},{dx:Math.round(5*s),col:'#B84010',op:.75}].forEach(({dx,col,op})=>{
+        const bW=Math.max(5,Math.round(13*s)),bHh=Math.max(4,Math.round(10*s));
+        const b=document.createElement('div');
+        b.style.cssText=`position:absolute;top:${-Math.round(bHh*.7)}px;left:${Math.round(tW/2+dx-bW/2)}px;width:${bW}px;height:${bHh}px;background:${col};border-radius:50%;opacity:${op};`;
+        tronc.appendChild(b);
+      });
+      const pW=Math.max(4,Math.round(9*s)),pH=Math.max(5,Math.round(12*s));
+      const p=document.createElement('div');
+      p.style.cssText=`position:absolute;top:${armTop+Math.round(2*s)}px;left:${Math.round(tW/2-pW/2)}px;width:${pW}px;height:${pH}px;background:#D4601A;border-radius:40% 40% 60% 60%;opacity:.82;`;
+      tronc.appendChild(p);
+    } else if(saison==='printemps'){
+      [{dx:0,col:'#78D030',op:.9},{dx:-Math.round(5*s),col:'#70C828',op:.78},{dx:Math.round(5*s),col:'#82D835',op:.78}].forEach(({dx,col,op})=>{
+        const bW=Math.max(4,Math.round(10*s)),bHh=Math.max(3,Math.round(8*s));
+        const b=document.createElement('div');
+        b.style.cssText=`position:absolute;top:${-Math.round(bHh*.6)}px;left:${Math.round(tW/2+dx-bW/2)}px;width:${bW}px;height:${bHh}px;background:${col};border-radius:50%;opacity:${op};`;
+        tronc.appendChild(b);
+      });
+    } else if(saison==='ete'){
+      [{dx:0,col:'#1E8010',op:.95,ss:1},{dx:-Math.round(6*s),col:'#1E8010',op:.85,ss:.85},{dx:Math.round(6*s),col:'#1E8010',op:.85,ss:.85},{dx:0,col:'#30A820',op:.55,ss:.65}].forEach(({dx,col,op,ss})=>{
+        const bW=Math.max(5,Math.round(14*s*ss)),bHh=Math.max(4,Math.round(11*s*ss));
+        const b=document.createElement('div');
+        b.style.cssText=`position:absolute;top:${-Math.round(bHh*.75)}px;left:${Math.round(tW/2+dx-bW/2)}px;width:${bW}px;height:${bHh}px;background:${col};border-radius:50%;opacity:${op};`;
+        tronc.appendChild(b);
+      });
+      const gW=Math.max(5,Math.round(10*s)),gH=Math.max(6,Math.round(16*s));
+      const g=document.createElement('div');
+      g.style.cssText=`position:absolute;top:${armTop+Math.round(2*s)}px;left:${Math.round(tW/2-gW/2)}px;width:${gW}px;height:${gH}px;background:#4810A0;border-radius:40% 40% 60% 60%;opacity:.9;`;
+      tronc.appendChild(g);
+    }
+    wrap.appendChild(tronc); return wrap;
   }
 
-  // Séquence temporelle — 2 secondes totales
-  setSeason('winter');
+  function buildVignes(){
+    SAISONS.forEach(saison=>{
+      const bande=document.getElementById('sp-b-'+saison);
+      bande.innerHTML='';
+      ROWS.forEach(({bot,s,n})=>{
+        const tH=Math.max(4,Math.round(30*s)),aW=Math.max(4,Math.round(28*s)),armTop=Math.round(tH*.40);
+        const rangee=document.createElement('div');
+        rangee.className='sp-rangee';
+        rangee.style.cssText=`bottom:${bot}%;left:0;right:0;align-items:flex-end;justify-content:space-around;padding:0 2px;`;
+        const fil=document.createElement('div');
+        fil.style.cssText=`position:absolute;left:1px;right:1px;height:${Math.max(1,Math.round(1.2*s))}px;background:${saison==='hiver'?'rgba(90,110,135,.45)':'rgba(90,65,30,.42)'};border-radius:1px;bottom:${armTop}px;opacity:${Math.min(1,s*1.6)};`;
+        rangee.appendChild(fil);
+        for(let i=0;i<n;i++) rangee.appendChild(mkCep(saison,s));
+        bande.appendChild(rangee);
+      });
+    });
+    // Oiseaux printemps
+    const ciel=document.getElementById('sp-ciel');
+    const bg=document.createElement('div');
+    bg.style.cssText='position:absolute;bottom:28%;left:52%;display:flex;gap:14px;align-items:center;opacity:.65;';
+    [0,1].forEach(i=>{
+      const sz=i===0?16:11;
+      const b=document.createElement('div');
+      b.style.cssText=`animation:sp-battre ${.75+i*.2}s ease-in-out infinite alternate;animation-delay:${i*.25}s;`;
+      b.innerHTML=`<svg width="${sz*2.2}" height="${sz}" viewBox="0 0 22 10" fill="none"><path d="M1,9 Q5.5,1 11,9 Q16.5,1 21,9" stroke="#2a5018" stroke-width="2" stroke-linecap="round"/></svg>`;
+      bg.appendChild(b);
+    });
+    ciel.appendChild(bg);
+  }
 
-  setTimeout(() => setSeason('spring'), 480);
-  setTimeout(() => setSeason('summer'), 950);
-  setTimeout(() => setSeason('autumn'), 1520);
+  let rafId=null,t0=null;
+  const DUR=5000;
 
-  // Masquer le splash et libérer les events après la fin
-  setTimeout(() => {
-    var el = document.getElementById('splash-screen');
-    if (el) {
-      el.style.pointerEvents = 'none';
-      // Retirer du DOM après fadeout
-      setTimeout(() => { if (el && el.parentNode) el.parentNode.removeChild(el); }, 500);
+  function frame(ts){
+    if(!t0)t0=ts;
+    const t=clamp((ts-t0)/DUR,0,1),e=easeOut(t);
+    const vw=window.innerWidth,vh=window.innerHeight,skyH=vh*.38;
+    // Ciel
+    const cielEl=document.getElementById('sp-ciel');
+    cielEl.style.background=`linear-gradient(180deg,rgb(${ri(26,38,e)},${ri(30,68,e)},${ri(46,108,e)}) 0%,rgb(${ri(42,100,e)},${ri(54,158,e)},${ri(70,200,e)}) 100%)`;
+    // Soleil
+    const sx=lerp(vw*.05,vw*.70,e),sy=lerp(skyH*.85,skyH*.15,e),sr=lerp(10,50,e),sop=lerp(.28,1,e);
+    const sun=document.getElementById('sp-soleil');
+    const gr=ri(150,255,e),gg=ri(170,190,e),gb=ri(210,20,e),ga=lerp(.18,.75,e);
+    sun.style.cssText=`position:absolute;left:${sx-sr}px;top:${sy-sr}px;width:${sr*2}px;height:${sr*2}px;border-radius:50%;opacity:${sop};background:radial-gradient(circle,white 0%,rgb(${ri(200,255,e)},${ri(215,215,e)},${ri(255,40,e)}) 45%,rgba(${gr},${gg},${gb},.5) 100%);box-shadow:0 0 ${Math.round(sr*1.4)}px ${Math.round(sr*.7)}px rgba(${gr},${gg},${gb},${ga}),0 0 ${Math.round(sr*3)}px ${Math.round(sr*1.5)}px rgba(${gr},${gg},${gb},${ga*.35});`;
+    // Overlay
+    const ot=clamp((e-.55)/.45,0,1);
+    const ov=document.getElementById('sp-overlay');
+    ov.style.opacity=ot;
+    ov.style.background=`radial-gradient(ellipse at ${ri(65,88,e)}% 35%,rgba(255,220,80,.45) 0%,rgba(255,180,40,.18) 35%,transparent 62%)`;
+    // Particules
+    if(Math.random()<.1) addFeuille();
+    if(Math.random()<.08) addFlocon();
+    if(t<1){ rafId=requestAnimationFrame(frame); }
+    else {
+      // Fadeout puis masquer
+      const el=document.getElementById('splash-screen');
+      el.style.transition='opacity 0.5s ease';
+      el.style.opacity='0';
+      setTimeout(()=>{el.style.display='none';},500);
     }
-  }, 2100);
+  }
+
+  function addFeuille(){
+    const b=document.getElementById('sp-b-automne');
+    const el=document.createElement('div'); el.className='sp-feuille';
+    const cols=['#D4601A','#E07820','#C85010','#B84010'];
+    el.style.cssText=`left:${5+Math.random()*85}%;top:${5+Math.random()*60}%;background:${cols[Math.floor(Math.random()*4)]};animation-duration:${1.5+Math.random()*1.5}s;`;
+    b.appendChild(el); setTimeout(()=>el.remove(),3000);
+  }
+  function addFlocon(){
+    const b=document.getElementById('sp-b-hiver');
+    const el=document.createElement('div'); el.className='sp-flocon'; el.textContent='❄';
+    el.style.cssText=`left:${5+Math.random()*85}%;top:${3+Math.random()*55}%;animation-duration:${1.2+Math.random()*1.3}s;font-size:${6+Math.random()*5}px;`;
+    b.appendChild(el); setTimeout(()=>el.remove(),2500);
+  }
+
+  buildVignes();
+  rafId=requestAnimationFrame(frame);
 })();
 </script>
 </div>
@@ -1660,7 +1410,10 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
   <div class="modal-body" style="padding-top:8px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--texte-doux)">Parcelles restantes</div>
-      <div onclick="toggleSDShowDone()" id="sd-show-done-btn" style="font-size:11px;font-weight:600;color:var(--acier);cursor:pointer;background:var(--acier-pale);padding:4px 10px;border-radius:8px">Voir toutes</div>
+      <div style="display:flex;gap:6px">
+        <div onclick="toggleSDSkipMode()" id="sd-skip-mode-btn" style="font-size:11px;font-weight:600;color:#8B3A28;cursor:pointer;background:#F0D0C8;padding:4px 10px;border-radius:8px">⊘ Désactiver</div>
+        <div onclick="toggleSDShowDone()" id="sd-show-done-btn" style="font-size:11px;font-weight:600;color:var(--acier);cursor:pointer;background:var(--acier-pale);padding:4px 10px;border-radius:8px">Voir toutes</div>
+      </div>
     </div>
     <div id="sd-parcelles"></div>
   </div>
@@ -2924,60 +2677,86 @@ function renderTracteur(){
   document.getElementById('s-cond-pick').innerHTML=CONDUCTEURS.map((c,i)=>`<div class="pchk ${i===0?'sel acre':''}" onclick="pickCond(this)">${c.nom}</div>`).join('');
 }
 let sdShowDone=false;
+let sdSkipMode=false;
 function openSessionDetail(id){
   const s=SESSIONS.find(x=>x.id===id);if(!s)return;
-  tracSessionId=id;sdShowDone=false;
+  tracSessionId=id;sdShowDone=false;sdSkipMode=false;
   if(!s.parcellesFaites)s.parcellesFaites=[];
+  if(!s.parcellesSkip)s.parcellesSkip=[];
   const amap=ACTIVITES.reduce((m,a)=>{m[a.nom]=a;return m},{});
   const em=amap[s.activite]?.emoji||'🚜';
   document.getElementById('sd-titre').textContent=`${em} ${s.activite}`;
   document.getElementById('sd-meta').textContent=`${fmtDate(s.date)} · ${s.conducteur}`;
+  updateSDSkipBtn();
   renderSDParcelles();
   renderSessionProgress();
   openOv('ovSessionDetail');
 }
+function updateSDSkipBtn(){
+  const btn=document.getElementById('sd-skip-mode-btn');if(!btn)return;
+  if(sdSkipMode){btn.textContent='⊘ Mode désactivation ON';btn.style.background='#C83A20';btn.style.color='white';}
+  else{btn.textContent='⊘ Désactiver';btn.style.background='#F0D0C8';btn.style.color='#8B3A28';}
+}
+function toggleSDSkipMode(){sdSkipMode=!sdSkipMode;updateSDSkipBtn();renderSDParcelles();}
 function renderSDParcelles(){
   const s=SESSIONS.find(x=>x.id===tracSessionId);if(!s)return;
   const actives=PARCELLES.filter(p=>p.statut!=='Arrachee');
   const done=s.parcellesFaites||[];
-  // Par défaut : afficher seulement les non-faites (restantes)
-  const toShow=(sdShowDone?actives:actives.filter(p=>!done.includes(p.nom))).slice().sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
+  const skip=s.parcellesSkip||[];
+  let toShow;
+  if(sdSkipMode){
+    toShow=actives.filter(p=>!done.includes(p.nom)).slice().sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
+  } else {
+    toShow=(sdShowDone?actives:actives.filter(p=>!done.includes(p.nom)&&!skip.includes(p.nom))).slice().sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
+  }
   const btn=document.getElementById('sd-show-done-btn');
   if(btn)btn.textContent=sdShowDone?'Masquer faites':'Voir toutes';
-  document.getElementById('sd-parcelles').innerHTML=toShow.length===0
-    ?'<div style="text-align:center;padding:24px;color:var(--texte-doux);font-size:13px">✅ Toutes les parcelles sont cochées</div>'
-    :toShow.map(p=>{
-      const fait=done.includes(p.nom);
+  if(toShow.length===0){document.getElementById('sd-parcelles').innerHTML='<div style="text-align:center;padding:24px;color:var(--texte-doux);font-size:13px">✅ Toutes les parcelles sont cochées</div>';return;}
+  document.getElementById('sd-parcelles').innerHTML=toShow.map(p=>{
+    const fait=done.includes(p.nom);
+    const skipped=skip.includes(p.nom);
+    if(sdSkipMode){
+      return `<div class="sdp-row ${skipped?'sdp-skip':''}" style="cursor:default">
+        <div class="sdp-check ${skipped?'skip':''}">${skipped?'⊘':''}</div>
+        <div class="sdp-nom" style="${skipped?'color:#8B4A40;text-decoration:line-through;':''}">${p.nom}</div>
+        <div class="sdp-surf">${p.surface} ha</div>
+        <button class="sdp-skip-btn ${skipped?'active':'inactive'}" onclick="toggleSessionSkip('${p.nom}')">${skipped?'Réactiver':'Désactiver'}</button>
+      </div>`;
+    } else {
       return `<div class="sdp-row ${fait?'sdp-done':''}" onclick="toggleSessionParcelle('${p.nom}',this)">
         <div class="sdp-check ${fait?'on':''}">${fait?'✓':''}</div>
         <div class="sdp-nom">${p.nom}</div>
         <div class="sdp-surf">${p.surface} ha</div>
       </div>`;
-    }).join('');
+    }
+  }).join('');
 }
-function toggleSDShowDone(){
-  sdShowDone=!sdShowDone;
-  renderSDParcelles();
-}
+function toggleSDShowDone(){sdShowDone=!sdShowDone;renderSDParcelles();}
 function toggleSessionParcelle(nom,row){
   const s=SESSIONS.find(x=>x.id===tracSessionId);if(!s)return;
   if(!s.parcellesFaites)s.parcellesFaites=[];
   const idx=s.parcellesFaites.indexOf(nom);
-  if(idx>=0){s.parcellesFaites.splice(idx,1);}
-  else{s.parcellesFaites.push(nom);}
-  saveData('sessions');
-  renderSessionProgress();
-  renderSDParcelles(); // re-render (may hide the row if not showing done)
+  if(idx>=0){s.parcellesFaites.splice(idx,1);}else{s.parcellesFaites.push(nom);}
+  saveData('sessions');renderSessionProgress();renderSDParcelles();
+}
+function toggleSessionSkip(nom){
+  const s=SESSIONS.find(x=>x.id===tracSessionId);if(!s)return;
+  if(!s.parcellesSkip)s.parcellesSkip=[];
+  const idx=s.parcellesSkip.indexOf(nom);
+  if(idx>=0){s.parcellesSkip.splice(idx,1);}else{s.parcellesSkip.push(nom);}
+  saveData('sessions');renderSessionProgress();renderSDParcelles();
 }
 function renderSessionProgress(){
   const s=SESSIONS.find(x=>x.id===tracSessionId);if(!s)return;
-  const total=PARCELLES.filter(p=>p.statut!=='Arrachee').length;
+  const skip=s.parcellesSkip||[];
+  const total=PARCELLES.filter(p=>p.statut!=='Arrachee'&&!skip.includes(p.nom)).length;
   const done=(s.parcellesFaites||[]).length;
-  const pct=Math.round(done/total*100);
+  const skipCount=skip.length;
+  const pct=total>0?Math.round(done/total*100):100;
   s.avancement=pct;
-  document.getElementById('sd-progress').textContent=`${done}/${total} parcelles · ${pct}%`;
+  const skipTxt=skipCount>0?` · ${skipCount} désactivée${skipCount>1?'s':''}` : '';
+  document.getElementById('sd-progress').textContent=`${done}/${total} parcelles · ${pct}%${skipTxt}`;
   document.getElementById('sd-bar').style.width=pct+'%';
-  // Mise à jour statut auto
   if(pct===100&&s.statut==='En cours')s.statut='Terminé';
   else if(pct<100&&s.statut==='Terminé')s.statut='En cours';
 }
@@ -4110,26 +3889,60 @@ function exportPDFMois(){
   const amapPdf=ACTIVITES.reduce((m,a)=>{m[a.nom]=a;return m},{});
   let tracteurSection='';
   if(sessionsMois.length>0){
+    const parcActives=PARCELLES.filter(p=>p.statut!=='Arrachee');
     const lignesSessions=sessionsMois.map(s=>{
       const em=amapPdf[s.activite]?.emoji||'🚜';
       const pct=s.avancement!=null?s.avancement:0;
       const statCls=s.statut==='En cours'?'trac-enc':'trac-ter';
       const fillCls=s.statut==='En cours'?'trac-fill-enc':'trac-fill';
-      const total=PARCELLES.filter(p=>p.statut!=='Arrachee').length;
-      const faites=(s.parcellesFaites||[]).length;
+      const skip=s.parcellesSkip||[];
+      const faites=s.parcellesFaites||[];
+      const total=parcActives.filter(p=>!skip.includes(p.nom)).length;
+      const nbFaites=faites.length;
+      const nbSkip=skip.length;
+
+      // Liste parcelles faites triées
+      const parcellesFaitesTriees=[...faites].sort((a,b)=>a.localeCompare(b,'fr'));
+      // Parcelles restantes (actives - faites - skip)
+      const parcRestantes=parcActives.filter(p=>!faites.includes(p.nom)&&!skip.includes(p.nom)).map(p=>p.nom).sort((a,b)=>a.localeCompare(b,'fr'));
+      const parcSkipTriees=[...skip].sort((a,b)=>a.localeCompare(b,'fr'));
+
+      // Lignes du détail parcelles (grille compacte)
+      const mkPillList=(noms,cls)=>noms.length===0?'<span style="color:#aaa;font-style:italic;font-size:10px">—</span>'
+        :noms.map(n=>`<span class="parc-pill ${cls}">${n}</span>`).join('');
+
       return `<tr>
         <td>${em} <strong>${s.activite}</strong></td>
         <td>${fmtD(s.date)}</td>
         <td>${s.conducteur||'—'}</td>
         <td><span class="trac-badge ${statCls}">${s.statut}</span></td>
         <td><div class="trac-bar-wrap"><div class="trac-bar"><div class="${fillCls}" style="width:${pct}%"></div></div><span style="font-size:10px;font-weight:700;color:${s.statut==='En cours'?'#B85A1A':'#2C3E50'}">${pct}%</span></div></td>
-        <td style="font-size:10px;color:#7A7A6A">${faites}/${total} parcelles${s.note?` · ${s.note}`:''}</td>
+        <td style="font-size:10px;color:#7A7A6A">${nbFaites}/${total} parc.${nbSkip>0?` · ${nbSkip} désact.`:''}</td>
+      </tr>
+      <tr class="trac-detail-row">
+        <td colspan="6" style="padding:0 8px 14px 28px">
+          <div class="trac-detail-block">
+            <div class="trac-detail-col">
+              <div class="trac-detail-label trac-det-ok">✓ Travaillées (${nbFaites})</div>
+              <div class="trac-pills">${mkPillList(parcellesFaitesTriees,'pill-ok')}</div>
+            </div>
+            ${parcRestantes.length>0?`<div class="trac-detail-col">
+              <div class="trac-detail-label trac-det-rest">⏳ Restantes (${parcRestantes.length})</div>
+              <div class="trac-pills">${mkPillList(parcRestantes,'pill-rest')}</div>
+            </div>`:''}
+            ${nbSkip>0?`<div class="trac-detail-col">
+              <div class="trac-detail-label trac-det-skip">⊘ Désactivées (${nbSkip})</div>
+              <div class="trac-pills">${mkPillList(parcSkipTriees,'pill-skip')}</div>
+            </div>`:''}
+          </div>
+          ${s.note?`<div style="margin-top:6px;font-size:10px;color:#7A7A6A;font-style:italic">📝 ${s.note}</div>`:''}
+        </td>
       </tr>`;
     }).join('');
     tracteurSection=`<div class="section">
   <div class="section-title">🚜 Activité tracteur — ${moisNom}</div>
   <table class="trac-table">
-    <thead><tr><th>Activité</th><th>Date</th><th>Conducteur</th><th>Statut</th><th>Avancement</th><th>Détail</th></tr></thead>
+    <thead><tr><th>Activité</th><th>Date</th><th>Conducteur</th><th>Statut</th><th>Avancement</th><th>Parcelles</th></tr></thead>
     <tbody>${lignesSessions}</tbody>
   </table>
 </div>`;
@@ -4209,6 +4022,19 @@ function exportPDFMois(){
   .trac-bar{width:80px;height:6px;background:#EFEDE8;border-radius:4px;overflow:hidden;display:inline-block;vertical-align:middle;}
   .trac-fill{height:100%;border-radius:4px;background:#2C3E50;}
   .trac-fill-enc{background:#B85A1A;}
+  /* Détail parcelles tracteur */
+  .trac-detail-row td{background:#F8F8F5;border-bottom:2px solid #ECF0F4;}
+  .trac-detail-block{display:flex;flex-wrap:wrap;gap:12px;padding-top:8px;}
+  .trac-detail-col{flex:1;min-width:160px;}
+  .trac-detail-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;padding:2px 6px;border-radius:4px;display:inline-block;}
+  .trac-det-ok{background:#EAF3E2;color:#1E3A12;}
+  .trac-det-rest{background:#FBF0E6;color:#8B4A1A;}
+  .trac-det-skip{background:#F5E8E5;color:#7A2A1A;}
+  .trac-pills{display:flex;flex-wrap:wrap;gap:4px;}
+  .parc-pill{display:inline-block;padding:2px 7px;border-radius:5px;font-size:9px;font-weight:600;}
+  .pill-ok{background:#EAF3E2;color:#1E3A12;}
+  .pill-rest{background:#FBF0E6;color:#8B4A1A;}
+  .pill-skip{background:#F5E8E5;color:#7A2A1A;text-decoration:line-through;opacity:0.8;}
   @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
 </style></head><body>
 
