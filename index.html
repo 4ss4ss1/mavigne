@@ -2349,13 +2349,8 @@ function renderJournal(){
   const byQui={};
   JOURNAL.filter(j=>!j.meteo&&j.qui).forEach(j=>{
     if(j.equipe){
-      // Travail en équipe : créditer tous les membres actifs du journal du même jour+parcelle+tâche
-      // Chercher tous les membres ayant validé ce jour-là (même date)
-      const memeJour=JOURNAL.filter(k=>!k.meteo&&k.date===j.date&&k.tache===j.tache&&k.parcelle===j.parcelle&&k.qui);
-      const dejaComptes=new Set();
-      memeJour.forEach(k=>{if(!dejaComptes.has(k.qui)){dejaComptes.add(k.qui);byQui[k.qui]=(byQui[k.qui]||0)+1;}});
-      // Si le validateur n'est pas dans la liste, l'ajouter quand même
-      if(!dejaComptes.has(j.qui)){byQui[j.qui]=(byQui[j.qui]||0)+1;}
+      // Travail en équipe : compter uniquement "Équipe", pas les individus
+      byQui['Équipe']=(byQui['Équipe']||0)+1;
     } else {
       byQui[j.qui]=(byQui[j.qui]||0)+1;
     }
@@ -3548,7 +3543,7 @@ function exportPDFMois(){
   const parcellesTouchees=[...new Set(travaux.map(j=>j.parcelle))];
   const tachesTouchees=[...new Set(travaux.map(j=>j.tache))];
   const ouvrierStats={};
-  travaux.forEach(j=>{const n=j.qui||'—';ouvrierStats[n]=(ouvrierStats[n]||0)+1;});
+  travaux.forEach(j=>{const n=j.equipe?'Équipe':(j.qui||'—');ouvrierStats[n]=(ouvrierStats[n]||0)+1;});
 
   // ── Météo résumée du mois ──
   // Agréger température moy/min/max, conditions dominantes
@@ -3804,7 +3799,8 @@ ${Object.keys(ouvrierStats).length>0?`
         <table>${items.map(r=>{
           if(r.meteo)return`<tr class="meteo-row"><td>🌤 Météo</td><td colspan="3">${r.emoji||''} ${r.temp}°C · ${r.desc} · Vent ${r.wind} km/h</td></tr>`;
           const sb=r.statut==='Validé'?'bv':'be';
-          return`<tr><td>${TEMOJI[r.tache]||'📋'} ${r.tache}</td><td>${r.parcelle}</td><td>${r.qui||'—'}${r.equipe?' 👥':''}</td><td><span class="badge ${sb}">${r.statut}</span></td></tr>`;
+          const affQui=r.equipe?'Équipe 👥':(r.qui||'—');
+          return`<tr><td>${TEMOJI[r.tache]||'📋'} ${r.tache}</td><td>${r.parcelle}</td><td>${affQui}</td><td><span class="badge ${sb}">${r.statut}</span></td></tr>`;
         }).join('')}</table>
       </div>`;
     }).join('')
