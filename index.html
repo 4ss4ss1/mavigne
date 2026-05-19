@@ -815,218 +815,148 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 <style>
 #splash-screen {
   position:fixed; inset:0; z-index:99999; overflow:hidden;
-  display:flex; flex-direction:column; background:#1a2030;
+  background:#0a0e06;
 }
-#sp-ciel {
-  width:100%; height:38vh; position:relative; flex-shrink:0;
-  background:linear-gradient(180deg,#1a2030 0%,#2a3f60 100%);
+#sp-video {
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; object-position:center center;
 }
-#sp-soleil { position:absolute; border-radius:50%; pointer-events:none; }
-#sp-vignes { flex:1; display:flex; flex-direction:row; position:relative; }
-.sp-bande { flex:1; height:100%; position:relative; overflow:hidden; }
-.sp-bande+.sp-bande { border-left:1px solid rgba(0,0,0,0.3); }
-.sp-bande-automne   { background:linear-gradient(180deg,#8B3E10,#4A1E06); }
-.sp-bande-hiver     { background:linear-gradient(180deg,#3a4858,#1e2a36); }
-.sp-bande-printemps { background:linear-gradient(180deg,#3a6a1a,#1e3a0a); }
-.sp-bande-ete       { background:linear-gradient(180deg,#5a8a10,#2e4806); }
-.sp-rangee {
-  position:absolute; left:0; right:0;
-  display:flex; align-items:flex-end; justify-content:space-around; padding:0 2px;
+/* Overlay sombre pour lisibilité du logo */
+#sp-overlay {
+  position:absolute; inset:0;
+  background:linear-gradient(
+    180deg,
+    rgba(0,0,0,0.15) 0%,
+    rgba(0,0,0,0.05) 40%,
+    rgba(0,0,0,0.35) 100%
+  );
 }
-.sp-cep { position:relative; display:flex; flex-direction:column; align-items:center; }
-.sp-tronc { position:relative; border-radius:2px; margin:0 auto; }
-#sp-overlay { position:absolute; inset:0; pointer-events:none; z-index:10; opacity:0; }
+/* Logo centré */
 #sp-logo {
-  position:absolute; bottom:6vh; left:0; right:0;
-  text-align:center; z-index:20; pointer-events:none;
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  opacity:0;
+  transform:translateY(5px);
+  transition:opacity 1.2s ease, transform 1.2s ease;
+}
+#sp-logo.show { opacity:1; transform:translateY(0); }
+#sp-ornement {
+  display:flex; align-items:center; gap:14px; margin-bottom:16px;
+}
+.sp-orn-line {
+  width:38px; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.45));
+}
+.sp-orn-line-r {
+  width:38px; height:1px;
+  background:linear-gradient(90deg,rgba(255,255,255,.45),transparent);
 }
 #sp-logo-name {
-  display:block; font-family:'Cormorant Garamond',serif; font-weight:600;
-  font-size:clamp(26px,8vw,42px); color:white; letter-spacing:.1em;
-  text-shadow:0 2px 20px rgba(0,0,0,.8);
+  font-family:'Cormorant Garamond',serif; font-weight:600;
+  font-size:clamp(34px,9vw,54px); color:#f4f0e8;
+  letter-spacing:.12em; line-height:1;
+  text-shadow:0 2px 32px rgba(0,0,0,.85), 0 0 80px rgba(0,0,0,.5);
 }
 #sp-logo-sub {
-  display:block; font-family:'Outfit',sans-serif; font-weight:300;
-  font-size:clamp(9px,2.5vw,14px); color:rgba(255,255,255,.5);
-  letter-spacing:.25em; text-transform:uppercase; margin-top:4px;
+  font-family:'Outfit',sans-serif; font-weight:300;
+  font-size:clamp(9px,2.2vw,12px); color:rgba(255,255,255,.55);
+  letter-spacing:.38em; text-transform:uppercase; margin-top:10px;
+  text-shadow:0 1px 16px rgba(0,0,0,.9);
 }
-@keyframes sp-tomber {
-  0%  { transform:translateY(0) rotate(0deg); opacity:.9; }
-  100%{ transform:translateY(70px) rotate(200deg); opacity:0; }
+/* Barre de progression fine */
+#sp-progress {
+  position:absolute; bottom:40px; left:50%; transform:translateX(-50%);
+  width:48px; height:1px; background:rgba(255,255,255,.15);
+  overflow:hidden;
 }
-@keyframes sp-flocon {
-  0%  { transform:translateY(0) translateX(0); opacity:.8; }
-  100%{ transform:translateY(55px) translateX(6px); opacity:0; }
+#sp-progress-fill {
+  height:100%; width:0%;
+  background:rgba(255,255,255,.6);
 }
-@keyframes sp-battre {
-  0%,100%{ transform:scaleY(1); } 50%{ transform:scaleY(.5); }
-}
-.sp-feuille {
-  position:absolute; width:7px; height:5px; border-radius:50% 0 50% 0;
-  animation:sp-tomber linear forwards; pointer-events:none;
-}
-.sp-flocon {
-  position:absolute; color:rgba(210,228,255,.7); font-size:8px;
-  animation:sp-flocon linear forwards; pointer-events:none;
+/* Fadeout final */
+#splash-screen.fadeout {
+  opacity:0;
+  transition:opacity 0.7s ease;
 }
 </style>
 
-<div id="sp-ciel"><div id="sp-soleil"></div></div>
-<div id="sp-vignes">
-  <div class="sp-bande sp-bande-automne"   id="sp-b-automne"></div>
-  <div class="sp-bande sp-bande-hiver"     id="sp-b-hiver"></div>
-  <div class="sp-bande sp-bande-printemps" id="sp-b-printemps"></div>
-  <div class="sp-bande sp-bande-ete"       id="sp-b-ete"></div>
-</div>
+<video id="sp-video" autoplay muted playsinline webkit-playsinline
+  preload="auto" disablePictureInPicture>
+  <source src="splash_vigne.mp4" type="video/mp4">
+</video>
 <div id="sp-overlay"></div>
 <div id="sp-logo">
-  <span id="sp-logo-name">Ma Vigne</span>
-  <span id="sp-logo-sub">Gestion viticole</span>
+  <div id="sp-ornement">
+    <div class="sp-orn-line"></div>
+    <svg width="15" height="19" viewBox="0 0 15 19" fill="none" opacity=".65">
+      <ellipse cx="7.5" cy="5.5" rx="3.5" ry="4.5" stroke="rgba(255,255,255,.8)" stroke-width="1"/>
+      <path d="M7.5 10 C5 12 4 15 4 18" stroke="rgba(255,255,255,.55)" stroke-width="1" stroke-linecap="round"/>
+      <path d="M7.5 10 C10 12 11 15 11 18" stroke="rgba(255,255,255,.55)" stroke-width="1" stroke-linecap="round"/>
+      <path d="M7.5 1 L7.5 0" stroke="rgba(255,255,255,.4)" stroke-width="1" stroke-linecap="round"/>
+    </svg>
+    <div class="sp-orn-line-r"></div>
+  </div>
+  <div id="sp-logo-name">Ma Vigne</div>
+  <div id="sp-logo-sub">Gestion viticole</div>
 </div>
+<div id="sp-progress"><div id="sp-progress-fill"></div></div>
 
 <script>
 (function(){
-  const ROWS=[
-    {bot:1, s:1.00, n:5},{bot:14,s:0.80,n:5},{bot:25,s:0.64,n:5},{bot:34,s:0.51,n:5},
-    {bot:42,s:0.40,n:5},{bot:49,s:0.31,n:4},{bot:55,s:0.23,n:4},{bot:60,s:0.17,n:4}
-  ];
-  const SAISONS=['automne','hiver','printemps','ete'];
-  const lerp=(a,b,t)=>a+(b-a)*t;
-  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-  const easeOut=t=>1-Math.pow(1-t,2.5);
-  const ri=(a,b,t)=>Math.round(lerp(a,b,t));
+  const DUR    = 2800;   // durée vidéo en ms
+  const LOGO_AT = 1400;  // logo apparaît à 1.4s
+  let startTs = null, rafId = null;
+  let logoShown = false;
 
-  function mkCep(saison,s){
-    const tH=Math.max(4,Math.round(30*s)),tW=Math.max(2,Math.round(4*s));
-    const aW=Math.max(4,Math.round(28*s)),armTop=Math.round(tH*.40);
-    const wrap=document.createElement('div');
-    wrap.className='sp-cep'; wrap.style.width=Math.round(aW*1.1)+'px';
-    const tronc=document.createElement('div');
-    tronc.className='sp-tronc';
-    const tc=saison==='hiver'?'#4a5868':'#6B3A14';
-    tronc.style.cssText=`width:${tW}px;height:${tH}px;background:${tc};`;
-    const bras=document.createElement('div');
-    bras.style.cssText=`position:absolute;top:${armTop}px;left:${Math.round(tW/2-aW/2)}px;width:${aW}px;height:${Math.max(1,Math.round(2.5*s))}px;background:${tc};border-radius:1px;`;
-    tronc.appendChild(bras);
-    if(saison==='hiver'){
-      const n=document.createElement('div');
-      n.style.cssText=`position:absolute;top:${armTop-Math.max(1,Math.round(2*s))}px;left:${Math.round(tW/2-aW/2-1)}px;width:${aW+2}px;height:${Math.max(2,Math.round(3.5*s))}px;background:rgba(215,232,255,.92);border-radius:2px;`;
-      tronc.appendChild(n);
-    } else if(saison==='automne'){
-      [{dx:0,col:'#C85010',op:.92},{dx:-Math.round(5*s),col:'#D46018',op:.78},{dx:Math.round(5*s),col:'#B84010',op:.75}].forEach(({dx,col,op})=>{
-        const bW=Math.max(5,Math.round(13*s)),bHh=Math.max(4,Math.round(10*s));
-        const b=document.createElement('div');
-        b.style.cssText=`position:absolute;top:${-Math.round(bHh*.7)}px;left:${Math.round(tW/2+dx-bW/2)}px;width:${bW}px;height:${bHh}px;background:${col};border-radius:50%;opacity:${op};`;
-        tronc.appendChild(b);
-      });
-      const pW=Math.max(4,Math.round(9*s)),pH=Math.max(5,Math.round(12*s));
-      const p=document.createElement('div');
-      p.style.cssText=`position:absolute;top:${armTop+Math.round(2*s)}px;left:${Math.round(tW/2-pW/2)}px;width:${pW}px;height:${pH}px;background:#D4601A;border-radius:40% 40% 60% 60%;opacity:.82;`;
-      tronc.appendChild(p);
-    } else if(saison==='printemps'){
-      [{dx:0,col:'#78D030',op:.9},{dx:-Math.round(5*s),col:'#70C828',op:.78},{dx:Math.round(5*s),col:'#82D835',op:.78}].forEach(({dx,col,op})=>{
-        const bW=Math.max(4,Math.round(10*s)),bHh=Math.max(3,Math.round(8*s));
-        const b=document.createElement('div');
-        b.style.cssText=`position:absolute;top:${-Math.round(bHh*.6)}px;left:${Math.round(tW/2+dx-bW/2)}px;width:${bW}px;height:${bHh}px;background:${col};border-radius:50%;opacity:${op};`;
-        tronc.appendChild(b);
-      });
-    } else if(saison==='ete'){
-      [{dx:0,col:'#1E8010',op:.95,ss:1},{dx:-Math.round(6*s),col:'#1E8010',op:.85,ss:.85},{dx:Math.round(6*s),col:'#1E8010',op:.85,ss:.85},{dx:0,col:'#30A820',op:.55,ss:.65}].forEach(({dx,col,op,ss})=>{
-        const bW=Math.max(5,Math.round(14*s*ss)),bHh=Math.max(4,Math.round(11*s*ss));
-        const b=document.createElement('div');
-        b.style.cssText=`position:absolute;top:${-Math.round(bHh*.75)}px;left:${Math.round(tW/2+dx-bW/2)}px;width:${bW}px;height:${bHh}px;background:${col};border-radius:50%;opacity:${op};`;
-        tronc.appendChild(b);
-      });
-      const gW=Math.max(5,Math.round(10*s)),gH=Math.max(6,Math.round(16*s));
-      const g=document.createElement('div');
-      g.style.cssText=`position:absolute;top:${armTop+Math.round(2*s)}px;left:${Math.round(tW/2-gW/2)}px;width:${gW}px;height:${gH}px;background:#4810A0;border-radius:40% 40% 60% 60%;opacity:.9;`;
-      tronc.appendChild(g);
+  const video   = document.getElementById('sp-video');
+  const logo    = document.getElementById('sp-logo');
+  const fill    = document.getElementById('sp-progress-fill');
+  const splash  = document.getElementById('splash-screen');
+
+  function tick(ts) {
+    if (!startTs) startTs = ts;
+    const elapsed = ts - startTs;
+    const progress = Math.min(elapsed / DUR, 1);
+
+    // Barre de progression
+    fill.style.width = (progress * 100) + '%';
+
+    // Logo
+    if (!logoShown && elapsed >= LOGO_AT) {
+      logo.classList.add('show');
+      logoShown = true;
     }
-    wrap.appendChild(tronc); return wrap;
-  }
 
-  function buildVignes(){
-    SAISONS.forEach(saison=>{
-      const bande=document.getElementById('sp-b-'+saison);
-      bande.innerHTML='';
-      ROWS.forEach(({bot,s,n})=>{
-        const tH=Math.max(4,Math.round(30*s)),aW=Math.max(4,Math.round(28*s)),armTop=Math.round(tH*.40);
-        const rangee=document.createElement('div');
-        rangee.className='sp-rangee';
-        rangee.style.cssText=`bottom:${bot}%;left:0;right:0;align-items:flex-end;justify-content:space-around;padding:0 2px;`;
-        const fil=document.createElement('div');
-        fil.style.cssText=`position:absolute;left:1px;right:1px;height:${Math.max(1,Math.round(1.2*s))}px;background:${saison==='hiver'?'rgba(90,110,135,.45)':'rgba(90,65,30,.42)'};border-radius:1px;bottom:${armTop}px;opacity:${Math.min(1,s*1.6)};`;
-        rangee.appendChild(fil);
-        for(let i=0;i<n;i++) rangee.appendChild(mkCep(saison,s));
-        bande.appendChild(rangee);
-      });
-    });
-    // Oiseaux printemps
-    const ciel=document.getElementById('sp-ciel');
-    const bg=document.createElement('div');
-    bg.style.cssText='position:absolute;bottom:28%;left:52%;display:flex;gap:14px;align-items:center;opacity:.65;';
-    [0,1].forEach(i=>{
-      const sz=i===0?16:11;
-      const b=document.createElement('div');
-      b.style.cssText=`animation:sp-battre ${.75+i*.2}s ease-in-out infinite alternate;animation-delay:${i*.25}s;`;
-      b.innerHTML=`<svg width="${sz*2.2}" height="${sz}" viewBox="0 0 22 10" fill="none"><path d="M1,9 Q5.5,1 11,9 Q16.5,1 21,9" stroke="#2a5018" stroke-width="2" stroke-linecap="round"/></svg>`;
-      bg.appendChild(b);
-    });
-    ciel.appendChild(bg);
-  }
-
-  let rafId=null,t0=null;
-  const DUR=5000;
-
-  function frame(ts){
-    if(!t0)t0=ts;
-    const t=clamp((ts-t0)/DUR,0,1),e=easeOut(t);
-    const vw=window.innerWidth,vh=window.innerHeight,skyH=vh*.38;
-    // Ciel
-    const cielEl=document.getElementById('sp-ciel');
-    cielEl.style.background=`linear-gradient(180deg,rgb(${ri(26,38,e)},${ri(30,68,e)},${ri(46,108,e)}) 0%,rgb(${ri(42,100,e)},${ri(54,158,e)},${ri(70,200,e)}) 100%)`;
-    // Soleil
-    const sx=lerp(vw*.05,vw*.70,e),sy=lerp(skyH*.85,skyH*.15,e),sr=lerp(10,50,e),sop=lerp(.28,1,e);
-    const sun=document.getElementById('sp-soleil');
-    const gr=ri(150,255,e),gg=ri(170,190,e),gb=ri(210,20,e),ga=lerp(.18,.75,e);
-    sun.style.cssText=`position:absolute;left:${sx-sr}px;top:${sy-sr}px;width:${sr*2}px;height:${sr*2}px;border-radius:50%;opacity:${sop};background:radial-gradient(circle,white 0%,rgb(${ri(200,255,e)},${ri(215,215,e)},${ri(255,40,e)}) 45%,rgba(${gr},${gg},${gb},.5) 100%);box-shadow:0 0 ${Math.round(sr*1.4)}px ${Math.round(sr*.7)}px rgba(${gr},${gg},${gb},${ga}),0 0 ${Math.round(sr*3)}px ${Math.round(sr*1.5)}px rgba(${gr},${gg},${gb},${ga*.35});`;
-    // Overlay
-    const ot=clamp((e-.55)/.45,0,1);
-    const ov=document.getElementById('sp-overlay');
-    ov.style.opacity=ot;
-    ov.style.background=`radial-gradient(ellipse at ${ri(65,88,e)}% 35%,rgba(255,220,80,.45) 0%,rgba(255,180,40,.18) 35%,transparent 62%)`;
-    // Particules
-    if(Math.random()<.1) addFeuille();
-    if(Math.random()<.08) addFlocon();
-    if(t<1){ rafId=requestAnimationFrame(frame); }
-    else {
-      // Fadeout puis masquer
-      const el=document.getElementById('splash-screen');
-      el.style.transition='opacity 0.5s ease';
-      el.style.opacity='0';
-      setTimeout(()=>{el.style.display='none';},500);
+    if (progress < 1) {
+      rafId = requestAnimationFrame(tick);
+    } else {
+      // Fadeout
+      splash.classList.add('fadeout');
+      setTimeout(function(){ splash.style.display = 'none'; }, 720);
     }
   }
 
-  function addFeuille(){
-    const b=document.getElementById('sp-b-automne');
-    const el=document.createElement('div'); el.className='sp-feuille';
-    const cols=['#D4601A','#E07820','#C85010','#B84010'];
-    el.style.cssText=`left:${5+Math.random()*85}%;top:${5+Math.random()*60}%;background:${cols[Math.floor(Math.random()*4)]};animation-duration:${1.5+Math.random()*1.5}s;`;
-    b.appendChild(el); setTimeout(()=>el.remove(),3000);
-  }
-  function addFlocon(){
-    const b=document.getElementById('sp-b-hiver');
-    const el=document.createElement('div'); el.className='sp-flocon'; el.textContent='❄';
-    el.style.cssText=`left:${5+Math.random()*85}%;top:${3+Math.random()*55}%;animation-duration:${1.2+Math.random()*1.3}s;font-size:${6+Math.random()*5}px;`;
-    b.appendChild(el); setTimeout(()=>el.remove(),2500);
-  }
+  // Démarrer dès que la vidéo joue
+  video.addEventListener('playing', function() {
+    if (!startTs) rafId = requestAnimationFrame(tick);
+  }, { once: true });
 
-  buildVignes();
-  rafId=requestAnimationFrame(frame);
+  // Fallback si la vidéo ne charge pas (hors ligne / 404)
+  video.addEventListener('error', function() {
+    // Démarrer quand même, fond sombre statique
+    if (!startTs) rafId = requestAnimationFrame(tick);
+  });
+
+  // Tentative de lecture (nécessaire sur iOS PWA)
+  video.play().catch(function() {
+    // Autoplay bloqué (rare en PWA) → démarrer tick sans vidéo
+    if (!startTs) rafId = requestAnimationFrame(tick);
+  });
 })();
 </script>
 </div>
+
 
 <!-- ══════ LOGIN ══════ -->
 <div id="sync-badge" style="position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#3D6B27;color:white;font-size:11px;font-weight:600;font-family:'Outfit',sans-serif;padding:5px 14px;border-radius:20px;z-index:99999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.2)"></div>

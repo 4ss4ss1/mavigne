@@ -1,12 +1,12 @@
 // ════════════════════════════════════════════════════════
-// MA VIGNE — Service Worker v1.14
+// MA VIGNE — Service Worker v1.15
 // Stratégie : Cache-first pour l'app shell
 //             Network-first pour Firebase (avec fallback)
 //             Background Sync pour les sauvegardes hors ligne
-// v1.14 — Bilan PDF mensuel : champ heures dues + ETP = travaillées ÷ dues
+// v1.15 — Splash screen vidéo Luma Labs (4 saisons)
 // ════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'mavigne-v1.14';
+const CACHE_NAME = 'mavigne-v1.15';
 const SYNC_TAG   = 'mavigne-sync';
 
 // Fichiers à mettre en cache immédiatement (app shell)
@@ -15,6 +15,7 @@ const APP_SHELL = [
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
+  './splash_vigne.mp4',
 ];
 
 // CDN à mettre en cache (Leaflet + Google Fonts)
@@ -26,7 +27,7 @@ const CDN_URLS = [
 
 // ── Installation : mise en cache de l'app shell ──────────
 self.addEventListener('install', event => {
-  console.log('[SW] Install v1.14');
+  console.log('[SW] Install v1.15');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       // App shell local (critique — doit réussir)
@@ -42,7 +43,7 @@ self.addEventListener('install', event => {
 
 // ── Activation : nettoyage des anciens caches ─────────────
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v1.14');
+  console.log('[SW] Activate v1.15');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
