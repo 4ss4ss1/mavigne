@@ -1377,8 +1377,10 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
       <div style="font-size:13px;font-weight:700;color:var(--rouge);margin-bottom:10px">🖨️ Rapport PDF mensuel</div>
       <div class="fl" style="margin-top:0">Mois</div>
       <input type="month" class="fi" id="pdf-mois" style="margin-bottom:10px">
-      <div class="fl" style="margin-top:0">⏱ Heures totales travaillées</div>
+      <div class="fl" style="margin-top:0">⏱ Heures travaillées ce mois</div>
       <input type="number" class="fi" id="pdf-heures" placeholder="Ex : 142" min="0" step="0.5" style="margin-bottom:10px">
+      <div class="fl" style="margin-top:0">📋 Heures dues ce mois (convention)</div>
+      <input type="number" class="fi" id="pdf-heures-dues" placeholder="Ex : 167" min="0" step="0.5" style="margin-bottom:10px">
       <div class="fl" style="margin-top:0">💬 Commentaire mensuel</div>
       <textarea class="fi" id="pdf-commentaire" placeholder="Observations, conditions, points notables…" style="margin-bottom:10px;min-height:72px;resize:vertical;font-family:'Outfit',sans-serif;font-size:13px;line-height:1.5"></textarea>
       <button onclick="exportPDFMois()" style="background:var(--rouge);color:white;border:none;border-radius:10px;padding:11px 18px;font-size:13px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;width:100%">Générer le PDF du mois</button>
@@ -3808,7 +3810,12 @@ function exportPDFMois(){
 
   // Champs saisis manuellement
   const heuresTotales=(document.getElementById('pdf-heures').value||'').trim();
+  const heuresDues=(document.getElementById('pdf-heures-dues').value||'').trim();
   const commentaire=(document.getElementById('pdf-commentaire').value||'').trim();
+  // ETP = heures travaillées ÷ heures dues conventionnelles du mois
+  const etpVal = (heuresTotales && heuresDues && parseFloat(heuresDues)>0)
+    ? (parseFloat(heuresTotales)/parseFloat(heuresDues)).toFixed(2)
+    : null;
 
   // Filtrer le journal pour ce mois
   const travaux=JOURNAL.filter(j=>!j.meteo&&j.date&&j.date.startsWith(moisVal));
@@ -4096,7 +4103,7 @@ function exportPDFMois(){
 <!-- ── 3. HEURES TOTALES ── -->
 <div class="section">
   <div class="section-title">⏱ Heures de travail — ${moisNom}</div>
-  ${heuresTotales?`<div class="heures-box"><div><div class="heures-val">${heuresTotales}</div><div class="heures-label">heures travaillées ce mois</div></div></div>`:'<p style="color:#7A7A6A;font-style:italic">Aucune saisie d\'heures pour ce mois.</p>'}
+  ${heuresTotales?`<div class="heures-box"><div><div class="heures-val">${heuresTotales}</div><div class="heures-label">heures travaillées</div></div>${heuresDues?`<div style="width:1px;background:#E8D9B8;align-self:stretch;margin:0 4px"></div><div><div class="heures-val" style="color:#7A4F2E;opacity:0.6">${heuresDues}</div><div class="heures-label">heures dues</div></div>`:''}${etpVal?`<div style="width:1px;background:#E8D9B8;align-self:stretch;margin:0 4px"></div><div><div class="heures-val" style="color:${parseFloat(etpVal)>=1?'#3D6B27':'#B85A1A'}">${etpVal}</div><div class="heures-label" style="color:${parseFloat(etpVal)>=1?'#1E3A12':'#7A2A1A'}">ETP ce mois</div></div>`:''}}</div></div>`:'<p style="color:#7A7A6A;font-style:italic">Aucune saisie d\'heures pour ce mois.</p>'}
 </div>
 
 <!-- ── 4. COMMENTAIRE ── -->
