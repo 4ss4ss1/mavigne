@@ -2506,6 +2506,7 @@ function switchPTab(tab){
   if(tab==='carte'){
     if(!mapInit){initMap();mapInit=true;}
     else if(leafMap){setTimeout(function(){leafMap.invalidateSize();},100);}
+    setTimeout(updateKmlZone,50);
   }
 }
 function initMap(){
@@ -2555,7 +2556,14 @@ function loadKML(input){
 }
 function updateKmlZone(){
   const kz=document.querySelector('.kml-zone');
-  if(kz&&kmlPolygons.length>0)kz.innerHTML='<div style="font-size:24px">✅</div><p style="color:var(--vert-med);font-weight:600">'+kmlPolygons.length+' parcelles KML chargées</p><p style="font-size:10px;color:var(--texte-doux);margin-top:4px">Tap pour changer le fichier</p><input type="file" id="kmlInput" accept=".kml" style="display:none" onchange="loadKML(this)">';
+  if(!kz)return;
+  if(kmlPolygons.length>0){
+    kz.onclick=function(){document.getElementById('kmlInput').click();};
+    kz.innerHTML='<div style="font-size:24px">✅</div><p style="color:var(--vert-med);font-weight:600">'+kmlPolygons.length+' parcelles KML chargées</p><p style="font-size:10px;color:var(--texte-doux);margin-top:4px">Tap pour changer le fichier</p><input type="file" id="kmlInput" accept=".kml" style="display:none" onchange="loadKML(this)">';
+  } else {
+    kz.onclick=function(){document.getElementById('kmlInput').click();};
+    kz.innerHTML='<div style="font-size:24px">📂</div><p>Glisser votre KML ou appuyer pour importer</p><input type="file" id="kmlInput" accept=".kml" style="display:none" onchange="loadKML(this)">';
+  }
 }
 function loadKMLFromStorage(){
   try{
