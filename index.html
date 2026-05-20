@@ -4669,6 +4669,11 @@ function chatOpenDM(el, nom){
   chatRender();
 }
 
+// ── Envoi : dispatch canal ou DM selon contexte ──
+function chatSendActive(){
+  if(_chatDMTarget){ dmSend(); } else { chatSend(); }
+}
+
 // ── Envoi message canal ──
 async function chatSend(){
   if(isSaisonnier()){alert('🔒 Accès lecture seule');return;}
@@ -4677,12 +4682,10 @@ async function chatSend(){
   if(!txt)return;
   var msg={auteur:currentUser.nom,txt:txt,ts:Date.now()};
   ta.value='';ta.style.height='auto';
-  // Firestore : append
   try{
     var snap=await _chatDoc(_chatCanal).get();
     var msgs=snap.exists&&snap.data().msgs?snap.data().msgs:[];
     msgs.push(msg);
-    // Garder 200 messages max
     if(msgs.length>200)msgs=msgs.slice(msgs.length-200);
     await _chatDoc(_chatCanal).set({msgs:msgs,updatedAt:Date.now()});
   }catch(e){
@@ -4691,10 +4694,10 @@ async function chatSend(){
   }
 }
 
-// ── Envoi DM ──
+// ── Envoi DM ── (utilise chat-ta, pas dm-ta supprimé)
 async function dmSend(){
   if(!_chatDMTarget)return;
-  var ta=document.getElementById('dm-ta');
+  var ta=document.getElementById('chat-ta');
   var txt=ta.value.trim();
   if(!txt)return;
   var msg={auteur:currentUser.nom,txt:txt,ts:Date.now()};
@@ -4710,8 +4713,7 @@ async function dmSend(){
 
 // ── Helpers input ──
 function chatAutoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,90)+'px';}
-function chatHandleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();chatSend();}}
-function dmHandleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();dmSend();}}
+function chatHandleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();chatSendActive();}}
 function chatAppendTag(tag){var ta=document.getElementById('chat-ta');ta.value=(ta.value?ta.value+' ':'')+' ['+tag+'] ';ta.focus();}
 function chatPickEmoji(){openOv('ovChatEmoji');}
 function chatInsertEmoji(e){var ta=document.getElementById('chat-ta');ta.value+=e;closeOv(null,'ovChatEmoji');ta.focus();}

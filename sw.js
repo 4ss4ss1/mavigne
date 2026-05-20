@@ -16,23 +16,20 @@
 // ╚══════════════════════════════════════════════════════════════╝
 
 // ════════════════════════════════════════════════════════
-// MA VIGNE — Service Worker v1.38
+// MA VIGNE — Service Worker v1.43
 // v1.27 — Splash : vrai logo GT détouré sur fond noir + animation lumière
 // v1.28 — Rôle saisonnier : lecture seule (Accueil/Parcelles/Journal, sans écriture)
 // v1.29 — Fix overlay mentions légales : structure modal standard + closeOv + fermeture backdrop
 // v1.30 — KML intégré en statique : suppression import KML, polygones auto au chargement
 // v1.31 — Nouveau logo splash : version fond blanc détourée sur fond noir
 // v1.32 — Module Chat : canaux thématiques + messages privés, temps réel Firebase Firestore
-// v1.35 — Fix chat iOS/Android : position:fixed bottom nav, user-select:text textarea
-// v1.36 — Badge notif messages sur avatar accueil
-// v1.37 — Fix chat-input-zone cachée : suppression double safe-area-inset-bottom
-// v1.38 — Fix chat iOS : padding-bottom au lieu de bottom calc, notifs détection corrigée, tags masqués mobile
+// v1.38 — Fix chat iOS : padding-bottom, notifs, tags masqués mobile
+// v1.43 — Fix layout chat iOS (nav cachée, plein écran), chatSendActive, notifs DM
 // ════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'mavigne-v1.38';
+const CACHE_NAME = 'mavigne-v1.43';
 const SYNC_TAG   = 'mavigne-sync';
 
-// Fichiers à mettre en cache immédiatement (app shell)
 const APP_SHELL = [
   './index.html',
   './manifest.json',
@@ -40,21 +37,17 @@ const APP_SHELL = [
   './icon-512.png',
 ];
 
-// CDN à mettre en cache (Leaflet + Google Fonts)
 const CDN_URLS = [
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
   'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap',
 ];
 
-// ── Installation : mise en cache de l'app shell ──────────
 self.addEventListener('install', event => {
-  console.log('[SW] Install v1.38');
+  console.log('[SW] Install v1.43');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      // App shell local (critique — doit réussir)
       return cache.addAll(APP_SHELL).then(() => {
-        // CDN optionnel — on ignore les erreurs pour ne pas bloquer l'install
         return Promise.allSettled(
           CDN_URLS.map(url => cache.add(url).catch(() => {}))
         );
@@ -63,9 +56,8 @@ self.addEventListener('install', event => {
   );
 });
 
-// ── Activation : nettoyage des anciens caches ─────────────
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v1.38');
+  console.log('[SW] Activate v1.43');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
@@ -75,17 +67,14 @@ self.addEventListener('activate', event => {
   );
 });
 
-// ── Fetch : stratégie par type de requête ─────────────────
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // 1. Firebase / Firestore → Network-first, pas de cache (temps réel)
   if (url.hostname.includes('firestore.googleapis.com') ||
       url.hostname.includes('firebase') ||
       url.hostname.includes('googleapis.com')) {
     event.respondWith(
       fetch(event.request).catch(() => {
-        // Firebase inaccessible → répondre 503 proprement
         return new Response(JSON.stringify({ error: 'offline' }), {
           status: 503,
           headers: { 'Content-Type': 'application/json' }
@@ -95,7 +84,6 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 2. Open-Meteo (météo) → Network-first avec fallback cache
   if (url.hostname.includes('open-meteo.com')) {
     event.respondWith(
       fetch(event.request)
@@ -109,11 +97,9 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 3. App shell + CDN → Cache-first (fonctionne hors ligne)
   event.respondWith(
     caches.match(event.request).then(cached => {
       if (cached) return cached;
-      // Pas en cache → réseau, puis mise en cache pour la prochaine fois
       return fetch(event.request).then(response => {
         if (response.ok) {
           const clone = response.clone();
@@ -121,7 +107,6 @@ self.addEventListener('fetch', event => {
         }
         return response;
       }).catch(() => {
-        // Ultime fallback : retourner index.html pour les navigations
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }
@@ -130,7 +115,6 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// ── Background Sync : vider la queue dès que la connexion revient ──
 self.addEventListener('sync', event => {
   if (event.tag === SYNC_TAG) {
     console.log('[SW] Background sync déclenché');
@@ -138,20 +122,16 @@ self.addEventListener('sync', event => {
   }
 });
 
-// ── Message depuis l'app principale ──────────────────────
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-  // L'app envoie la queue à vider quand elle revient en ligne
   if (event.data && event.data.type === 'FLUSH_QUEUE') {
     flushOfflineQueue();
   }
 });
 
-// ── Vider la queue des sauvegardes en attente ─────────────
 async function flushOfflineQueue() {
-  // Notifier tous les clients (onglets ouverts) de vider leur queue
   const clients = await self.clients.matchAll({ type: 'window' });
   clients.forEach(client => {
     client.postMessage({ type: 'FLUSH_OFFLINE_QUEUE' });
