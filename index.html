@@ -3075,13 +3075,15 @@ function isHashed(val) { return /^[0-9a-f]{64}$/.test(val||''); }
 
 // Vérifier le MDP saisi vs celui stocké (clair ou hashé)
 async function checkMdp(m, saisi) {
-  if(isHashed(m.mdp)) {
+  // Si aucun mdp stocké → mdp par défaut vigne21
+  const stored = m.mdp || 'vigne21';
+  if(isHashed(stored)) {
     // MDP stocké est un hash — comparer avec hash du saisi
     const h = await sha256(saisi);
-    return h === m.mdp;
+    return h === stored;
   } else {
     // MDP en clair (legacy) — comparer directement puis migrer
-    if(saisi === m.mdp) {
+    if(saisi === stored) {
       // Migration automatique : hashage au premier login
       m.mdp = await sha256(saisi);
       saveData('membres');
