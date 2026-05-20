@@ -810,153 +810,95 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
 <body>
 
 
+
 <!-- ══════ SPLASH SCREEN ══════ -->
 <div id="splash-screen">
 <style>
 #splash-screen {
-  position:fixed; inset:0; z-index:99999; overflow:hidden;
-  background:#0a0e06;
-}
-#sp-video {
-  position:absolute; inset:0; width:100%; height:100%;
-  object-fit:cover; object-position:center center;
-}
-/* Overlay sombre pour lisibilité du logo */
-#sp-overlay {
-  position:absolute; inset:0;
-  background:linear-gradient(
-    180deg,
-    rgba(0,0,0,0.15) 0%,
-    rgba(0,0,0,0.05) 40%,
-    rgba(0,0,0,0.35) 100%
-  );
-}
-/* Logo centré */
-#sp-logo {
-  position:absolute; inset:0;
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  opacity:0;
-  transform:translateY(5px);
-  transition:opacity 1.2s ease, transform 1.2s ease;
-}
-#sp-logo.show { opacity:1; transform:translateY(0); }
-#sp-ornement {
-  display:flex; align-items:center; gap:14px; margin-bottom:16px;
-}
-.sp-orn-line {
-  width:38px; height:1px;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.45));
-}
-.sp-orn-line-r {
-  width:38px; height:1px;
-  background:linear-gradient(90deg,rgba(255,255,255,.45),transparent);
-}
-#sp-logo-name {
-  font-family:'Cormorant Garamond',serif; font-weight:600;
-  font-size:clamp(34px,9vw,54px); color:#f4f0e8;
-  letter-spacing:.12em; line-height:1;
-  text-shadow:0 2px 32px rgba(0,0,0,.85), 0 0 80px rgba(0,0,0,.5);
-}
-#sp-logo-sub {
-  font-family:'Outfit',sans-serif; font-weight:300;
-  font-size:clamp(9px,2.2vw,12px); color:rgba(255,255,255,.55);
-  letter-spacing:.38em; text-transform:uppercase; margin-top:10px;
-  text-shadow:0 1px 16px rgba(0,0,0,.9);
-}
-/* Barre de progression fine */
-#sp-progress {
-  position:absolute; bottom:40px; left:50%; transform:translateX(-50%);
-  width:48px; height:1px; background:rgba(255,255,255,.15);
+  position:fixed; inset:0; z-index:99999;
+  background:#000;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
   overflow:hidden;
 }
-#sp-progress-fill {
-  height:100%; width:0%;
-  background:rgba(255,255,255,.6);
-}
-/* Fadeout final */
-#splash-screen.fadeout {
+#sp-title {
+  font-family:'Cormorant Garamond',serif; font-weight:600;
+  font-size:clamp(36px,9vw,58px); color:#f4f0e8;
+  letter-spacing:.12em; text-align:center;
   opacity:0;
-  transition:opacity 0.7s ease;
+  animation: sp-fadein 1.4s ease forwards;
+  animation-delay: 0.3s;
+  text-shadow: 0 0 0px rgba(255,255,255,0);
+}
+#sp-sub {
+  font-family:'Outfit',sans-serif; font-weight:300;
+  font-size:clamp(10px,2.5vw,13px); color:rgba(255,255,255,.45);
+  letter-spacing:.4em; text-transform:uppercase;
+  margin-top:14px;
+  opacity:0;
+  animation: sp-fadein 1.2s ease forwards;
+  animation-delay: 0.7s;
+}
+#sp-flash {
+  position:absolute; inset:0;
+  background:#fff;
+  opacity:0;
+  pointer-events:none;
+}
+@keyframes sp-fadein {
+  from { opacity:0; }
+  to   { opacity:1; }
 }
 </style>
 
-<video id="sp-video" autoplay muted playsinline webkit-playsinline
-  preload="auto" disablePictureInPicture>
-  <source src="splash_vigne.mp4" type="video/mp4">
-</video>
-<div id="sp-overlay"></div>
-<div id="sp-logo">
-  <div id="sp-ornement">
-    <div class="sp-orn-line"></div>
-    <svg width="15" height="19" viewBox="0 0 15 19" fill="none" opacity=".65">
-      <ellipse cx="7.5" cy="5.5" rx="3.5" ry="4.5" stroke="rgba(255,255,255,.8)" stroke-width="1"/>
-      <path d="M7.5 10 C5 12 4 15 4 18" stroke="rgba(255,255,255,.55)" stroke-width="1" stroke-linecap="round"/>
-      <path d="M7.5 10 C10 12 11 15 11 18" stroke="rgba(255,255,255,.55)" stroke-width="1" stroke-linecap="round"/>
-      <path d="M7.5 1 L7.5 0" stroke="rgba(255,255,255,.4)" stroke-width="1" stroke-linecap="round"/>
-    </svg>
-    <div class="sp-orn-line-r"></div>
-  </div>
-  <div id="sp-logo-name">Ma Vigne</div>
-  <div id="sp-logo-sub">Gestion viticole</div>
-</div>
-<div id="sp-progress"><div id="sp-progress-fill"></div></div>
+<div id="sp-title">Ma Vigne</div>
+<div id="sp-sub">Une application viticole</div>
+<div id="sp-flash"></div>
 
 <script>
 (function(){
-  const DUR    = 2800;   // durée vidéo en ms
-  const LOGO_AT = 1400;  // logo apparaît à 1.4s
-  let startTs = null, rafId = null;
-  let logoShown = false;
+  const DUR_HOLD  = 2200; // texte visible avant la montée de lumière
+  const DUR_GLOW  = 900;  // montée de luminosité
+  const DUR_FLASH = 320;  // flash blanc
 
-  const video   = document.getElementById('sp-video');
-  const logo    = document.getElementById('sp-logo');
-  const fill    = document.getElementById('sp-progress-fill');
-  const splash  = document.getElementById('splash-screen');
+  const title = document.getElementById('sp-title');
+  const flash = document.getElementById('sp-flash');
+  const splash = document.getElementById('splash-screen');
 
-  function tick(ts) {
-    if (!startTs) startTs = ts;
-    const elapsed = ts - startTs;
-    const progress = Math.min(elapsed / DUR, 1);
+  // Phase 1 — texte s'illumine progressivement (glow blanc)
+  setTimeout(function() {
+    var start = null;
+    function glowFrame(ts) {
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / DUR_GLOW, 1);
+      // ease-in pour la montée de lumière
+      var e = p * p;
+      title.style.textShadow =
+        '0 0 ' + Math.round(e * 80) + 'px rgba(255,255,255,' + (e * 0.9) + '),' +
+        '0 0 ' + Math.round(e * 160) + 'px rgba(255,255,255,' + (e * 0.5) + ')';
+      title.style.color = 'rgb(' +
+        Math.round(244 + (255-244)*e) + ',' +
+        Math.round(240 + (255-240)*e) + ',' +
+        Math.round(232 + (255-232)*e) + ')';
+      // Fond qui s'éclaircit aussi
+      var bg = Math.round(e * 38);
+      splash.style.background = 'rgb('+bg+','+bg+','+bg+')';
 
-    // Barre de progression
-    fill.style.width = (progress * 100) + '%';
-
-    // Logo
-    if (!logoShown && elapsed >= LOGO_AT) {
-      logo.classList.add('show');
-      logoShown = true;
+      if (p < 1) {
+        requestAnimationFrame(glowFrame);
+      } else {
+        // Phase 2 — flash blanc
+        flash.style.transition = 'opacity ' + DUR_FLASH + 'ms ease-out';
+        flash.style.opacity = '1';
+        setTimeout(function() {
+          splash.style.display = 'none';
+        }, DUR_FLASH);
+      }
     }
-
-    if (progress < 1) {
-      rafId = requestAnimationFrame(tick);
-    } else {
-      // Fadeout
-      splash.classList.add('fadeout');
-      setTimeout(function(){ splash.style.display = 'none'; }, 720);
-    }
-  }
-
-  // Démarrer dès que la vidéo joue
-  video.addEventListener('playing', function() {
-    if (!startTs) rafId = requestAnimationFrame(tick);
-  }, { once: true });
-
-  // Fallback si la vidéo ne charge pas (hors ligne / 404)
-  video.addEventListener('error', function() {
-    // Démarrer quand même, fond sombre statique
-    if (!startTs) rafId = requestAnimationFrame(tick);
-  });
-
-  // Tentative de lecture (nécessaire sur iOS PWA)
-  video.play().catch(function() {
-    // Autoplay bloqué (rare en PWA) → démarrer tick sans vidéo
-    if (!startTs) rafId = requestAnimationFrame(tick);
-  });
+    requestAnimationFrame(glowFrame);
+  }, DUR_HOLD);
 })();
 </script>
 </div>
-
 
 <!-- ══════ LOGIN ══════ -->
 <div id="sync-badge" style="position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#3D6B27;color:white;font-size:11px;font-weight:600;font-family:'Outfit',sans-serif;padding:5px 14px;border-radius:20px;z-index:99999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.2)"></div>
@@ -4305,6 +4247,7 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('./sw.js').then(function(reg) {
       console.log('[SW] Enregistré :', reg.scope);
+      // Déclencher Background Sync si supporté (vide la queue au retour réseau)
       if ('sync' in reg) {
         reg.sync.register('mavigne-sync').catch(function(e) {
           console.warn('[SW] Background Sync non dispo :', e);
@@ -4312,17 +4255,6 @@ if ('serviceWorker' in navigator) {
       }
     }).catch(function(err) {
       console.warn('[SW] Échec enregistrement :', err);
-    });
-
-    // ── Rechargement automatique quand un nouveau SW prend le contrôle ──
-    // skipWaiting() + clients.claim() → 'controllerchange' → reload
-    var refreshing = false;
-    navigator.serviceWorker.addEventListener('controllerchange', function() {
-      if (!refreshing) {
-        refreshing = true;
-        console.log('[SW] Nouveau service worker actif — rechargement');
-        window.location.reload();
-      }
     });
   });
 }
