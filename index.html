@@ -324,19 +324,25 @@ console.log('🔥 Firebase prêt, en attente de _fbLoad()');
 body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;}
 
 /* ══ LOGIN ══ */
-#login-screen{position:fixed;inset:0;background:var(--vert);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;z-index:9999;padding:60px 30px 40px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-.login-logo{font-size:60px;margin-bottom:16px;}
-.login-title{font-family:'Cormorant Garamond',serif;color:white;font-size:32px;font-weight:600;margin-bottom:6px;}
-.login-sub{color:rgba(255,255,255,0.6);font-size:13px;margin-bottom:40px;letter-spacing:0.5px;}
-.login-label{color:rgba(255,255,255,0.7);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;align-self:flex-start;width:100%;}
-.login-input{width:100%;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);border-radius:12px;padding:13px 16px;font-size:15px;font-family:'Outfit',sans-serif;color:white;outline:none;margin-bottom:14px;}
-.login-input::placeholder{color:rgba(255,255,255,0.4);}
-.login-btn{width:100%;background:white;color:var(--vert);border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;margin-top:6px;}
-.login-profiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:20px;}
-.lp-btn{background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.2);border-radius:12px;padding:12px;text-align:center;cursor:pointer;transition:background 0.15s;}
-.lp-btn:active{background:rgba(255,255,255,0.2);}
-.lp-name{color:white;font-size:13px;font-weight:600;}
-.lp-role{color:rgba(255,255,255,0.5);font-size:10px;margin-top:2px;}
+#login-screen{position:fixed;inset:0;background:linear-gradient(160deg,#1A1F2E 0%,#0F1319 55%,#111820 100%);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;z-index:9999;padding:60px 30px 40px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+#login-screen::before{content:'';position:absolute;top:-80px;right:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(61,107,39,0.12) 0%,transparent 70%);pointer-events:none;}
+#login-screen::after{content:'';position:absolute;bottom:-60px;left:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(184,145,58,0.08) 0%,transparent 70%);pointer-events:none;}
+.login-logo{font-size:52px;margin-bottom:20px;filter:drop-shadow(0 0 18px rgba(255,255,255,0.12));}
+.login-title{font-family:'Cormorant Garamond',serif;color:white;font-size:34px;font-weight:600;margin-bottom:5px;letter-spacing:0.02em;}
+.login-sub{color:rgba(255,255,255,0.38);font-size:12px;margin-bottom:42px;letter-spacing:1.5px;text-transform:uppercase;}
+.login-label{color:rgba(255,255,255,0.5);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;align-self:flex-start;width:100%;}
+.login-input{width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.14);border-radius:12px;padding:13px 16px;font-size:15px;font-family:'Outfit',sans-serif;color:white;outline:none;margin-bottom:14px;transition:border-color 0.2s;}
+.login-input:focus{border-color:rgba(255,255,255,0.32);}
+.login-input::placeholder{color:rgba(255,255,255,0.25);}
+.login-btn{width:100%;background:rgba(255,255,255,0.95);color:#1A1F2E;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;margin-top:6px;transition:background 0.15s;}
+.login-btn:active{background:rgba(255,255,255,0.8);}
+.login-profiles{display:grid;grid-template-columns:1fr 1fr;gap:9px;width:100%;margin-top:20px;}
+.lp-btn{background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:13px;padding:14px 12px;text-align:center;cursor:pointer;transition:all 0.18s;position:relative;overflow:hidden;}
+.lp-btn:active{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.22);}
+.lp-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.04) 0%,transparent 60%);pointer-events:none;}
+.lp-avatar{width:36px;height:36px;border-radius:50%;margin:0 auto 9px;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:white;border:1.5px solid rgba(255,255,255,0.15);}
+.lp-name{color:rgba(255,255,255,0.9);font-size:13px;font-weight:600;letter-spacing:0.01em;}
+.lp-role{color:rgba(255,255,255,0.35);font-size:10px;margin-top:3px;letter-spacing:0.3px;}
 
 /* ══ NAV ══ */
 .nav-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:white;border-top:1px solid var(--gris-clair);display:grid;grid-template-columns:repeat(6,1fr);height:calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));padding:6px 0 calc(14px + env(safe-area-inset-bottom, 0px));box-shadow:0 -4px 24px rgba(0,0,0,0.09);z-index:1000;transition:grid-template-columns 0.3s;}
@@ -983,6 +989,15 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
     </div>
   </div>
 
+  <!-- AVANCEMENT PAR TÂCHE -->
+  <div class="hv2-section-head" style="cursor:pointer;margin-top:20px" onclick="document.getElementById('hv2-hcard').classList.toggle('hv2-collapsed')">
+    <div class="hv2-section-label" style="margin:0">Avancement par tâche</div>
+    <div class="hv2-voir-tout">Détail ›</div>
+  </div>
+  <div class="hv2-hcard-wrap" id="hv2-hcard">
+    <div class="heures-card" id="heures-card-home"></div>
+  </div>
+
   <!-- TRACTEUR SESSIONS — CARD SOMBRE -->
   <div class="hv2-section-label" style="margin-top:20px">Travaux mécaniques</div>
   <div class="hv2-trac-card" onclick="goTo('tracteur')">
@@ -994,20 +1009,11 @@ body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);
   </div>
 
   <!-- DERNIERS TRAVAUX -->
-  <div class="hv2-section-head">
+  <div class="hv2-section-head" style="margin-top:20px">
     <div class="hv2-section-label" style="margin:0">Derniers travaux</div>
     <div class="hv2-voir-tout" onclick="goTo('journal')">Tout voir →</div>
   </div>
   <div class="hv2-travaux" id="derniers-travaux"></div>
-
-  <!-- HEURES PAR TÂCHE (conservé, rétractable) -->
-  <div class="hv2-section-head" style="cursor:pointer" onclick="document.getElementById('hv2-hcard').classList.toggle('hv2-collapsed')">
-    <div class="hv2-section-label" style="margin:0">Avancement par tâche</div>
-    <div class="hv2-voir-tout">Détail ›</div>
-  </div>
-  <div class="hv2-hcard-wrap" id="hv2-hcard">
-    <div class="heures-card" id="heures-card-home"></div>
-  </div>
 
   <!-- IDs cachés pour compatibilité avec renderHome() -->
   <span id="hs-travaux" style="display:none">0</span>
@@ -1613,24 +1619,34 @@ const COULEURS_MBR={Nico:'#3D6B27',Victor:'#1A4A7A',Dessi:'#7A4F2E',Etienne:'#5B
 const TCLS={Cuivre:'tcc',Soufre:'tsc',Fongicide:'tfc',Insecticide:'tic',Herbicide:'thc','Biocontrôle':'tbc'};
 const TEMJ={Cuivre:'🔵',Soufre:'🟡',Fongicide:'🟢',Insecticide:'🟠',Herbicide:'🟤','Biocontrôle':'🟣'};
 const TEMOJI={Taille:'🌿',Tirage:'🔄',Brulage:'🔥',Pliage:'🔗',Reparation:'🛠️',Plantation:'🌱',Ebourgeonnage1:'🌾',Ebourgeonnage2:'🌾',Pioche1:'⛏️',Pioche2:'⛏️',Relevage:'↑',Accolage:'🔗',Palissage:'🪵'};
+const TABREV={Ebourgeonnage1:'Ebourg. 1',Ebourgeonnage2:'Ebourg. 2',Reparation:'Répar.',Plantation:'Plant.',Accolage:'Accol.',Palissage:'Paliss.',Relevage:'Relev.'};
+function tNom(nom){return TABREV[nom]||nom;}
 
 // LOGIN
 let loginPendingIdx = -1;
 
+// Couleurs avatars login — palette ardoise/or sobre
+var LP_COLORS=['#2C4A3E','#3A3A5C','#4A3228','#1E3A4A','#3C2E4A','#2A4028','#4A3C1E'];
 function initLogin(){
   var profiles = document.getElementById('login-profiles');
   profiles.innerHTML = '';
   for(var i=0; i<MEMBRES.length; i++){
     (function(idx){
       var m = MEMBRES[idx];
+      var col = LP_COLORS[idx % LP_COLORS.length];
       var btn = document.createElement('div');
       btn.className = 'lp-btn';
+      var avaDiv = document.createElement('div');
+      avaDiv.className = 'lp-avatar';
+      avaDiv.style.background = col;
+      avaDiv.textContent = m.nom.charAt(0).toUpperCase();
       var nameDiv = document.createElement('div');
       nameDiv.className = 'lp-name';
       nameDiv.textContent = m.nom;
       var roleDiv = document.createElement('div');
       roleDiv.className = 'lp-role';
       roleDiv.textContent = getRoleLabel(m.roles);
+      btn.appendChild(avaDiv);
       btn.appendChild(nameDiv);
       btn.appendChild(roleDiv);
       btn.addEventListener('click', function(){ selectProfile(idx); });
@@ -1830,7 +1846,7 @@ function renderHeuresCard(containerId){
     +data.map(t=>{
       const col=t.pct===100?'var(--vert-med)':t.pct>=50?'var(--or)':'var(--orange)';
       return `<div class="htache-row">
-        <div class="htache-nom">${TEMOJI[t.nom]||'🌿'} ${t.nom}</div>
+        <div class="htache-nom">${TEMOJI[t.nom]||'🌿'} ${tNom(t.nom)}</div>
         <div class="htache-bar-wrap">
           <div class="htache-bar-track"><div class="htache-bar-fill" style="width:${t.pct}%;background:${col}"></div></div>
           <div class="htache-stats"><span>${t.h_done}h faites</span><span>${t.h_reste}h restantes</span></div>
@@ -1896,7 +1912,7 @@ function renderHomeCard(){
       document.getElementById('home-stat-val').textContent=t.pct+'%';
       document.getElementById('home-stat-label').textContent=t.nom;
       document.getElementById('home-stat-sub').textContent=t.val+'/'+t.total+' parcelles';
-      document.getElementById('home-stat-chip').textContent='À prioriser';
+      document.getElementById('home-stat-chip').textContent=priorityMessage&&priorityMessage.trim()?priorityMessage.trim().slice(0,28)+(priorityMessage.trim().length>28?'…':''):'En retard';
     } else {
       document.getElementById('home-stat-picto').textContent='✅';
       document.getElementById('home-stat-val').textContent='100%';
