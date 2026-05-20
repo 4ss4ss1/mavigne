@@ -4600,7 +4600,7 @@ function chatInit(){
   var dl = document.getElementById('chat-dm-list');
   if(dl){
     dl.innerHTML = MEMBRES.filter(function(m){return m.nom!==currentUser.nom;}).map(function(m){
-      return '<div class="chat-dm" data-dm="'+m.nom+'" onclick="chatOpenDM(this,''+m.nom+'')">'+
+      return '<div class="chat-dm" data-dm="'+m.nom+'" onclick="chatOpenDM(this,\''+m.nom+'\')">'+
         '<div class="chat-dm-ava" style="background:'+(COULEURS_MBR[m.nom]||'#3D6B27')+'">'+
           m.nom.charAt(0).toUpperCase()+'<div class="chat-dm-status offline"></div>'+
         '</div>'+
@@ -4609,9 +4609,7 @@ function chatInit(){
       '</div>';
     }).join('');
   }
-  }
 }
-
 
 // ── Rendu principal : écoute Firestore du canal OU du DM actif ──
 function chatRender(){
