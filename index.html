@@ -1,3 +1,23 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                        MA VIGNE                             ║
+  ║         Application de gestion viticole — PWA               ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║  © 2026 Nicolas GUERET / GUERETTECH — Tous droits réservés.               ║
+  ║                                                              ║
+  ║  Ce code source est une œuvre originale protégée par le      ║
+  ║  droit d'auteur (Code de la propriété intellectuelle,        ║
+  ║  articles L.111-1 et suivants).                              ║
+  ║                                                              ║
+  ║  Toute reproduction, distribution, modification ou           ║
+  ║  utilisation commerciale, partielle ou totale, sans          ║
+  ║  autorisation écrite préalable de l'auteur est               ║
+  ║  strictement interdite et constitue une contrefaçon          ║
+  ║  passible de poursuites judiciaires.                         ║
+  ║                                                              ║
+  ║  Contact : ngdevpro@gmail.com                                     ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -924,6 +944,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     <div id="login-pwd-error" style="color:#FF8A80;font-size:12px;margin-top:-8px;margin-bottom:10px;display:none">❌ Mot de passe incorrect</div>
     <button class="login-btn" id="login-pwd-btn">Se connecter</button>
     <div id="login-forgot-link" style="text-align:center;margin-top:14px;color:rgba(255,255,255,0.5);font-size:12px;cursor:pointer;text-decoration:underline" onclick="showForgotPanel()">Mot de passe oublié ?</div>
+    <div style="text-align:center;margin-top:22px;color:rgba(255,255,255,0.28);font-size:10px;line-height:1.6;padding:0 8px">Votre adresse email est utilisée uniquement pour votre identification.<br>Elle n'est ni partagée ni utilisée à d'autres fins.<br><span onclick="openOv('ovMentions')" style="text-decoration:underline;cursor:pointer;color:rgba(255,255,255,0.4)">Mentions légales &amp; confidentialité</span></div>
   </div>
   <div id="login-forgot-panel" style="display:none;width:100%;margin-top:20px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
@@ -1216,6 +1237,12 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
       <div class="set-row" onclick="openExport()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">📤</div><div><div class="sr-lbl">Exporter / Importer</div><div class="sr-sub">JSON · CSV journal · CSV parcelles · Restaurer</div></div></div><div class="sr-arr">›</div></div>
       <div class="set-row" onclick="resetData()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🗑️</div><div><div class="sr-lbl" style="color:var(--rouge)">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr">›</div></div>
       <div class="set-row" style="border-radius:0 0 16px 16px" onclick="logout()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🚪</div><div><div class="sr-lbl" style="color:var(--rouge)">Se déconnecter</div></div></div><div class="sr-arr">›</div></div>
+    </div>
+  </div>
+    <div class="set-sec">
+    <div class="set-title">Légal</div>
+    <div style="margin:0 16px">
+      <div class="set-row" style="border-radius:16px" onclick="openOv('ovMentions')"><div class="sr-l"><div class="sr-ico" style="background:#EEF2FF">⚖️</div><div><div class="sr-lbl">Mentions légales & confidentialité</div><div class="sr-sub">RGPD · Données personnelles · Copyright</div></div></div><div class="sr-arr">›</div></div>
     </div>
   </div>
   <div class="ver-tag">Ma Vigne v4.2 · Catalogue phyto enrichi · KML persisté · Filtres tâches 🌿</div>
@@ -4282,6 +4309,42 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
+<!-- ══════ OVERLAY MENTIONS LÉGALES ══════ -->
+<div class="overlay" id="ovMentions">
+  <div class="ov-box" style="max-height:85vh;overflow-y:auto">
+    <div class="ov-title">⚖️ Mentions légales & confidentialité</div>
+
+    <div style="font-size:12px;color:#2D0B45;line-height:1.7">
+
+      <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Éditeur</div>
+      <p style="margin:0 0 14px">Ma Vigne est une application développée et éditée par Nicolas GUERET.<br>
+      Micro-entreprise <strong>GUERETTECH</strong> — SIRET : 98214811600014<br>
+      Contact : <span style="color:#3D6B27">ngdevpro@gmail.com</span></p>
+
+      <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Propriété intellectuelle</div>
+      <p style="margin:0 0 14px">L'ensemble du code source, des interfaces et des contenus de cette application est protégé par le droit d'auteur (Code de la propriété intellectuelle, art. L.111-1). Toute reproduction ou distribution sans autorisation écrite est interdite.</p>
+
+      <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Données personnelles — RGPD</div>
+      <p style="margin:0 0 8px"><strong>Données collectées :</strong> prénom, adresse email, rôles dans l'application.</p>
+      <p style="margin:0 0 8px"><strong>Finalité :</strong> authentification et gestion des accès uniquement.</p>
+      <p style="margin:0 0 8px"><strong>Base légale :</strong> intérêt légitime (gestion d'équipe).</p>
+      <p style="margin:0 0 8px"><strong>Stockage :</strong> Firebase (Google Cloud, serveurs européens) + mémoire locale de l'appareil.</p>
+      <p style="margin:0 0 8px"><strong>Durée :</strong> tant que vous êtes membre actif du domaine.</p>
+      <p style="margin:0 0 14px"><strong>Vos droits :</strong> accès, rectification, suppression de vos données sur simple demande à l'administrateur ou par email à <span style="color:#3D6B27">ngdevpro@gmail.com</span>. Conformément au Règlement (UE) 2016/679.</p>
+
+      <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Hébergement</div>
+      <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
+
+      <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Cookies & traceurs</div>
+      <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
+
+      <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v4.2</div>
+    </div>
+
+    <button class="mbtn" style="margin-top:16px" onclick="document.getElementById('ovMentions').classList.remove('open')">Fermer</button>
+  </div>
+</div>
+
 </script>
 </body>
 </html>

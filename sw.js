@@ -1,12 +1,29 @@
+// ╔══════════════════════════════════════════════════════════════╗
+// ║                        MA VIGNE                             ║
+// ║         Application de gestion viticole — PWA               ║
+// ╠══════════════════════════════════════════════════════════════╣
+// ║  © 2026 Nicolas GUERET / GUERETTECH — Tous droits réservés.               ║
+// ║                                                              ║
+// ║  Ce code source est une œuvre originale protégée par le      ║
+// ║  droit d'auteur (Code de la propriété intellectuelle,        ║
+// ║  articles L.111-1 et suivants).                              ║
+// ║                                                              ║
+// ║  Toute reproduction, distribution, modification ou           ║
+// ║  utilisation commerciale, partielle ou totale, sans          ║
+// ║  autorisation écrite préalable de l'auteur est               ║
+// ║  strictement interdite et constitue une contrefaçon          ║
+// ║  passible de poursuites judiciaires.                         ║
+// ╚══════════════════════════════════════════════════════════════╝
+
 // ════════════════════════════════════════════════════════
-// MA VIGNE — Service Worker v1.21
+// MA VIGNE — Service Worker v1.22
 // Stratégie : Cache-first pour l'app shell
 //             Network-first pour Firebase (avec fallback)
 //             Background Sync pour les sauvegardes hors ligne
-// v1.21 — Splash screen épuré : Ma Vigne + fondu + flash blanc
+// v1.22 — Copyright + mentions légales RGPD
 // ════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'mavigne-v1.21';
+const CACHE_NAME = 'mavigne-v1.22';
 const SYNC_TAG   = 'mavigne-sync';
 
 // Fichiers à mettre en cache immédiatement (app shell)
@@ -26,7 +43,7 @@ const CDN_URLS = [
 
 // ── Installation : mise en cache de l'app shell ──────────
 self.addEventListener('install', event => {
-  console.log('[SW] Install v1.21');
+  console.log('[SW] Install v1.22');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       // App shell local (critique — doit réussir)
@@ -42,7 +59,7 @@ self.addEventListener('install', event => {
 
 // ── Activation : nettoyage des anciens caches ─────────────
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v1.21');
+  console.log('[SW] Activate v1.22');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
