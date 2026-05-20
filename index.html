@@ -4370,12 +4370,16 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
-<!-- ══════ OVERLAY MENTIONS LÉGALES ══════ -->
-<div class="overlay" id="ovMentions">
-  <div class="ov-box" style="max-height:85vh;overflow-y:auto">
-    <div class="ov-title">⚖️ Mentions légales & confidentialité</div>
+</script>
 
-    <div style="font-size:12px;color:#2D0B45;line-height:1.7">
+<!-- ══════ OVERLAY MENTIONS LÉGALES ══════ -->
+<div class="overlay" id="ovMentions" onclick="closeOv(event,'ovMentions')">
+  <div class="modal" onclick="event.stopPropagation()" style="max-height:88vh;overflow-y:auto;padding-bottom:40px">
+    <div class="modal-handle"></div>
+    <div class="modal-hd">
+      <div class="modal-title">⚖️ Mentions légales & confidentialité</div>
+    </div>
+    <div class="modal-body" style="font-size:12px;color:#2D0B45;line-height:1.7">
 
       <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Éditeur</div>
       <p style="margin:0 0 14px">Ma Vigne est une application développée et éditée par Nicolas GUERET.<br>
@@ -4400,12 +4404,10 @@ if ('serviceWorker' in navigator) {
       <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
 
       <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v4.2</div>
-    </div>
 
-    <button class="mbtn" style="margin-top:16px" onclick="document.getElementById('ovMentions').classList.remove('open')">Fermer</button>
+      <button class="mbtn" style="margin-top:20px" onclick="closeOv(null,'ovMentions')">Fermer</button>
+    </div>
   </div>
 </div>
-
-</script>
 </body>
 </html>
