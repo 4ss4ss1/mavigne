@@ -853,7 +853,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 /* ══ CHAT ══ */
 #page-chat{background:#0F1319;color:#E8EAF0;display:none;min-height:100vh;padding-bottom:0;}
 #page-chat.active{display:flex;flex-direction:column;}
-.chat-layout{display:flex;flex:1;overflow:hidden;height:calc(100vh - 68px - env(safe-area-inset-bottom,0px));}
+.chat-layout{display:flex;flex:1;overflow:hidden;height:calc(100dvh - 68px - env(safe-area-inset-bottom,0px));}
 .chat-sidebar{width:200px;background:#161C24;border-right:1px solid rgba(255,255,255,0.07);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
 .chat-sidebar::-webkit-scrollbar{width:3px;}
 .chat-sidebar::-webkit-scrollbar-thumb{background:#252E3A;border-radius:4px;}
@@ -910,7 +910,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .chat-input-btns{display:flex;gap:3px;}
 .chat-input-btn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:none;border:none;border-radius:7px;color:#7A8499;cursor:pointer;font-size:15px;transition:all 0.12s;}
 .chat-input-btn:hover{background:#252E3A;color:#E8EAF0;}
-#chat-ta{flex:1;background:none;border:none;outline:none;color:#E8EAF0;font-family:'Outfit',sans-serif;font-size:13.5px;resize:none;max-height:90px;line-height:1.5;}
+#chat-ta{flex:1;background:none;border:none;outline:none;color:#E8EAF0;font-family:'Outfit',sans-serif;font-size:13.5px;resize:none;max-height:90px;line-height:1.5;user-select:text;-webkit-user-select:text;}
 #chat-ta::placeholder{color:#4A5568;}
 .chat-send-btn{width:32px;height:32px;background:#3D6B27;border:none;border-radius:9px;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;transition:all 0.18s;box-shadow:0 2px 7px rgba(61,107,39,0.35);}
 .chat-send-btn:hover{background:#5A8F3C;transform:scale(1.05);}
@@ -1442,7 +1442,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
       <div id="dm-ov-msgs" style="max-height:300px;overflow-y:auto;margin-bottom:12px;display:flex;flex-direction:column;gap:4px;"></div>
       <div style="display:flex;gap:8px;align-items:flex-end;background:#1E2630;border:1px solid rgba(255,255,255,0.12);border-radius:11px;padding:7px 10px;">
         <textarea id="dm-ta" rows="1" placeholder="Message privé…" oninput="chatAutoResize(this)" onkeydown="dmHandleKey(event)"
-          style="flex:1;background:none;border:none;outline:none;color:#E8EAF0;font-family:'Outfit',sans-serif;font-size:13px;resize:none;max-height:80px;line-height:1.5;"></textarea>
+          style="flex:1;background:none;border:none;outline:none;color:#E8EAF0;font-family:'Outfit',sans-serif;font-size:13px;resize:none;max-height:80px;line-height:1.5;user-select:text;-webkit-user-select:text;"></textarea>
         <button class="chat-send-btn" onclick="dmSend()">➤</button>
       </div>
     </div>
@@ -4576,6 +4576,18 @@ function chatInit(){
       '</div>';
     }).join('');
   }
+  // Fix iOS : ajuster la hauteur du chat-layout quand le clavier virtuel apparaît
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize', _chatVPResize);
+  }
+}
+function _chatVPResize(){
+  var layout = document.getElementById('page-chat');
+  if(!layout || !layout.classList.contains('active')) return;
+  var navH = 68;
+  var vvH = window.visualViewport.height;
+  var cl = layout.querySelector('.chat-layout');
+  if(cl) cl.style.height = (vvH - navH) + 'px';
 }
 
 // ── Rendu principal : écoute Firestore du canal actif ──
