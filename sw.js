@@ -1,12 +1,12 @@
 // ════════════════════════════════════════════════════════
-// MA VIGNE — Service Worker v1.18
+// MA VIGNE — Service Worker v1.21
 // Stratégie : Cache-first pour l'app shell
 //             Network-first pour Firebase (avec fallback)
 //             Background Sync pour les sauvegardes hors ligne
-// v1.18 — Thème mensuel dynamique : couleurs calquées sur le calendrier viticole
+// v1.21 — Splash screen épuré : Ma Vigne + fondu + flash blanc
 // ════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'mavigne-v1.18';
+const CACHE_NAME = 'mavigne-v1.21';
 const SYNC_TAG   = 'mavigne-sync';
 
 // Fichiers à mettre en cache immédiatement (app shell)
@@ -26,7 +26,7 @@ const CDN_URLS = [
 
 // ── Installation : mise en cache de l'app shell ──────────
 self.addEventListener('install', event => {
-  console.log('[SW] Install v1.18');
+  console.log('[SW] Install v1.21');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       // App shell local (critique — doit réussir)
@@ -42,7 +42,7 @@ self.addEventListener('install', event => {
 
 // ── Activation : nettoyage des anciens caches ─────────────
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v1.18');
+  console.log('[SW] Activate v1.21');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
