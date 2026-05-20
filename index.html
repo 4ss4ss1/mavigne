@@ -853,14 +853,18 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 /* ══ CHAT ══ */
 #page-chat{
   position:fixed;
-  top:0;left:0;right:0;
-  bottom:0;
+  top:0;left:0;right:0;bottom:0;
   background:#0F1319;color:#E8EAF0;
   display:none;flex-direction:column;
   z-index:10;max-width:430px;margin:0 auto;
-  padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));
 }
 #page-chat.active{display:flex;}
+/* Le layout occupe tout l'espace entre le haut et la nav */
+.chat-wrap{
+  display:flex;flex-direction:column;
+  flex:1;min-height:0;
+  padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));
+}
 .chat-layout{display:flex;flex:1;overflow:hidden;min-height:0;}
 .chat-sidebar{width:200px;background:#161C24;border-right:1px solid rgba(255,255,255,0.07);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
 .chat-sidebar::-webkit-scrollbar{width:3px;}
@@ -1387,75 +1391,50 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 <!-- ══════ NAV ══════ -->
 <!-- ══════ PAGE CHAT ══════ -->
 <div class="page" id="page-chat">
-  <div class="chat-layout">
-    <!-- SIDEBAR -->
-    <div class="chat-sidebar" id="chat-sidebar">
-      <div class="chat-sec-lbl">Canaux</div>
-      <div class="chat-canal actif" data-canal="general" onclick="chatSwitch(this,'general')">
-        <span class="chat-canal-ico">#</span><span>Général</span>
-      </div>
-      <div class="chat-canal" data-canal="travaux" onclick="chatSwitch(this,'travaux')">
-        <span class="chat-canal-ico">🌿</span><span>Travaux</span>
-        <span class="chat-canal-badge" id="cbadge-travaux" style="display:none"></span>
-      </div>
-      <div class="chat-canal" data-canal="tracteur" onclick="chatSwitch(this,'tracteur')">
-        <span class="chat-canal-ico">🚜</span><span>Tracteur</span>
-        <span class="chat-canal-badge" id="cbadge-tracteur" style="display:none"></span>
-      </div>
-      <div class="chat-canal" data-canal="phyto" onclick="chatSwitch(this,'phyto')">
-        <span class="chat-canal-ico">🧪</span><span>Phyto</span>
-        <span class="chat-canal-badge" id="cbadge-phyto" style="display:none"></span>
-      </div>
-      <div class="chat-canal" data-canal="meteo" onclick="chatSwitch(this,'meteo')">
-        <span class="chat-canal-ico">🌤</span><span>Météo</span>
-        <span class="chat-canal-badge" id="cbadge-meteo" style="display:none"></span>
-      </div>
-      <div class="chat-sec-lbl">Privés</div>
-      <div id="chat-dm-list"></div>
-    </div>
-    <!-- ZONE PRINCIPALE -->
-    <div class="chat-main">
-      <div class="chat-topbar">
-        <span id="chat-topbar-ico" style="font-size:15px">#</span>
-        <div style="flex:1;min-width:0">
-          <div class="chat-topbar-name" id="chat-topbar-name">général</div>
-          <div class="chat-topbar-desc" id="chat-topbar-desc">Discussion générale du domaine</div>
+  <div class="chat-wrap">
+    <div class="chat-layout">
+      <!-- SIDEBAR -->
+      <div class="chat-sidebar" id="chat-sidebar">
+        <div class="chat-sec-lbl">Canaux</div>
+        <div class="chat-canal actif" data-canal="general" onclick="chatSwitch(this,'general')">
+          <span class="chat-canal-ico">#</span><span>Général</span>
+          <span class="chat-canal-badge" id="cbadge-general" style="display:none"></span>
         </div>
-      </div>
-      <div class="chat-msgs" id="chat-msgs-area"></div>
-      <div class="chat-input-zone">
-        <div class="chat-input-tags" id="chat-input-tags">
-          <span class="chat-input-tags-lbl">Tag rapide :</span>
-          <span class="chat-tag-chip" onclick="chatAppendTag('📋 Ébourgeonnage')">📋 Ébourgeonnage</span>
-          <span class="chat-tag-chip" onclick="chatAppendTag('🚜 Tracteur')">🚜 Tracteur</span>
-          <span class="chat-tag-chip" onclick="chatAppendTag('⚠️ Urgent')">⚠️ Urgent</span>
+        <div class="chat-canal" data-canal="travaux" onclick="chatSwitch(this,'travaux')">
+          <span class="chat-canal-ico">🌿</span><span>Travaux</span>
+          <span class="chat-canal-badge" id="cbadge-travaux" style="display:none"></span>
         </div>
-        <div class="chat-input-row">
-          <div class="chat-input-btns">
-            <button class="chat-input-btn" onclick="chatPickEmoji()" title="Emoji">😊</button>
-            <button class="chat-input-btn" onclick="chatPickParcelle()" title="Tag parcelle">📍</button>
+        <div class="chat-canal" data-canal="tracteur" onclick="chatSwitch(this,'tracteur')">
+          <span class="chat-canal-ico">🚜</span><span>Tracteur</span>
+          <span class="chat-canal-badge" id="cbadge-tracteur" style="display:none"></span>
+        </div>
+        <div class="chat-canal" data-canal="phyto" onclick="chatSwitch(this,'phyto')">
+          <span class="chat-canal-ico">🧪</span><span>Phyto</span>
+          <span class="chat-canal-badge" id="cbadge-phyto" style="display:none"></span>
+        </div>
+        <div class="chat-canal" data-canal="meteo" onclick="chatSwitch(this,'meteo')">
+          <span class="chat-canal-ico">🌤</span><span>Météo</span>
+          <span class="chat-canal-badge" id="cbadge-meteo" style="display:none"></span>
+        </div>
+        <div class="chat-sec-lbl">Privés</div>
+        <div id="chat-dm-list"></div>
+      </div>
+      <!-- ZONE PRINCIPALE -->
+      <div class="chat-main">
+        <div class="chat-topbar">
+          <span id="chat-topbar-ico" style="font-size:15px">#</span>
+          <div style="flex:1;min-width:0">
+            <div class="chat-topbar-name" id="chat-topbar-name">général</div>
+            <div class="chat-topbar-desc" id="chat-topbar-desc">Discussion générale du domaine</div>
           </div>
-          <textarea id="chat-ta" rows="1" placeholder="Message…" oninput="chatAutoResize(this)" onkeydown="chatHandleKey(event)"></textarea>
-          <button class="chat-send-btn" onclick="chatSend()">➤</button>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Overlay DM -->
-<div class="overlay" id="ovChatDM" onclick="closeOv(event,'ovChatDM')">
-  <div class="modal" onclick="event.stopPropagation()" style="background:#161C24;border:1px solid rgba(255,255,255,0.1)">
-    <div class="modal-handle" style="background:rgba(255,255,255,0.15)"></div>
-    <div class="modal-hd">
-      <div class="modal-title" id="dm-ov-title" style="color:#E8EAF0">💬 Message privé</div>
-    </div>
-    <div class="modal-body">
-      <div id="dm-ov-msgs" style="max-height:300px;overflow-y:auto;margin-bottom:12px;display:flex;flex-direction:column;gap:4px;"></div>
-      <div style="display:flex;gap:8px;align-items:flex-end;background:#1E2630;border:1px solid rgba(255,255,255,0.12);border-radius:11px;padding:7px 10px;">
-        <textarea id="dm-ta" rows="1" placeholder="Message privé…" oninput="chatAutoResize(this)" onkeydown="dmHandleKey(event)"
-          style="flex:1;background:none;border:none;outline:none;color:#E8EAF0;font-family:'Outfit',sans-serif;font-size:13px;resize:none;max-height:80px;line-height:1.5;user-select:text;-webkit-user-select:text;"></textarea>
-        <button class="chat-send-btn" onclick="dmSend()">➤</button>
+        <div class="chat-msgs" id="chat-msgs-area"></div>
+        <div class="chat-input-zone" id="chat-input-zone">
+          <div class="chat-input-row">
+            <textarea id="chat-ta" rows="1" placeholder="Message #général…" oninput="chatAutoResize(this)" onkeydown="chatHandleKey(event)"></textarea>
+            <button class="chat-send-btn" onclick="chatSendActive()">➤</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -4574,103 +4553,103 @@ function _dmDoc(a,b){ var k=[a,b].sort().join('__'); return db.collection('mavig
 
 // ── Initialisation (appelée à chaque goTo('chat')) ──
 function chatInit(){
-  // Peupler la sidebar DM
   var dl = document.getElementById('chat-dm-list');
   if(dl){
-    dl.innerHTML = MEMBRES.filter(m=>m.nom!==currentUser.nom).map(function(m){
-      return '<div class="chat-dm" data-dm="'+m.nom+'" onclick="chatOpenDM(this,\''+m.nom+'\')">'+
-        '<div class="chat-dm-ava" style="background:'+( COULEURS_MBR[m.nom]||'#3D6B27')+'">'+
-          m.nom.charAt(0).toUpperCase()+
-          '<div class="chat-dm-status offline"></div>'+
+    dl.innerHTML = MEMBRES.filter(function(m){return m.nom!==currentUser.nom;}).map(function(m){
+      return '<div class="chat-dm" data-dm="'+m.nom+'" onclick="chatOpenDM(this,''+m.nom+'')">'+
+        '<div class="chat-dm-ava" style="background:'+(COULEURS_MBR[m.nom]||'#3D6B27')+'">'+
+          m.nom.charAt(0).toUpperCase()+'<div class="chat-dm-status offline"></div>'+
         '</div>'+
         '<span class="chat-dm-name">'+m.nom+'</span>'+
         '<span class="chat-canal-badge" id="dmbadge-'+m.nom+'" style="display:none"></span>'+
       '</div>';
     }).join('');
   }
+  // Fix iOS clavier : visualViewport resize
+  if(window.visualViewport && !window._chatVPBound){
+    window._chatVPBound = true;
+    var _lastVVH = window.visualViewport.height;
+    window.visualViewport.addEventListener('resize', function(){
+      var newH = window.visualViewport.height;
+      if(newH < _lastVVH - 50){ // clavier ouvert
+        _chatVPResize();
+      } else { // clavier fermé
+        _chatVPHide();
+      }
+      _lastVVH = newH;
+    });
+    window.visualViewport.addEventListener('scroll', _chatVPScroll);
+  }
+}
+function _chatVPResize(){
+  var pg=document.getElementById('page-chat');
+  if(!pg||!pg.classList.contains('active'))return;
+  var vvH=window.visualViewport.height;
+  var vvOffY=window.visualViewport.offsetTop||0;
+  // La nav bar est fixe en bas — on la sort du calcul
+  var navH=68+( parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-bottom')||0)||0);
+  // Repositionner la page : top = offsetTop du viewport (scroll iOS), height = hauteur visible
+  pg.style.top=vvOffY+'px';
+  pg.style.height=vvH+'px';
+  pg.style.paddingBottom='0px'; // nav bar gère elle-même sa hauteur fixe
+  var area=document.getElementById('chat-msgs-area');
+  if(area)setTimeout(function(){area.scrollTop=area.scrollHeight;},50);
+}
+function _chatVPHide(){
+  // Clavier fermé : remettre le layout normal
+  var pg=document.getElementById('page-chat');
+  if(!pg)return;
+  pg.style.top='';
+  pg.style.height='';
+  pg.style.paddingBottom='calc(var(--nav-h) + env(safe-area-inset-bottom,0px))';
+}
+function _chatVPScroll(){
+  var pg=document.getElementById('page-chat');
+  if(!pg||!pg.classList.contains('active'))return;
+  pg.style.top=(window.visualViewport.offsetTop||0)+'px';
 }
 
-// ── Rendu principal : écoute Firestore du canal actif ──
+// ── Rendu principal : écoute Firestore du canal OU du DM actif ──
 function chatRender(){
-  // Détacher l'ancien listener si présent
-  if(_chatUnsub){ _chatUnsub(); _chatUnsub=null; }
-  // Mettre à jour topbar
-  var cfg = CHAT_CANAUX[_chatCanal]||{ico:'#',label:_chatCanal,desc:''};
-  document.getElementById('chat-topbar-ico').textContent = cfg.ico;
-  document.getElementById('chat-topbar-name').textContent = cfg.label;
-  document.getElementById('chat-topbar-desc').textContent = cfg.desc;
-  document.getElementById('chat-ta').placeholder = 'Message #'+cfg.label+'…';
-  // Mettre à jour tags rapides selon canal
-  chatUpdateTags(_chatCanal);
-  // Écoute temps réel Firestore
-  var area = document.getElementById('chat-msgs-area');
-  area.innerHTML = '<div class="chat-system">⏳ Chargement…</div>';
-  _chatUnsub = _chatDoc(_chatCanal).onSnapshot(function(snap){
-    var msgs = [];
-    if(snap.exists && snap.data().msgs) msgs = snap.data().msgs;
-    chatRenderMsgs(msgs, area);
-    // Marquer comme lu
-    _chatReadTs[_chatCanal] = Date.now();
-    document.getElementById('cbadge-'+_chatCanal) && (document.getElementById('cbadge-'+_chatCanal).style.display='none');
-    chatCheckNavDot();
-  }, function(e){
-    area.innerHTML = '<div class="chat-system">⚠️ Erreur de chargement</div>';
-  });
-}
+  if(_chatUnsub){_chatUnsub();_chatUnsub=null;}
+  if(_chatDMUnsub){_chatDMUnsub();_chatDMUnsub=null;}
+  var area=document.getElementById('chat-msgs-area');
+  var ta=document.getElementById('chat-ta');
 
-function chatUpdateTags(canal){
-  var tags = {
-    general: ['🌿 Travaux','🚜 Tracteur','⚠️ Urgent'],
-    travaux: ['📋 Ébourgeonnage','📋 Pliage','📋 Relevage'],
-    tracteur: ['🚜 Griffage','🚜 Intercep','🚜 Minibuttage'],
-    phyto: ['🧪 Bouillie bordelaise','🧪 Soufre','⚠️ DAR'],
-    meteo: ['❄️ Risque gel','🌧️ Pluie','🌤️ Fenêtre météo'],
-  };
-  var chips = tags[canal]||['📍 Parcelle','⚠️ Urgent'];
-  var zone = document.getElementById('chat-input-tags');
-  zone.innerHTML = '<span class="chat-input-tags-lbl">Tag rapide :</span>'+
-    chips.map(function(t){ return '<span class="chat-tag-chip" onclick="chatAppendTag(\''+t+'\')">'+t+'</span>'; }).join('');
-}
-
-function chatRenderMsgs(msgs, area){
-  if(!msgs.length){ area.innerHTML='<div class="chat-system">Aucun message — soyez le premier à écrire !</div>'; return; }
-  var lastDate = null;
-  var lastAuthor = null;
-  var html = '';
-  msgs.forEach(function(msg, i){
-    var d = new Date(msg.ts);
-    var dateStr = d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
-    if(dateStr!==lastDate){
-      html += '<div class="chat-date-sep"><span>'+dateStr+'</span></div>';
-      lastDate=dateStr;
-      lastAuthor=null;
-    }
-    var isMine = (msg.auteur===currentUser.nom);
-    var timeStr = d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-    var couleur = COULEURS_MBR[msg.auteur]||'#3D6B27';
-    var suite = (msg.auteur===lastAuthor);
-    var bubbleClass = 'chat-bubble'+(suite?' chat-bubble-suite':'');
-    var metaHtml = suite?'':'<div class="chat-msg-meta"><span class="chat-msg-author" style="color:'+couleur+'">'+msg.auteur+'</span><span class="chat-msg-time">'+timeStr+'</span></div>';
-    var avaHtml = suite?
-      '<div class="chat-msg-ava" style="visibility:hidden;background:'+couleur+'">'+msg.auteur.charAt(0)+'</div>':
-      '<div class="chat-msg-ava" style="background:'+couleur+'">'+msg.auteur.charAt(0)+'</div>';
-    var txtHtml = chatFormatText(msg.txt);
-    html += '<div class="chat-msg'+(isMine?' mine':'')+'">'+
-      (isMine?'':avaHtml)+
-      '<div class="chat-msg-body">'+metaHtml+
-        '<div class="'+bubbleClass+'">'+txtHtml+'</div>'+
-      '</div>'+
-      (isMine?avaHtml:'')+
-    '</div>';
-    lastAuthor=msg.auteur;
-  });
-  area.innerHTML=html;
-  area.scrollTop=area.scrollHeight;
-}
-
-function chatFormatText(txt){
-  // Tags [📍 xxx] ou [📋 xxx] → chip coloré
-  return txt.replace(/\[(.*?)\]/g,'<span class="chat-tag">$1</span>');
+  if(_chatDMTarget){
+    // ── Mode DM ──
+    var couleur=COULEURS_MBR[_chatDMTarget]||'#3D6B27';
+    document.getElementById('chat-topbar-ico').innerHTML='<span style="width:22px;height:22px;border-radius:50%;background:'+couleur+';display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white">'+_chatDMTarget.charAt(0)+'</span>';
+    document.getElementById('chat-topbar-name').textContent=_chatDMTarget;
+    document.getElementById('chat-topbar-desc').textContent='Message privé';
+    if(ta)ta.placeholder='Message à '+_chatDMTarget+'…';
+    area.innerHTML='<div class="chat-system">⏳ Chargement…</div>';
+    _chatDMUnsub=_dmDoc(currentUser.nom,_chatDMTarget).onSnapshot(function(snap){
+      var msgs=snap.exists&&snap.data().msgs?snap.data().msgs:[];
+      chatRenderMsgs(msgs,area);
+      // Marquer le DM comme lu
+      _chatDMReadTs[_chatDMTarget]=Date.now();
+      var badge=document.getElementById('dmbadge-'+_chatDMTarget);
+      if(badge)badge.style.display='none';
+      chatCheckNavDot();
+    },function(){area.innerHTML='<div class="chat-system">⚠️ Erreur</div>';});
+  } else {
+    // ── Mode Canal ──
+    var cfg=CHAT_CANAUX[_chatCanal]||{ico:'#',label:_chatCanal,desc:''};
+    document.getElementById('chat-topbar-ico').textContent=cfg.ico;
+    document.getElementById('chat-topbar-name').textContent=cfg.label;
+    document.getElementById('chat-topbar-desc').textContent=cfg.desc;
+    if(ta)ta.placeholder='Message #'+cfg.label+'…';
+    area.innerHTML='<div class="chat-system">⏳ Chargement…</div>';
+    _chatUnsub=_chatDoc(_chatCanal).onSnapshot(function(snap){
+      var msgs=snap.exists&&snap.data().msgs?snap.data().msgs:[];
+      chatRenderMsgs(msgs,area);
+      _chatReadTs[_chatCanal]=Date.now();
+      var b=document.getElementById('cbadge-'+_chatCanal);
+      if(b)b.style.display='none';
+      chatCheckNavDot();
+    },function(){area.innerHTML='<div class="chat-system">⚠️ Erreur de chargement</div>';});
+  }
 }
 
 // ── Switcher canal ──
@@ -4682,44 +4661,13 @@ function chatSwitch(el, canal){
   chatRender();
 }
 
-// ── Ouvrir DM ──
+// ── Ouvrir DM (inline, pas overlay) ──
 function chatOpenDM(el, nom){
   _chatDMTarget=nom;
+  _chatCanal=null;
   document.querySelectorAll('.chat-canal,.chat-dm').forEach(function(x){x.classList.remove('actif');});
   el.classList.add('actif');
-  // Préparer l'overlay DM
-  var couleur=COULEURS_MBR[nom]||'#3D6B27';
-  document.getElementById('dm-ov-title').innerHTML='<span style="width:22px;height:22px;border-radius:50%;background:'+couleur+';display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;margin-right:8px">'+nom.charAt(0)+'</span>'+nom;
-  var dmArea=document.getElementById('dm-ov-msgs');
-  dmArea.innerHTML='<div class="chat-system" style="color:#4A5568">⏳ Chargement…</div>';
-  openOv('ovChatDM');
-  // Badge lu
-  var badge=document.getElementById('dmbadge-'+nom);
-  if(badge)badge.style.display='none';
-  chatCheckNavDot();
-  // Listener DM Firestore
-  if(_chatDMUnsub){_chatDMUnsub();_chatDMUnsub=null;}
-  _chatDMUnsub=_dmDoc(currentUser.nom,nom).onSnapshot(function(snap){
-    var msgs=[];
-    if(snap.exists&&snap.data().msgs)msgs=snap.data().msgs;
-    // Rendu simplifié DM
-    if(!msgs.length){dmArea.innerHTML='<div class="chat-system" style="color:#4A5568">Démarrez la conversation !</div>';return;}
-    dmArea.innerHTML=msgs.map(function(msg){
-      var isMine=(msg.auteur===currentUser.nom);
-      var d=new Date(msg.ts);
-      var t=d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-      var c=COULEURS_MBR[msg.auteur]||'#3D6B27';
-      return '<div class="chat-msg'+(isMine?' mine':'')+'" style="animation:none">'+
-        (isMine?'':'<div class="chat-msg-ava" style="background:'+c+';width:24px;height:24px;font-size:10px">'+msg.auteur.charAt(0)+'</div>')+
-        '<div class="chat-msg-body">'+
-          '<div class="'+( isMine?'chat-bubble mine':'chat-bubble')+'">'+chatFormatText(msg.txt)+'</div>'+
-          '<div style="font-size:9.5px;color:#4A5568;margin-top:2px;text-align:'+(isMine?'right':'left')+'">'+t+'</div>'+
-        '</div>'+
-        (isMine?'<div class="chat-msg-ava" style="background:'+c+';width:24px;height:24px;font-size:10px">'+msg.auteur.charAt(0)+'</div>':'')+
-      '</div>';
-    }).join('');
-    dmArea.scrollTop=dmArea.scrollHeight;
-  });
+  chatRender();
 }
 
 // ── Envoi message canal ──
@@ -4812,29 +4760,57 @@ function chatCheckNavDot(){
   }
 }
 
-// ── Écoute globale pour badges (canaux principaux) ──
+// ── Écoute globale pour badges (canaux + DMs) ──
 var _chatGlobalUnsubs=[];
+var _chatDMReadTs={}; // timestamps lecture DMs
 function chatStartGlobalListeners(){
   _chatGlobalUnsubs.forEach(function(u){u();});
   _chatGlobalUnsubs=[];
-  // Initialiser readTs à maintenant pour les canaux pas encore lus (évite faux badges au login)
+  // Init readTs à maintenant pour éviter faux badges au login
   var now=Date.now();
   Object.keys(CHAT_CANAUX).forEach(function(c){
     if(!_chatReadTs[c])_chatReadTs[c]=now;
   });
+  MEMBRES.forEach(function(m){
+    if(!_chatDMReadTs[m.nom])_chatDMReadTs[m.nom]=now;
+  });
+
+  // ── Canaux ──
   Object.keys(CHAT_CANAUX).forEach(function(canal){
     var unsub=_chatDoc(canal).onSnapshot(function(snap){
       if(!snap.exists)return;
-      var d=snap.data();
-      // Si la page chat est active et ce canal est sélectionné → pas de badge
       var chatPage=document.getElementById('page-chat');
       var chatVisible=chatPage&&chatPage.classList.contains('active');
-      if(chatVisible&&_chatCanal===canal)return;
-      var msgs=d.msgs||[];
+      if(chatVisible&&_chatCanal===canal&&!_chatDMTarget)return;
+      var msgs=(snap.data().msgs)||[];
       var lastTs=msgs.length?msgs[msgs.length-1].ts:0;
       var readTs=_chatReadTs[canal]||0;
-      if(lastTs>readTs&&msgs.length){
+      if(lastTs>readTs){
         var badge=document.getElementById('cbadge-'+canal);
+        if(badge){badge.textContent='!';badge.style.display='';}
+        chatCheckNavDot();
+      }
+    });
+    _chatGlobalUnsubs.push(unsub);
+  });
+
+  // ── DMs : écouter tous les DMs impliquant l'utilisateur ──
+  if(!currentUser)return;
+  MEMBRES.filter(function(m){return m.nom!==currentUser.nom;}).forEach(function(membre){
+    var unsub=_dmDoc(currentUser.nom,membre.nom).onSnapshot(function(snap){
+      if(!snap.exists)return;
+      var chatPage=document.getElementById('page-chat');
+      var chatVisible=chatPage&&chatPage.classList.contains('active');
+      // Pas de badge si on est dans ce DM en ce moment
+      if(chatVisible&&_chatDMTarget===membre.nom)return;
+      var msgs=(snap.data().msgs)||[];
+      // Filtrer seulement les msgs reçus (pas envoyés par soi)
+      var reçus=msgs.filter(function(msg){return msg.auteur!==currentUser.nom;});
+      if(!reçus.length)return;
+      var lastTs=reçus[reçus.length-1].ts;
+      var readTs=_chatDMReadTs[membre.nom]||0;
+      if(lastTs>readTs){
+        var badge=document.getElementById('dmbadge-'+membre.nom);
         if(badge){badge.textContent='!';badge.style.display='';}
         chatCheckNavDot();
       }
