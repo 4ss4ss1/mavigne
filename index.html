@@ -4815,7 +4815,7 @@ function chatStartGlobalListeners(){
 // Exposer pour appel après login
 window.chatStartGlobalListeners=chatStartGlobalListeners;
 
-
+window.addEventListener('load', function(){
   var todayStr = new Date().toISOString().split('T')[0];
   var sd = document.getElementById('s-date'); if(sd) sd.value = todayStr;
   var pd = document.getElementById('p-date'); if(pd) pd.value = todayStr;

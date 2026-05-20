@@ -16,17 +16,18 @@
 // ╚══════════════════════════════════════════════════════════════╝
 
 // ════════════════════════════════════════════════════════
-// MA VIGNE — Service Worker v1.33
+// MA VIGNE — Service Worker v1.34
 // v1.27 — Splash : vrai logo GT détouré sur fond noir + animation lumière
 // v1.28 — Rôle saisonnier : lecture seule (Accueil/Parcelles/Journal, sans écriture)
 // v1.29 — Fix overlay mentions légales : structure modal standard + closeOv + fermeture backdrop
 // v1.30 — KML intégré en statique : suppression import KML, polygones auto au chargement
 // v1.31 — Nouveau logo splash : version fond blanc détourée sur fond noir
 // v1.32 — Module Chat : canaux thématiques + messages privés, temps réel Firebase Firestore
-// v1.33 — Fix écran noir iOS : failsafe splash 6s + visibilitychange reload + init try/catch
+// v1.34 — Fix écran noir iOS : failsafe splash 6s + visibilitychange reload + init try/catch
+// v1.34 — Fix SyntaxError critique : window.addEventListener('load') manquant après module Chat
 // ════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'mavigne-v1.33';
+const CACHE_NAME = 'mavigne-v1.34';
 const SYNC_TAG   = 'mavigne-sync';
 
 // Fichiers à mettre en cache immédiatement (app shell)
@@ -46,7 +47,7 @@ const CDN_URLS = [
 
 // ── Installation : mise en cache de l'app shell ──────────
 self.addEventListener('install', event => {
-  console.log('[SW] Install v1.33');
+  console.log('[SW] Install v1.34');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       // App shell local (critique — doit réussir)
@@ -62,7 +63,7 @@ self.addEventListener('install', event => {
 
 // ── Activation : nettoyage des anciens caches ─────────────
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v1.33');
+  console.log('[SW] Activate v1.34');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
