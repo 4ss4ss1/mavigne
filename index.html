@@ -320,6 +320,11 @@ console.log('🔥 Firebase prêt, en attente de _fbLoad()');
   --shadow-md:0 6px 24px rgba(0,0,0,0.12);
   --nav-h:68px;
 }
+
+/* ══ FLOCONS DE NEIGE (décembre) ══ */
+.snowflake{position:fixed;top:-20px;color:white;font-size:14px;z-index:9998;pointer-events:none;animation:snowfall linear infinite;opacity:0.7;}
+@keyframes snowfall{0%{transform:translateY(-20px) rotate(0deg);opacity:0.8;}100%{transform:translateY(110vh) rotate(360deg);opacity:0;}}
+
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{font-family:'Outfit',sans-serif;background:var(--blanc);color:var(--texte);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;}
 
@@ -4204,8 +4209,64 @@ function exportPDFPhyto(){
   showExportFeedback(`✅ Registre phyto ${annee} généré — ${nbTotal} traitement${nbTotal>1?'s':''} !`);
 }
 
+// ════════════════════════════════════
+// THÈME MENSUEL — couleurs vivantes selon le calendrier viticole
+// ════════════════════════════════════
+function applyMonthTheme() {
+  const month = new Date().getMonth(); // 0=jan … 11=dec
+
+  // [vert, vert-med, vert-clair, vert-pale, blanc-fond, label]
+  const themes = {
+    0:  { v:'#8EB4CC', vm:'#5A8BAD', vc:'#7EB5C8', vp:'#E8F3F9', bg:'#F5F8FB', label:'Janvier — Neige' },
+    1:  { v:'#7AA2BC', vm:'#4E7A9A', vc:'#6E9AB0', vp:'#E2EDF5', bg:'#F2F6FA', label:'Février — Hiver bleu' },
+    2:  { v:'#4E8FAA', vm:'#2F6E8A', vc:'#5CA0BE', vp:'#DFF0F5', bg:'#F0F7FA', label:'Mars — Réveil' },
+    3:  { v:'#5A9E62', vm:'#3D7A45', vc:'#72B87A', vp:'#E4F4E6', bg:'#F2FAF3', label:'Avril — Débourrement' },
+    4:  { v:'#4E9C30', vm:'#357520', vc:'#6BB84A', vp:'#E6F5DE', bg:'#F2FAF0', label:'Mai — Croissance' },
+    5:  { v:'#357520', vm:'#245514', vc:'#4E9C30', vp:'#DFF0D8', bg:'#EEF8EA', label:'Juin — Floraison' },
+    6:  { v:'#215A10', vm:'#163D09', vc:'#357520', vp:'#D6EBD0', bg:'#EAF5E5', label:'Juillet — Véraison' },
+    7:  { v:'#1A4D0C', vm:'#113308', vc:'#2A6B14', vp:'#D0E8C8', bg:'#E7F3E2', label:'Août — Maturité' },
+    8:  { v:'#B86C20', vm:'#8A4C10', vc:'#D4873A', vp:'#FAEADE', bg:'#FBF3EA', label:'Septembre — Vendanges 🍇' },
+    9:  { v:'#A0291E', vm:'#782014', vc:'#C43828', vp:'#FAE4E0', bg:'#FBF0EE', label:'Octobre — Automne' },
+    10: { v:'#6B3D1E', vm:'#4A2810', vc:'#8C5530', vp:'#F0E3D8', bg:'#FAF3EC', label:'Novembre — Repos' },
+    11: { v:'#B81C2A', vm:'#8A0F1C', vc:'#D42638', vp:'#FAE0E2', bg:'#FDF5F5', label:'Décembre — Noël 🎄' },
+  };
+
+  const t = themes[month];
+  if (!t) return;
+
+  const r = document.documentElement;
+  r.style.setProperty('--vert',       t.v);
+  r.style.setProperty('--vert-med',   t.vm);
+  r.style.setProperty('--vert-clair', t.vc);
+  r.style.setProperty('--vert-pale',  t.vp);
+  r.style.setProperty('--blanc',      t.bg);
+
+  // Meta theme-color navigateur (barre de statut mobile)
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', t.v);
+
+  console.log('[Thème]', t.label);
+
+  // ── Flocons de neige pour décembre ──
+  if (month === 11) {
+    const emojis = ['❄','❅','❆','✦','*'];
+    for (let i = 0; i < 18; i++) {
+      const s = document.createElement('span');
+      s.className = 'snowflake';
+      s.textContent = emojis[i % emojis.length];
+      s.style.left = (Math.random() * 100) + 'vw';
+      s.style.fontSize = (10 + Math.random() * 12) + 'px';
+      s.style.animationDuration = (6 + Math.random() * 10) + 's';
+      s.style.animationDelay = (Math.random() * 8) + 's';
+      s.style.opacity = (0.4 + Math.random() * 0.5).toFixed(2);
+      document.body.appendChild(s);
+    }
+  }
+}
+
 // ════ INIT ════
 document.addEventListener('DOMContentLoaded', function(){
+  applyMonthTheme();
   var todayStr = new Date().toISOString().split('T')[0];
   var sd = document.getElementById('s-date'); if(sd) sd.value = todayStr;
   var pd = document.getElementById('p-date'); if(pd) pd.value = todayStr;
