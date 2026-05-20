@@ -4596,6 +4596,7 @@ function _dmDoc(a,b){ var k=[a,b].sort().join('__'); return db.collection('mavig
 
 // ── Initialisation (appelée à chaque goTo('chat')) ──
 function chatInit(){
+  if(!currentUser)return; // guard : pas de currentUser avant login
   var dl = document.getElementById('chat-dm-list');
   if(dl){
     dl.innerHTML = MEMBRES.filter(function(m){return m.nom!==currentUser.nom;}).map(function(m){

@@ -16,7 +16,7 @@
 // ╚══════════════════════════════════════════════════════════════╝
 
 // ════════════════════════════════════════════════════════
-// MA VIGNE — Service Worker v1.44
+// MA VIGNE — Service Worker v1.45
 // v1.27 — Splash : vrai logo GT détouré sur fond noir + animation lumière
 // v1.28 — Rôle saisonnier : lecture seule (Accueil/Parcelles/Journal, sans écriture)
 // v1.29 — Fix overlay mentions légales : structure modal standard + closeOv + fermeture backdrop
@@ -25,10 +25,11 @@
 // v1.32 — Module Chat : canaux thématiques + messages privés, temps réel Firebase Firestore
 // v1.43 — Fix chat iOS : padding-bottom, notifs, tags masqués mobile
 // v1.43 — Fix layout chat iOS (nav cachée, plein écran), chatSendActive, notifs DM
-// v1.44 — Fix notifs : chatInit au login pour dmbadge-*, overflow body iOS, viewport interactive-widget
+// v1.44 — Fix notifs : chatInit au login, overflow iOS, viewport
+// v1.45 — Fix critique : guard currentUser dans chatInit (écran noir) : chatInit au login pour dmbadge-*, overflow body iOS, viewport interactive-widget
 // ════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'mavigne-v1.44';
+const CACHE_NAME = 'mavigne-v1.45';
 const SYNC_TAG   = 'mavigne-sync';
 
 const APP_SHELL = [
@@ -45,7 +46,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  console.log('[SW] Install v1.44');
+  console.log('[SW] Install v1.45');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       return cache.addAll(APP_SHELL).then(() => {
@@ -58,7 +59,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v1.44');
+  console.log('[SW] Activate v1.45');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
