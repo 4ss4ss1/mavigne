@@ -1064,6 +1064,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     <div class="sbi"><div class="sbi-val cor" id="pc-e">0</div><div class="sbi-lbl">Cours</div></div>
     <div class="sbi"><div class="sbi-val" style="color:var(--rouge)" id="pc-a">0</div><div class="sbi-lbl">Arrach.</div></div>
   </div>
+  <div class="readonly-banner saisonnier-readonly-banner" style="display:none;margin:0 16px 12px;">🔒 Accès lecture seule — consultation uniquement en mode saisonnier</div>
   <div class="tabs2">
     <div class="tab2 active" id="tbl" onclick="switchPTab('liste')">📋 Liste</div>
     <div class="tab2" id="tbc" onclick="switchPTab('carte')">🗺️ Carte</div>
@@ -1128,8 +1129,9 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 <!-- ══════ PAGE JOURNAL ══════ -->
 <div class="page" id="page-journal">
   <div class="ph verde">
-    <div class="ph-top"><div><div class="ph-title">Journal des travaux</div><div class="ph-sub" id="j-sub">0 entrées</div></div><button class="ph-add" onclick="openJournalEntry()">＋ Ajouter</button></div>
+    <div class="ph-top"><div><div class="ph-title">Journal des travaux</div><div class="ph-sub" id="j-sub">0 entrées</div></div><button id="journal-add-btn" class="ph-add" onclick="openJournalEntry()">＋ Ajouter</button></div>
   </div>
+  <div class="readonly-banner saisonnier-readonly-banner" style="display:none;margin:12px 16px 0;">🔒 Accès lecture seule — vous consultez le journal en mode saisonnier</div>
   <div class="sband c4">
     <div class="sbi"><div class="sbi-val cv" id="js-tot">0</div><div class="sbi-lbl">Total</div></div>
     <div class="sbi"><div class="sbi-val cv" id="js-val">0</div><div class="sbi-lbl">Validés</div></div>
@@ -1773,6 +1775,8 @@ function logout(){
 function isAdmin(){return currentUser?.roles.includes('admin');}
 function isTractoriste(){return currentUser?.roles.includes('tractoriste');}
 function canSeePhyto(){return currentUser?.roles.includes('admin');}
+function isSaisonnier(){return currentUser?.roles.includes('saisonnier')&&!currentUser?.roles.includes('admin')&&!currentUser?.roles.includes('ouvrier');}
+function canWrite(){return isAdmin()||(currentUser?.roles.includes('ouvrier')&&!isSaisonnier());}
 
 function applyRoles(){
   // Phyto — admin seulement
@@ -1785,6 +1789,12 @@ function applyRoles(){
   if(condAddBtn)condAddBtn.style.display=isReadOnly?'none':'block';
   if(actAddBtn)actAddBtn.style.display=isReadOnly?'none':'block';
   document.getElementById('trac-readonly').style.display=isReadOnly?'flex':'none';
+  // Saisonnier : banner lecture seule sur Journal et Parcelles
+  const saisonBanners=document.querySelectorAll('.saisonnier-readonly-banner');
+  saisonBanners.forEach(b=>b.style.display=isSaisonnier()?'flex':'none');
+  // Bouton + Journal : masqué pour saisonnier
+  const jAddBtn=document.getElementById('journal-add-btn');
+  if(jAddBtn)jAddBtn.style.display=canWrite()?'flex':'none';
   // Avatar v2 (header accueil)
   const m=currentUser;
   if(m){
@@ -2209,7 +2219,7 @@ function openDP(nom){
     }
   }
   // Tâches : afficher toutes, exclues en grisé
-  const canEdit=isAdmin()||currentUser?.roles.includes('ouvrier');
+  const canEdit=canWrite();
   const nomParcelle=p.nom;
   document.getElementById('dp-taches').innerHTML=tachesSaison.map(t=>{
     const stat=p.taches[t.nom]||'Non démarré';
