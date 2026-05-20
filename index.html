@@ -4627,15 +4627,24 @@ function chatRender(){
     document.getElementById('chat-topbar-desc').textContent='Message privé';
     if(ta)ta.placeholder='Message à '+_chatDMTarget+'…';
     area.innerHTML='<div class="chat-system">⏳ Chargement…</div>';
+    var _dmTimeout=setTimeout(function(){
+      if(area.innerHTML.indexOf('Chargement')>=0){
+        area.innerHTML='<div class="chat-system">Démarrez la conversation !</div>';
+      }
+    },5000);
     _chatDMUnsub=_dmDoc(currentUser.nom,_chatDMTarget).onSnapshot(function(snap){
-      var msgs=snap.exists&&snap.data().msgs?snap.data().msgs:[];
+      clearTimeout(_dmTimeout);
+      var msgs=snap.exists&&snap.data()&&snap.data().msgs?snap.data().msgs:[];
       chatRenderMsgs(msgs,area);
-      // Marquer le DM comme lu
       _chatDMReadTs[_chatDMTarget]=Date.now();
       var badge=document.getElementById('dmbadge-'+_chatDMTarget);
       if(badge)badge.style.display='none';
       chatCheckNavDot();
-    },function(){area.innerHTML='<div class="chat-system">⚠️ Erreur</div>';});
+    },function(err){
+      clearTimeout(_dmTimeout);
+      console.error('[Chat] Erreur Firebase DM:',err);
+      area.innerHTML='<div class="chat-system">⚠️ Impossible de charger</div>';
+    });
   } else {
     // ── Mode Canal ──
     var cfg=CHAT_CANAUX[_chatCanal]||{ico:'#',label:_chatCanal,desc:''};
@@ -4644,14 +4653,26 @@ function chatRender(){
     document.getElementById('chat-topbar-desc').textContent=cfg.desc;
     if(ta)ta.placeholder='Message #'+cfg.label+'…';
     area.innerHTML='<div class="chat-system">⏳ Chargement…</div>';
+    // Timeout : si Firebase ne répond pas en 5s, afficher vide
+    var _loadTimeout=setTimeout(function(){
+      if(area.innerHTML.indexOf('Chargement')>=0){
+        area.innerHTML='<div class="chat-system">Aucun message — soyez le premier à écrire !</div>';
+      }
+    },5000);
     _chatUnsub=_chatDoc(_chatCanal).onSnapshot(function(snap){
-      var msgs=snap.exists&&snap.data().msgs?snap.data().msgs:[];
+      clearTimeout(_loadTimeout);
+      // Document inexistant = canal vide (normal au premier lancement)
+      var msgs=snap.exists&&snap.data()&&snap.data().msgs?snap.data().msgs:[];
       chatRenderMsgs(msgs,area);
       _chatReadTs[_chatCanal]=Date.now();
       var b=document.getElementById('cbadge-'+_chatCanal);
       if(b)b.style.display='none';
       chatCheckNavDot();
-    },function(){area.innerHTML='<div class="chat-system">⚠️ Erreur de chargement</div>';});
+    },function(err){
+      clearTimeout(_loadTimeout);
+      console.error('[Chat] Erreur Firebase canal:',err);
+      area.innerHTML='<div class="chat-system">⚠️ Impossible de charger — vérifiez votre connexion</div>';
+    });
   }
 }
 
