@@ -720,7 +720,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .hv2-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1;}
 .hv2-brand{font-family:'Cormorant Garamond',serif;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:3px;}
 .hv2-title{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;color:#fff;line-height:1.1;}
-.hv2-avatar{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:#fff;cursor:pointer;flex-shrink:0;}
+.hv2-avatar-wrap{position:relative;flex-shrink:0;cursor:pointer;}.hv2-avatar{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:#fff;flex-shrink:0;}.hv2-msg-badge{position:absolute;top:-3px;right:-3px;background:var(--rouge);color:white;font-size:9px;font-weight:700;font-family:'Outfit',sans-serif;min-width:16px;height:16px;border-radius:8px;display:none;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--vert);line-height:1;}
 .hv2-meta{display:flex;align-items:center;gap:10px;margin-top:18px;position:relative;z-index:1;}
 .hv2-saison-pill{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:500;color:rgba(255,255,255,0.85);display:flex;align-items:center;gap:6px;}
 .hv2-dot{width:6px;height:6px;border-radius:50%;background:var(--vert-clair);flex-shrink:0;}
@@ -851,9 +851,9 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .hjr-date{font-size:10px;color:var(--texte-doux);flex-shrink:0;}
 
 /* ══ CHAT ══ */
-#page-chat{background:#0F1319;color:#E8EAF0;display:none;min-height:100vh;padding-bottom:0;}
-#page-chat.active{display:flex;flex-direction:column;}
-.chat-layout{display:flex;flex:1;overflow:hidden;height:calc(100dvh - 68px - env(safe-area-inset-bottom,0px));}
+#page-chat{position:fixed;top:0;left:0;right:0;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));background:#0F1319;color:#E8EAF0;display:none;flex-direction:column;z-index:10;max-width:430px;margin:0 auto;}
+#page-chat.active{display:flex;}
+.chat-layout{display:flex;flex:1;overflow:hidden;min-height:0;}
 .chat-sidebar{width:200px;background:#161C24;border-right:1px solid rgba(255,255,255,0.07);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
 .chat-sidebar::-webkit-scrollbar{width:3px;}
 .chat-sidebar::-webkit-scrollbar-thumb{background:#252E3A;border-radius:4px;}
@@ -1098,7 +1098,10 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
         <div class="hv2-brand">Domaine</div>
         <div class="hv2-title">Ma Vigne</div>
       </div>
-      <div class="hv2-avatar" id="up-ava-v2" onclick="logout()">N</div>
+      <div class="hv2-avatar-wrap" onclick="logout()">
+        <div class="hv2-avatar" id="up-ava-v2">N</div>
+        <div class="hv2-msg-badge" id="home-msg-badge"></div>
+      </div>
     </div>
     <div class="hv2-meta">
       <div class="hv2-saison-pill"><span class="hv2-dot"></span> <span id="saison-badge-home"></span></div>
@@ -4576,18 +4579,6 @@ function chatInit(){
       '</div>';
     }).join('');
   }
-  // Fix iOS : ajuster la hauteur du chat-layout quand le clavier virtuel apparaît
-  if(window.visualViewport){
-    window.visualViewport.addEventListener('resize', _chatVPResize);
-  }
-}
-function _chatVPResize(){
-  var layout = document.getElementById('page-chat');
-  if(!layout || !layout.classList.contains('active')) return;
-  var navH = 68;
-  var vvH = window.visualViewport.height;
-  var cl = layout.querySelector('.chat-layout');
-  if(cl) cl.style.height = (vvH - navH) + 'px';
 }
 
 // ── Rendu principal : écoute Firestore du canal actif ──
@@ -4788,16 +4779,28 @@ function chatSelectParcelle(nom){
 // ── Badge notification nav ──
 function chatCheckNavDot(){
   var hasNew=false;
+  var count=0;
   Object.keys(CHAT_CANAUX).forEach(function(c){
     var badge=document.getElementById('cbadge-'+c);
-    if(badge&&badge.style.display!=='none')hasNew=true;
+    if(badge&&badge.style.display!=='none'){hasNew=true;count++;}
   });
   MEMBRES.filter(function(m){return m.nom!==currentUser.nom;}).forEach(function(m){
     var badge=document.getElementById('dmbadge-'+m.nom);
-    if(badge&&badge.style.display!=='none')hasNew=true;
+    if(badge&&badge.style.display!=='none'){hasNew=true;count++;}
   });
+  // Dot nav bar
   var dot=document.getElementById('chat-nav-dot');
   if(dot)dot.style.display=hasNew?'block':'none';
+  // Badge avatar accueil
+  var homeBadge=document.getElementById('home-msg-badge');
+  if(homeBadge){
+    if(hasNew){
+      homeBadge.textContent=count>9?'9+':String(count);
+      homeBadge.style.display='flex';
+    } else {
+      homeBadge.style.display='none';
+    }
+  }
 }
 
 // ── Écoute globale pour badges (canaux principaux) ──

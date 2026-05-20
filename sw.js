@@ -16,17 +16,18 @@
 // ╚══════════════════════════════════════════════════════════════╝
 
 // ════════════════════════════════════════════════════════
-// MA VIGNE — Service Worker v1.35
+// MA VIGNE — Service Worker v1.36
 // v1.27 — Splash : vrai logo GT détouré sur fond noir + animation lumière
 // v1.28 — Rôle saisonnier : lecture seule (Accueil/Parcelles/Journal, sans écriture)
 // v1.29 — Fix overlay mentions légales : structure modal standard + closeOv + fermeture backdrop
 // v1.30 — KML intégré en statique : suppression import KML, polygones auto au chargement
 // v1.31 — Nouveau logo splash : version fond blanc détourée sur fond noir
 // v1.32 — Module Chat : canaux thématiques + messages privés, temps réel Firebase Firestore
-// v1.35 — Fix chat iOS/Android : 100dvh, user-select:text textarea, visualViewport resize listener
+// v1.35 — Fix chat iOS/Android : position:fixed bottom nav, user-select:text textarea
+// v1.36 — Badge notif messages sur avatar accueil (compteur canaux + DM non lus)
 // ════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'mavigne-v1.35';
+const CACHE_NAME = 'mavigne-v1.36';
 const SYNC_TAG   = 'mavigne-sync';
 
 // Fichiers à mettre en cache immédiatement (app shell)
@@ -46,7 +47,7 @@ const CDN_URLS = [
 
 // ── Installation : mise en cache de l'app shell ──────────
 self.addEventListener('install', event => {
-  console.log('[SW] Install v1.35');
+  console.log('[SW] Install v1.36');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       // App shell local (critique — doit réussir)
@@ -62,7 +63,7 @@ self.addEventListener('install', event => {
 
 // ── Activation : nettoyage des anciens caches ─────────────
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v1.35');
+  console.log('[SW] Activate v1.36');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
