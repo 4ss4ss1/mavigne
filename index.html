@@ -3069,11 +3069,9 @@ function deleteMembre(){
   const nom=document.getElementById('em-nom').value;
   if(nom==='Nico'){alert('Impossible de supprimer le compte principal.');return;}
   if(!confirm('Supprimer '+nom+'?'))return;
-  // Mutation en place ET réassignation pour garantir cohérence locale/window
   const idx=MEMBRES.findIndex(m=>m.nom===nom);
   if(idx>=0) MEMBRES.splice(idx,1);
   window.MEMBRES=MEMBRES;
-  // Sauvegarder directement vers Firebase et localStorage
   if(window.fbSave) window.fbSave('membres', MEMBRES.map(m=>({...m})));
   try{
     const raw=localStorage.getItem('mavigne_data_v1');
@@ -3081,9 +3079,8 @@ function deleteMembre(){
     d.MEMBRES=MEMBRES;
     localStorage.setItem('mavigne_data_v1', JSON.stringify(d));
   }catch(e){}
-  document.getElementById('ovEditMembre').classList.remove('open');
-  renderReglages();
-  initLogin();
+  // Reload après court délai pour laisser Firebase confirmer
+  setTimeout(()=>location.reload(), 800);
 }
 
 // ════ OVERLAYS ════
