@@ -232,6 +232,7 @@ function fbListen() {
     fbDoc(key).onSnapshot(function(snap) {
       if(!snap.exists) return;
       if(_ignoreNext[key]) { _ignoreNext[key] = false; return; }
+      if(_ignoreBefore[key] && Date.now() < _ignoreBefore[key]) { return; }
       applyFbData(key, snap.data().value);
       if(window.currentUser) {
         var p = document.querySelector('.page.active');
@@ -256,8 +257,11 @@ function fbListen() {
 }
 
 // ── Sauvegarder une collection (avec queue offline automatique) ──
+var _ignoreBefore = {}; // timestamp jusqu'auquel ignorer les snapshots
+
 window.fbSave = async function(key, value) {
   _ignoreNext[key] = true;
+  _ignoreBefore[key] = Date.now() + 4000; // ignorer les snapshots pendant 4s
   // Si hors ligne → queue de rattrapage immédiate
   if (!navigator.onLine) {
     _queueSave(key, value);
