@@ -3065,22 +3065,26 @@ function saveMembre(){const nom=document.getElementById('nm-nom').value.trim();i
 function editMembre(nom){const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;document.getElementById('em-title').textContent='✏️ '+nom;document.getElementById('em-nom').value=nom;document.getElementById('em-statut').value=m.statut;const er=document.getElementById('em-roles');const allRoles=['admin','ouvrier','tractoriste','saisonnier'];er.innerHTML=allRoles.map(r=>`<div class="role-check-row"><span class="role-check-name">${r}</span><div class="role-chk ${m.roles.includes(r)?'on':''}" id="erc-${r}" onclick="toggleEmRole('${r}',this)">${m.roles.includes(r)?'✓':''}</div></div>`).join('');openOv('ovEditMembre');}
 function toggleEmRole(r,el){el.classList.toggle('on');el.textContent=el.classList.contains('on')?'✓':'';}
 function saveEditMembre(){const nom=document.getElementById('em-nom').value;const m=MEMBRES.find(x=>x.nom===nom);if(!m)return;m.statut=document.getElementById('em-statut').value;const allRoles=['admin','ouvrier','tractoriste','saisonnier'];m.roles=allRoles.filter(r=>document.getElementById('erc-'+r)?.classList.contains('on'));saveData('membres');document.getElementById('ovEditMembre').classList.remove('open');renderReglages();}
-function deleteMembre(){
+async function deleteMembre(){
   const nom=document.getElementById('em-nom').value;
   if(nom==='Nico'){alert('Impossible de supprimer le compte principal.');return;}
   if(!confirm('Supprimer '+nom+'?'))return;
+  // Supprimer en mémoire
   const idx=MEMBRES.findIndex(m=>m.nom===nom);
   if(idx>=0) MEMBRES.splice(idx,1);
   window.MEMBRES=MEMBRES;
-  if(window.fbSave) window.fbSave('membres', MEMBRES.map(m=>({...m})));
+  // Sauver en localStorage immédiatement
   try{
     const raw=localStorage.getItem('mavigne_data_v1');
     const d=raw?JSON.parse(raw):{};
-    d.MEMBRES=MEMBRES;
-    localStorage.setItem('mavigne_data_v1', JSON.stringify(d));
+    d.MEMBRES=MEMBRES.map(m=>({...m}));
+    localStorage.setItem('mavigne_data_v1',JSON.stringify(d));
   }catch(e){}
-  // Reload après court délai pour laisser Firebase confirmer
-  setTimeout(()=>location.reload(), 800);
+  // Écrire directement sur Firestore puis reload
+  try{
+    await db.collection('mavigne').doc('membres').set({value:MEMBRES.map(m=>({...m}))});
+  }catch(e){console.warn('deleteMembre fbwrite error',e);}
+  location.reload();
 }
 
 // ════ OVERLAYS ════
