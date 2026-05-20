@@ -16,13 +16,14 @@
 // ╚══════════════════════════════════════════════════════════════╝
 
 // ════════════════════════════════════════════════════════
-// MA VIGNE — Service Worker v1.29
+// MA VIGNE — Service Worker v1.30
 // v1.27 — Splash : vrai logo GT détouré sur fond noir + animation lumière
 // v1.28 — Rôle saisonnier : lecture seule (Accueil/Parcelles/Journal, sans écriture)
 // v1.29 — Fix overlay mentions légales : structure modal standard + closeOv + fermeture backdrop
+// v1.30 — KML intégré en statique : suppression import KML, polygones auto au chargement
 // ════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'mavigne-v1.29';
+const CACHE_NAME = 'mavigne-v1.30';
 const SYNC_TAG   = 'mavigne-sync';
 
 // Fichiers à mettre en cache immédiatement (app shell)
@@ -42,7 +43,7 @@ const CDN_URLS = [
 
 // ── Installation : mise en cache de l'app shell ──────────
 self.addEventListener('install', event => {
-  console.log('[SW] Install v1.29');
+  console.log('[SW] Install v1.30');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       // App shell local (critique — doit réussir)
@@ -58,7 +59,7 @@ self.addEventListener('install', event => {
 
 // ── Activation : nettoyage des anciens caches ─────────────
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v1.29');
+  console.log('[SW] Activate v1.30');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
