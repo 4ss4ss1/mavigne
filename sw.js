@@ -16,14 +16,11 @@
 // ╚══════════════════════════════════════════════════════════════╝
 
 // ════════════════════════════════════════════════════════
-// MA VIGNE — Service Worker v1.23
-// Stratégie : Cache-first pour l'app shell
-//             Network-first pour Firebase (avec fallback)
-//             Background Sync pour les sauvegardes hors ligne
-// v1.23 — Copyright + mentions légales RGPD
+// MA VIGNE — Service Worker v1.27
+// v1.27 — Splash : vrai logo GT détouré sur fond noir + animation lumière
 // ════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'mavigne-v1.23';
+const CACHE_NAME = 'mavigne-v1.27';
 const SYNC_TAG   = 'mavigne-sync';
 
 // Fichiers à mettre en cache immédiatement (app shell)
