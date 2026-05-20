@@ -381,7 +381,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .lp-role{color:rgba(255,255,255,0.35);font-size:10px;margin-top:3px;letter-spacing:0.3px;}
 
 /* ══ NAV ══ */
-.nav-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:white;border-top:1px solid var(--gris-clair);display:grid;grid-template-columns:repeat(6,1fr);height:calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));padding:6px 0 calc(14px + env(safe-area-inset-bottom, 0px));box-shadow:0 -4px 24px rgba(0,0,0,0.09);z-index:1000;transition:grid-template-columns 0.3s;}
+.nav-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:white;border-top:1px solid var(--gris-clair);display:grid;grid-template-columns:repeat(7,1fr);height:calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));padding:6px 0 calc(14px + env(safe-area-inset-bottom, 0px));box-shadow:0 -4px 24px rgba(0,0,0,0.09);z-index:1000;transition:grid-template-columns 0.3s;}
 .nb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;transition:transform 0.15s;}
 .nb:active{transform:scale(0.86);}
 .nb-icon{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;transition:background 0.2s;}
@@ -399,6 +399,9 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .nb[data-p=phyto].active .nb-label{color:var(--phyto);}
 .nb[data-p=reglages].active .nb-icon{background:var(--gris-clair);}
 .nb[data-p=reglages].active .nb-label{color:var(--texte-med);}
+.nb[data-p=chat].active .nb-icon{background:#E8F0FA;}
+.nb[data-p=chat].active .nb-label{color:#1A4A7A;}
+.chat-notif-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--rouge);border-radius:50%;border:2px solid white;display:none;}
 
 /* ══ PAGES ══ */
 .page{display:none;min-height:100vh;padding-bottom:calc(var(--nav-h) + 24px + env(safe-area-inset-bottom, 0px));animation:pageIn 0.22s ease forwards;}
@@ -846,6 +849,80 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .hjr-meta{font-size:10px;color:var(--texte-doux);margin-top:1px;}
 .hjr-date{font-size:10px;color:var(--texte-doux);flex-shrink:0;}
 
+/* ══ CHAT ══ */
+#page-chat{background:#0F1319;color:#E8EAF0;display:none;min-height:100vh;padding-bottom:0;}
+#page-chat.active{display:flex;flex-direction:column;}
+.chat-layout{display:flex;flex:1;overflow:hidden;height:calc(100vh - 68px - env(safe-area-inset-bottom,0px));}
+.chat-sidebar{width:200px;background:#161C24;border-right:1px solid rgba(255,255,255,0.07);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+.chat-sidebar::-webkit-scrollbar{width:3px;}
+.chat-sidebar::-webkit-scrollbar-thumb{background:#252E3A;border-radius:4px;}
+.chat-sec-lbl{font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#4A5568;padding:12px 12px 5px;}
+.chat-canal{display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:400;color:#7A8499;position:relative;margin:0 6px 1px;transition:background 0.12s;}
+.chat-canal:hover{background:#1E2630;color:#E8EAF0;}
+.chat-canal.actif{background:rgba(61,107,39,0.15);color:#5A8F3C;font-weight:600;border:1px solid rgba(90,143,60,0.2);}
+.chat-canal-ico{font-size:14px;width:18px;text-align:center;flex-shrink:0;}
+.chat-canal-badge{margin-left:auto;background:#A0291E;color:white;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;min-width:17px;text-align:center;}
+.chat-dm{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;cursor:pointer;font-size:12.5px;color:#7A8499;margin:0 6px 1px;transition:background 0.12s;}
+.chat-dm:hover{background:#1E2630;color:#E8EAF0;}
+.chat-dm.actif{background:rgba(61,107,39,0.12);color:#E8EAF0;}
+.chat-dm-ava{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0;position:relative;}
+.chat-dm-status{position:absolute;bottom:-1px;right:-1px;width:7px;height:7px;border-radius:50%;border:1.5px solid #161C24;}
+.chat-dm-status.online{background:#4CAF50;}
+.chat-dm-status.offline{background:#4A5568;}
+.chat-main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#0F1319;}
+.chat-topbar{padding:9px 14px;border-bottom:1px solid rgba(255,255,255,0.07);background:#161C24;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.chat-topbar-name{font-weight:600;font-size:13.5px;flex:1;color:#E8EAF0;}
+.chat-topbar-desc{font-size:11px;color:#7A8499;font-weight:300;}
+.chat-msgs{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:1px;scroll-behavior:smooth;}
+.chat-msgs::-webkit-scrollbar{width:3px;}
+.chat-msgs::-webkit-scrollbar-thumb{background:#252E3A;border-radius:4px;}
+.chat-date-sep{display:flex;align-items:center;gap:10px;margin:12px 0 8px;}
+.chat-date-sep::before,.chat-date-sep::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.07);}
+.chat-date-sep span{font-size:10px;color:#4A5568;letter-spacing:0.05em;white-space:nowrap;}
+.chat-msg{display:flex;gap:8px;padding:2px 0;border-radius:7px;transition:background 0.1s;}
+.chat-msg:hover{background:rgba(255,255,255,0.02);}
+.chat-msg.mine{flex-direction:row-reverse;}
+.chat-msg-ava{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;flex-shrink:0;align-self:flex-end;margin-bottom:2px;}
+.chat-msg-body{flex:1;min-width:0;max-width:78%;}
+.chat-msg.mine .chat-msg-body{display:flex;flex-direction:column;align-items:flex-end;}
+.chat-msg-meta{display:flex;align-items:baseline;gap:5px;margin-bottom:2px;}
+.chat-msg.mine .chat-msg-meta{flex-direction:row-reverse;}
+.chat-msg-author{font-size:11.5px;font-weight:600;}
+.chat-msg-time{font-size:10px;color:#4A5568;font-weight:300;}
+.chat-bubble{background:#1E2630;padding:7px 11px;border-radius:4px 11px 11px 11px;font-size:13px;line-height:1.5;color:#E8EAF0;word-break:break-word;display:inline-block;max-width:100%;}
+.chat-msg.mine .chat-bubble{background:rgba(61,107,39,0.2);border:1px solid rgba(90,143,60,0.25);border-radius:11px 4px 11px 11px;}
+.chat-bubble-suite{border-radius:4px 11px 11px 11px;}
+.chat-msg.mine .chat-bubble-suite{border-radius:11px 4px 11px 11px;}
+.chat-tag{display:inline-block;background:rgba(184,145,58,0.15);border:1px solid rgba(184,145,58,0.3);color:#B8913A;font-size:10.5px;font-weight:600;padding:1px 6px;border-radius:5px;margin-right:3px;}
+.chat-system{text-align:center;font-size:11px;color:#4A5568;font-style:italic;margin:6px 0;font-family:'Cormorant Garamond',serif;}
+.chat-reactions{display:flex;gap:3px;margin-top:3px;flex-wrap:wrap;}
+.chat-reaction{background:#1E2630;border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:2px 7px;font-size:11.5px;cursor:pointer;display:flex;align-items:center;gap:3px;transition:all 0.12s;}
+.chat-reaction:hover{background:#252E3A;}
+.chat-reaction span{font-size:10px;color:#7A8499;font-weight:500;}
+.chat-input-zone{padding:10px 14px;background:#161C24;border-top:1px solid rgba(255,255,255,0.07);flex-shrink:0;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));}
+.chat-input-tags{display:flex;gap:5px;margin-bottom:6px;flex-wrap:wrap;align-items:center;}
+.chat-input-tags-lbl{font-size:10px;color:#4A5568;}
+.chat-tag-chip{background:rgba(184,145,58,0.1);border:1px solid rgba(184,145,58,0.25);color:#B8913A;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:5px;cursor:pointer;transition:all 0.12s;}
+.chat-tag-chip:hover{background:rgba(184,145,58,0.2);}
+.chat-input-row{display:flex;align-items:flex-end;gap:7px;background:#1E2630;border:1px solid rgba(255,255,255,0.12);border-radius:11px;padding:7px 10px;transition:border-color 0.2s;}
+.chat-input-row:focus-within{border-color:rgba(61,107,39,0.5);box-shadow:0 0 0 3px rgba(61,107,39,0.07);}
+.chat-input-btns{display:flex;gap:3px;}
+.chat-input-btn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:none;border:none;border-radius:7px;color:#7A8499;cursor:pointer;font-size:15px;transition:all 0.12s;}
+.chat-input-btn:hover{background:#252E3A;color:#E8EAF0;}
+#chat-ta{flex:1;background:none;border:none;outline:none;color:#E8EAF0;font-family:'Outfit',sans-serif;font-size:13.5px;resize:none;max-height:90px;line-height:1.5;}
+#chat-ta::placeholder{color:#4A5568;}
+.chat-send-btn{width:32px;height:32px;background:#3D6B27;border:none;border-radius:9px;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;transition:all 0.18s;box-shadow:0 2px 7px rgba(61,107,39,0.35);}
+.chat-send-btn:hover{background:#5A8F3C;transform:scale(1.05);}
+/* Mobile : sidebar réduite */
+@media(max-width:430px){
+  .chat-sidebar{width:52px;}
+  .chat-sec-lbl,.chat-canal span:not(.chat-canal-ico),.chat-dm-name{display:none;}
+  .chat-canal{justify-content:center;padding:9px;}
+  .chat-canal-badge{position:absolute;top:3px;right:3px;font-size:9px;padding:0 4px;}
+  .chat-dm{justify-content:center;padding:7px;}
+}
+@keyframes chatMsgIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.chat-msg{animation:chatMsgIn 0.18s ease;}
 </style>
 </head>
 <body>
@@ -1266,12 +1343,126 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 </div>
 
 <!-- ══════ NAV ══════ -->
+<!-- ══════ PAGE CHAT ══════ -->
+<div class="page" id="page-chat">
+  <div class="chat-layout">
+    <!-- SIDEBAR -->
+    <div class="chat-sidebar" id="chat-sidebar">
+      <div class="chat-sec-lbl">Canaux</div>
+      <div class="chat-canal actif" data-canal="general" onclick="chatSwitch(this,'general')">
+        <span class="chat-canal-ico">#</span><span>Général</span>
+      </div>
+      <div class="chat-canal" data-canal="travaux" onclick="chatSwitch(this,'travaux')">
+        <span class="chat-canal-ico">🌿</span><span>Travaux</span>
+        <span class="chat-canal-badge" id="cbadge-travaux" style="display:none"></span>
+      </div>
+      <div class="chat-canal" data-canal="tracteur" onclick="chatSwitch(this,'tracteur')">
+        <span class="chat-canal-ico">🚜</span><span>Tracteur</span>
+        <span class="chat-canal-badge" id="cbadge-tracteur" style="display:none"></span>
+      </div>
+      <div class="chat-canal" data-canal="phyto" onclick="chatSwitch(this,'phyto')">
+        <span class="chat-canal-ico">🧪</span><span>Phyto</span>
+        <span class="chat-canal-badge" id="cbadge-phyto" style="display:none"></span>
+      </div>
+      <div class="chat-canal" data-canal="meteo" onclick="chatSwitch(this,'meteo')">
+        <span class="chat-canal-ico">🌤</span><span>Météo</span>
+        <span class="chat-canal-badge" id="cbadge-meteo" style="display:none"></span>
+      </div>
+      <div class="chat-sec-lbl">Privés</div>
+      <div id="chat-dm-list"></div>
+    </div>
+    <!-- ZONE PRINCIPALE -->
+    <div class="chat-main">
+      <div class="chat-topbar">
+        <span id="chat-topbar-ico" style="font-size:15px">#</span>
+        <div style="flex:1;min-width:0">
+          <div class="chat-topbar-name" id="chat-topbar-name">général</div>
+          <div class="chat-topbar-desc" id="chat-topbar-desc">Discussion générale du domaine</div>
+        </div>
+      </div>
+      <div class="chat-msgs" id="chat-msgs-area"></div>
+      <div class="chat-input-zone">
+        <div class="chat-input-tags" id="chat-input-tags">
+          <span class="chat-input-tags-lbl">Tag rapide :</span>
+          <span class="chat-tag-chip" onclick="chatAppendTag('📋 Ébourgeonnage')">📋 Ébourgeonnage</span>
+          <span class="chat-tag-chip" onclick="chatAppendTag('🚜 Tracteur')">🚜 Tracteur</span>
+          <span class="chat-tag-chip" onclick="chatAppendTag('⚠️ Urgent')">⚠️ Urgent</span>
+        </div>
+        <div class="chat-input-row">
+          <div class="chat-input-btns">
+            <button class="chat-input-btn" onclick="chatPickEmoji()" title="Emoji">😊</button>
+            <button class="chat-input-btn" onclick="chatPickParcelle()" title="Tag parcelle">📍</button>
+          </div>
+          <textarea id="chat-ta" rows="1" placeholder="Message…" oninput="chatAutoResize(this)" onkeydown="chatHandleKey(event)"></textarea>
+          <button class="chat-send-btn" onclick="chatSend()">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay DM -->
+<div class="overlay" id="ovChatDM" onclick="closeOv(event,'ovChatDM')">
+  <div class="modal" onclick="event.stopPropagation()" style="background:#161C24;border:1px solid rgba(255,255,255,0.1)">
+    <div class="modal-handle" style="background:rgba(255,255,255,0.15)"></div>
+    <div class="modal-hd">
+      <div class="modal-title" id="dm-ov-title" style="color:#E8EAF0">💬 Message privé</div>
+    </div>
+    <div class="modal-body">
+      <div id="dm-ov-msgs" style="max-height:300px;overflow-y:auto;margin-bottom:12px;display:flex;flex-direction:column;gap:4px;"></div>
+      <div style="display:flex;gap:8px;align-items:flex-end;background:#1E2630;border:1px solid rgba(255,255,255,0.12);border-radius:11px;padding:7px 10px;">
+        <textarea id="dm-ta" rows="1" placeholder="Message privé…" oninput="chatAutoResize(this)" onkeydown="dmHandleKey(event)"
+          style="flex:1;background:none;border:none;outline:none;color:#E8EAF0;font-family:'Outfit',sans-serif;font-size:13px;resize:none;max-height:80px;line-height:1.5;"></textarea>
+        <button class="chat-send-btn" onclick="dmSend()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay Emoji picker (simple) -->
+<div class="overlay" id="ovChatEmoji" onclick="closeOv(event,'ovChatEmoji')">
+  <div class="modal" onclick="event.stopPropagation()" style="background:#161C24;border:1px solid rgba(255,255,255,0.1)">
+    <div class="modal-handle" style="background:rgba(255,255,255,0.15)"></div>
+    <div class="modal-hd"><div class="modal-title" style="color:#E8EAF0">😊 Choisir un emoji</div></div>
+    <div class="modal-body">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        <span style="font-size:24px;cursor:pointer;padding:6px;" onclick="chatInsertEmoji('👍')">👍</span>
+        <span style="font-size:24px;cursor:pointer;padding:6px;" onclick="chatInsertEmoji('☀️')">☀️</span>
+        <span style="font-size:24px;cursor:pointer;padding:6px;" onclick="chatInsertEmoji('✅')">✅</span>
+        <span style="font-size:24px;cursor:pointer;padding:6px;" onclick="chatInsertEmoji('⚠️')">⚠️</span>
+        <span style="font-size:24px;cursor:pointer;padding:6px;" onclick="chatInsertEmoji('🌿')">🌿</span>
+        <span style="font-size:24px;cursor:pointer;padding:6px;" onclick="chatInsertEmoji('🚜')">🚜</span>
+        <span style="font-size:24px;cursor:pointer;padding:6px;" onclick="chatInsertEmoji('🌧️')">🌧️</span>
+        <span style="font-size:24px;cursor:pointer;padding:6px;" onclick="chatInsertEmoji('❄️')">❄️</span>
+        <span style="font-size:24px;cursor:pointer;padding:6px;" onclick="chatInsertEmoji('🔥')">🔥</span>
+        <span style="font-size:24px;cursor:pointer;padding:6px;" onclick="chatInsertEmoji('🎉')">🎉</span>
+        <span style="font-size:24px;cursor:pointer;padding:6px;" onclick="chatInsertEmoji('👋')">👋</span>
+        <span style="font-size:24px;cursor:pointer;padding:6px;" onclick="chatInsertEmoji('💪')">💪</span>
+        <span style="font-size:24px;cursor:pointer;padding:6px;" onclick="chatInsertEmoji('🤔')">🤔</span>
+        <span style="font-size:24px;cursor:pointer;padding:6px;" onclick="chatInsertEmoji('👀')">👀</span>
+        <span style="font-size:24px;cursor:pointer;padding:6px;" onclick="chatInsertEmoji('😊')">😊</span>
+        <span style="font-size:24px;cursor:pointer;padding:6px;" onclick="chatInsertEmoji('😅')">😅</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay tag parcelle -->
+<div class="overlay" id="ovChatParcelle" onclick="closeOv(event,'ovChatParcelle')">
+  <div class="modal" onclick="event.stopPropagation()" style="background:#161C24;border:1px solid rgba(255,255,255,0.1);max-height:70vh;overflow-y:auto;">
+    <div class="modal-handle" style="background:rgba(255,255,255,0.15)"></div>
+    <div class="modal-hd"><div class="modal-title" style="color:#E8EAF0">📍 Choisir une parcelle</div></div>
+    <div class="modal-body" id="chat-parcelle-list"></div>
+  </div>
+</div>
+
 <nav class="nav-bar" id="nav-bar">
   <div class="nb active" data-p="home" onclick="goTo('home')"><div class="nb-icon">🏠</div><div class="nb-label">Accueil</div></div>
   <div class="nb" data-p="parcelles" onclick="goTo('parcelles')"><div class="nb-icon">🗺️</div><div class="nb-label">Parcelles</div></div>
   <div class="nb" data-p="journal" onclick="goTo('journal')"><div class="nb-icon">📋</div><div class="nb-label">Journal</div></div>
   <div class="nb" data-p="tracteur" onclick="goTo('tracteur')"><div class="nb-icon">🚜</div><div class="nb-label">Tracteur</div></div>
   <div class="nb" data-p="phyto" onclick="goTo('phyto')"><div class="nb-icon">🧪</div><div class="nb-label">Phyto</div></div>
+  <div class="nb" data-p="chat" onclick="goTo('chat')" style="position:relative"><div class="nb-icon" style="position:relative">💬<div class="chat-notif-dot" id="chat-nav-dot"></div></div><div class="nb-label">Messages</div></div>
   <div class="nb" data-p="reglages" onclick="goTo('reglages')"><div class="nb-icon">⚙️</div><div class="nb-label">Réglages</div></div>
 </nav>
 
@@ -1793,6 +1984,7 @@ async function confirmLogin(){
     updateNavForRoles();
     goTo('home');
     fetchMeteo();
+    chatStartGlobalListeners();
     // Si MDP temporaire : forcer le changement
     if(m._tempPwd) {
       delete m._tempPwd;
@@ -1828,7 +2020,7 @@ function logout(){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.style.display='');
-  document.getElementById('nav-bar').style.gridTemplateColumns='repeat(6,1fr)';
+  document.getElementById('nav-bar').style.gridTemplateColumns='repeat(7,1fr)';
   document.getElementById('login-profiles').style.display = 'grid';
   document.getElementById('login-pwd-panel').style.display = 'none';
   document.getElementById('login-screen').style.display='flex';
@@ -1977,6 +2169,7 @@ function goTo(page){
   if(page==='tracteur')renderTracteur();
   if(page==='phyto')renderPhyto();
   if(page==='reglages')renderReglages();
+  if(page==='chat'){chatInit();chatRender();}
 }
 
 // ════ ACCUEIL ════
@@ -4301,8 +4494,282 @@ function exportPDFPhyto(){
   showExportFeedback(`✅ Registre phyto ${annee} généré — ${nbTotal} traitement${nbTotal>1?'s':''} !`);
 }
 
-// ════ INIT ════
-document.addEventListener('DOMContentLoaded', function(){
+// ════ MODULE CHAT ════
+// Variables d'état chat
+var _chatCanal = 'general';
+var _chatDMTarget = null;
+var _chatUnsub = null; // listener Firestore canaux
+var _chatDMUnsub = null; // listener Firestore DM
+var _chatReadTs = {}; // timestamps de lecture par canal
+var CHAT_CANAUX = {
+  general:  {ico:'#', label:'général', desc:'Discussion générale du domaine'},
+  travaux:  {ico:'🌿', label:'travaux', desc:'Suivi des travaux en cours'},
+  tracteur: {ico:'🚜', label:'tracteur', desc:'Passages et sessions tracteur'},
+  phyto:    {ico:'🧪', label:'phyto', desc:'Traitements phytosanitaires'},
+  meteo:    {ico:'🌤', label:'météo', desc:'Alertes météo et gel'}
+};
+
+// Clé Firestore pour un canal : mavigne/chat_canal_{nom}
+function _chatDoc(canal){ return db.collection('mavigne').doc('chat_canal_'+canal); }
+// Clé Firestore pour un DM : tri alphabétique pour unicité
+function _dmDoc(a,b){ var k=[a,b].sort().join('__'); return db.collection('mavigne').doc('chat_dm_'+k); }
+
+// ── Initialisation (appelée à chaque goTo('chat')) ──
+function chatInit(){
+  // Peupler la sidebar DM
+  var dl = document.getElementById('chat-dm-list');
+  if(dl){
+    dl.innerHTML = MEMBRES.filter(m=>m.nom!==currentUser.nom).map(function(m){
+      return '<div class="chat-dm" data-dm="'+m.nom+'" onclick="chatOpenDM(this,\''+m.nom+'\')">'+
+        '<div class="chat-dm-ava" style="background:'+( COULEURS_MBR[m.nom]||'#3D6B27')+'">'+
+          m.nom.charAt(0).toUpperCase()+
+          '<div class="chat-dm-status offline"></div>'+
+        '</div>'+
+        '<span class="chat-dm-name">'+m.nom+'</span>'+
+        '<span class="chat-canal-badge" id="dmbadge-'+m.nom+'" style="display:none"></span>'+
+      '</div>';
+    }).join('');
+  }
+}
+
+// ── Rendu principal : écoute Firestore du canal actif ──
+function chatRender(){
+  // Détacher l'ancien listener si présent
+  if(_chatUnsub){ _chatUnsub(); _chatUnsub=null; }
+  // Mettre à jour topbar
+  var cfg = CHAT_CANAUX[_chatCanal]||{ico:'#',label:_chatCanal,desc:''};
+  document.getElementById('chat-topbar-ico').textContent = cfg.ico;
+  document.getElementById('chat-topbar-name').textContent = cfg.label;
+  document.getElementById('chat-topbar-desc').textContent = cfg.desc;
+  document.getElementById('chat-ta').placeholder = 'Message #'+cfg.label+'…';
+  // Mettre à jour tags rapides selon canal
+  chatUpdateTags(_chatCanal);
+  // Écoute temps réel Firestore
+  var area = document.getElementById('chat-msgs-area');
+  area.innerHTML = '<div class="chat-system">⏳ Chargement…</div>';
+  _chatUnsub = _chatDoc(_chatCanal).onSnapshot(function(snap){
+    var msgs = [];
+    if(snap.exists && snap.data().msgs) msgs = snap.data().msgs;
+    chatRenderMsgs(msgs, area);
+    // Marquer comme lu
+    _chatReadTs[_chatCanal] = Date.now();
+    document.getElementById('cbadge-'+_chatCanal) && (document.getElementById('cbadge-'+_chatCanal).style.display='none');
+    chatCheckNavDot();
+  }, function(e){
+    area.innerHTML = '<div class="chat-system">⚠️ Erreur de chargement</div>';
+  });
+}
+
+function chatUpdateTags(canal){
+  var tags = {
+    general: ['🌿 Travaux','🚜 Tracteur','⚠️ Urgent'],
+    travaux: ['📋 Ébourgeonnage','📋 Pliage','📋 Relevage'],
+    tracteur: ['🚜 Griffage','🚜 Intercep','🚜 Minibuttage'],
+    phyto: ['🧪 Bouillie bordelaise','🧪 Soufre','⚠️ DAR'],
+    meteo: ['❄️ Risque gel','🌧️ Pluie','🌤️ Fenêtre météo'],
+  };
+  var chips = tags[canal]||['📍 Parcelle','⚠️ Urgent'];
+  var zone = document.getElementById('chat-input-tags');
+  zone.innerHTML = '<span class="chat-input-tags-lbl">Tag rapide :</span>'+
+    chips.map(function(t){ return '<span class="chat-tag-chip" onclick="chatAppendTag(\''+t+'\')">'+t+'</span>'; }).join('');
+}
+
+function chatRenderMsgs(msgs, area){
+  if(!msgs.length){ area.innerHTML='<div class="chat-system">Aucun message — soyez le premier à écrire !</div>'; return; }
+  var lastDate = null;
+  var lastAuthor = null;
+  var html = '';
+  msgs.forEach(function(msg, i){
+    var d = new Date(msg.ts);
+    var dateStr = d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+    if(dateStr!==lastDate){
+      html += '<div class="chat-date-sep"><span>'+dateStr+'</span></div>';
+      lastDate=dateStr;
+      lastAuthor=null;
+    }
+    var isMine = (msg.auteur===currentUser.nom);
+    var timeStr = d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    var couleur = COULEURS_MBR[msg.auteur]||'#3D6B27';
+    var suite = (msg.auteur===lastAuthor);
+    var bubbleClass = 'chat-bubble'+(suite?' chat-bubble-suite':'');
+    var metaHtml = suite?'':'<div class="chat-msg-meta"><span class="chat-msg-author" style="color:'+couleur+'">'+msg.auteur+'</span><span class="chat-msg-time">'+timeStr+'</span></div>';
+    var avaHtml = suite?
+      '<div class="chat-msg-ava" style="visibility:hidden;background:'+couleur+'">'+msg.auteur.charAt(0)+'</div>':
+      '<div class="chat-msg-ava" style="background:'+couleur+'">'+msg.auteur.charAt(0)+'</div>';
+    var txtHtml = chatFormatText(msg.txt);
+    html += '<div class="chat-msg'+(isMine?' mine':'')+'">'+
+      (isMine?'':avaHtml)+
+      '<div class="chat-msg-body">'+metaHtml+
+        '<div class="'+bubbleClass+'">'+txtHtml+'</div>'+
+      '</div>'+
+      (isMine?avaHtml:'')+
+    '</div>';
+    lastAuthor=msg.auteur;
+  });
+  area.innerHTML=html;
+  area.scrollTop=area.scrollHeight;
+}
+
+function chatFormatText(txt){
+  // Tags [📍 xxx] ou [📋 xxx] → chip coloré
+  return txt.replace(/\[(.*?)\]/g,'<span class="chat-tag">$1</span>');
+}
+
+// ── Switcher canal ──
+function chatSwitch(el, canal){
+  _chatCanal=canal;
+  _chatDMTarget=null;
+  document.querySelectorAll('.chat-canal,.chat-dm').forEach(function(x){x.classList.remove('actif');});
+  el.classList.add('actif');
+  chatRender();
+}
+
+// ── Ouvrir DM ──
+function chatOpenDM(el, nom){
+  _chatDMTarget=nom;
+  document.querySelectorAll('.chat-canal,.chat-dm').forEach(function(x){x.classList.remove('actif');});
+  el.classList.add('actif');
+  // Préparer l'overlay DM
+  var couleur=COULEURS_MBR[nom]||'#3D6B27';
+  document.getElementById('dm-ov-title').innerHTML='<span style="width:22px;height:22px;border-radius:50%;background:'+couleur+';display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;margin-right:8px">'+nom.charAt(0)+'</span>'+nom;
+  var dmArea=document.getElementById('dm-ov-msgs');
+  dmArea.innerHTML='<div class="chat-system" style="color:#4A5568">⏳ Chargement…</div>';
+  openOv('ovChatDM');
+  // Badge lu
+  var badge=document.getElementById('dmbadge-'+nom);
+  if(badge)badge.style.display='none';
+  chatCheckNavDot();
+  // Listener DM Firestore
+  if(_chatDMUnsub){_chatDMUnsub();_chatDMUnsub=null;}
+  _chatDMUnsub=_dmDoc(currentUser.nom,nom).onSnapshot(function(snap){
+    var msgs=[];
+    if(snap.exists&&snap.data().msgs)msgs=snap.data().msgs;
+    // Rendu simplifié DM
+    if(!msgs.length){dmArea.innerHTML='<div class="chat-system" style="color:#4A5568">Démarrez la conversation !</div>';return;}
+    dmArea.innerHTML=msgs.map(function(msg){
+      var isMine=(msg.auteur===currentUser.nom);
+      var d=new Date(msg.ts);
+      var t=d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+      var c=COULEURS_MBR[msg.auteur]||'#3D6B27';
+      return '<div class="chat-msg'+(isMine?' mine':'')+'" style="animation:none">'+
+        (isMine?'':'<div class="chat-msg-ava" style="background:'+c+';width:24px;height:24px;font-size:10px">'+msg.auteur.charAt(0)+'</div>')+
+        '<div class="chat-msg-body">'+
+          '<div class="'+( isMine?'chat-bubble mine':'chat-bubble')+'">'+chatFormatText(msg.txt)+'</div>'+
+          '<div style="font-size:9.5px;color:#4A5568;margin-top:2px;text-align:'+(isMine?'right':'left')+'">'+t+'</div>'+
+        '</div>'+
+        (isMine?'<div class="chat-msg-ava" style="background:'+c+';width:24px;height:24px;font-size:10px">'+msg.auteur.charAt(0)+'</div>':'')+
+      '</div>';
+    }).join('');
+    dmArea.scrollTop=dmArea.scrollHeight;
+  });
+}
+
+// ── Envoi message canal ──
+async function chatSend(){
+  if(isSaisonnier()){alert('🔒 Accès lecture seule');return;}
+  var ta=document.getElementById('chat-ta');
+  var txt=ta.value.trim();
+  if(!txt)return;
+  var msg={auteur:currentUser.nom,txt:txt,ts:Date.now()};
+  ta.value='';ta.style.height='auto';
+  // Firestore : append
+  try{
+    var snap=await _chatDoc(_chatCanal).get();
+    var msgs=snap.exists&&snap.data().msgs?snap.data().msgs:[];
+    msgs.push(msg);
+    // Garder 200 messages max
+    if(msgs.length>200)msgs=msgs.slice(msgs.length-200);
+    await _chatDoc(_chatCanal).set({msgs:msgs,updatedAt:Date.now()});
+  }catch(e){
+    console.warn('[Chat] Envoi échoué',e);
+    showSyncBadge('⚠️ Message non envoyé','#B85A1A');
+  }
+}
+
+// ── Envoi DM ──
+async function dmSend(){
+  if(!_chatDMTarget)return;
+  var ta=document.getElementById('dm-ta');
+  var txt=ta.value.trim();
+  if(!txt)return;
+  var msg={auteur:currentUser.nom,txt:txt,ts:Date.now()};
+  ta.value='';ta.style.height='auto';
+  try{
+    var snap=await _dmDoc(currentUser.nom,_chatDMTarget).get();
+    var msgs=snap.exists&&snap.data().msgs?snap.data().msgs:[];
+    msgs.push(msg);
+    if(msgs.length>200)msgs=msgs.slice(msgs.length-200);
+    await _dmDoc(currentUser.nom,_chatDMTarget).set({msgs:msgs,updatedAt:Date.now()});
+  }catch(e){console.warn('[Chat DM] Envoi échoué',e);}
+}
+
+// ── Helpers input ──
+function chatAutoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,90)+'px';}
+function chatHandleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();chatSend();}}
+function dmHandleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();dmSend();}}
+function chatAppendTag(tag){var ta=document.getElementById('chat-ta');ta.value=(ta.value?ta.value+' ':'')+' ['+tag+'] ';ta.focus();}
+function chatPickEmoji(){openOv('ovChatEmoji');}
+function chatInsertEmoji(e){var ta=document.getElementById('chat-ta');ta.value+=e;closeOv(null,'ovChatEmoji');ta.focus();}
+function chatPickParcelle(){
+  var list=document.getElementById('chat-parcelle-list');
+  var actives=PARCELLES.filter(function(p){return p.statut!=='Arrachee';});
+  list.innerHTML=actives.map(function(p){
+    return '<div onclick="chatSelectParcelle(\''+p.nom+'\')" style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.07);color:#E8EAF0;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;">'+
+      '<span style="font-size:16px">📍</span><span>'+p.nom+'</span><span style="font-size:10px;color:#7A8499;margin-left:auto">'+p.surface+'ha</span>'+
+    '</div>';
+  }).join('');
+  openOv('ovChatParcelle');
+}
+function chatSelectParcelle(nom){
+  var ta=document.getElementById('chat-ta');
+  ta.value=(ta.value?ta.value+' ':'')+' [📍 '+nom+'] ';
+  closeOv(null,'ovChatParcelle');
+  ta.focus();
+}
+
+// ── Badge notification nav ──
+function chatCheckNavDot(){
+  var hasNew=false;
+  Object.keys(CHAT_CANAUX).forEach(function(c){
+    var badge=document.getElementById('cbadge-'+c);
+    if(badge&&badge.style.display!=='none')hasNew=true;
+  });
+  MEMBRES.filter(function(m){return m.nom!==currentUser.nom;}).forEach(function(m){
+    var badge=document.getElementById('dmbadge-'+m.nom);
+    if(badge&&badge.style.display!=='none')hasNew=true;
+  });
+  var dot=document.getElementById('chat-nav-dot');
+  if(dot)dot.style.display=hasNew?'block':'none';
+}
+
+// ── Écoute globale pour badges (canaux principaux) ──
+var _chatGlobalUnsubs=[];
+function chatStartGlobalListeners(){
+  _chatGlobalUnsubs.forEach(function(u){u();});
+  _chatGlobalUnsubs=[];
+  Object.keys(CHAT_CANAUX).forEach(function(canal){
+    var unsub=_chatDoc(canal).onSnapshot(function(snap){
+      if(!snap.exists)return;
+      var d=snap.data();
+      // Si la page chat est active et ce canal est sélectionné → pas de badge
+      var page=document.querySelector('.page.active');
+      if(page&&page.id==='page-chat'&&_chatCanal===canal)return;
+      var msgs=d.msgs||[];
+      var lastTs=msgs.length?msgs[msgs.length-1].ts:0;
+      var readTs=_chatReadTs[canal]||0;
+      if(lastTs>readTs&&msgs.length){
+        var badge=document.getElementById('cbadge-'+canal);
+        if(badge){badge.textContent='!';badge.style.display='';}
+        chatCheckNavDot();
+      }
+    });
+    _chatGlobalUnsubs.push(unsub);
+  });
+}
+// Exposer pour appel après login
+window.chatStartGlobalListeners=chatStartGlobalListeners;
+
+
   var todayStr = new Date().toISOString().split('T')[0];
   var sd = document.getElementById('s-date'); if(sd) sd.value = todayStr;
   var pd = document.getElementById('p-date'); if(pd) pd.value = todayStr;
