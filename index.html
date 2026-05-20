@@ -1019,9 +1019,38 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     }
     requestAnimationFrame(glowFrame);
   },DUR_HOLD);
+
+  // ── Failsafe iOS : fermeture forcée du splash après 6s (cold start, Firebase lent) ──
+  setTimeout(function(){
+    var s=document.getElementById('splash-screen');
+    if(s && s.style.display!=='none'){
+      s.style.transition='opacity 0.4s';
+      s.style.opacity='0';
+      setTimeout(function(){ s.style.display='none'; },400);
+    }
+  }, 6000);
 })();
 </script>
 </div>
+
+<!-- ── iOS PWA : détection retour après longue inactivité (frozen state) ── -->
+<script>
+(function(){
+  var _lastHidden=0;
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='hidden'){
+      _lastHidden=Date.now();
+    } else if(document.visibilityState==='visible'){
+      // En mode standalone iOS, après 30 min d'inactivité → reload propre
+      var isStandaloneIOS=(window.navigator.standalone===true);
+      var elapsed=Date.now()-_lastHidden;
+      if(isStandaloneIOS && _lastHidden>0 && elapsed>30*60*1000){
+        window.location.reload();
+      }
+    }
+  });
+})();
+</script>
 
 <!-- ══════ LOGIN ══════ -->
 <div id="sync-badge" style="position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#3D6B27;color:white;font-size:11px;font-weight:600;font-family:'Outfit',sans-serif;padding:5px 14px;border-radius:20px;z-index:99999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.2)"></div>
@@ -4786,16 +4815,19 @@ window.chatStartGlobalListeners=chatStartGlobalListeners;
   window.initLogin       = initLogin;
 
   // Initialisation : Firebase en priorité, localStorage en fallback
-  if(window._fbLoad) {
-    // Firebase dispo — _fbLoad appellera initLogin lui-même dans tous les cas
-    window._fbLoad().catch(() => {
+  // try/catch global pour éviter l'écran noir iOS en cas d'erreur silencieuse
+  try {
+    if(window._fbLoad) {
+      window._fbLoad().catch(function(){
+        try { loadData(); initLogin(); } catch(e){ console.error('[Init fallback]',e); }
+      });
+    } else {
       loadData();
       initLogin();
-    });
-  } else {
-    // Module Firebase pas encore chargé (rare) — fallback immédiat
-    loadData();
-    initLogin();
+    }
+  } catch(e) {
+    console.error('[Init erreur critique]',e);
+    try { loadData(); initLogin(); } catch(e2){}
   }
 
   document.getElementById('login-back-btn').addEventListener('click', backToProfiles);
