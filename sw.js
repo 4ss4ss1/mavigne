@@ -1,7 +1,7 @@
-// MA VIGNE — Service Worker v1.55
-// v1.55 — Fix chat : retour layout page normale (plus position:fixed), nav non cachée
+// MA VIGNE — Service Worker v1.56
+// v1.56 — Fix chargement infini : suppression chatStartGlobalListeners (onSnapshot docs inexistants bloquait SDK)
 
-const CACHE_NAME = 'mavigne-v1.55';
+const CACHE_NAME = 'mavigne-v1.56';
 const SYNC_TAG   = 'mavigne-sync';
 const APP_SHELL = ['./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 const CDN_URLS = [
@@ -10,7 +10,7 @@ const CDN_URLS = [
   'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap',
 ];
 self.addEventListener('install', event => {
-  console.log('[SW] Install v1.55');
+  console.log('[SW] Install v1.56');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache =>
       cache.addAll(APP_SHELL).then(() =>
@@ -20,7 +20,7 @@ self.addEventListener('install', event => {
   );
 });
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v1.55');
+  console.log('[SW] Activate v1.56');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))

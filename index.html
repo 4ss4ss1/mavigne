@@ -2042,7 +2042,6 @@ async function confirmLogin(){
     updateNavForRoles();
     goTo('home');
     fetchMeteo();
-    chatInit(); // peuple chat-dm-list et les dmbadge-* AVANT les listeners
     chatStartGlobalListeners();
     // Si MDP temporaire : forcer le changement
     if(m._tempPwd) {
@@ -4762,50 +4761,8 @@ function chatCheckNavDot(){
   }
 }
 
-// ── Écoute globale pour badges (canaux + DMs) ──
-var _chatGlobalUnsubs=[];
-var _chatDMReadTs={}; // timestamps lecture DMs
-function chatStartGlobalListeners(){
-  _chatGlobalUnsubs.forEach(function(u){u();});
-  _chatGlobalUnsubs=[];
-  // Init readTs à maintenant pour éviter faux badges au login
-  var now=Date.now();
-  Object.keys(CHAT_CANAUX).forEach(function(c){
-    if(!_chatReadTs[c])_chatReadTs[c]=now;
-  });
-  MEMBRES.forEach(function(m){
-    if(!_chatDMReadTs[m.nom])_chatDMReadTs[m.nom]=now;
-  });
-
-  // ── NOTE : pas de listeners globaux canaux (géré par chatRender) ──
-  // Les badges canaux sont mis à jour dans chatRender quand un message arrive
-
-  // ── DMs : écouter tous les DMs impliquant l'utilisateur ──
-  if(!currentUser)return;
-  MEMBRES.filter(function(m){return m.nom!==currentUser.nom;}).forEach(function(membre){
-    var unsub=_dmDoc(currentUser.nom,membre.nom).onSnapshot(function(snap){
-      if(!snap.exists)return;
-      var chatPage=document.getElementById('page-chat');
-      var chatVisible=chatPage&&chatPage.classList.contains('active');
-      // Pas de badge si on est dans ce DM en ce moment
-      if(chatVisible&&_chatDMTarget===membre.nom)return;
-      var msgs=(snap.data().msgs)||[];
-      // Filtrer seulement les msgs reçus (pas envoyés par soi)
-      var reçus=msgs.filter(function(msg){return msg.auteur!==currentUser.nom;});
-      if(!reçus.length)return;
-      var lastTs=reçus[reçus.length-1].ts;
-      var readTs=_chatDMReadTs[membre.nom]||0;
-      if(lastTs>readTs){
-        var badge=document.getElementById('dmbadge-'+membre.nom);
-        if(badge){badge.textContent='!';badge.style.display='';}
-        chatCheckNavDot();
-      }
-    });
-    _chatGlobalUnsubs.push(unsub);
-  });
-}
-// Exposer pour appel après login
-window.chatStartGlobalListeners=chatStartGlobalListeners;
+// [notifications désactivées temporairement]
+window.chatStartGlobalListeners=function(){};
 
 window.addEventListener('load', function(){
   var todayStr = new Date().toISOString().split('T')[0];
