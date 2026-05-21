@@ -4626,12 +4626,6 @@ function chatRender(){
         area.innerHTML='<div class="chat-system">Démarrez la conversation !</div>';
       }
     },5000);
-    // Initialiser le doc DM s'il n'existe pas
-    _dmDoc(currentUser.nom,_chatDMTarget).get().then(function(initSnap){
-      if(!initSnap.exists){
-        return _dmDoc(currentUser.nom,_chatDMTarget).set({msgs:[],updatedAt:Date.now()});
-      }
-    }).catch(function(){});
     _chatDMUnsub=_dmDoc(currentUser.nom,_chatDMTarget).onSnapshot(function(snap){
       clearTimeout(_dmTimeout);
       var msgs=snap.exists&&snap.data()&&snap.data().msgs?snap.data().msgs:[];
@@ -4659,12 +4653,6 @@ function chatRender(){
         area.innerHTML='<div class="chat-system">Aucun message — soyez le premier à écrire !</div>';
       }
     },5000);
-    // Initialiser le document s'il n'existe pas (évite attente infinie)
-    _chatDoc(_chatCanal).get().then(function(initSnap){
-      if(!initSnap.exists){
-        return _chatDoc(_chatCanal).set({msgs:[],updatedAt:Date.now()});
-      }
-    }).catch(function(){});
     _chatUnsub=_chatDoc(_chatCanal).onSnapshot(function(snap){
       clearTimeout(_loadTimeout);
       var msgs=snap.exists&&snap.data()&&snap.data().msgs?snap.data().msgs:[];
@@ -4806,24 +4794,8 @@ function chatStartGlobalListeners(){
     if(!_chatDMReadTs[m.nom])_chatDMReadTs[m.nom]=now;
   });
 
-  // ── Canaux ──
-  Object.keys(CHAT_CANAUX).forEach(function(canal){
-    var unsub=_chatDoc(canal).onSnapshot(function(snap){
-      if(!snap.exists)return;
-      var chatPage=document.getElementById('page-chat');
-      var chatVisible=chatPage&&chatPage.classList.contains('active');
-      if(chatVisible&&_chatCanal===canal&&!_chatDMTarget)return;
-      var msgs=(snap.data().msgs)||[];
-      var lastTs=msgs.length?msgs[msgs.length-1].ts:0;
-      var readTs=_chatReadTs[canal]||0;
-      if(lastTs>readTs){
-        var badge=document.getElementById('cbadge-'+canal);
-        if(badge){badge.textContent='!';badge.style.display='';}
-        chatCheckNavDot();
-      }
-    });
-    _chatGlobalUnsubs.push(unsub);
-  });
+  // ── NOTE : pas de listeners globaux canaux (géré par chatRender) ──
+  // Les badges canaux sont mis à jour dans chatRender quand un message arrive
 
   // ── DMs : écouter tous les DMs impliquant l'utilisateur ──
   if(!currentUser)return;
