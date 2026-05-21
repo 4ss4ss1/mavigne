@@ -4608,18 +4608,24 @@ function chatRender(){
         area.innerHTML='<div class="chat-system">Démarrez la conversation !</div>';
       }
     },5000);
-    _chatDMUnsub=_dmDoc(currentUser.nom,_chatDMTarget).onSnapshot(function(snap){
+    // Charger DM avec .get() d'abord
+    _dmDoc(currentUser.nom,_chatDMTarget).get().then(function(snap){
       clearTimeout(_dmTimeout);
       var msgs=snap.exists&&snap.data()&&snap.data().msgs?snap.data().msgs:[];
       chatRenderMsgs(msgs,area);
       _chatDMReadTs[_chatDMTarget]=Date.now();
       var badge=document.getElementById('dmbadge-'+_chatDMTarget);
       if(badge)badge.style.display='none';
-      chatCheckNavDot();
-    },function(err){
+    }).catch(function(){
       clearTimeout(_dmTimeout);
-      console.error('[Chat] Erreur Firebase DM:',err);
-      area.innerHTML='<div class="chat-system">⚠️ Impossible de charger</div>';
+      area.innerHTML='<div class="chat-system">Démarrez la conversation !</div>';
+    });
+    // Listener temps réel DM
+    _chatDMUnsub=_dmDoc(currentUser.nom,_chatDMTarget).onSnapshot(function(snap){
+      var msgs=snap.exists&&snap.data()&&snap.data().msgs?snap.data().msgs:[];
+      chatRenderMsgs(msgs,area);
+    },function(err){
+      console.error('[Chat] onSnapshot DM err:',err.code);
     });
   } else {
     // ── Mode Canal ──
@@ -4635,18 +4641,27 @@ function chatRender(){
         area.innerHTML='<div class="chat-system">Aucun message — soyez le premier à écrire !</div>';
       }
     },5000);
-    _chatUnsub=_chatDoc(_chatCanal).onSnapshot(function(snap){
+    // Charger d'abord avec .get() (fiable), puis écouter les changements
+    _chatDoc(_chatCanal).get().then(function(snap){
       clearTimeout(_loadTimeout);
       var msgs=snap.exists&&snap.data()&&snap.data().msgs?snap.data().msgs:[];
       chatRenderMsgs(msgs,area);
       _chatReadTs[_chatCanal]=Date.now();
       var b=document.getElementById('cbadge-'+_chatCanal);
       if(b)b.style.display='none';
-      chatCheckNavDot();
-    },function(err){
+    }).catch(function(err){
       clearTimeout(_loadTimeout);
-      console.error('[Chat] Erreur Firebase canal:',err);
-      area.innerHTML='<div class="chat-system">⚠️ '+err.code+' — '+err.message+'</div>';
+      area.innerHTML='<div class="chat-system">⚠️ '+err.code+'</div>';
+    });
+    // Puis listener temps réel pour les nouveaux messages
+    _chatUnsub=_chatDoc(_chatCanal).onSnapshot(function(snap){
+      var msgs=snap.exists&&snap.data()&&snap.data().msgs?snap.data().msgs:[];
+      chatRenderMsgs(msgs,area);
+      _chatReadTs[_chatCanal]=Date.now();
+      var b=document.getElementById('cbadge-'+_chatCanal);
+      if(b)b.style.display='none';
+    },function(err){
+      console.error('[Chat] onSnapshot canal err:',err.code);
     });
   }
 }
