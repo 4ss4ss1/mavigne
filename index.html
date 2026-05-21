@@ -4653,6 +4653,13 @@ function chatRender(){
     document.getElementById('chat-topbar-desc').textContent=cfg.desc;
     if(ta)ta.placeholder='Message #'+cfg.label+'…';
     area.innerHTML='<div class="chat-system">⏳ Chargement…</div>';
+    // Test rapide : .get() pour détecter si Firebase répond/autorise l'accès
+    _chatDoc(_chatCanal).get().then(function(testSnap){
+      console.log('[Chat] Firebase OK, accès autorisé pour canal:', _chatCanal);
+    }).catch(function(testErr){
+      console.error('[Chat] Firebase REFUSE canal:', _chatCanal, testErr.code, testErr.message);
+      area.innerHTML='<div class="chat-system">⚠️ Accès refusé (règles Firestore) — code: '+testErr.code+'</div>';
+    });
     // Timeout : si Firebase ne répond pas en 5s, afficher vide
     var _loadTimeout=setTimeout(function(){
       if(area.innerHTML.indexOf('Chargement')>=0){
@@ -4671,7 +4678,7 @@ function chatRender(){
     },function(err){
       clearTimeout(_loadTimeout);
       console.error('[Chat] Erreur Firebase canal:',err);
-      area.innerHTML='<div class="chat-system">⚠️ Impossible de charger — vérifiez votre connexion</div>';
+      area.innerHTML='<div class="chat-system">⚠️ '+err.code+' — '+err.message+'</div>';
     });
   }
 }
