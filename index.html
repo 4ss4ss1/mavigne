@@ -55,14 +55,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ── Persistance offline Firestore (IndexedDB) ──
-db.enablePersistence({ experimentalForceOwningTab: true }).catch(function(err) {
-  if (err.code === 'failed-precondition') {
-    console.warn('[Firestore] Persistance impossible');
-  } else if (err.code === 'unimplemented') {
-    console.warn('[Firestore] Persistance non supportée par ce navigateur');
-  }
-});
+// ── Persistance offline désactivée (incompatible iOS Safari + multi-onglets) ──
+// enablePersistence() bloque toutes les requêtes Firestore sur iOS → supprimé
 
 const COLLECTIONS = ['parcelles','journal','sessions','travaux','traitements',
                      'catalogue','conducteurs','activites','membres','saisons','taches','config','historique'];
