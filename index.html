@@ -2234,9 +2234,6 @@ function goTo(page){
   // Chat en plein écran : cacher la nav bar, sinon la montrer
   var navBar=document.getElementById('nav-bar');
   if(navBar)navBar.style.display=(page==='chat')?'none':'';
-  // iOS fix : bloquer scroll body en mode chat pour que position:fixed reste stable
-  document.body.style.overflow=(page==='chat')?'hidden':'';
-  document.documentElement.style.overflow=(page==='chat')?'hidden':'';
   window.scrollTo(0,0);
   if(page==='home'){renderHome();}
   if(page==='parcelles'){renderParcelles();computePStats();}
