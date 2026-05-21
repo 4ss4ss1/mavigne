@@ -845,22 +845,11 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .hjr-date{font-size:10px;color:var(--texte-doux);flex-shrink:0;}
 
 /* ══ CHAT ══ */
-/* Approche : page-chat = position:fixed full-screen, nav bar cachée */
-#page-chat{display:none;}
-#page-chat.active{
-  display:flex;flex-direction:column;
-  position:fixed;
-  top:0;left:0;right:0;bottom:0;
-  max-width:430px;margin:0 auto;
-  background:#0F1319;color:#E8EAF0;
-  z-index:900;
-}
-/* wrapper interne qui respecte les safe areas */
+#page-chat{background:#0F1319;color:#E8EAF0;padding-bottom:0;}
 .chat-wrap{
   display:flex;flex-direction:column;
-  flex:1;min-height:0;
-  padding-top:env(safe-area-inset-top,0px);
-  padding-bottom:env(safe-area-inset-bottom,0px);
+  height:calc(100vh - var(--nav-h) - env(safe-area-inset-bottom,0px));
+  min-height:0;
 }
 .chat-layout{display:flex;flex:1;min-height:0;overflow:hidden;}
 .chat-sidebar{
@@ -1453,7 +1442,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
       <!-- ZONE PRINCIPALE -->
       <div class="chat-main">
         <div class="chat-topbar">
-          <button class="chat-topbar-back" onclick="goTo('home')" title="Retour">‹</button>
+
           <span id="chat-topbar-ico" style="font-size:16px">#</span>
           <div style="flex:1;min-width:0">
             <div class="chat-topbar-name" id="chat-topbar-name">général</div>
@@ -2231,9 +2220,6 @@ function goTo(page){
   document.getElementById('page-'+page).classList.add('active');
   const nb=document.querySelector('.nb[data-p='+page+']');
   if(nb)nb.classList.add('active');
-  // Chat en plein écran : cacher la nav bar, sinon la montrer
-  var navBar=document.getElementById('nav-bar');
-  if(navBar)navBar.style.display=(page==='chat')?'none':'';
   window.scrollTo(0,0);
   if(page==='home'){renderHome();}
   if(page==='parcelles'){renderParcelles();computePStats();}
