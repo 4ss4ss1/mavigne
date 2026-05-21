@@ -4626,6 +4626,12 @@ function chatRender(){
         area.innerHTML='<div class="chat-system">Démarrez la conversation !</div>';
       }
     },5000);
+    // Initialiser le doc DM s'il n'existe pas
+    _dmDoc(currentUser.nom,_chatDMTarget).get().then(function(initSnap){
+      if(!initSnap.exists){
+        return _dmDoc(currentUser.nom,_chatDMTarget).set({msgs:[],updatedAt:Date.now()});
+      }
+    }).catch(function(){});
     _chatDMUnsub=_dmDoc(currentUser.nom,_chatDMTarget).onSnapshot(function(snap){
       clearTimeout(_dmTimeout);
       var msgs=snap.exists&&snap.data()&&snap.data().msgs?snap.data().msgs:[];
@@ -4647,22 +4653,20 @@ function chatRender(){
     document.getElementById('chat-topbar-desc').textContent=cfg.desc;
     if(ta)ta.placeholder='Message #'+cfg.label+'…';
     area.innerHTML='<div class="chat-system">⏳ Chargement…</div>';
-    // Test rapide : .get() pour détecter si Firebase répond/autorise l'accès
-    _chatDoc(_chatCanal).get().then(function(testSnap){
-      console.log('[Chat] Firebase OK, accès autorisé pour canal:', _chatCanal);
-    }).catch(function(testErr){
-      console.error('[Chat] Firebase REFUSE canal:', _chatCanal, testErr.code, testErr.message);
-      area.innerHTML='<div class="chat-system">⚠️ Accès refusé (règles Firestore) — code: '+testErr.code+'</div>';
-    });
     // Timeout : si Firebase ne répond pas en 5s, afficher vide
     var _loadTimeout=setTimeout(function(){
       if(area.innerHTML.indexOf('Chargement')>=0){
         area.innerHTML='<div class="chat-system">Aucun message — soyez le premier à écrire !</div>';
       }
     },5000);
+    // Initialiser le document s'il n'existe pas (évite attente infinie)
+    _chatDoc(_chatCanal).get().then(function(initSnap){
+      if(!initSnap.exists){
+        return _chatDoc(_chatCanal).set({msgs:[],updatedAt:Date.now()});
+      }
+    }).catch(function(){});
     _chatUnsub=_chatDoc(_chatCanal).onSnapshot(function(snap){
       clearTimeout(_loadTimeout);
-      // Document inexistant = canal vide (normal au premier lancement)
       var msgs=snap.exists&&snap.data()&&snap.data().msgs?snap.data().msgs:[];
       chatRenderMsgs(msgs,area);
       _chatReadTs[_chatCanal]=Date.now();
