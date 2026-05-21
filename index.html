@@ -842,9 +842,9 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .hjr-date{font-size:10px;color:var(--texte-doux);flex-shrink:0;}
 
 /* ══ CHAT ══ */
-#page-chat{background:#0F1319;color:#E8EAF0;padding-bottom:0;display:none;}
-#page-chat.active{display:flex;flex-direction:column;}
-.chat-wrap{display:flex;flex-direction:column;flex:1;height:calc(100vh - 68px);min-height:0;}
+#page-chat{background:#0F1319;color:#E8EAF0;padding-bottom:0 !important;display:none;min-height:unset !important;}
+#page-chat.active{display:flex;flex-direction:column;height:calc(100vh - var(--nav-h) - env(safe-area-inset-bottom,0px));}
+.chat-wrap{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;}
 .chat-layout{display:flex;flex:1;overflow:hidden;min-height:0;}
 .chat-sidebar{width:56px;background:#161C24;border-right:1px solid rgba(255,255,255,0.07);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;overflow-x:hidden;}
 .chat-sec-lbl{font-size:8px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#4A5568;padding:10px 0 4px;text-align:center;}
