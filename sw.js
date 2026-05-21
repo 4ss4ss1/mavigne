@@ -2,19 +2,35 @@
 // ║                        MA VIGNE                             ║
 // ║         Application de gestion viticole — PWA               ║
 // ╠══════════════════════════════════════════════════════════════╣
-// ║  © 2026 Nicolas GUERET / GUERETTECH — Tous droits réservés. ║
+// ║  © 2026 Nicolas GUERET / GUERETTECH — Tous droits réservés.               ║
+// ║                                                              ║
+// ║  Ce code source est une œuvre originale protégée par le      ║
+// ║  droit d'auteur (Code de la propriété intellectuelle,        ║
+// ║  articles L.111-1 et suivants).                              ║
+// ║                                                              ║
+// ║  Toute reproduction, distribution, modification ou           ║
+// ║  utilisation commerciale, partielle ou totale, sans          ║
+// ║  autorisation écrite préalable de l'auteur est               ║
+// ║  strictement interdite et constitue une contrefaçon          ║
+// ║  passible de poursuites judiciaires.                         ║
 // ╚══════════════════════════════════════════════════════════════╝
 
 // ════════════════════════════════════════════════════════
-// MA VIGNE — Service Worker v1.48
-// v1.32 — Module Chat Firestore
-// v1.41 — Refonte layout chat plein écran
-// v1.46 — Fix SyntaxError JS critique
-// v1.47 — Fix sidebar overflow + noms DM
-// v1.48 — Fix chargement infini : SW ne bloque plus Firebase (return sans respondWith)
+// MA VIGNE — Service Worker v1.49
+// v1.27 — Splash : vrai logo GT détouré sur fond noir + animation lumière
+// v1.28 — Rôle saisonnier : lecture seule (Accueil/Parcelles/Journal, sans écriture)
+// v1.29 — Fix overlay mentions légales : structure modal standard + closeOv + fermeture backdrop
+// v1.30 — KML intégré en statique : suppression import KML, polygones auto au chargement
+// v1.31 — Nouveau logo splash : version fond blanc détourée sur fond noir
+// v1.32 — Module Chat : canaux thématiques + messages privés, temps réel Firebase Firestore
+// v1.43 — Fix chat iOS : padding-bottom, notifs, tags masqués mobile
+// v1.43 — Fix layout chat iOS (nav cachée, plein écran), chatSendActive, notifs DM
+// v1.44 — Fix notifs : chatInit au login, overflow iOS, viewport
+// v1.45 — Fix critique : guard currentUser, overflow iOS
+// v1.49 — Fix chargement infini chat : enablePersistence experimentalForceOwningTab : guard currentUser dans chatInit (écran noir) : chatInit au login pour dmbadge-*, overflow body iOS, viewport interactive-widget
 // ════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'mavigne-v1.48';
+const CACHE_NAME = 'mavigne-v1.49';
 const SYNC_TAG   = 'mavigne-sync';
 
 const APP_SHELL = [
@@ -31,7 +47,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  console.log('[SW] Install v1.48');
+  console.log('[SW] Install v1.49');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       return cache.addAll(APP_SHELL).then(() => {
@@ -44,7 +60,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v1.48');
+  console.log('[SW] Activate v1.49');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
@@ -57,17 +73,15 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // Firebase/Google : laisser passer SANS interception
-  // (Firestore utilise WebSockets/streams qui ne fonctionnent pas avec respondWith)
+  // Firebase/Firestore : ne PAS intercepter — WebSockets et connexions longues
+  // doivent passer directement sans être gérées par le SW
   if (url.hostname.includes('firestore.googleapis.com') ||
       url.hostname.includes('firebase') ||
       url.hostname.includes('googleapis.com') ||
-      url.hostname.includes('google.com') ||
-      url.hostname.includes('gstatic.com')) {
-    return;
+      url.hostname.includes('google.com')) {
+    return; // laisser passer sans respondWith
   }
 
-  // Open-Meteo : Network-first avec fallback cache
   if (url.hostname.includes('open-meteo.com')) {
     event.respondWith(
       fetch(event.request)
@@ -81,7 +95,6 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // App shell + CDN : Cache-first
   event.respondWith(
     caches.match(event.request).then(cached => {
       if (cached) return cached;
@@ -108,11 +121,17 @@ self.addEventListener('sync', event => {
 });
 
 self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
-  if (event.data && event.data.type === 'FLUSH_QUEUE') flushOfflineQueue();
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+  if (event.data && event.data.type === 'FLUSH_QUEUE') {
+    flushOfflineQueue();
+  }
 });
 
 async function flushOfflineQueue() {
   const clients = await self.clients.matchAll({ type: 'window' });
-  clients.forEach(client => client.postMessage({ type: 'FLUSH_OFFLINE_QUEUE' }));
+  clients.forEach(client => {
+    client.postMessage({ type: 'FLUSH_OFFLINE_QUEUE' });
+  });
 }

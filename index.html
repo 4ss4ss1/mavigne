@@ -55,10 +55,10 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ── Persistance offline Firestore (IndexedDB) — fonctionnement hors ligne natif ──
-db.enablePersistence({ synchronizeTabs: true }).catch(function(err) {
+// ── Persistance offline Firestore (IndexedDB) ──
+db.enablePersistence({ experimentalForceOwningTab: true }).catch(function(err) {
   if (err.code === 'failed-precondition') {
-    console.warn('[Firestore] Persistance impossible — plusieurs onglets ouverts');
+    console.warn('[Firestore] Persistance impossible');
   } else if (err.code === 'unimplemented') {
     console.warn('[Firestore] Persistance non supportée par ce navigateur');
   }
