@@ -698,6 +698,30 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .leg{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--texte-doux);}
 .leg-dot{width:10px;height:10px;border-radius:50%;}
 .ver-tag{text-align:center;font-size:11px;color:var(--texte-doux);padding:20px;}
+
+/* ── Toast confirmation ── */
+#mv-toast{position:fixed;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 12px);left:50%;transform:translateX(-50%) translateY(20px);background:#1A1A14;color:white;border-radius:50px;padding:10px 20px;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,0.22);z-index:9999;opacity:0;transition:opacity 0.25s,transform 0.3s cubic-bezier(0.34,1.56,0.64,1);pointer-events:none;white-space:nowrap;}
+#mv-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#mv-toast-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* ── Dots pagination card accueil ── */
+.hv2-card-dots{display:flex;gap:5px;justify-content:center;margin-top:12px;}
+.hv2-card-dot{height:6px;border-radius:3px;background:rgba(61,107,39,0.25);transition:all 0.25s;}
+.hv2-card-dot.active{background:var(--vert);width:16px;}
+.hv2-card-dot:not(.active){width:6px;}
+
+/* ── Section destructive Réglages ── */
+.set-sec-danger .set-row{border-left:3px solid var(--rouge-pale);}
+.set-sec-danger .set-title{color:var(--rouge);}
+.set-danger-row{background:var(--rouge-pale)!important;border-left:3px solid var(--rouge)!important;}
+.set-danger-row .sr-lbl{color:var(--rouge)!important;font-weight:700!important;}
+
+/* ── Filtre dates Journal ── */
+.j-date-range{display:flex;align-items:center;gap:8px;padding:0 16px 10px;font-family:'Outfit',sans-serif;}
+.j-date-input{border:1.5px solid var(--gris-clair);border-radius:10px;padding:7px 10px;font-size:12px;font-family:'Outfit',sans-serif;color:var(--texte);background:white;outline:none;flex:1;min-width:0;}
+.j-date-input:focus{border-color:var(--or);}
+.j-date-sep{font-size:11px;color:var(--texte-doux);flex-shrink:0;}
+.j-date-clear{font-size:11px;font-weight:600;color:var(--rouge);cursor:pointer;flex-shrink:0;padding:4px 8px;border-radius:8px;background:var(--rouge-pale);display:none;}
 .roles-check{display:flex;flex-direction:column;gap:8px;}
 .role-check-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--gris-clair);border-radius:10px;}
 .role-check-name{font-size:13px;font-weight:500;}
@@ -1118,6 +1142,11 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
       <div class="hv2-card-label" id="home-stat-label">Avancement saison</div>
       <div class="hv2-card-sub" id="home-stat-sub">Calcul…</div>
       <div class="hv2-chip hv2-chip-vert" id="home-stat-chip">Domaine</div>
+      <div class="hv2-card-dots" id="home-stat-dots">
+        <div class="hv2-card-dot active"></div>
+        <div class="hv2-card-dot"></div>
+        <div class="hv2-card-dot"></div>
+      </div>
     </div>
     <div class="hv2-card hv2-card-terre" onclick="goTo('journal')">
       <div class="hv2-card-picto">⏱</div>
@@ -1249,6 +1278,12 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
   <div class="orow" id="ouvrier-chips-row"></div>
   <div class="tfilters" id="tache-chips-row"></div>
   <div style="padding:0 16px 4px"><div class="sbox"><span>🔍</span><input type="text" id="jSearch" placeholder="Parcelle, tâche, ouvrier…"><span id="jSearch-clear" onclick="clearJSearch()" style="display:none;cursor:pointer;font-size:16px;color:var(--texte-doux);padding:2px 4px;line-height:1">✕</span></div></div>
+  <div class="j-date-range">
+    <input type="date" id="jDateDeb" class="j-date-input" onchange="applyJDateFilter()">
+    <span class="j-date-sep">→</span>
+    <input type="date" id="jDateFin" class="j-date-input" onchange="applyJDateFilter()">
+    <span class="j-date-clear" id="jDateClear" onclick="clearJDateFilter()">✕ Dates</span>
+  </div>
   <div class="tfilters" id="j-parcelle-filter-row" style="padding:0 16px 12px;overflow-x:auto;scrollbar-width:none;display:flex;gap:6px;flex-wrap:nowrap"></div>
   <div class="timeline" id="timeline"></div>
 </div>
@@ -1350,9 +1385,14 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     <div class="set-title">Application</div>
     <div style="margin:0 16px">
       <div class="set-row" style="border-radius:16px 16px 0 0" onclick="requestNotifications()"><div class="sr-l"><div class="sr-ico" style="background:var(--terre-pale)">🔔</div><div><div class="sr-lbl">Notifications</div><div class="sr-sub" id="notif-status">Alertes gel, DAR, validations</div></div></div><div class="sr-arr" id="notif-arr">›</div></div>
-      <div class="set-row" onclick="openExport()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">📤</div><div><div class="sr-lbl">Exporter / Importer</div><div class="sr-sub">JSON · CSV journal · CSV parcelles · Restaurer</div></div></div><div class="sr-arr">›</div></div>
-      <div class="set-row" onclick="resetData()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🗑️</div><div><div class="sr-lbl" style="color:var(--rouge)">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr">›</div></div>
-      <div class="set-row" style="border-radius:0 0 16px 16px" onclick="logout()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🚪</div><div><div class="sr-lbl" style="color:var(--rouge)">Se déconnecter</div></div></div><div class="sr-arr">›</div></div>
+      <div class="set-row" onclick="openExport()"><div class="sr-l"><div class="sr-ico" style="background:var(--bleu-pale)">📤</div><div><div class="sr-lbl">Exporter / Importer</div><div class="sr-sub">JSON · CSV journal · CSV parcelles · Restaurer</div></div></div><div class="sr-arr">›</div></div>
+      <div class="set-row" style="border-radius:0 0 16px 16px" onclick="logout()"><div class="sr-l"><div class="sr-ico" style="background:var(--gris-clair)">🚪</div><div><div class="sr-lbl">Se déconnecter</div></div></div><div class="sr-arr">›</div></div>
+    </div>
+  </div>
+  <div class="set-sec">
+    <div class="set-title" style="color:var(--rouge)">⚠️ Zone dangereuse</div>
+    <div style="margin:0 16px">
+      <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="resetData()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🗑️</div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
     </div>
   </div>
     <div class="set-sec">
@@ -2150,6 +2190,8 @@ function renderHeuresCard(containerId){
 // ════ NAVIGATION ════
 function goTo(page){
   if(page!=='parcelles'&&leafMap){leafMap.remove();leafMap=null;mapInit=false;}
+  // Reset filtre parcelle Journal à chaque sortie du journal
+  if(page!=='journal'){jParcelle='toutes';}
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
@@ -2239,6 +2281,8 @@ function renderHomeCard(){
   card.style.transition='transform 0.15s';
   card.style.transform='scale(0.96)';
   setTimeout(()=>{card.style.transform='scale(1)';},150);
+  // Mettre à jour les dots
+  updateHomeDots();
 }
 
 function toggleHomeCard(){
@@ -2589,6 +2633,7 @@ function toggleTravail(nomParcelle,nomTache,btn){
     btn.title='Cliquer pour valider';
     saveData('parcelles');
     renderParcelles();computePStats();
+    showToast('↩️ '+tNom(nomTache)+' remis en cours','#B85A1A');
   } else {
     // Ouvrir le mini-panneau de validation avec choix équipe/seul
     openValidationPanel(nomParcelle,nomTache,btn);
@@ -2647,6 +2692,7 @@ function confirmValidation(){
   saveData('parcelles'); saveData('journal'); saveData('travaux');
   document.getElementById('ovValidation').classList.remove('open');
   renderParcelles();computePStats();
+  showToast('✅ '+tNom(_validTache)+' · '+_validParcelle,'#3D6B27');
 }
 function openJournalEntry(){
   // Remplir les selects
@@ -2714,27 +2760,40 @@ function switchPTab(tab){
   document.getElementById('pwrapcarte').classList.toggle('vis',tab==='carte');
   if(tab==='carte'){
     if(!mapInit){initMap();mapInit=true;}
-    else if(leafMap){setTimeout(function(){leafMap.invalidateSize();},100);}
+    else if(leafMap){
+      setTimeout(function(){leafMap.invalidateSize();},100);
+      refreshMapColors();
+    }
   }
 }
+var _leafLayers=[]; // stocke {poly, parcelle} pour rafraîchir les couleurs sans recréer la carte
 function initMap(){
   leafMap=L.map('map').setView([47.21,4.972],12);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(leafMap);
-  // Polygones intégrés — affichage automatique, aucun import requis
+  _leafLayers=[];
   KML_DATA.forEach(function(k){
     const p=PARCELLES.find(function(x){return x.nom.toLowerCase()===k.name.toLowerCase();});
     const col=p?getPCls(p).col:'#888888';
     const popup=p?('<b>'+p.nom+'</b><br>'+p.surface+' ha · '+getPCls(p).pct+'%'):('<b>'+k.name+'</b>');
     const poly=L.polygon(k.pts,{color:col,fillColor:col,fillOpacity:0.28,weight:2}).addTo(leafMap).bindPopup(popup);
-    if(p){poly.on('click',function(){openDP(p.nom);});}
+    if(p){
+      poly.on('click',function(){openDP(p.nom);});
+      _leafLayers.push({poly,parcelle:p});
+    }
   });
-  // Marqueurs centraux (si coordonnées GPS définies sur la parcelle)
   PARCELLES.forEach(p=>{
     if(!p.lat||!p.lng)return;
     const cl=getPCls(p);
     L.circleMarker([parseFloat(p.lat),parseFloat(p.lng)],{radius:6,fillColor:cl.col,color:'white',weight:2,fillOpacity:0.9})
       .addTo(leafMap).bindPopup('<b>'+p.nom+'</b><br>'+p.surface+' ha · '+cl.pct+'%')
       .on('click',function(){openDP(p.nom);});
+  });
+}
+function refreshMapColors(){
+  _leafLayers.forEach(function(item){
+    const cl=getPCls(item.parcelle);
+    item.poly.setStyle({color:cl.col,fillColor:cl.col});
+    item.poly.setPopupContent('<b>'+item.parcelle.nom+'</b><br>'+item.parcelle.surface+' ha · '+cl.pct+'%');
   });
 }
 // fchip + pSearch listeners moved to DOMContentLoaded
@@ -2798,7 +2857,9 @@ function renderJournalList(){
     if(jQui!=='tous'&&r.qui!==jQui)return false;
     if(jTache!=='toutes'&&r.tache!==jTache)return false;
     if(jParcelle!=='toutes'&&r.parcelle!==jParcelle&&!r.meteo)return false;
-    if(r.meteo&&jParcelle!=='toutes')return false; // masquer météo si filtre parcelle actif
+    if(r.meteo&&jParcelle!=='toutes')return false;
+    if(jDateDeb&&r.date<jDateDeb)return false;
+    if(jDateFin&&r.date>jDateFin)return false;
     if(jSearch){const q=jSearch.toLowerCase();if(!r.parcelle.toLowerCase().includes(q)&&!r.tache.toLowerCase().includes(q)&&!(r.qui||'').toLowerCase().includes(q))return false;}
     return true;
   });
@@ -4766,6 +4827,47 @@ function clearJSearch(){
   renderJournalList();
 }
 
+// ── Toast confirmation pill ──
+var _toastTimer=null;
+function showToast(msg,color){
+  color=color||'#3D6B27';
+  var t=document.getElementById('mv-toast');
+  var d=document.getElementById('mv-toast-dot');
+  var m=document.getElementById('mv-toast-msg');
+  if(!t)return;
+  d.style.background=color;
+  m.textContent=msg;
+  clearTimeout(_toastTimer);
+  t.classList.add('show');
+  _toastTimer=setTimeout(function(){t.classList.remove('show');},2200);
+}
+
+// ── Mise à jour dots card accueil ──
+function updateHomeDots(){
+  var dots=document.querySelectorAll('.hv2-card-dot');
+  dots.forEach(function(d,i){
+    d.classList.toggle('active',i===homeCardMode);
+  });
+}
+
+// ── Filtre dates Journal ──
+var jDateDeb='', jDateFin='';
+function applyJDateFilter(){
+  jDateDeb=document.getElementById('jDateDeb').value||'';
+  jDateFin=document.getElementById('jDateFin').value||'';
+  var clr=document.getElementById('jDateClear');
+  if(clr)clr.style.display=(jDateDeb||jDateFin)?'inline':'none';
+  renderJournalList();
+}
+function clearJDateFilter(){
+  jDateDeb='';jDateFin='';
+  var dd=document.getElementById('jDateDeb');var df=document.getElementById('jDateFin');
+  if(dd)dd.value='';if(df)df.value='';
+  var clr=document.getElementById('jDateClear');
+  if(clr)clr.style.display='none';
+  renderJournalList();
+}
+
 window.addEventListener('load', function(){
   var todayStr = new Date().toISOString().split('T')[0];
   var sd = document.getElementById('s-date'); if(sd) sd.value = todayStr;
@@ -4846,6 +4948,9 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+
+<!-- ══════ TOAST CONFIRMATION ══════ -->
+<div id="mv-toast"><div id="mv-toast-dot"></div><span id="mv-toast-msg"></span></div>
 
 <!-- ══════ OVERLAY MENTIONS LÉGALES ══════ -->
 <div class="overlay" id="ovMentions" onclick="closeOv(event,'ovMentions')">
