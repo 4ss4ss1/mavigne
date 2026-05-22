@@ -1033,7 +1033,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     <div id="login-pwd-error" style="color:#FF8A80;font-size:12px;margin-top:-8px;margin-bottom:10px;display:none">❌ Mot de passe incorrect</div>
     <button class="login-btn" id="login-pwd-btn">Se connecter</button>
     <div id="login-forgot-link" style="text-align:center;margin-top:14px;color:rgba(255,255,255,0.5);font-size:12px;cursor:pointer;text-decoration:underline" onclick="showForgotPanel()">Mot de passe oublié ?</div>
-    <div style="text-align:center;margin-top:22px;color:rgba(255,255,255,0.28);font-size:10px;line-height:1.6;padding:0 8px">Votre adresse email est utilisée uniquement pour votre identification.<br>Elle n'est ni partagée ni utilisée à d'autres fins.<br><span onclick="openOv('ovMentions')" style="text-decoration:underline;cursor:pointer;color:rgba(255,255,255,0.4)">Mentions légales &amp; confidentialité</span></div>
+    <div style="text-align:center;margin-top:22px;color:rgba(255,255,255,0.28);font-size:10px;line-height:1.6;padding:0 8px">Votre adresse email est utilisée uniquement pour votre identification.<br>Elle n'est ni partagée ni utilisée à d'autres fins.<br><span onclick="openMentionsLogin()" style="text-decoration:underline;cursor:pointer;color:rgba(255,255,255,0.4)">Mentions légales &amp; confidentialité</span></div>
   </div>
   <div id="login-forgot-panel" style="display:none;width:100%;margin-top:20px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
@@ -1047,6 +1047,33 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     <div id="login-forgot-ok" style="color:#A8E6A3;font-size:12px;margin-top:-8px;margin-bottom:10px;padding:8px 0;display:none"></div>
     <button class="login-btn" id="login-forgot-btn" onclick="submitForgotLogin()">📧 Envoyer le mot de passe temporaire</button>
     <div style="text-align:center;margin-top:12px;color:rgba(255,255,255,0.4);font-size:11px">Un mot de passe temporaire à usage unique vous sera envoyé</div>
+  </div>
+
+  <!-- ══ Mini-modal mentions légales (z-index > login-screen, accessible sans connexion) ══ -->
+  <div id="login-mentions-ov" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.75);overflow-y:auto;-webkit-overflow-scrolling:touch" onclick="if(event.target===this)this.style.display='none'">
+    <div style="background:#fff;border-radius:20px 20px 0 0;margin-top:60px;padding:24px 20px 44px;min-height:60vh" onclick="event.stopPropagation()">
+      <div style="width:36px;height:4px;background:#DDD;border-radius:2px;margin:0 auto 20px"></div>
+      <div style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:#2D0B45;margin-bottom:20px">⚖️ Mentions légales &amp; confidentialité</div>
+      <div style="font-family:'Outfit',sans-serif;font-size:12px;color:#2D0B45;line-height:1.7">
+        <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Éditeur</div>
+        <p style="margin:0 0 14px">Ma Vigne est une application développée et éditée par Nicolas GUERET.<br>Micro-entreprise <strong>GUERETTECH</strong> — SIRET : 98214811600014<br>Contact : <span style="color:#3D6B27">ngdevpro@gmail.com</span></p>
+        <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Propriété intellectuelle</div>
+        <p style="margin:0 0 14px">L'ensemble du code source, des interfaces et des contenus de cette application est protégé par le droit d'auteur (Code de la propriété intellectuelle, art. L.111-1). Toute reproduction ou distribution sans autorisation écrite est interdite.</p>
+        <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Données personnelles — RGPD</div>
+        <p style="margin:0 0 8px"><strong>Données collectées :</strong> prénom, adresse email, rôles dans l'application.</p>
+        <p style="margin:0 0 8px"><strong>Finalité :</strong> authentification et gestion des accès uniquement.</p>
+        <p style="margin:0 0 8px"><strong>Base légale :</strong> intérêt légitime (gestion d'équipe).</p>
+        <p style="margin:0 0 8px"><strong>Stockage :</strong> Firebase (Google Cloud, serveurs européens) + mémoire locale de l'appareil.</p>
+        <p style="margin:0 0 8px"><strong>Durée :</strong> tant que vous êtes membre actif du domaine.</p>
+        <p style="margin:0 0 14px"><strong>Vos droits :</strong> accès, rectification, suppression de vos données sur simple demande à l'administrateur ou par email à <span style="color:#3D6B27">ngdevpro@gmail.com</span>. Conformément au Règlement (UE) 2016/679.</p>
+        <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Hébergement</div>
+        <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
+        <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
+        <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v4.2</div>
+        <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -3359,6 +3386,11 @@ function showForgotPanel() {
   document.getElementById('login-forgot-panel').style.display = 'block';
   // Scroll en haut pour que le panneau soit visible sur mobile
   setTimeout(() => { document.getElementById('login-screen').scrollTop = 0; }, 50);
+}
+
+function openMentionsLogin(){
+  document.getElementById('login-mentions-ov').style.display='block';
+  document.getElementById('login-screen').scrollTop=0;
 }
 
 function hideForgotPanel() {
