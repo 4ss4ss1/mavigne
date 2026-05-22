@@ -1197,7 +1197,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
       <div id="priority-empty" style="display:none;margin-bottom:12px">
         <button onclick="openPriorityEdit()" style="width:100%;background:white;border:1.5px dashed var(--gris);border-radius:12px;padding:10px;font-size:12px;color:var(--texte-doux);cursor:pointer;font-family:'Outfit',sans-serif">⚡ Définir une tâche prioritaire…</button>
       </div>
-      <div class="sbox"><span>🔍</span><input type="text" id="pSearch" placeholder="Rechercher une parcelle…"></div>
+      <div class="sbox"><span>🔍</span><input type="text" id="pSearch" placeholder="Rechercher une parcelle…"><span id="pSearch-clear" onclick="clearPSearch()" style="display:none;cursor:pointer;font-size:16px;color:var(--texte-doux);padding:2px 4px;line-height:1">✕</span></div>
       <div class="tfilters" id="p-tache-filter-row" style="padding-bottom:4px"></div>
       <div id="pList"></div>
     </div>
@@ -1248,7 +1248,8 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
   <div class="ost-card" id="ouvrier-stats-card"></div>
   <div class="orow" id="ouvrier-chips-row"></div>
   <div class="tfilters" id="tache-chips-row"></div>
-  <div style="padding:0 16px 12px"><div class="sbox"><span>🔍</span><input type="text" id="jSearch" placeholder="Parcelle, tâche, ouvrier…"></div></div>
+  <div style="padding:0 16px 4px"><div class="sbox"><span>🔍</span><input type="text" id="jSearch" placeholder="Parcelle, tâche, ouvrier…"><span id="jSearch-clear" onclick="clearJSearch()" style="display:none;cursor:pointer;font-size:16px;color:var(--texte-doux);padding:2px 4px;line-height:1">✕</span></div></div>
+  <div class="tfilters" id="j-parcelle-filter-row" style="padding:0 16px 12px;overflow-x:auto;scrollbar-width:none;display:flex;gap:6px;flex-wrap:nowrap"></div>
   <div class="timeline" id="timeline"></div>
 </div>
 
@@ -1821,7 +1822,7 @@ window.loadData = loadData;
 
 // État
 let currentUser=null;
-let pFilter='toutes',pTacheFilter='toutes',pSearch='',jQui='tous',jTache='toutes',jSearch='',phTab='reg',phFilter='tous';
+let pFilter='toutes',pTacheFilter='toutes',pSearch='',jQui='tous',jTache='toutes',jSearch='',jParcelle='toutes',phTab='reg',phFilter='tous';
 let fCond='tous',fAct='toutes',selEmoji='🚜';
 // ════ KML INTÉGRÉ — polygones des 46 parcelles du domaine ════
 // Généré depuis Domaine.kml — coordonnées [lat, lng] au format Leaflet
@@ -2779,10 +2780,25 @@ function setPTacheFilter(v,el){
 }
 function setJQui(v,el){jQui=v;document.querySelectorAll('.ochip').forEach(x=>x.classList.remove('active'));el.classList.add('active');renderJournalList();}
 function setJTache(v,el){jTache=v;document.querySelectorAll('.tfchip').forEach(x=>x.classList.remove('active'));el.classList.add('active');renderJournalList();}
+function setJParcelle(v){jParcelle=v;renderParcelleFilterChips();renderJournalList();}
+function renderParcelleFilterChips(){
+  const row=document.getElementById('j-parcelle-filter-row');
+  if(!row)return;
+  // Parcelles présentes dans le journal (triées alphabétiquement)
+  const parcelles=[...new Set(JOURNAL.filter(j=>!j.meteo).map(j=>j.parcelle))].sort();
+  if(parcelles.length===0){row.style.display='none';return;}
+  row.style.display='flex';
+  row.innerHTML=`<div class="tfchip ${jParcelle==='toutes'?'active':''}" onclick="setJParcelle('toutes')">📍 Toutes</div>`
+    +parcelles.map(p=>`<div class="tfchip ${jParcelle===p?'active':''}" onclick="setJParcelle('${p.replace(/'/g,"\\'")}')" style="white-space:nowrap">${p}</div>`).join('');
+}
 function renderJournalList(){
+  // Rafraîchir les chips de parcelle à chaque rendu
+  renderParcelleFilterChips();
   let data=JOURNAL.filter(r=>{
     if(jQui!=='tous'&&r.qui!==jQui)return false;
     if(jTache!=='toutes'&&r.tache!==jTache)return false;
+    if(jParcelle!=='toutes'&&r.parcelle!==jParcelle&&!r.meteo)return false;
+    if(r.meteo&&jParcelle!=='toutes')return false; // masquer météo si filtre parcelle actif
     if(jSearch){const q=jSearch.toLowerCase();if(!r.parcelle.toLowerCase().includes(q)&&!r.tache.toLowerCase().includes(q)&&!(r.qui||'').toLowerCase().includes(q))return false;}
     return true;
   });
@@ -3052,6 +3068,7 @@ function saveConducteur(){
   renderTracteur();
 }
 function editCond(nom){
+  if(!isAdmin()){return;} // lecture seule pour tous sauf admin
   const c=CONDUCTEURS.find(x=>x.nom===nom);if(!c)return;
   document.getElementById('ec-title').textContent='✏️ '+nom;
   document.getElementById('ec-nom').value=nom;
@@ -3059,7 +3076,7 @@ function editCond(nom){
   document.getElementById('ec-st').value=c.statut;
   openOv('ovEditCond');
 }
-function saveEditCond(){const nom=document.getElementById('ec-nom').value;const c=CONDUCTEURS.find(x=>x.nom===nom);if(c)c.statut=document.getElementById('ec-st').value;saveData('conducteurs');document.getElementById('ovEditCond').classList.remove('open');renderTracteur();}
+function saveEditCond(){if(!isAdmin())return;const nom=document.getElementById('ec-nom').value;const c=CONDUCTEURS.find(x=>x.nom===nom);if(c)c.statut=document.getElementById('ec-st').value;saveData('conducteurs');document.getElementById('ovEditCond').classList.remove('open');renderTracteur();}
 function deleteCond(){const nom=document.getElementById('ec-nom').value;if(nom==='Nico'){alert('Impossible.');return;}if(!confirm('Supprimer '+nom+'?'))return;CONDUCTEURS=CONDUCTEURS.filter(c=>c.nom!==nom);saveData('conducteurs');document.getElementById('ovEditCond').classList.remove('open');renderTracteur();}
 
 // ════ PHYTO ════
@@ -4734,6 +4751,21 @@ function chatRender(){
   chatLoad();
 }
 
+// ── Effacer recherche Parcelles ──
+function clearPSearch(){
+  pSearch='';
+  document.getElementById('pSearch').value='';
+  document.getElementById('pSearch-clear').style.display='none';
+  renderParcelles();
+}
+// ── Effacer recherche Journal ──
+function clearJSearch(){
+  jSearch='';
+  document.getElementById('jSearch').value='';
+  document.getElementById('jSearch-clear').style.display='none';
+  renderJournalList();
+}
+
 window.addEventListener('load', function(){
   var todayStr = new Date().toISOString().split('T')[0];
   var sd = document.getElementById('s-date'); if(sd) sd.value = todayStr;
@@ -4777,8 +4809,16 @@ window.addEventListener('load', function(){
   pTacheFilter='toutes';
   renderParcelles();
 }));
-  document.getElementById('pSearch').addEventListener('input',function(){pSearch=this.value;renderParcelles();});
-  document.getElementById('jSearch').addEventListener('input',function(){jSearch=this.value;renderJournalList();});
+  document.getElementById('pSearch').addEventListener('input',function(){
+    pSearch=this.value;
+    document.getElementById('pSearch-clear').style.display=this.value?'inline':'none';
+    renderParcelles();
+  });
+  document.getElementById('jSearch').addEventListener('input',function(){
+    jSearch=this.value;
+    document.getElementById('jSearch-clear').style.display=this.value?'inline':'none';
+    renderJournalList();
+  });
   if('Notification' in window&&Notification.permission==='granted'){
     updateNotifUI('granted');
     scheduleNotifCheck();
