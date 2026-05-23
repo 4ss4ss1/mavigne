@@ -561,6 +561,16 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .chip.active.ac{border-color:var(--acier);background:var(--acier-pale);color:var(--acier);}
 .readonly-banner{background:var(--or-pale);border:1px solid var(--or);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--terre);display:flex;gap:8px;align-items:center;}
 .scard{background:white;border-radius:16px;margin-bottom:12px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);overflow:hidden;}
+.scard-enc{background:var(--acier);border:1px solid rgba(255,255,255,0.06);}
+.scard-enc .sc-act{color:#fff;}
+.scard-enc .sc-date{color:rgba(255,255,255,0.5);}
+.scard-enc .sc-cond{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.75);}
+.scard-enc .sc-pct{color:var(--or);}
+.scard-enc .sc-blbl{color:rgba(255,255,255,0.45);}
+.scard-enc .sc-btrack{background:rgba(255,255,255,0.12);}
+.scard-enc .sc-ico{background:rgba(255,255,255,0.1);}
+.scard-enc .sc-edit-btn{filter:brightness(0) invert(1);opacity:0.6;}
+.scard-enc .ssenc{background:rgba(224,123,42,0.25);color:#F0A060;}
 .sc-hd{display:flex;align-items:center;gap:14px;padding:16px;}
 .sc-ico{width:48px;height:48px;border-radius:13px;background:var(--acier-pale);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
 .sc-info{flex:1;min-width:0;}
@@ -2964,35 +2974,22 @@ function renderTracteur(){
   if(!data.length){sl.innerHTML='<div class="empty-state"><div class="ei">🚜</div><p>Aucune session.</p></div>';return;}
   const amap=ACTIVITES.reduce((m,a)=>{m[a.nom]=a;return m},{});
   const isAdmin=currentUser&&currentUser.roles&&currentUser.roles.includes('admin');
-  // ── Card session en cours épinglée ──
-  const sEnCours=SESSIONS.find(s=>s.statut==='En cours');
-  var pinnedHtml='';
-  if(sEnCours&&isTractoriste()){
-    const emE=amap[sEnCours.activite]?.emoji||'🚜';
-    const pctE=sEnCours.avancement||0;
-    const pfE=(sEnCours.parcellesFaites||[]).length;
-    const totE=PARCELLES.filter(p=>p.statut!=='Arrachee').length;
-    pinnedHtml=`<div class="trac-encours-card" onclick="openSessionDetail('${sEnCours.id}')">
-      <div class="trac-encours-label">En cours</div>
-      <div class="trac-encours-act">${emE} ${sEnCours.activite}</div>
-      <div class="trac-encours-meta">📅 ${fmtDate(sEnCours.date)} · 👤 ${sEnCours.conducteur}</div>
-      <div class="trac-encours-bar-wrap">
-        <div class="trac-encours-bar-lbl"><span>Avancement domaine</span><span>${pfE}/${totE} parcelles · ${pctE}%</span></div>
-        <div class="trac-encours-bar-track"><div class="trac-encours-bar-fill" style="width:${pctE}%"></div></div>
-      </div>
-      <div class="trac-encours-btn">Reprendre →</div>
-    </div>`;
-  }
-  sl.innerHTML=pinnedHtml+data.map(s=>{
+  // ── Tri : sessions en cours en premier (fond sombre), puis terminées ──
+  const dataEnc=data.filter(s=>s.statut==='En cours');
+  const dataTer=data.filter(s=>s.statut!=='En cours');
+  const mkScard=s=>{
     const em=amap[s.activite]?.emoji||'🚜';
-    const sc=s.statut==='En cours'?'ssenc':'sster';
+    const isEnc=s.statut==='En cours';
+    const sc=isEnc?'ssenc':'sster';
     const pct=s.avancement!=null?s.avancement:0;
     const parcellesFaites=(s.parcellesFaites||[]).length;
     const total=PARCELLES.filter(p=>p.statut!=='Arrachee').length;
     const clk=isTractoriste()?`onclick="openSessionDetail('${s.id}')" style="cursor:pointer"`:'';
     const editBtn=isAdmin?`<button class="sc-edit-btn" onclick="event.stopPropagation();openEditSession('${s.id}')">✏️</button>`:'';
-    return `<div class="scard" ${clk}><div class="sc-hd"><div class="sc-ico">${em}</div><div class="sc-info"><div class="sc-act">${s.activite}</div><div class="sc-meta"><span class="sc-date">📅 ${fmtDate(s.date)}</span><span class="sc-cond">👤 ${s.conducteur}</span></div></div><div class="sc-right">${editBtn}<div class="sc-st ${sc}">${s.statut}</div><div class="sc-pct">${pct}%</div></div></div><div class="sc-bwrap"><div class="sc-blbl"><span>Avancement domaine</span><span>${parcellesFaites}/${total} parcelles</span></div><div class="sc-btrack"><div class="sc-bfill ${s.statut==='En cours'?'sc-bfill-enc':''}" style="width:${pct}%"></div></div></div>${s.note?`<div style="padding:0 16px 12px;font-size:11px;color:var(--texte-doux)">💬 ${s.note}</div>`:''}</div>`;
-  }).join('');
+    const encCls=isEnc?' scard-enc':'';
+    return `<div class="scard${encCls}" ${clk}><div class="sc-hd"><div class="sc-ico">${em}</div><div class="sc-info"><div class="sc-act">${s.activite}</div><div class="sc-meta"><span class="sc-date">📅 ${fmtDate(s.date)}</span><span class="sc-cond">👤 ${s.conducteur}</span></div></div><div class="sc-right">${editBtn}<div class="sc-st ${sc}">${s.statut}</div><div class="sc-pct">${pct}%</div></div></div><div class="sc-bwrap"><div class="sc-blbl"><span>Avancement domaine</span><span>${parcellesFaites}/${total} parcelles</span></div><div class="sc-btrack"><div class="sc-bfill ${isEnc?'sc-bfill-enc':''}" style="width:${pct}%"></div></div></div>${s.note?`<div style="padding:0 16px 12px;font-size:11px;color:${isEnc?'rgba(255,255,255,0.45)':'var(--texte-doux)'}">💬 ${s.note}</div>`:''}</div>`;
+  };
+  sl.innerHTML=[...dataEnc,...dataTer].map(mkScard).join('');
   document.getElementById('s-act').innerHTML=ACTIVITES.map(a=>`<option>${a.emoji} ${a.nom}</option>`).join('');
   document.getElementById('s-cond-pick').innerHTML=CONDUCTEURS.map((c,i)=>`<div class="pchk ${i===0?'sel acre':''}" onclick="pickCond(this)">${c.nom}</div>`).join('');
 }
