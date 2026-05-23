@@ -119,8 +119,11 @@ function showSyncBadge(msg, color) {
   badge.style.background = color;
   badge.style.opacity = '1';
   clearTimeout(badge._t);
-  var delay = (msg.includes('Hors ligne') || msg.includes('attente')) ? 6000 : 2500;
-  badge._t = setTimeout(function(){ badge.style.opacity='0'; }, delay);
+  // Offline → persistant jusqu'au retour réseau (pas de setTimeout)
+  var isOffline = msg.includes('Hors ligne') || msg.includes('attente') || msg.includes('Mode hors ligne');
+  if (!isOffline) {
+    badge._t = setTimeout(function(){ badge.style.opacity='0'; }, 2500);
+  }
 }
 
 // ── Détection connexion réseau ──
@@ -343,15 +346,37 @@ console.log('🔥 Firebase prêt, en attente de _fbLoad()');
   --phyto:#5B2D8E;--phyto-med:#7B4DB8;--phyto-pale:#F0EAF8;
   --bleu:#1A4A7A;--bleu-pale:#E8F0FA;
   --blanc:#F8F7F3;--gris-clair:#EFEDE8;--gris:#DDD9D0;
-  --texte:#1A1A14;--texte-med:#4A4A3A;--texte-doux:#7A7A6A;
+  --texte:#1A1A14;--texte-med:#4A4A3A;--texte-doux:#767676;
   --rouge:#A0291E;--rouge-pale:#FAEAE8;
   --orange:#B85A1A;--orange-pale:#FBF0E6;
   --shadow-sm:0 2px 8px rgba(0,0,0,0.07);
   --shadow-md:0 6px 24px rgba(0,0,0,0.12);
   --nav-h:68px;
+  /* Dark mode */
+  --bg-app:#F0EEE8;--bg-card:#FFFFFF;--nav-bg:#FFFFFF;--nav-border:rgba(0,0,0,0.06);
+}
+.hv2-meteo-cache-wrap{width:100%;display:flex;flex-direction:column;}
+.hv2-meteo-cache-main{display:flex;align-items:center;gap:14px;padding-bottom:10px;}
+.hv2-meteo-cache-banner{display:flex;align-items:center;justify-content:space-between;padding:6px 0 2px;border-top:1px solid var(--gris-clair);}
+/* ══ DARK MODE ══ */
+[data-theme="dark"]{
+  --vert:#5A9E3A;--vert-med:#6AB845;--vert-clair:#7BC74E;--vert-pale:#1A2E12;
+  --or:#D4A84B;--or-pale:#2A2010;
+  --terre:#A07050;--terre-pale:#2A1A0E;
+  --acier:#4A80C4;--acier-med:#6AA0D4;--acier-pale:#0E1E30;
+  --phyto:#8B5CC8;--phyto-med:#AB7CE8;--phyto-pale:#1E1030;
+  --bleu:#4A80C4;--bleu-pale:#0E1E30;
+  --blanc:#1E1E1A;--gris-clair:#242420;--gris:#333330;
+  --texte:#F0EFE9;--texte-med:#C8C6BE;--texte-doux:#8A8880;
+  --rouge:#E05545;--rouge-pale:#2E1010;
+  --orange:#D4721A;--orange-pale:#2A1408;
+  --shadow-sm:0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md:0 6px 24px rgba(0,0,0,0.5);
+  --bg-app:#141412;--bg-card:#1E1E1A;--nav-bg:#1A1A16;--nav-border:rgba(255,255,255,0.06);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;}
+#app-root{background:var(--bg-app);min-height:100vh;transition:background 0.3s,color 0.3s;}
 
 /* ══ LOGIN ══ */
 #login-screen{position:fixed;inset:0;background:linear-gradient(160deg,#1A1F2E 0%,#0F1319 55%,#111820 100%);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;z-index:9999;padding:60px 30px 40px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
@@ -375,7 +400,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .lp-role{color:rgba(255,255,255,0.35);font-size:10px;margin-top:3px;letter-spacing:0.3px;}
 
 /* ══ NAV ══ */
-.nav-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:white;border-top:1px solid var(--gris-clair);display:grid;grid-template-columns:repeat(7,1fr);height:calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));padding:6px 0 calc(14px + env(safe-area-inset-bottom, 0px));box-shadow:0 -4px 24px rgba(0,0,0,0.09);z-index:1000;transition:grid-template-columns 0.3s;}
+.nav-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--nav-bg);border-top:1px solid var(--nav-border);display:grid;grid-template-columns:repeat(7,1fr);height:calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));padding:6px 0 calc(14px + env(safe-area-inset-bottom, 0px));box-shadow:0 -4px 24px rgba(0,0,0,0.09);z-index:1000;transition:grid-template-columns 0.3s,background 0.3s,border-color 0.3s;}
 .nb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;transition:transform 0.15s;}
 .nb:active{transform:scale(0.86);}
 .nb-icon{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;transition:background 0.2s;}
@@ -427,7 +452,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .locked-badge{font-size:9px;background:rgba(255,200,0,0.2);border:1px solid rgba(255,200,0,0.4);color:#FFD700;padding:2px 8px;border-radius:8px;font-weight:600;}
 
 /* ══ STAT BAND ══ */
-.sband{background:white;margin:0 16px;border-radius:16px;box-shadow:var(--shadow-md);transform:translateY(-16px);display:grid;overflow:hidden;position:relative;z-index:1;}
+.sband{background:var(--bg-card);margin:0 16px;border-radius:16px;box-shadow:var(--shadow-md);transform:translateY(-16px);display:grid;overflow:hidden;position:relative;z-index:1;}
 .sband.c3{grid-template-columns:1fr 1fr 1fr;}
 .sband.c4{grid-template-columns:1fr 1fr 1fr 1fr;}
 .sband.c5{grid-template-columns:1fr 1fr 1fr 1fr 1fr;}
@@ -445,7 +470,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .sv{color:var(--vert-med);}.sac{color:var(--acier-med);}.sph{color:var(--phyto-med);}
 
 /* ══ HEURES CARD ══ */
-.heures-card{background:white;border-radius:16px;padding:18px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);margin-bottom:14px;}
+.heures-card{background:var(--bg-card);border-radius:16px;padding:18px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);margin-bottom:14px;}
 .hc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
 .hc-title{font-size:15px;font-weight:600;}
 .hc-total{text-align:right;}
@@ -467,10 +492,10 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .fchip.active{background:white;color:var(--vert);border-color:white;}
 .tabs2{display:flex;background:var(--gris-clair);border-radius:12px;padding:3px;margin:0 16px 14px;}
 .tab2{flex:1;text-align:center;padding:8px;font-size:12px;font-weight:600;border-radius:10px;cursor:pointer;color:var(--texte-doux);transition:all 0.2s;}
-.tab2.active{background:white;box-shadow:var(--shadow-sm);color:var(--vert-med);}
-.sbox{display:flex;align-items:center;gap:8px;background:white;border-radius:12px;padding:10px 14px;border:1.5px solid var(--gris-clair);box-shadow:var(--shadow-sm);margin-bottom:12px;}
-.sbox input{border:none;outline:none;font-size:13px;flex:1;font-family:'Outfit',sans-serif;background:transparent;}
-.pcard{background:white;border-radius:16px;margin-bottom:10px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);overflow:hidden;cursor:pointer;transition:transform 0.15s;}
+.tab2.active{background:var(--bg-card);box-shadow:var(--shadow-sm);color:var(--vert-med);}
+.sbox{display:flex;align-items:center;gap:8px;background:var(--bg-card);border-radius:12px;padding:10px 14px;border:1.5px solid var(--gris-clair);box-shadow:var(--shadow-sm);margin-bottom:12px;}
+.sbox input{border:none;outline:none;font-size:13px;flex:1;font-family:'Outfit',sans-serif;background:transparent;color:var(--texte);}
+.pcard{background:var(--bg-card);border-radius:16px;margin-bottom:10px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);overflow:hidden;cursor:pointer;transition:transform 0.15s,background 0.3s;}
 .pcard:active{transform:scale(0.98);}
 .pc-main{display:flex;align-items:center;padding:14px;gap:12px;}
 .pc-ava{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;position:relative;}
@@ -509,16 +534,16 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 /* ══ JOURNAL ══ */
 .orow{display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none;}
 .orow::-webkit-scrollbar{display:none;}
-.ochip{flex-shrink:0;display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:white;transition:all 0.15s;}
+.ochip{flex-shrink:0;display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:var(--bg-card);transition:all 0.15s;}
 .ochip.active{border-color:var(--vert);background:var(--vert-pale);color:var(--vert);}
 .oava{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:white;}
 .tfilters{display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none;}
 .tfilters::-webkit-scrollbar{display:none;}
-.tfchip{flex-shrink:0;padding:5px 12px;border-radius:16px;font-size:10px;font-weight:600;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:white;transition:all 0.15s;}
+.tfchip{flex-shrink:0;padding:5px 12px;border-radius:16px;font-size:10px;font-weight:600;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:var(--bg-card);transition:all 0.15s;}
 .ptfchip{flex-shrink:0;padding:5px 12px;border-radius:16px;font-size:10px;font-weight:600;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:white;transition:all 0.15s;}
 .ptfchip.active{border-color:var(--vert);background:var(--vert);color:white;}
 .tfchip.active{border-color:var(--vert);background:var(--vert);color:white;}
-.ost-card{background:white;border-radius:14px;padding:14px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);margin:0 16px 14px;}
+.ost-card{background:var(--bg-card);border-radius:14px;padding:14px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);margin:0 16px 14px;}
 .ost-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--texte-doux);margin-bottom:10px;}
 .ostr{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
 .ostr:last-child{margin-bottom:0;}
@@ -537,7 +562,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .jdot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 .jdv{background:var(--vert-med);}.jdf{background:var(--or);}.jde{background:var(--orange);}.jdm{background:var(--bleu);}
 .jlinev{width:2px;flex:1;background:var(--gris-clair);margin-top:4px;min-height:20px;}
-.jcard{flex:1;background:white;border-radius:12px;padding:12px 14px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);}
+.jcard{flex:1;background:var(--bg-card);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);}
 .jtop{display:flex;justify-content:space-between;align-items:flex-start;}
 .jtache{font-size:13px;font-weight:600;}
 .jst{font-size:9px;font-weight:700;padding:3px 8px;border-radius:8px;text-transform:uppercase;letter-spacing:0.5px;}
@@ -557,7 +582,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 /* ══ TRACTEUR ══ */
 .chips-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;margin-bottom:14px;}
 .chips-row::-webkit-scrollbar{display:none;}
-.chip{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:white;transition:all 0.15s;display:flex;align-items:center;gap:5px;}
+.chip{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:var(--bg-card);transition:all 0.15s;display:flex;align-items:center;gap:5px;}
 .chip.active.ac{border-color:var(--acier);background:var(--acier-pale);color:var(--acier);}
 .readonly-banner{background:var(--or-pale);border:1px solid var(--or);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--terre);display:flex;gap:8px;align-items:center;}
 .scard{background:white;border-radius:16px;margin-bottom:12px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);overflow:hidden;}
@@ -687,7 +712,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .db-sub{font-size:11px;opacity:0.7;}
 .set-sec{margin-bottom:24px;}
 .set-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--texte-doux);margin-bottom:10px;padding:0 16px;}
-.set-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:white;margin-bottom:1px;cursor:pointer;}
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg-card);margin-bottom:1px;cursor:pointer;}
 .set-row:first-of-type{border-radius:16px 16px 0 0;}.set-row:last-of-type{border-radius:0 0 16px 16px;}
 .sr-l{display:flex;align-items:center;gap:12px;}
 .sr-ico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;}
@@ -718,7 +743,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 /* ══ OVERLAYS ══ */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;display:none;align-items:flex-end;max-width:430px;margin:0 auto;}
 .overlay.open{display:flex;}
-.modal{background:white;border-radius:24px 24px 0 0;width:100%;padding:0 0 60px;max-height:88vh;overflow-y:auto;animation:slideUp 0.28s cubic-bezier(.32,1.2,.32,1);}
+.modal{background:var(--bg-card);border-radius:24px 24px 0 0;width:100%;padding:0 0 60px;max-height:88vh;overflow-y:auto;animation:slideUp 0.28s cubic-bezier(.32,1.2,.32,1);}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal-handle{width:36px;height:4px;background:var(--gris);border-radius:4px;margin:12px auto 0;}
 .modal-hd{padding:16px 20px 14px;border-bottom:1px solid var(--gris-clair);}
@@ -733,7 +758,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .fi.ac:focus{border-color:var(--acier);}
 .fsel{width:100%;background:var(--gris-clair);border:2px solid transparent;border-radius:10px;padding:11px 14px;font-size:14px;font-family:'Outfit',sans-serif;outline:none;color:var(--texte);appearance:none;cursor:pointer;}
 .ppicker{display:flex;gap:8px;flex-wrap:wrap;}
-.pchk{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:white;transition:all 0.15s;}
+.pchk{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:var(--bg-card);transition:all 0.15s;}
 .pchk.sel.vert{border-color:var(--vert);background:var(--vert-pale);color:var(--vert);}
 .pchk.sel.acre{border-color:var(--acier);background:var(--acier-pale);color:var(--acier);}
 .pchk.sel.phyt{border-color:var(--phyto);background:var(--phyto-pale);color:var(--phyto);}
@@ -744,7 +769,13 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .mbtn-del{width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--rouge);background:transparent;color:var(--rouge);font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;margin-top:10px;}
 .infobx{background:var(--phyto-pale);border-radius:10px;padding:10px 12px;margin-top:8px;font-size:11px;color:var(--phyto);display:none;}
 .empty-state{text-align:center;padding:40px 20px;color:var(--texte-doux);}
-.empty-state .ei{font-size:40px;margin-bottom:10px;}
+.empty-state .ei{font-size:44px;margin-bottom:14px;line-height:1;opacity:0.8;}
+.empty-state .et{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--texte-med);margin-bottom:8px;}
+.empty-state .ed{font-size:13px;color:var(--texte-doux);line-height:1.5;max-width:240px;margin:0 auto 18px;}
+.empty-cta-v{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:12px;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;border:none;cursor:pointer;background:var(--vert-med);color:white;}
+.empty-cta-or{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:12px;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;background:var(--or-pale);color:var(--or);border:1.5px solid rgba(184,145,58,0.3);}
+.empty-cta-ac{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:12px;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;border:none;cursor:pointer;background:var(--acier);color:white;}
+.empty-cta-ph{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:12px;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;border:none;cursor:pointer;background:var(--phyto);color:white;}
 .sdp-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--gris-clair);cursor:pointer;transition:background 0.1s;border-radius:6px;}
 .sdp-row:active{background:var(--gris-clair);}
 .sdp-row.sdp-done{background:var(--vert-pale);border-radius:8px;padding:11px 8px;border-color:transparent;margin:1px 0;}
@@ -841,7 +872,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .hv2-date{font-size:11px;color:rgba(255,255,255,0.45);font-weight:300;}
 
 /* météo */
-.hv2-meteo{margin:-1px 16px 0;background:white;border-radius:0 0 18px 18px;padding:15px 18px;display:flex;align-items:center;gap:14px;border:1px solid var(--gris-clair);border-top:none;box-shadow:var(--shadow-sm);}
+.hv2-meteo{margin:-1px 16px 0;background:var(--bg-card);border-radius:0 0 18px 18px;padding:15px 18px;display:flex;align-items:center;gap:14px;border:1px solid var(--gris-clair);border-top:none;box-shadow:var(--shadow-sm);}
 .hv2-meteo-skel{display:flex;gap:12px;align-items:center;width:100%;}
 .hv2-skel{background:linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);background-size:200% 100%;animation:hv2-shimmer 1.2s infinite;border-radius:6px;}
 @keyframes hv2-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
@@ -1011,7 +1042,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 </style>
 </head>
 <body>
-
+<div id="app-root">
 
 
 <!-- ══════ SPLASH SCREEN ══════ -->
@@ -1192,7 +1223,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v4.2</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v4.3</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -1468,7 +1499,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 <!-- ══════ PAGE RÉGLAGES ══════ -->
 <div class="page" id="page-reglages">
   <div class="ph gris" style="padding-bottom:16px">
-    <div class="ph-top"><div><div class="ph-title">Réglages</div><div class="ph-sub">Ma Vigne v4.2</div></div></div>
+    <div class="ph-top"><div><div class="ph-title">Réglages</div><div class="ph-sub">Ma Vigne v4.3</div></div></div>
   </div>
   <div style="height:14px"></div>
   <div class="dom-badge"><div class="db-logo">🍇 Ma Vigne</div><div class="db-sub" id="dom-badge-sub">Domaine · 11,76 ha actifs</div></div>
@@ -1506,7 +1537,15 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
   <div class="set-sec">
     <div class="set-title">Application</div>
     <div style="margin:0 16px">
-      <div class="set-row" style="border-radius:16px 16px 0 0" onclick="requestNotifications()"><div class="sr-l"><div class="sr-ico" style="background:var(--terre-pale)">🔔</div><div><div class="sr-lbl">Notifications</div><div class="sr-sub" id="notif-status">Alertes gel, DAR, validations</div></div></div><div class="sr-arr" id="notif-arr">›</div></div>
+      <div class="set-row" style="border-radius:16px 16px 0 0;align-items:flex-start;gap:12px">
+        <div class="sr-l"><div class="sr-ico" style="background:var(--gris-clair)">🌗</div><div><div class="sr-lbl">Thème</div><div class="sr-sub">Clair, Sombre ou Automatique</div></div></div>
+        <div style="display:flex;gap:3px;background:var(--gris-clair);border-radius:10px;padding:3px;flex-shrink:0">
+          <button id="theme-btn-light" onclick="setThemeMode('light')" style="padding:5px 11px;border-radius:8px;font-size:11px;font-weight:600;border:none;font-family:'Outfit',sans-serif;cursor:pointer;background:transparent;color:var(--texte-doux);transition:all 0.2s">☀️</button>
+          <button id="theme-btn-auto" onclick="setThemeMode('auto')" style="padding:5px 11px;border-radius:8px;font-size:11px;font-weight:600;border:none;font-family:'Outfit',sans-serif;cursor:pointer;background:transparent;color:var(--texte-doux);transition:all 0.2s">Auto</button>
+          <button id="theme-btn-dark" onclick="setThemeMode('dark')" style="padding:5px 11px;border-radius:8px;font-size:11px;font-weight:600;border:none;font-family:'Outfit',sans-serif;cursor:pointer;background:transparent;color:var(--texte-doux);transition:all 0.2s">🌙</button>
+        </div>
+      </div>
+      <div class="set-row" onclick="requestNotifications()"><div class="sr-l"><div class="sr-ico" style="background:var(--terre-pale)">🔔</div><div><div class="sr-lbl">Notifications</div><div class="sr-sub" id="notif-status">Alertes gel, DAR, validations</div></div></div><div class="sr-arr" id="notif-arr">›</div></div>
       <div class="set-row" onclick="openExport()"><div class="sr-l"><div class="sr-ico" style="background:var(--bleu-pale)">📤</div><div><div class="sr-lbl">Exporter / Importer</div><div class="sr-sub">JSON · CSV journal · CSV parcelles · Restaurer</div></div></div><div class="sr-arr">›</div></div>
       <div class="set-row" style="border-radius:0 0 16px 16px" onclick="logout()"><div class="sr-l"><div class="sr-ico" style="background:var(--gris-clair)">🚪</div><div><div class="sr-lbl">Se déconnecter</div></div></div><div class="sr-arr">›</div></div>
     </div>
@@ -1535,7 +1574,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
       <div class="set-row" style="border-radius:16px" onclick="openOv('ovMentions')"><div class="sr-l"><div class="sr-ico" style="background:#EEF2FF">⚖️</div><div><div class="sr-lbl">Mentions légales & confidentialité</div><div class="sr-sub">RGPD · Données personnelles · Copyright</div></div></div><div class="sr-arr">›</div></div>
     </div>
   </div>
-  <div class="ver-tag">Ma Vigne v4.2 · Catalogue phyto enrichi · KML persisté · Filtres tâches 🌿</div>
+  <div class="ver-tag">Ma Vigne v4.3 · Dark mode · États vides · Météo cache · PDF rapport saison 🌿</div>
 </div>
 
 <!-- ══════ NAV ══════ -->
@@ -1655,6 +1694,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     <button onclick="exportCSVParcelles()" style="background:var(--or);color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">🗺️ <div><div>Export CSV — Parcelles</div><div style="font-size:11px;opacity:0.75;font-weight:400">Avancement par parcelle et par tâche</div></div></button>
     <button onclick="exportJSON()" style="background:var(--acier);color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">📦 <div><div>Export JSON complet</div><div style="font-size:11px;opacity:0.75;font-weight:400">Toutes les données — sauvegarde complète</div></div></button>
     <button onclick="exportPDFPhyto()" style="background:#4A2060;color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">🧪 <div><div>Registre phyto PDF</div><div style="font-size:11px;opacity:0.75;font-weight:400">Registre réglementaire complet — toute la saison</div></div></button>
+    <button onclick="exportPDFRapportSaison()" style="background:#1A3A2A;color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">📄 <div><div>Rapport de saison PDF</div><div style="font-size:11px;opacity:0.75;font-weight:400">Travaux · Tracteur · Phyto — rapport complet</div></div></button>
     <div style="border-top:1px solid var(--gris);margin:4px 0"></div>
     <button onclick="document.getElementById('import-json-input').click()" style="background:var(--bleu-pale);color:var(--bleu);border:2px dashed var(--bleu);border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">📂 <div><div>Charger un export JSON</div><div style="font-size:11px;opacity:0.75;font-weight:400">Restaurer une sauvegarde · remplace les données actuelles</div></div></button>
     <input type="file" id="import-json-input" accept=".json,application/json" style="display:none" onchange="importJSON(this)">
@@ -2214,6 +2254,43 @@ function getRoleLabel(roles){
   return labels.join(' · ')||'Membre';
 }
 
+// ════ DARK MODE ════
+function applyTheme(mode){
+  var root=document.getElementById('app-root');
+  if(!root)return;
+  if(mode==='dark'){root.setAttribute('data-theme','dark');}
+  else if(mode==='light'){root.removeAttribute('data-theme');}
+  else{
+    // Auto : suivre prefers-color-scheme
+    var prefersDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches;
+    prefersDark?root.setAttribute('data-theme','dark'):root.removeAttribute('data-theme');
+  }
+  // Mettre à jour les boutons du toggle
+  ['light','auto','dark'].forEach(function(m){
+    var btn=document.getElementById('theme-btn-'+m);
+    if(!btn)return;
+    var isActive=(m===mode);
+    btn.style.background=isActive?'var(--bg-card)':'transparent';
+    btn.style.color=isActive?'var(--texte)':'var(--texte-doux)';
+    btn.style.boxShadow=isActive?'0 1px 4px rgba(0,0,0,0.1)':'none';
+  });
+}
+function setThemeMode(mode){
+  try{localStorage.setItem('mavigne_theme',mode);}catch(e){}
+  applyTheme(mode);
+}
+function initTheme(){
+  var saved='auto';
+  try{saved=localStorage.getItem('mavigne_theme')||'auto';}catch(e){}
+  applyTheme(saved);
+  // Écouter les changements système en mode Auto
+  if(window.matchMedia){
+    window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',function(){
+      try{var m=localStorage.getItem('mavigne_theme')||'auto';if(m==='auto')applyTheme('auto');}catch(e){}
+    });
+  }
+}
+
 function logout(){
   currentUser=null;
   loginPendingIdx=-1;
@@ -2276,6 +2353,8 @@ async function fetchMeteo(){
     const desc=wmoDesc(code);
     const emoji=wmoEmoji(code);
     meteoData={temp,desc,wind,emoji,date:new Date().toISOString().split('T')[0]};
+    // Sauvegarder en cache avec timestamp
+    try{localStorage.setItem('mavigne_meteo_cache',JSON.stringify({...meteoData,wind,rain,ts:Date.now()}));}catch(e){}
     // Nouvelle card météo v2
     const mc=document.getElementById('hv2-meteo-card');
     if(mc){
@@ -2304,12 +2383,50 @@ async function fetchMeteo(){
     const existant=METEO_JOURNAL.find(m=>m.date===meteoData.date);
     if(!existant){
       METEO_JOURNAL.push({...meteoData});
-      // La météo s'insère dans le journal uniquement quand un travail est ajouté ce jour-là
-      // (voir injectMeteoIfNeeded)
     }
   }catch(e){
+    // Fallback : afficher les données en cache si disponibles
     const mc=document.getElementById('hv2-meteo-card');
-    if(mc)mc.innerHTML='<div style="font-size:12px;color:var(--texte-doux);padding:4px 0">Météo indisponible</div>';
+    if(!mc)return;
+    try{
+      const raw=localStorage.getItem('mavigne_meteo_cache');
+      if(raw){
+        const cache=JSON.parse(raw);
+        const ts=cache.ts?new Date(cache.ts):null;
+        let label='';
+        if(ts){
+          const now=new Date();
+          const diffH=Math.round((now-ts)/3600000);
+          if(diffH<1)label='il y a moins d\'1h';
+          else if(diffH<24)label=`il y a ${diffH}h`;
+          else{const d=ts.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});label=`le ${d} à ${ts.getHours()}h${String(ts.getMinutes()).padStart(2,'0')}`;}
+        }
+        mc.innerHTML=`<div class="hv2-meteo-cache-wrap">
+          <div class="hv2-meteo-cache-main">
+            <div class="hv2-meteo-icon" style="opacity:0.65">${cache.emoji||'☁️'}</div>
+            <div class="hv2-meteo-main">
+              <div class="hv2-meteo-temp" style="color:var(--texte-med)">${cache.temp||'—'}°<small style="font-size:16px;color:var(--texte-doux)">C</small></div>
+              <div class="hv2-meteo-desc">${cache.desc||''} · Bourgogne</div>
+            </div>
+            <div class="hv2-meteo-details">
+              <div class="hv2-meteo-detail">Vent <span>${cache.wind||'—'} km/h</span></div>
+              <div class="hv2-meteo-detail">Pluie <span>${cache.rain||0} mm</span></div>
+            </div>
+          </div>
+          <div class="hv2-meteo-cache-banner">
+            <div style="display:flex;align-items:center;gap:6px">
+              <div style="width:6px;height:6px;border-radius:50%;background:var(--or);flex-shrink:0"></div>
+              <span style="font-size:10px;color:var(--or);font-weight:600">Cache${label?' · '+label:''}</span>
+            </div>
+            <button onclick="fetchMeteo()" style="display:flex;align-items:center;gap:4px;padding:3px 10px;border-radius:8px;background:var(--or-pale);border:1px solid rgba(184,145,58,0.25);font-size:10px;font-weight:600;color:var(--or);cursor:pointer;font-family:'Outfit',sans-serif">🔄 Actualiser</button>
+          </div>
+        </div>`;
+      } else {
+        mc.innerHTML='<div style="font-size:12px;color:var(--texte-doux);padding:4px 0">Météo indisponible</div>';
+      }
+    }catch(e2){
+      mc.innerHTML='<div style="font-size:12px;color:var(--texte-doux);padding:4px 0">Météo indisponible</div>';
+    }
   }
 }
 function wmoDesc(c){const m={0:'Dégagé',1:'Peu nuageux',2:'Partiellement nuageux',3:'Couvert',45:'Brouillard',48:'Brouillard givrant',51:'Bruine légère',53:'Bruine modérée',55:'Bruine forte',61:'Pluie légère',63:'Pluie modérée',65:'Pluie forte',71:'Neige légère',73:'Neige modérée',75:'Neige forte',80:'Averses légères',81:'Averses modérées',82:'Averses fortes',95:'Orage',96:'Orage avec grêle'};return m[c]||'Variable';}
@@ -2607,8 +2724,8 @@ function renderParcelles(){
   const cont=document.getElementById('pList');
   if(!data.length){
     const msg=pTacheFilter!=='toutes'
-      ?`<div class="empty-state"><div class="ei">✅</div><p><strong>${pTacheFilter}</strong> terminé sur toutes les parcelles !</p></div>`
-      :'<div class="empty-state"><div class="ei">🔍</div><p>Aucun résultat.</p></div>';
+      ?`<div class="empty-state"><div class="ei">✅</div><div class="et">${pTacheFilter} terminé</div><div class="ed">Cette tâche est terminée sur toutes les parcelles de la saison !</div></div>`
+      :`<div class="empty-state"><div class="ei">🔍</div><div class="et">Aucun résultat</div><div class="ed">Aucune parcelle ne correspond aux filtres actifs.</div></div>`;
     cont.innerHTML=msg;return;
   }
   cont.innerHTML=data.map(p=>{
@@ -3060,7 +3177,13 @@ function renderJournalList(){
   const grouped={};
   data.forEach(r=>{if(!grouped[r.date])grouped[r.date]=[];grouped[r.date].push(r);});
   const tl=document.getElementById('timeline');
-  if(!data.length){tl.innerHTML='<div class="empty-state"><div class="ei">🔍</div><p>Aucun résultat.</p></div>';return;}
+  if(!data.length){
+    const hasFilters=jQui!=='tous'||jTache!=='toutes'||jSearch||jParcelle!=='toutes'||jDateDeb||jDateFin;
+    tl.innerHTML=hasFilters
+      ?`<div class="empty-state"><div class="ei">🔍</div><div class="et">Aucun résultat</div><div class="ed">Aucune entrée ne correspond aux filtres actifs.</div><button class="empty-cta-or" onclick="clearAllJFiltres()">✕ Effacer les filtres</button></div>`
+      :`<div class="empty-state"><div class="ei">📋</div><div class="et">Journal vide</div><div class="ed">Aucun travail enregistré pour cette saison. Les entrées apparaîtront ici au fil des journées.</div>${canWrite()?'<button class="empty-cta-v" onclick="openOv(\'ovJournalEntry\')">+ Ajouter un travail</button>':''}</div>`;
+    return;
+  }
   tl.innerHTML=Object.entries(grouped).map(([date,items])=>`
     <div class="dgroup">
       <div class="dhead"><div class="dline"></div><div class="dlabel">${fmtDate(date)}</div><div class="dcnt">${items.length}</div><div class="dline"></div></div>
@@ -3523,7 +3646,7 @@ function renderTracteur(){
     +ACTIVITES.map(a=>`<div class="chip ${fAct===a.nom?'active ac':''}" onclick="fAct='${a.nom}';renderTracteur()">${a.emoji} ${a.nom}</div>`).join('');
   let data=SESSIONS.filter(s=>{if(fCond!=='tous'&&s.conducteur!==fCond)return false;if(fAct!=='toutes'&&s.activite!==fAct)return false;return true;}).sort((a,b)=>b.date.localeCompare(a.date));
   const sl=document.getElementById('sessions-list');
-  if(!data.length){sl.innerHTML='<div class="empty-state"><div class="ei">🚜</div><p>Aucune session.</p></div>';return;}
+  if(!data.length){sl.innerHTML=`<div class="empty-state"><div class="ei">🚜</div><div class="et">Aucune session</div><div class="ed">Aucun passage tracteur enregistré pour cette saison. Démarrez une session pour suivre l'avancement des activités.</div>${!isReadOnly?'<button class="empty-cta-ac" onclick="openOv(\'ovNewSession\')">+ Démarrer une session</button>':''}</div>`;return;}
   const amap=ACTIVITES.reduce((m,a)=>{m[a.nom]=a;return m},{});
   const isAdmin=currentUser&&currentUser.roles&&currentUser.roles.includes('admin');
   // ── Tri : sessions en cours en premier (fond sombre), puis terminées ──
@@ -3903,7 +4026,7 @@ function renderPhyto(){
   document.getElementById('phyto-type-row').innerHTML=types.map(t=>`<div class="pchip2 ${phFilter===t?'active':''}" onclick="phFilter='${t}';renderPhyto()">${t==='tous'?'Tous':(TEMJ[t]||'')+' '+t}</div>`).join('');
   let data=TRAITEMENTS.filter(t=>phFilter==='tous'||t.type===phFilter).sort((a,b)=>b.date.localeCompare(a.date));
   const reg=document.getElementById('traitements-list');
-  if(!data.length)reg.innerHTML='<div class="empty-state"><div class="ei">🧪</div><p>Aucun traitement.<br>Appuyez sur <strong>＋ Traitement</strong></p></div>';
+  if(!data.length)reg.innerHTML=`<div class="empty-state"><div class="ei">🌿</div><div class="et">Aucun traitement</div><div class="ed">Le registre phytosanitaire est vide pour cette saison. Enregistrez votre premier traitement pour commencer le suivi DAR.</div>${isAdmin()?'<button class="empty-cta-ph" onclick="openOv(\'ovNewTrait\')">+ Nouveau traitement</button>':''}</div>`;
   else reg.innerHTML=data.map((t,i)=>{
     const prod=CATALOGUE.find(p=>p.nom===t.produit);
     const darR=prod?Math.max(0,prod.dar-Math.floor((today-new Date(t.date))/86400000)):null;
@@ -4609,7 +4732,7 @@ function renderHistorique(){
   <div id="histo-archive-feedback" style="display:none;margin:0 16px 12px;background:var(--vert-pale);color:var(--vert);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600"></div>`;
 
   if(allSaisons.length < 2){
-    html += `<div class="histo-empty"><div class="ei">📦</div><div style="font-size:14px;font-weight:600;margin-bottom:6px">Pas encore d'historique</div><div style="font-size:12px">Archivez la saison active pour commencer à comparer les années.</div></div>`;
+    html += `<div class="empty-state"><div class="ei">🗂️</div><div class="et">Aucune saison archivée</div><div class="ed">L'historique s'enrichira au fil des saisons clôturées. La saison active n'apparaît pas ici.</div></div>`;
     body.innerHTML = html;
     return;
   }
@@ -5386,6 +5509,221 @@ function exportPDFPhyto(){
   showExportFeedback(`✅ Registre phyto ${annee} généré — ${nbTotal} traitement${nbTotal>1?'s':''} !`);
 }
 
+  const win=window.open('','_blank','width=1000,height=750');
+  win.document.write(html);
+  win.document.close();
+  win.onload=()=>{win.focus();win.print();};
+  showExportFeedback(`✅ Registre phyto ${annee} généré — ${nbTotal} traitement${nbTotal>1?'s':''} !`);
+}
+
+// ════ PDF RAPPORT DE SAISON ════
+function exportPDFRapportSaison(){
+  const saison=getSaisonActive();
+  const nomSaison=saison?saison.nom:'Saison';
+  const domaine=(window.CONFIG&&window.CONFIG.nomDomaine)||'Domaine Marchand-Grillot';
+  const today=new Date();
+  const dateGen=today.toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+
+  // ── Données ──
+  const travaux=JOURNAL.filter(j=>!j.meteo).sort((a,b)=>a.date>b.date?1:-1);
+  const sessions=[...SESSIONS].sort((a,b)=>{
+    const ord={'En cours':0,'Terminé':1};
+    return (ord[a.statut]??2)-(ord[b.statut]??2);
+  });
+  const traitements=[...TRAITEMENTS].sort((a,b)=>a.date>b.date?1:-1);
+
+  // ── Stats couverture ──
+  const nbParcelles=PARCELLES.filter(p=>p.statut!=='Arrachée').length;
+  const surfTot=PARCELLES.filter(p=>p.statut!=='Arrachée').reduce((s,p)=>s+(p.surface||0),0);
+  const pctGlobal=PARCELLES.length?Math.round(PARCELLES.filter(p=>p.statut!=='Arrachée').reduce((s,p)=>{
+    const ts=getTachesSaison();const tot=ts.length;if(!tot)return s;
+    const done=ts.filter(t=>p.taches&&p.taches[t.nom]==='Validé').length;
+    return s+done/tot;
+  },0)/Math.max(1,nbParcelles)*100):0;
+
+  function fmtD(d){if(!d)return'—';const p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+  function badge(txt,bg,col){return`<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:${bg};color:${col}">${txt}</span>`;}
+
+  // ── Tableau travaux ──
+  const travauxRows=travaux.map((j,i)=>{
+    const isEq=j.equipe||j.qui==='Equipe';
+    const qui=isEq&&j.qui&&j.qui!=='Equipe'?`Équipe (${j.qui})`:isEq?'Équipe':j.qui||'—';
+    const isVal=j.statut==='Validé';
+    return `<tr style="background:${i%2===0?'white':'#FAFAF8'}">
+      <td style="padding:8px 10px;font-size:11px;color:#666;white-space:nowrap">${fmtD(j.date)}</td>
+      <td style="padding:8px 10px;font-size:12px;font-weight:500">${j.parcelle||'—'}</td>
+      <td style="padding:8px 10px;font-size:12px">${j.tache||'—'}</td>
+      <td style="padding:8px 10px;font-size:11px">${qui}</td>
+      <td style="padding:8px 10px">${isVal
+        ?badge('✓ Validé','#EAF4E2','#2C5F14')
+        :badge('En cours','#FDF3E0','#8B5E14')}</td>
+    </tr>`;
+  }).join('');
+
+  // ── Sessions tracteur ──
+  const sessionsHTML=sessions.map(s=>{
+    const pct=s.avancement||0;
+    const isEnc=s.statut==='En cours';
+    const nbFait=s.parcelles?s.parcelles.filter(p=>p.fait).length:Math.round(pct/100*nbParcelles);
+    const tracteurNom=s.tracteurId?(TRACTEURS_LIST||[]).find(t=>t.id===s.tracteurId)?.nom||'—':'—';
+    return `<div style="border:1px solid #E0DDD5;border-radius:8px;margin-bottom:12px;overflow:hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#F5F4F0;border-bottom:1px solid #E0DDD5">
+        <div>
+          <div style="font-size:13px;font-weight:700">🚜 ${s.activite||'Session'}</div>
+          <div style="font-size:11px;color:#888;margin-top:2px">${tracteurNom?tracteurNom+' · ':''}${s.conducteur||'—'} · ${fmtD(s.date)}</div>
+        </div>
+        ${isEnc?badge('En cours','#FDF3E0','#8B5E14'):badge('✓ Terminé','#EAF4E2','#2C5F14')}
+      </div>
+      <div style="display:flex;gap:28px;padding:10px 14px;flex-wrap:wrap">
+        <div><div style="font-size:9px;text-transform:uppercase;color:#AAA;letter-spacing:0.6px;margin-bottom:3px">Avancement</div>
+          <div style="font-size:14px;font-weight:700;color:#1A3A2A">${pct}%</div>
+          <div style="height:4px;width:120px;background:#E8E8E4;border-radius:3px;margin-top:5px;overflow:hidden"><div style="height:100%;width:${pct}%;background:#2C4E1A;border-radius:3px"></div></div>
+        </div>
+        <div><div style="font-size:9px;text-transform:uppercase;color:#AAA;letter-spacing:0.6px;margin-bottom:3px">Parcelles</div>
+          <div style="font-size:14px;font-weight:700">${nbFait} / ${nbParcelles}</div>
+        </div>
+        <div><div style="font-size:9px;text-transform:uppercase;color:#AAA;letter-spacing:0.6px;margin-bottom:3px">Conducteur</div>
+          <div style="font-size:14px;font-weight:700">${s.conducteur||'—'}</div>
+        </div>
+        ${isEnc?`<div><div style="font-size:9px;text-transform:uppercase;color:#AAA;letter-spacing:0.6px;margin-bottom:3px">Restant</div><div style="font-size:14px;font-weight:700;color:#B85A1A">${nbParcelles-nbFait} parcelles</div></div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  // ── Traitements phyto ──
+  const CATALOGUE_MAP={};(CATALOGUE||[]).forEach(p=>{CATALOGUE_MAP[p.nom]=p;});
+  const typeColor={'Cuivre':'#1A4A7A','Soufre':'#7D6608','Fongicide':'#4A2060','Insecticide':'#A0291E','Herbicide':'#1E3A12','Biocontrôle':'#2C6E49'};
+  const phytoRows=traitements.map(t=>{
+    const prod=CATALOGUE_MAP[t.produit]||{};
+    const tc=typeColor[prod.type]||'#666';
+    const darJ=prod.dar;
+    let darCell='—';
+    if(darJ&&t.date){const dt=new Date(t.date);dt.setDate(dt.getDate()+darJ);const r=Math.ceil((dt-today)/86400000);darCell=r>0?`<span style="color:#B85A1A;font-weight:700">${r}j restants</span>`:`<span style="color:#2C5F14">✅ Libre</span>`;}
+    return `<div style="display:flex;align-items:flex-start;gap:8px;padding:10px 0;border-bottom:1px solid #F0EEE9">
+      <div style="font-size:11px;color:#AAA;width:68px;flex-shrink:0;padding-top:1px">${fmtD(t.date)}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;margin-bottom:2px">${t.produit||'—'} <span style="display:inline-block;padding:1px 7px;border-radius:8px;font-size:9px;font-weight:700;background:#F0EAF8;color:${tc}">${prod.type||'—'}</span></div>
+        <div style="font-size:11px;color:#888">Dose : ${t.dose||prod.dose||'—'} · ${t.parcelles||'Toutes parcelles'} · ${t.operateur||'—'}</div>
+      </div>
+      <div style="font-size:11px;text-align:right;flex-shrink:0;padding-top:1px">${darCell}</div>
+    </div>`;
+  }).join('');
+
+  // ── Récaps ──
+  const nbOuvriersActifs=[...new Set(travaux.map(j=>j.qui).filter(Boolean))].length;
+  const nbTravauxTotal=travaux.length;
+
+  const html=`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+<title>Rapport de saison — ${nomSaison} — ${domaine}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1A1A1A;background:white;font-size:12px;}
+@page{margin:20mm 18mm;}
+@media print{.page-break{page-break-before:always;}.no-break{break-inside:avoid;}}
+.cover{padding:48px 0 40px;border-top:6px solid #2C4E1A;min-height:calc(100vh - 40px);display:flex;flex-direction:column;justify-content:space-between;}
+.cover-domaine{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#888;margin-bottom:14px;}
+.cover-titre{font-size:32px;font-weight:700;color:#1A1A1A;line-height:1.2;margin-bottom:6px;}
+.cover-sous{font-size:16px;font-weight:300;color:#666;margin-bottom:28px;}
+.cover-stats{display:flex;gap:28px;padding:18px 0;border-top:1px solid #E8E8E4;border-bottom:1px solid #E8E8E4;margin-bottom:28px;}
+.cs-val{font-size:26px;font-weight:700;color:#2C4E1A;line-height:1;}
+.cs-lbl{font-size:10px;color:#888;margin-top:3px;}
+.cover-desc{font-size:12px;color:#666;line-height:1.6;}
+.cover-bottom{display:flex;justify-content:space-between;align-items:flex-end;margin-top:32px;padding-top:16px;border-top:1px solid #E8E8E4;}
+.cover-meta{font-size:10px;color:#AAA;line-height:1.8;}
+.cover-app{font-size:10px;color:#CCC;text-align:right;line-height:1.6;}
+.section-page{padding:32px 0;}
+.sec-head{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:2px solid #2C4E1A;margin-bottom:20px;}
+.sec-num{width:26px;height:26px;border-radius:50%;background:#2C4E1A;color:white;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sec-title{font-size:17px;font-weight:700;}
+.sec-sub{font-size:10px;color:#AAA;margin-top:1px;}
+.recap-band{display:flex;gap:20px;background:#F8F7F4;border-radius:8px;padding:12px 14px;margin-bottom:18px;}
+.rb-val{font-size:19px;font-weight:700;color:#2C4E1A;}
+.rb-lbl{font-size:9px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:0.5px;}
+table{width:100%;border-collapse:collapse;}
+thead th{background:#F5F4F0;padding:7px 9px;text-align:left;font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#666;border-bottom:1px solid #E0DDD5;}
+tbody tr{border-bottom:1px solid #F0EEE9;}
+tbody tr:last-child{border-bottom:none;}
+.page-footer{border-top:1px solid #F0EEE9;padding:8px 0 0;display:flex;justify-content:space-between;margin-top:20px;}
+.footer-dom{font-size:9px;color:#CCC;font-weight:600;letter-spacing:0.5px;}
+.footer-app{font-size:9px;color:#DDD;}
+</style></head><body>
+
+<!-- PAGE 1 : COUVERTURE -->
+<div class="cover">
+  <div>
+    <div class="cover-domaine">${domaine.toUpperCase()}</div>
+    <div class="cover-titre">Rapport de saison</div>
+    <div class="cover-sous">${nomSaison} · Bourgogne</div>
+    <div class="cover-stats">
+      <div><div class="cs-val">${nbParcelles}</div><div class="cs-lbl">Parcelles actives</div></div>
+      <div><div class="cs-val">${surfTot.toFixed(2)} ha</div><div class="cs-lbl">Surface totale</div></div>
+      <div><div class="cs-val">${pctGlobal}%</div><div class="cs-lbl">Avancement global</div></div>
+      <div><div class="cs-val">${sessions.length}</div><div class="cs-lbl">Sessions tracteur</div></div>
+    </div>
+    <div class="cover-desc">Ce rapport couvre l'ensemble des travaux manuels, des sessions de travail mécanique et des traitements phytosanitaires enregistrés dans l'application Ma Vigne au cours de la saison ${nomSaison}.</div>
+  </div>
+  <div class="cover-bottom">
+    <div class="cover-meta">Généré le ${dateGen}<br>${domaine}<br>SIRET 98214811600014</div>
+    <div class="cover-app">Généré par Ma Vigne v4.3<br>GUERETTECH</div>
+  </div>
+</div>
+
+<!-- PAGE 2 : TRAVAUX -->
+<div class="section-page page-break">
+  <div class="sec-head">
+    <div class="sec-num">1</div>
+    <div><div class="sec-title">Travaux manuels</div><div class="sec-sub">Journal de saison — ${nomSaison}</div></div>
+  </div>
+  <div class="recap-band">
+    <div><div class="rb-val">${nbTravauxTotal}</div><div class="rb-lbl">Entrées journal</div></div>
+    <div><div class="rb-val">${nbOuvriersActifs}</div><div class="rb-lbl">Ouvriers actifs</div></div>
+    <div><div class="rb-val">${travaux.filter(j=>j.statut==='Validé').length}</div><div class="rb-lbl">Validées</div></div>
+    <div><div class="rb-val">${travaux.filter(j=>j.equipe).length}</div><div class="rb-lbl">En équipe</div></div>
+  </div>
+  ${travauxRows.length?`<table><thead><tr><th>Date</th><th>Parcelle</th><th>Tâche</th><th>Ouvrier / Équipe</th><th>Statut</th></tr></thead><tbody>${travauxRows}</tbody></table>`:'<p style="color:#888;font-style:italic;padding:12px 0">Aucun travail enregistré pour cette saison.</p>'}
+  <div class="page-footer"><div class="footer-dom">${domaine.toUpperCase()}</div><div class="footer-app">Rapport ${nomSaison} · Ma Vigne v4.3</div></div>
+</div>
+
+<!-- PAGE 3 : TRACTEUR -->
+<div class="section-page page-break">
+  <div class="sec-head">
+    <div class="sec-num">2</div>
+    <div><div class="sec-title">Travaux mécaniques</div><div class="sec-sub">Sessions tracteur · ${nomSaison}</div></div>
+  </div>
+  <div class="recap-band">
+    <div><div class="rb-val">${sessions.length}</div><div class="rb-lbl">Sessions</div></div>
+    <div><div class="rb-val">${sessions.filter(s=>s.statut==='Terminé').length}</div><div class="rb-lbl">Terminées</div></div>
+    <div><div class="rb-val">${sessions.filter(s=>s.statut==='En cours').length}</div><div class="rb-lbl">En cours</div></div>
+  </div>
+  ${sessionsHTML||'<p style="color:#888;font-style:italic;padding:12px 0">Aucune session tracteur enregistrée pour cette saison.</p>'}
+  <div class="page-footer"><div class="footer-dom">${domaine.toUpperCase()}</div><div class="footer-app">Rapport ${nomSaison} · Ma Vigne v4.3</div></div>
+</div>
+
+<!-- PAGE 4 : PHYTO -->
+<div class="section-page page-break">
+  <div class="sec-head">
+    <div class="sec-num">3</div>
+    <div><div class="sec-title">Traitements phytosanitaires</div><div class="sec-sub">Registre réglementaire · ${nomSaison}</div></div>
+  </div>
+  <div class="recap-band">
+    <div><div class="rb-val">${traitements.length}</div><div class="rb-lbl">Traitements</div></div>
+    <div><div class="rb-val">${[...new Set(traitements.map(t=>t.produit))].length}</div><div class="rb-lbl">Produits distincts</div></div>
+    <div><div class="rb-val">${traitements.filter(t=>{const p=CATALOGUE_MAP[t.produit]||{};if(!p.dar||!t.date)return false;const dt=new Date(t.date);dt.setDate(dt.getDate()+p.dar);return dt>today;}).length}</div><div class="rb-lbl">DAR en cours</div></div>
+  </div>
+  ${phytoRows||'<p style="color:#888;font-style:italic;padding:12px 0">Aucun traitement phytosanitaire enregistré pour cette saison.</p>'}
+  <div class="page-footer"><div class="footer-dom">${domaine.toUpperCase()}</div><div class="footer-app">Rapport ${nomSaison} · Ma Vigne v4.3</div></div>
+</div>
+
+</body></html>`;
+
+  const win=window.open('','_blank','width=1000,height=750');
+  if(!win){showExportFeedback('❌ Popup bloquée — autorisez les popups pour ce site');return;}
+  win.document.write(html);
+  win.document.close();
+  win.onload=()=>{win.focus();win.print();};
+  showExportFeedback(`✅ Rapport ${nomSaison} généré !`);
+}
+
 // ════ MODULE CHAT ════
 
 
@@ -5699,6 +6037,9 @@ function clearAllJFiltres(){
 }
 
 window.addEventListener('load', function(){
+  // Initialiser le thème dès le chargement
+  if(typeof initTheme==='function') initTheme();
+
   var todayStr = new Date().toISOString().split('T')[0];
   var sd = document.getElementById('s-date'); if(sd) sd.value = todayStr;
   var pd = document.getElementById('p-date'); if(pd) pd.value = todayStr;
@@ -5796,7 +6137,7 @@ function lancerExportEntretienPDF(){
     return '<section class="tracteur-section"><div class="tracteur-title"><div><div class="tracteur-nom">'+t.nom+(t.traitementOnly?' <span class="badge-trait">Traitement</span>':'')+'</div><div class="tracteur-modele">🔩 '+(t.modele||'—')+' · '+t.type+'</div></div><div class="tracteur-annee">'+annee+'</div></div>'+resumeHTML+'<h3 class="section-sub">📋 Fiches d\'entretien</h3>'+fichesHTML+'<h3 class="section-sub" style="margin-top:20px">🔧 Passages réparateur</h3>'+repsHTML+'</section>';
   }).join('<div class="page-break"></div>');
   var aujourd_hui=fmtD(new Date().toISOString().slice(0,10));
-  var html='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Ma Vigne — Entretien '+annee+'</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Georgia,serif;font-size:11px;color:#1A1A1A;padding:20px;}.doc-header{border-bottom:2px solid #3D6B27;padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;}.doc-title{font-size:20px;font-weight:bold;color:#3D6B27;}.doc-meta{text-align:right;font-size:10px;color:#888;}.tracteur-section{margin-bottom:30px;}.tracteur-title{display:flex;justify-content:space-between;align-items:flex-start;background:#2A3547;color:white;padding:12px 16px;border-radius:8px;margin-bottom:12px;}.tracteur-nom{font-size:16px;font-weight:bold;}.tracteur-modele{font-size:10px;color:rgba(255,255,255,0.6);margin-top:3px;}.tracteur-annee{font-size:22px;font-weight:bold;color:rgba(255,255,255,0.35);}.badge-trait{font-size:9px;background:#E07B2A;color:white;border-radius:4px;padding:1px 6px;vertical-align:middle;font-weight:normal;margin-left:6px;}.resume-bar{display:flex;border:1px solid #E0DDD5;border-radius:8px;overflow:hidden;margin-bottom:16px;}.resume-item{flex:1;text-align:center;padding:10px 6px;border-right:1px solid #E0DDD5;}.resume-item:last-child{border-right:none;}.resume-val{display:block;font-size:18px;font-weight:bold;color:#2A3547;}.val-warn{color:#C0392B;}.resume-lbl{display:block;font-size:9px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:0.04em;}.section-sub{font-size:12px;font-weight:bold;color:#2A3547;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E8E4D9;}.fiche-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;overflow:hidden;break-inside:avoid;}.fiche-bloc.has-anomalie{border-color:#F5B8B4;}.fiche-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#F9F8F5;border-bottom:1px solid #E0DDD5;}.fiche-date{font-weight:bold;font-size:11px;}.fiche-meta{font-size:10px;color:#666;margin-top:2px;}.fiche-score{font-size:18px;font-weight:bold;}.score-ok{color:#3D6B27;}.score-warn{color:#E07B2A;}.check-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:8px 12px;}.check-item{font-size:10px;display:flex;justify-content:space-between;align-items:center;padding:3px 6px;border-radius:4px;}.check-item.ok{background:#EAF4E2;color:#2D5A1B;}.check-item.ko{background:#FEF0EF;color:#922B21;}.check-item span{font-weight:bold;}.anomalie{padding:6px 12px 8px;background:#FEF0EF;font-size:10px;color:#922B21;border-top:1px solid #F5B8B4;}.rep-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;padding:10px 14px;break-inside:avoid;}.rep-bloc.rep-en-cours{border-color:#F5CBA7;background:#FEF9F5;}.rep-bloc.rep-depasse{border-color:#F5B8B4;background:#FEF0EF;}.rep-header{display:flex;justify-content:space-between;align-items:center;gap:10px;}.rep-motif{font-weight:bold;font-size:11px;margin-bottom:4px;}.rep-dates{font-size:10px;color:#555;}.rep-badge{font-size:10px;font-weight:bold;padding:4px 10px;border-radius:12px;white-space:nowrap;}.badge-ok{background:#EAF4E2;color:#2D5A1B;}.badge-cours{background:#FEF3E2;color:#935116;}.empty{font-size:10px;color:#999;font-style:italic;padding:8px 0;}.page-break{page-break-after:always;}.doc-footer{border-top:1px solid #E0DDD5;padding-top:8px;margin-top:20px;font-size:9px;color:#AAA;display:flex;justify-content:space-between;}@media print{.page-break{page-break-after:always;border:none;margin:0;}}</style></head><body><div class="doc-header"><div><div class="doc-title">🍇 Ma Vigne — Entretien tracteurs</div><div style="font-size:11px;color:#666;margin-top:2px">Historique '+annee+' · '+tracteursSelectionnes.map(function(t){return t.nom;}).join(', ')+'</div></div><div class="doc-meta">Généré le '+aujourd_hui+'<br>Ma Vigne v4.2 · GUERETTECH</div></div>'+sectionsHTML+'<div class="doc-footer"><span>Ma Vigne — Document confidentiel · Usage interne</span><span>© 2026 Nicolas GUERET / GUERETTECH</span></div></body></html>';
+  var html='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Ma Vigne — Entretien '+annee+'</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Georgia,serif;font-size:11px;color:#1A1A1A;padding:20px;}.doc-header{border-bottom:2px solid #3D6B27;padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;}.doc-title{font-size:20px;font-weight:bold;color:#3D6B27;}.doc-meta{text-align:right;font-size:10px;color:#888;}.tracteur-section{margin-bottom:30px;}.tracteur-title{display:flex;justify-content:space-between;align-items:flex-start;background:#2A3547;color:white;padding:12px 16px;border-radius:8px;margin-bottom:12px;}.tracteur-nom{font-size:16px;font-weight:bold;}.tracteur-modele{font-size:10px;color:rgba(255,255,255,0.6);margin-top:3px;}.tracteur-annee{font-size:22px;font-weight:bold;color:rgba(255,255,255,0.35);}.badge-trait{font-size:9px;background:#E07B2A;color:white;border-radius:4px;padding:1px 6px;vertical-align:middle;font-weight:normal;margin-left:6px;}.resume-bar{display:flex;border:1px solid #E0DDD5;border-radius:8px;overflow:hidden;margin-bottom:16px;}.resume-item{flex:1;text-align:center;padding:10px 6px;border-right:1px solid #E0DDD5;}.resume-item:last-child{border-right:none;}.resume-val{display:block;font-size:18px;font-weight:bold;color:#2A3547;}.val-warn{color:#C0392B;}.resume-lbl{display:block;font-size:9px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:0.04em;}.section-sub{font-size:12px;font-weight:bold;color:#2A3547;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E8E4D9;}.fiche-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;overflow:hidden;break-inside:avoid;}.fiche-bloc.has-anomalie{border-color:#F5B8B4;}.fiche-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#F9F8F5;border-bottom:1px solid #E0DDD5;}.fiche-date{font-weight:bold;font-size:11px;}.fiche-meta{font-size:10px;color:#666;margin-top:2px;}.fiche-score{font-size:18px;font-weight:bold;}.score-ok{color:#3D6B27;}.score-warn{color:#E07B2A;}.check-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:8px 12px;}.check-item{font-size:10px;display:flex;justify-content:space-between;align-items:center;padding:3px 6px;border-radius:4px;}.check-item.ok{background:#EAF4E2;color:#2D5A1B;}.check-item.ko{background:#FEF0EF;color:#922B21;}.check-item span{font-weight:bold;}.anomalie{padding:6px 12px 8px;background:#FEF0EF;font-size:10px;color:#922B21;border-top:1px solid #F5B8B4;}.rep-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;padding:10px 14px;break-inside:avoid;}.rep-bloc.rep-en-cours{border-color:#F5CBA7;background:#FEF9F5;}.rep-bloc.rep-depasse{border-color:#F5B8B4;background:#FEF0EF;}.rep-header{display:flex;justify-content:space-between;align-items:center;gap:10px;}.rep-motif{font-weight:bold;font-size:11px;margin-bottom:4px;}.rep-dates{font-size:10px;color:#555;}.rep-badge{font-size:10px;font-weight:bold;padding:4px 10px;border-radius:12px;white-space:nowrap;}.badge-ok{background:#EAF4E2;color:#2D5A1B;}.badge-cours{background:#FEF3E2;color:#935116;}.empty{font-size:10px;color:#999;font-style:italic;padding:8px 0;}.page-break{page-break-after:always;}.doc-footer{border-top:1px solid #E0DDD5;padding-top:8px;margin-top:20px;font-size:9px;color:#AAA;display:flex;justify-content:space-between;}@media print{.page-break{page-break-after:always;border:none;margin:0;}}</style></head><body><div class="doc-header"><div><div class="doc-title">🍇 Ma Vigne — Entretien tracteurs</div><div style="font-size:11px;color:#666;margin-top:2px">Historique '+annee+' · '+tracteursSelectionnes.map(function(t){return t.nom;}).join(', ')+'</div></div><div class="doc-meta">Généré le '+aujourd_hui+'<br>Ma Vigne v4.3 · GUERETTECH</div></div>'+sectionsHTML+'<div class="doc-footer"><span>Ma Vigne — Document confidentiel · Usage interne</span><span>© 2026 Nicolas GUERET / GUERETTECH</span></div></body></html>';
   var win=window.open('','_blank');
   if(!win){showToast('Autorisez les popups pour l\'impression','#C0392B');return;}
   win.document.write(html);
@@ -6061,11 +6402,12 @@ if ('serviceWorker' in navigator) {
       <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Cookies & traceurs</div>
       <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
 
-      <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v4.2</div>
+      <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v4.3</div>
 
       <button class="mbtn" style="margin-top:20px" onclick="closeOv(null,'ovMentions')">Fermer</button>
     </div>
   </div>
 </div>
+</div><!-- /#app-root -->
 </body>
 </html>
