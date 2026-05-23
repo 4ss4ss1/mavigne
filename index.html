@@ -586,6 +586,51 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .sc-blbl{display:flex;justify-content:space-between;font-size:10px;color:var(--texte-doux);margin-bottom:5px;}
 .sc-btrack{height:6px;background:var(--gris-clair);border-radius:6px;overflow:hidden;}
 .sc-bfill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--acier-med),#6A8090);}
+/* ── Onglets tracteurs ── */
+.trac-tabs{display:flex;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--gris-clair);background:white;}
+.trac-tabs::-webkit-scrollbar{display:none;}
+.trac-tab{flex:0 0 auto;min-width:80px;max-width:110px;padding:10px 8px;border:none;background:transparent;font-family:'Outfit',sans-serif;font-size:11px;cursor:pointer;color:var(--texte-doux);border-bottom:2px solid transparent;transition:all 0.15s;position:relative;text-align:center;line-height:1.3;}
+.trac-tab.active{color:var(--acier);border-bottom-color:var(--acier);font-weight:700;}
+.trac-tab-rep-badge{position:absolute;top:4px;right:6px;background:var(--rouge);color:#fff;border-radius:5px;font-size:7px;padding:1px 4px;font-weight:700;line-height:14px;}
+/* ── Bandeau réparateur ── */
+.rep-banner{border-radius:12px;padding:14px 16px;margin-bottom:14px;}
+.rep-banner-btns{display:flex;gap:8px;margin-top:12px;}
+.rep-banner-btn{flex:1;padding:10px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;min-height:44px;}
+/* ── Fiche entretien ── */
+.fiche-card{background:white;border-radius:14px;margin-bottom:10px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);overflow:hidden;}
+.fiche-card.has-ano{border-color:rgba(192,57,43,0.35);}
+.fiche-hd{padding:12px 16px;border-bottom:1px solid var(--gris-clair);display:flex;justify-content:space-between;align-items:center;}
+.fiche-score{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;}
+.fiche-grid{padding:10px 16px;display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;}
+.fiche-item{display:flex;align-items:center;gap:6px;font-size:12px;}
+.fiche-ano{margin:0 16px 12px;padding:8px 12px;background:var(--rouge-pale);border-radius:8px;border-left:3px solid var(--rouge);}
+.fiche-act-badge{display:inline-block;font-size:11px;background:var(--acier-pale);color:var(--acier);border-radius:6px;padding:2px 8px;margin-top:4px;}
+/* ── Travail effectué chips dans overlay ── */
+.travail-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+.travail-chip{padding:8px 14px;border-radius:20px;font-size:13px;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:white;font-family:'Outfit',sans-serif;font-weight:400;transition:all 0.15s;min-height:44px;display:flex;align-items:center;}
+.travail-chip.sel{border-color:var(--acier);background:var(--acier-pale);color:var(--acier);font-weight:600;}
+.travail-chip.disabled{opacity:0.35;pointer-events:none;cursor:default;}
+/* ── Entretien checklist ── */
+.ent-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.ent-btn{display:flex;align-items:center;gap:8px;padding:11px 12px;background:white;border:1.5px solid var(--gris);border-radius:10px;cursor:pointer;text-align:left;transition:all 0.15s;min-height:44px;font-family:'Outfit',sans-serif;}
+.ent-btn.checked{background:var(--vert-pale);border-color:var(--vert);}
+.ent-btn-ico{font-size:18px;}
+.ent-btn-lbl{font-size:12px;color:var(--texte-doux);line-height:1.3;}
+.ent-btn.checked .ent-btn-lbl{color:var(--texte);}
+.ent-btn-sub{font-size:10px;color:var(--texte-doux);}
+.ent-btn.checked .ent-btn-sub{color:var(--vert);}
+/* ── Réglages parc tracteurs ── */
+.trac-set-card{background:white;border-radius:14px;margin-bottom:10px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;}
+.trac-set-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.trac-type-pick{display:flex;gap:8px;margin-bottom:14px;}
+.trac-type-btn{flex:1;padding:10px;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:white;transition:all 0.15s;min-height:44px;}
+.trac-type-btn.sel-meca{border-color:var(--vert);background:var(--vert-pale);color:var(--vert);font-weight:600;}
+.trac-type-btn.sel-hydro{border-color:var(--acier);background:var(--acier-pale);color:var(--acier);font-weight:600;}
+.trac-trait-toggle{width:100%;margin-bottom:16px;padding:11px 14px;display:flex;align-items:center;gap:10px;border-radius:10px;cursor:pointer;border:1.5px solid var(--gris);background:white;font-family:'Outfit',sans-serif;min-height:44px;transition:all 0.15s;}
+.trac-trait-toggle.on{border-color:var(--orange);background:var(--orange-pale);}
+/* ── Info tracteur bar ── */
+.trac-info-bar{background:white;border:1px solid var(--gris-clair);border-radius:12px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow-sm);}
+.trac-info-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 
 /* ══ PHYTO ══ */
 .tabs3{display:flex;background:var(--gris-clair);border-radius:12px;padding:3px;margin:0 16px 14px;}
@@ -1335,17 +1380,32 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
   <div class="ph acier">
     <div class="ph-top">
       <div style="font-size:26px">🚜</div>
-      <div><div class="ph-title">Tracteur</div><div class="ph-sub">Sessions & passages domaine</div></div>
+      <div><div class="ph-title">Tracteur</div><div class="ph-sub">Sessions & entretien</div></div>
       <button class="ph-add" id="trac-add-btn" onclick="openNewSession()">＋ Session</button>
     </div>
   </div>
-  <div class="sband c3">
+  <!-- Onglets tracteurs -->
+  <div class="trac-tabs" id="trac-tabs"></div>
+  <!-- Bandeau réparateur (affiché dynamiquement) -->
+  <div id="trac-rep-banner" style="display:none;padding:0 16px;margin-top:14px"></div>
+  <div class="sband c3" id="trac-sband">
     <div class="sbi"><div class="sbi-val cac" id="st-t">3</div><div class="sbi-lbl">Sessions</div></div>
     <div class="sbi"><div class="sbi-val cac" id="st-ter">2</div><div class="sbi-lbl">Terminées</div></div>
     <div class="sbi"><div class="sbi-val" style="color:var(--orange)" id="st-enc">1</div><div class="sbi-lbl">En cours</div></div>
   </div>
   <div class="content" style="margin-top:-4px">
     <div class="readonly-banner" id="trac-readonly" style="display:none">🔒 Consultation seule — vous n'avez pas le rôle Tractoriste</div>
+    <!-- Info tracteur sélectionné -->
+    <div class="trac-info-bar" id="trac-info-bar" style="display:none"></div>
+    <!-- Section entretien -->
+    <div class="sh">
+      <span class="st">Entretien</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="sa sac" id="ent-add-btn" onclick="openOvEntretien()">＋ Fiche</span>
+        <span id="ent-rep-btn" onclick="openReparateur()" style="cursor:pointer;font-size:16px;padding:4px 8px;border:1.5px solid var(--rouge);border-radius:8px;color:var(--rouge);display:none">🔧</span>
+      </div>
+    </div>
+    <div id="entretiens-list" style="margin-bottom:6px"></div>
     <div class="sh"><span class="st">Conducteurs</span><span class="sa sac" id="cond-add-btn" onclick="openOv('ovConducteur')">＋ Ajouter</span></div>
     <div class="chips-row" id="cond-chips"></div>
     <div class="sh"><span class="st">Activités</span><span class="sa sac" id="act-add-btn" onclick="openOv('ovActivite')">＋ Créer</span></div>
@@ -1431,6 +1491,12 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
       <div class="set-row" style="border-radius:0 0 16px 16px" onclick="logout()"><div class="sr-l"><div class="sr-ico" style="background:var(--gris-clair)">🚪</div><div><div class="sr-lbl">Se déconnecter</div></div></div><div class="sr-arr">›</div></div>
     </div>
   </div>
+  <div class="set-sec" id="set-sec-tracteurs">
+    <div class="set-title">🚜 Parc tracteurs</div>
+    <div id="tracteurs-set-list" style="padding:0 16px"></div>
+    <div style="padding:0 16px;margin-top:8px"><button class="mbtn verte" style="margin-top:0;font-size:13px;padding:10px" onclick="openOv('ovAddTracteur')">＋ Ajouter un tracteur</button></div>
+  </div>
+
   <div class="set-sec">
     <div class="set-title" style="color:var(--rouge)">⚠️ Zone dangereuse</div>
     <div style="margin:0 16px">
@@ -1750,6 +1816,16 @@ let JOURNAL=[{"id":"0b550083","date":"2026-05-15","parcelle":"Songe du Haut","ta
 
 let ACTIVITES=[{nom:'Griffage',emoji:'🚜'},{nom:'Intercep',emoji:'✂️'},{nom:'Rognage',emoji:'✂️'},{nom:'Buttage',emoji:'🌱'},{nom:'Débuttage',emoji:'🌱'},{nom:'Minibuttage',emoji:'🌱'}];
 let CONDUCTEURS=[{nom:'Nico',statut:'Formé'},{nom:'Etienne',statut:'Formé'}];
+// ── Parc tracteurs (persisté Firebase + localStorage) ──
+let TRACTEURS_LIST=[
+  {id:'trac1',nom:'T1',modele:'',type:'mécanique',   traitementOnly:false},
+  {id:'trac2',nom:'T2',modele:'',type:'hydrostatique',traitementOnly:false},
+  {id:'trac3',nom:'T3',modele:'',type:'hydrostatique',traitementOnly:true},
+];
+// ── Fiches d'entretien {id, tracteurId, date, conducteur, activite, plein, huile, filtre_air, radiateur, pression_pneu, lavage, anomalie} ──
+let ENTRETIENS=[];
+// ── État réparateur par tracteur {tracteurId:{depuis,motif,prevu_retour}} ──
+let REPARATEUR={};
 let SESSIONS=[{id:'0b81fe25',activite:'Griffage',date:'2026-03-03',conducteur:'Nico',statut:'Terminé',avancement:100,note:''},{id:'bf8d7558',activite:'Minibuttage',date:'2026-04-10',conducteur:'Nico',statut:'Terminé',avancement:100,note:''},{id:'4b6e4fb0',activite:'Intercep',date:'2026-04-26',conducteur:'Nico',statut:'En cours',avancement:71,note:'13 parcelles restantes (zone sud)'}];
 let CATALOGUE=[
   // ── Cuivre ──
@@ -1801,9 +1877,12 @@ window.SESSIONS   = SESSIONS;
 window.TRAVAUX    = TRAVAUX;
 window.TRAITEMENTS= TRAITEMENTS;
 window.CATALOGUE  = CATALOGUE;
-window.CONDUCTEURS= CONDUCTEURS;
-window.ACTIVITES  = ACTIVITES;
-window.MEMBRES    = MEMBRES;
+window.CONDUCTEURS    = CONDUCTEURS;
+window.ACTIVITES      = ACTIVITES;
+window.TRACTEURS_LIST = TRACTEURS_LIST;
+window.ENTRETIENS     = ENTRETIENS;
+window.REPARATEUR     = REPARATEUR;
+window.MEMBRES        = MEMBRES;
 window.SAISONS    = SAISONS;
 window.TACHES     = TACHES;
 window.HISTORIQUE = HISTORIQUE;
@@ -1818,6 +1897,9 @@ window._syncLocalVars = function() {
   if(window.CATALOGUE   !== undefined) CATALOGUE   = window.CATALOGUE;
   if(window.CONDUCTEURS !== undefined) CONDUCTEURS = window.CONDUCTEURS;
   if(window.ACTIVITES   !== undefined) ACTIVITES   = window.ACTIVITES;
+  if(window.TRACTEURS_LIST!==undefined) TRACTEURS_LIST=window.TRACTEURS_LIST;
+  if(window.ENTRETIENS  !== undefined) ENTRETIENS  = window.ENTRETIENS;
+  if(window.REPARATEUR  !== undefined) REPARATEUR  = window.REPARATEUR;
   if(window.MEMBRES     !== undefined) MEMBRES     = window.MEMBRES;
   if(window.SAISONS     !== undefined) SAISONS     = window.SAISONS;
   if(window.TACHES      !== undefined) TACHES      = window.TACHES;
@@ -1843,6 +1925,9 @@ function saveData(keyHint) {
     catalogue:   window.CATALOGUE   || CATALOGUE,
     conducteurs: window.CONDUCTEURS || CONDUCTEURS,
     activites:   window.ACTIVITES   || ACTIVITES,
+    tracteurs_list: window.TRACTEURS_LIST || TRACTEURS_LIST,
+    entretiens:  window.ENTRETIENS  || ENTRETIENS,
+    reparateur:  window.REPARATEUR  || REPARATEUR,
     membres:     window.MEMBRES     || MEMBRES,
     saisons:     window.SAISONS     || SAISONS,
     taches:      window.TACHES      || TACHES,
@@ -1854,7 +1939,9 @@ function saveData(keyHint) {
     localStorage.setItem(LS_KEY, JSON.stringify({
       PARCELLES:W.parcelles, JOURNAL:W.journal, SESSIONS:W.sessions,
       TRAVAUX:W.travaux, TRAITEMENTS:W.traitements, CATALOGUE:W.catalogue,
-      CONDUCTEURS:W.conducteurs, ACTIVITES:W.activites, MEMBRES:W.membres,
+      CONDUCTEURS:W.conducteurs, ACTIVITES:W.activites,
+      TRACTEURS_LIST:W.tracteurs_list, ENTRETIENS:W.entretiens, REPARATEUR:W.reparateur,
+      MEMBRES:W.membres,
       SAISONS:W.saisons, TACHES:W.taches, HISTORIQUE:W.historique,
       priorityMessage:priorityMessage,
       savedAt:Date.now()
@@ -1884,6 +1971,9 @@ function loadData() {
     if (d.CATALOGUE)    { CATALOGUE = d.CATALOGUE; window.CATALOGUE = CATALOGUE; }
     if (d.CONDUCTEURS)  { CONDUCTEURS = d.CONDUCTEURS; window.CONDUCTEURS = CONDUCTEURS; }
     if (d.ACTIVITES)    { ACTIVITES = d.ACTIVITES; window.ACTIVITES = ACTIVITES; }
+    if (d.TRACTEURS_LIST){ TRACTEURS_LIST=d.TRACTEURS_LIST; window.TRACTEURS_LIST=TRACTEURS_LIST; }
+    if (d.ENTRETIENS)   { ENTRETIENS=d.ENTRETIENS; window.ENTRETIENS=ENTRETIENS; }
+    if (d.REPARATEUR)   { REPARATEUR=d.REPARATEUR; window.REPARATEUR=REPARATEUR; }
     if (d.MEMBRES)      { MEMBRES = d.MEMBRES; window.MEMBRES = MEMBRES; }
     if (d.SAISONS)      { SAISONS = d.SAISONS; window.SAISONS = SAISONS; }
     if (d.TACHES)       { TACHES = d.TACHES; window.TACHES = TACHES; }
@@ -2955,8 +3045,460 @@ function renderJournalList(){
 }
 // jSearch listener moved to DOMContentLoaded
 
+// ════ TRACTEUR — ONGLETS & ENTRETIEN ════
+
+// ── Tracteur actuellement sélectionné ──
+var _tracSelId = null;
+
+function getTracteurSel(){
+  if(!_tracSelId||!TRACTEURS_LIST.find(t=>t.id===_tracSelId)){
+    _tracSelId = TRACTEURS_LIST[0]?.id || null;
+  }
+  return TRACTEURS_LIST.find(t=>t.id===_tracSelId)||null;
+}
+
+function couleurTracType(type){
+  return type==='mécanique' ? '#3D6B27' : '#1A4A7A';
+}
+
+// ── Render onglets tracteurs ──
+function renderTracTabs(){
+  var el=document.getElementById('trac-tabs');
+  if(!el)return;
+  el.innerHTML=TRACTEURS_LIST.map(function(t){
+    var enR=REPARATEUR[t.id];
+    var active=t.id===_tracSelId?'active':'';
+    var badge=enR?'<span class="trac-tab-rep-badge">REP</span>':'';
+    return '<button class="trac-tab '+active+'" onclick="selectTracteur(\''+t.id+'\')" style="border-bottom-color:'+(active?couleurTracType(t.type):'transparent')+'">'
+      +badge
+      +(enR?'🔧':(t.traitementOnly?'🌿':'🚜'))+'<br>'
+      +'<strong>'+t.nom+'</strong><br>'
+      +'<span style="font-size:9px;color:'+couleurTracType(t.type)+'">'+t.type+'</span>'
+    +'</button>';
+  }).join('');
+}
+
+// ── Sélection d'un tracteur ──
+function selectTracteur(id){
+  _tracSelId=id;
+  renderTracTabs();
+  renderTracInfoBar();
+  renderRepBanner();
+  renderEntretiens();
+}
+
+// ── Barre info tracteur ──
+function renderTracInfoBar(){
+  var bar=document.getElementById('trac-info-bar');
+  if(!bar)return;
+  var t=getTracteurSel();
+  if(!t){bar.style.display='none';return;}
+  bar.style.display='flex';
+  var dot='<div class="trac-info-dot" style="background:'+couleurTracType(t.type)+'"></div>';
+  var modele=t.modele?'<span style="font-size:11px;color:var(--texte-doux)">🔩 '+t.modele+'</span>':'';
+  var trait=t.traitementOnly?'<span style="font-size:10px;background:var(--orange-pale);color:var(--orange);border-radius:5px;padding:2px 7px;margin-left:4px">Traitement</span>':'';
+  bar.innerHTML=dot
+    +'<div style="flex:1;min-width:0">'
+      +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:15px;font-weight:600;color:'+couleurTracType(t.type)+'">'+t.nom+trait+'</div>'
+      +(t.modele?'<div style="font-size:11px;color:var(--texte-doux);margin-top:2px">🔩 '+t.modele+' · '+t.type+'</div>':'<div style="font-size:11px;color:var(--texte-doux);margin-top:2px">'+t.type+'</div>')
+    +'</div>';
+}
+
+// ════ RÉPARATEUR ════
+
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function addDays(iso,n){var d=new Date(iso);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
+
+function renderRepBanner(){
+  var wrap=document.getElementById('trac-rep-banner');
+  if(!wrap)return;
+  var t=getTracteurSel();
+  if(!t){wrap.style.display='none';return;}
+  var rep=REPARATEUR[t.id];
+  var repBtn=document.getElementById('ent-rep-btn');
+  if(repBtn)repBtn.style.display=(!rep)?'inline-block':'none';
+  if(!rep){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  var today=todayStr();
+  var retour=rep.prevu_retour||'';
+  var depasse=retour&&today>retour;
+  var jourJ=retour&&today===retour;
+  var demain=retour&&today===addDays(retour,-1);
+  var nbJ=Math.max(0,Math.ceil((new Date(today)-new Date(rep.depuis))/86400000));
+  var couleur=depasse?'var(--rouge)':jourJ||demain?'var(--orange)':'var(--bleu)';
+  var bgCouleur=depasse?'var(--rouge-pale)':jourJ||demain?'var(--orange-pale)':'var(--bleu-pale)';
+  var titre=depasse?'⚠️ Retour dépassé':jourJ?'📅 Retour prévu aujourd\'hui':demain?'📅 Retour prévu demain':'🔧 Chez le réparateur';
+  var depasseInfo=depasse&&retour?(' — dépassé de '+Math.ceil((new Date(today)-new Date(retour))/86400000)+'j'):'';
+  wrap.innerHTML='<div class="rep-banner" style="background:'+bgCouleur+';border:1px solid '+couleur+'">'
+    +'<div style="font-weight:700;color:'+couleur+';font-size:13px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">'
+      +'<span>'+titre+' — '+nbJ+'j</span>'
+      +'<span style="font-size:11px;font-weight:400;color:var(--texte-doux)">'+fmtDate(rep.depuis)+'</span>'
+    +'</div>'
+    +'<div style="font-size:12px;margin-bottom:4px">'+rep.motif+'</div>'
+    +(retour?'<div style="font-size:11px;color:var(--texte-doux);margin-bottom:12px">Retour prévu : <strong style="color:'+couleur+'">'+fmtDate(retour)+'</strong>'+depasseInfo+'</div>':'<div style="margin-bottom:12px"></div>')
+    +'<div class="rep-banner-btns">'
+      +'<button class="rep-banner-btn" style="border:1.5px solid var(--vert);background:transparent;color:var(--vert)" onclick="retourReparateur()">✅ Rentré</button>'
+      +'<button class="rep-banner-btn" style="border:1.5px solid var(--orange);background:transparent;color:var(--orange)" onclick="openOv(\'ovReporter\')">📅 Reporter</button>'
+    +'</div>'
+  +'</div>';
+}
+
+function openReparateur(){
+  var t=getTracteurSel();if(!t)return;
+  document.getElementById('ov-rep-sub').textContent=t.nom+(t.modele?' — '+t.modele:'');
+  var d=document.getElementById('rep-depuis');if(d)d.value=todayStr();
+  var m=document.getElementById('rep-motif');if(m)m.value='';
+  var r=document.getElementById('rep-retour');if(r)r.value='';
+  openOv('ovReparateur');
+}
+
+function saveReparateur(){
+  var t=getTracteurSel();if(!t)return;
+  var depuis=document.getElementById('rep-depuis').value;
+  var motif=document.getElementById('rep-motif').value.trim();
+  var retour=document.getElementById('rep-retour').value;
+  if(!depuis||!motif){showToast('Date et motif requis','#C0392B');return;}
+  REPARATEUR[t.id]={depuis:depuis,motif:motif,prevu_retour:retour};
+  window.REPARATEUR=REPARATEUR;
+  localStorage.removeItem('mavigne_notif_rep_'+t.id);
+  saveData('reparateur');
+  closeOv(null,'ovReparateur');
+  renderTracTabs();
+  renderRepBanner();
+  checkRepNotifications();
+  showToast('Tracteur signalé chez le réparateur','#E07B2A');
+}
+
+function retourReparateur(){
+  var t=getTracteurSel();if(!t)return;
+  if(!confirm('Confirmer le retour de '+t.nom+' ?'))return;
+  delete REPARATEUR[t.id];
+  window.REPARATEUR=REPARATEUR;
+  localStorage.removeItem('mavigne_notif_rep_'+t.id);
+  saveData('reparateur');
+  renderTracTabs();
+  renderRepBanner();
+  showToast('Tracteur de retour ✓','#3D6B27');
+}
+
+function saveReporter(){
+  var t=getTracteurSel();if(!t)return;
+  var nd=document.getElementById('reporter-date').value;
+  if(!nd){showToast('Date requise','#C0392B');return;}
+  if(!REPARATEUR[t.id])return;
+  REPARATEUR[t.id].prevu_retour=nd;
+  window.REPARATEUR=REPARATEUR;
+  localStorage.removeItem('mavigne_notif_rep_'+t.id);
+  saveData('reparateur');
+  closeOv(null,'ovReporter');
+  renderRepBanner();
+  checkRepNotifications();
+  showToast('Date de retour mise à jour ✓','#E07B2A');
+}
+
+// Ouvrir l'overlay reporter en pré-remplissant la date actuelle
+function openReporter(){
+  var t=getTracteurSel();if(!t)return;
+  var rep=REPARATEUR[t.id];
+  var d=document.getElementById('reporter-date');
+  if(d)d.value=(rep&&rep.prevu_retour)||todayStr();
+  openOv('ovReporter');
+}
+
+// ════ NOTIFICATIONS RÉPARATEUR ════
+// Vérifie au lancement et après chaque modif : veille/jourJ/dépassement (1× chacun)
+function checkRepNotifications(){
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  var today=todayStr();
+  TRACTEURS_LIST.forEach(function(t){
+    var rep=REPARATEUR[t.id];
+    if(!rep||!rep.prevu_retour)return;
+    var retour=rep.prevu_retour;
+    var veille=addDays(retour,-1);
+    var key='mavigne_notif_rep_'+t.id;
+    var last=localStorage.getItem(key)||'';
+    var nom=t.nom+(t.modele?' ('+t.modele+')':'');
+    if(today===veille&&last!=='veille_'+retour){
+      new Notification('Ma Vigne 🚜',{body:nom+' — retour prévu demain ('+fmtDate(retour)+')',icon:'icon-192.png',tag:'rep_veille_'+t.id});
+      localStorage.setItem(key,'veille_'+retour);
+    } else if(today===retour&&last!=='jour_'+retour){
+      new Notification('Ma Vigne 🚜',{body:nom+' — retour prévu aujourd\'hui !',icon:'icon-192.png',tag:'rep_jour_'+t.id});
+      localStorage.setItem(key,'jour_'+retour);
+    } else if(today>retour&&last!=='depasse_'+retour){
+      new Notification('Ma Vigne ⚠️',{body:nom+' — retour prévu dépassé ('+fmtDate(retour)+')',icon:'icon-192.png',tag:'rep_depasse_'+t.id});
+      localStorage.setItem(key,'depasse_'+retour);
+    }
+  });
+}
+
+// ════ ENTRETIEN ════
+
+var _entFields=[
+  {key:'plein',label:'Plein fait',icon:'⛽'},
+  {key:'huile',label:'Niveau huile',icon:'🛢️'},
+  {key:'filtre_air',label:'Filtre à air',icon:'💨'},
+  {key:'radiateur',label:'Radiateur',icon:'🌀'},
+  {key:'pression_pneu',label:'Pression pneus',icon:'🔵'},
+  {key:'lavage',label:'Lavage',icon:'🪣'},
+];
+
+function openOvEntretien(){
+  var t=getTracteurSel();if(!t)return;
+  document.getElementById('ov-ent-sub').textContent=t.nom+(t.modele?' — '+t.modele:'');
+  document.getElementById('ent-date').value=todayStr();
+
+  // Conducteurs
+  var cs=document.getElementById('ent-cond');
+  cs.innerHTML=CONDUCTEURS.map(function(c){return '<option>'+c.nom+'</option>';}).join('');
+
+  // Travail effectué — désactivé si traitementOnly
+  var travSec=document.getElementById('ent-travail-section');
+  var chips=document.getElementById('ent-travail-chips');
+  var actHid=document.getElementById('ent-activite');
+  if(t.traitementOnly){
+    // Tracteur traitement : afficher en lecture seule "Traitement"
+    travSec.innerHTML='<div class="fl">Travail effectué</div>'
+      +'<div style="background:var(--orange-pale);border:1.5px solid var(--orange);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--orange);font-weight:600;margin-bottom:16px">🌿 Traitement phyto <span style="font-weight:400;font-size:11px;color:var(--texte-doux)">(tracteur dédié)</span></div>'
+      +'<input type="hidden" id="ent-activite" value="Traitement">';
+  } else {
+    travSec.innerHTML='<div class="fl">Travail effectué</div>'
+      +'<div class="travail-chips" id="ent-travail-chips"></div>'
+      +'<input type="hidden" id="ent-activite">';
+    // Remplir les chips
+    var chipsEl=document.getElementById('ent-travail-chips');
+    var actHidEl=document.getElementById('ent-activite');
+    var first=ACTIVITES[0]?.nom||'';
+    actHidEl.value=first;
+    chipsEl.innerHTML=ACTIVITES.map(function(a,i){
+      return '<button class="travail-chip'+(i===0?' sel':'')+'" onclick="pickTravail(this,\''+a.nom+'\')">'+a.emoji+' '+a.nom+'</button>';
+    }).join('');
+  }
+
+  // Checklist
+  var grid=document.getElementById('ent-checklist');
+  grid.innerHTML=_entFields.map(function(f){
+    return '<button class="ent-btn" id="ent-btn-'+f.key+'" onclick="toggleEntBtn(this,\''+f.key+'\')">'
+      +'<span class="ent-btn-ico">'+f.icon+'</span>'
+      +'<div><div class="ent-btn-lbl">'+f.label+'</div><div class="ent-btn-sub">Non fait</div></div>'
+    +'</button>';
+  }).join('');
+
+  // Anomalie
+  document.getElementById('ent-anomalie').value='';
+
+  openOv('ovEntretien');
+}
+
+function pickTravail(el,nom){
+  document.querySelectorAll('.travail-chip').forEach(function(c){c.classList.remove('sel');});
+  el.classList.add('sel');
+  var h=document.getElementById('ent-activite');if(h)h.value=nom;
+}
+
+function toggleEntBtn(el,key){
+  el.classList.toggle('checked');
+  var sub=el.querySelector('.ent-btn-sub');
+  if(el.classList.contains('checked')){sub.textContent='OK ✓';}
+  else{sub.textContent='Non fait';}
+}
+
+function saveEntretien(){
+  var t=getTracteurSel();if(!t)return;
+  var date=document.getElementById('ent-date').value;
+  var cond=document.getElementById('ent-cond').value;
+  if(!date||!cond){showToast('Date et conducteur requis','#C0392B');return;}
+  var fiche={
+    id:'ent'+Date.now(),
+    tracteurId:t.id,
+    date:date,
+    conducteur:cond,
+    activite:document.getElementById('ent-activite')?.value||'',
+    anomalie:document.getElementById('ent-anomalie').value.trim(),
+  };
+  _entFields.forEach(function(f){
+    fiche[f.key]=document.getElementById('ent-btn-'+f.key)?.classList.contains('checked')||false;
+  });
+  ENTRETIENS.unshift(fiche);
+  window.ENTRETIENS=ENTRETIENS;
+  saveData('entretiens');
+  closeOv(null,'ovEntretien');
+  renderEntretiens();
+  showToast('Fiche enregistrée ✓','#3D6B27');
+}
+
+function renderEntretiens(){
+  var el=document.getElementById('entretiens-list');
+  if(!el)return;
+  var t=getTracteurSel();
+  if(!t){el.innerHTML='';return;}
+  var fiches=ENTRETIENS.filter(function(f){return f.tracteurId===t.id;}).sort(function(a,b){return b.date.localeCompare(a.date);});
+  if(!fiches.length){
+    el.innerHTML='<div style="text-align:center;padding:24px 0;color:var(--texte-doux);font-size:13px">📋 Aucune fiche d\'entretien</div>';
+    return;
+  }
+  el.innerHTML=fiches.map(function(f){
+    var nb=_entFields.filter(function(ef){return f[ef.key];}).length;
+    var scoreColor=nb===6?'var(--vert)':'var(--orange)';
+    var hasAno=!!f.anomalie;
+    var checkHtml=_entFields.map(function(ef){
+      return '<div class="fiche-item"><span style="font-size:14px">'+(f[ef.key]?'✅':'❌')+'</span>'
+        +'<span style="color:'+(f[ef.key]?'var(--texte)':'var(--texte-doux)')+'">'+ef.label+'</span></div>';
+    }).join('');
+    var anoHtml=hasAno?'<div class="fiche-ano"><div style="font-size:11px;color:var(--rouge);font-weight:700;margin-bottom:2px">⚠️ Anomalie</div><div style="font-size:12px">'+f.anomalie+'</div></div>':'';
+    var actBadge=f.activite?'<span class="fiche-act-badge">🚜 '+f.activite+'</span>':'';
+    return '<div class="fiche-card'+(hasAno?' has-ano':'')+'"><div class="fiche-hd">'
+      +'<div><div style="font-weight:700;font-size:14px">📅 '+fmtDate(f.date)+'</div><div style="font-size:12px;color:var(--texte-doux);margin-top:2px">👤 '+f.conducteur+'</div>'+actBadge+'</div>'
+      +'<div style="text-align:right"><div class="fiche-score" style="color:'+scoreColor+'">'+nb+'/6</div><div style="font-size:9px;color:var(--texte-doux)">points OK</div></div>'
+    +'</div><div class="fiche-grid">'+checkHtml+'</div>'+anoHtml+'</div>';
+  }).join('');
+}
+
+// ════ GESTION DU PARC TRACTEURS (Réglages) ════
+
+function renderTracteurSet(){
+  var el=document.getElementById('tracteurs-set-list');
+  if(!el)return;
+  // Masquer la section si non admin
+  var sec=document.getElementById('set-sec-tracteurs');
+  if(sec)sec.style.display=isAdmin()?'block':'none';
+  if(!isAdmin())return;
+  el.innerHTML=TRACTEURS_LIST.map(function(t){
+    var enR=REPARATEUR[t.id];
+    var dot='<div class="trac-set-dot" style="background:'+couleurTracType(t.type)+'"></div>';
+    var badges='';
+    if(t.traitementOnly)badges+='<span style="font-size:9px;background:var(--orange-pale);color:var(--orange);border-radius:5px;padding:1px 6px;margin-left:4px">Traitement</span>';
+    if(enR)badges+='<span style="font-size:9px;background:var(--rouge-pale);color:var(--rouge);border-radius:5px;padding:1px 6px;margin-left:4px">En réparation</span>';
+    return '<div class="trac-set-card"><div style="display:flex;align-items:center;gap:12px">'+dot
+      +'<div><div style="display:flex;align-items:center;gap:4px"><span style="font-weight:700;font-size:14px">'+t.nom+'</span>'+badges+'</div>'
+      +'<div style="font-size:12px;color:var(--texte-doux);margin-top:2px">🔩 '+(t.modele||'—')+'</div>'
+      +'<div style="font-size:11px;color:'+couleurTracType(t.type)+';margin-top:2px">'+t.type+'</div>'
+    +'</div></div>'
+    +'<button onclick="openEditTracteur(\''+t.id+'\')" style="padding:8px 12px;background:transparent;border:1px solid var(--gris);color:var(--texte-doux);border-radius:8px;font-family:\'Outfit\',sans-serif;font-size:13px;cursor:pointer;min-width:44px;min-height:44px">✏️</button>'
+    +'</div>';
+  }).join('');
+}
+
+function pickTracType(type){
+  document.getElementById('at-type').value=type;
+  var meca=document.getElementById('at-btn-meca');
+  var hydro=document.getElementById('at-btn-hydro');
+  var wrap=document.getElementById('at-trait-wrap');
+  meca.className='trac-type-btn'+(type==='mécanique'?' sel-meca':'');
+  hydro.className='trac-type-btn'+(type==='hydrostatique'?' sel-hydro':'');
+  if(wrap)wrap.style.display=type==='hydrostatique'?'block':'none';
+  if(type==='mécanique'){document.getElementById('at-trait').value='0';updateTracTraitBtn('at');}
+}
+function pickTracTypeEdit(type){
+  document.getElementById('et-type').value=type;
+  var meca=document.getElementById('et-btn-meca');
+  var hydro=document.getElementById('et-btn-hydro');
+  var wrap=document.getElementById('et-trait-wrap');
+  meca.className='trac-type-btn'+(type==='mécanique'?' sel-meca':'');
+  hydro.className='trac-type-btn'+(type==='hydrostatique'?' sel-hydro':'');
+  if(wrap)wrap.style.display=type==='hydrostatique'?'block':'none';
+  if(type==='mécanique'){document.getElementById('et-trait').value='0';updateTracTraitBtn('et');}
+}
+function toggleTracTrait(pfx){
+  var h=document.getElementById(pfx+'-trait');
+  h.value=h.value==='1'?'0':'1';
+  updateTracTraitBtn(pfx);
+}
+function updateTracTraitBtn(pfx){
+  var on=document.getElementById(pfx+'-trait').value==='1';
+  var btn=document.getElementById(pfx+'-trait-btn');
+  var ico=document.getElementById(pfx+'-trait-ico');
+  var lbl=document.getElementById(pfx+'-trait-lbl');
+  if(!btn)return;
+  btn.className='trac-trait-toggle'+(on?' on':'');
+  if(ico)ico.textContent=on?'✅':'⬜';
+  if(lbl)lbl.style.color=on?'var(--orange)':'var(--texte)';
+}
+
+function saveAddTracteur(){
+  var nom=document.getElementById('at-nom').value.trim();
+  var modele=document.getElementById('at-modele').value.trim();
+  var type=document.getElementById('at-type').value;
+  var trait=document.getElementById('at-trait').value==='1';
+  if(!nom||!modele){showToast('Nom et modèle requis','#C0392B');return;}
+  var id='trac'+Date.now();
+  TRACTEURS_LIST.push({id:id,nom:nom,modele:modele,type:type,traitementOnly:trait});
+  window.TRACTEURS_LIST=TRACTEURS_LIST;
+  REPARATEUR[id]=null;
+  saveData('tracteurs_list');
+  saveData('reparateur');
+  closeOv(null,'ovAddTracteur');
+  renderTracTabs();
+  renderTracteurSet();
+  showToast(nom+' ajouté ✓','#3D6B27');
+}
+
+function openEditTracteur(id){
+  var t=TRACTEURS_LIST.find(function(x){return x.id===id;});
+  if(!t)return;
+  document.getElementById('et-id').value=id;
+  document.getElementById('et-title').textContent='✏️ Modifier — '+t.nom;
+  document.getElementById('et-nom').value=t.nom;
+  document.getElementById('et-modele').value=t.modele||'';
+  document.getElementById('et-type').value=t.type;
+  document.getElementById('et-trait').value=t.traitementOnly?'1':'0';
+  // Boutons type
+  document.getElementById('et-btn-meca').className='trac-type-btn'+(t.type==='mécanique'?' sel-meca':'');
+  document.getElementById('et-btn-hydro').className='trac-type-btn'+(t.type==='hydrostatique'?' sel-hydro':'');
+  var wrap=document.getElementById('et-trait-wrap');
+  if(wrap)wrap.style.display=t.type==='hydrostatique'?'block':'none';
+  updateTracTraitBtn('et');
+  openOv('ovEditTracteur');
+}
+
+function saveEditTracteur(){
+  var id=document.getElementById('et-id').value;
+  var t=TRACTEURS_LIST.find(function(x){return x.id===id;});
+  if(!t)return;
+  t.nom=document.getElementById('et-nom').value.trim();
+  t.modele=document.getElementById('et-modele').value.trim();
+  t.type=document.getElementById('et-type').value;
+  t.traitementOnly=document.getElementById('et-trait').value==='1';
+  if(!t.nom){showToast('Nom requis','#C0392B');return;}
+  window.TRACTEURS_LIST=TRACTEURS_LIST;
+  saveData('tracteurs_list');
+  closeOv(null,'ovEditTracteur');
+  renderTracTabs();
+  renderTracInfoBar();
+  renderTracteurSet();
+  showToast('Tracteur modifié ✓','#3D6B27');
+}
+
+function deleteTracteuer(){
+  var id=document.getElementById('et-id').value;
+  if(TRACTEURS_LIST.length<=1){showToast('Impossible — 1 tracteur minimum','#C0392B');return;}
+  var t=TRACTEURS_LIST.find(function(x){return x.id===id;});
+  if(!t||!confirm('Supprimer '+t.nom+' ? Les fiches d\'entretien associées seront aussi supprimées.'))return;
+  TRACTEURS_LIST=TRACTEURS_LIST.filter(function(x){return x.id!==id;});
+  window.TRACTEURS_LIST=TRACTEURS_LIST;
+  ENTRETIENS=ENTRETIENS.filter(function(f){return f.tracteurId!==id;});
+  window.ENTRETIENS=ENTRETIENS;
+  delete REPARATEUR[id];
+  if(_tracSelId===id)_tracSelId=TRACTEURS_LIST[0]?.id||null;
+  saveData('tracteurs_list');
+  saveData('entretiens');
+  saveData('reparateur');
+  closeOv(null,'ovEditTracteur');
+  renderTracTabs();
+  renderTracInfoBar();
+  renderRepBanner();
+  renderEntretiens();
+  renderTracteurSet();
+  showToast('Tracteur supprimé','#C0392B');
+}
+
 // ════ TRACTEUR ════
 function renderTracteur(){
+  // Init sélection tracteur au premier render
+  if(!_tracSelId&&TRACTEURS_LIST.length)_tracSelId=TRACTEURS_LIST[0].id;
+  renderTracTabs();
+  renderTracInfoBar();
+  renderRepBanner();
+  renderEntretiens();
   // Normaliser les anciens "Validé" en "Terminé" à la volée
   SESSIONS.forEach(s=>{if(s.statut==='Validé')s.statut='Terminé';});
   const tot=SESSIONS.length,ter=SESSIONS.filter(s=>s.statut==='Terminé').length,enc=SESSIONS.filter(s=>s.statut==='En cours').length;
@@ -3386,6 +3928,8 @@ function renderReglages(){
   ml.innerHTML=MEMBRES.map(m=>`<div class="membre-card" onclick="editMembre('${m.nom}')"><div class="m-ava" style="background:${m.couleur||'#888'}">${m.nom[0]}</div><div class="m-info"><div class="m-nom">${m.nom}</div><div class="m-roles">${m.roles.map(r=>`<span class="m-role-badge rb-${r}">${r}</span>`).join('')}</div><div class="m-statut">${m.email||''} · ${m.statut}</div></div></div>`).join('');
   // Update select saisons dans modal tâche
   document.getElementById('nt-saison').innerHTML=['Hiver','Printemps','Été','Automne'].map(s=>`<option value="${s}" ${s===saisonNom?'selected':''}>${s}</option>`).join('');
+  // Parc tracteurs (admin)
+  renderTracteurSet();
 }
 function activateSaison(nom){SAISONS.forEach(s=>s.active=s.nom===nom);saveData('saisons');renderReglages();renderParcelles();computePStats();}
 function saveSaison(){const nom=document.getElementById('ns-nom').value.trim();if(!nom)return;SAISONS.push({nom,periode:document.getElementById('ns-periode').value,active:false});saveData('saisons');document.getElementById('ovSaison').classList.remove('open');document.getElementById('ns-nom').value='';document.getElementById('ns-periode').value='';renderReglages();}
@@ -5006,6 +5550,7 @@ window.addEventListener('load', function(){
   if('Notification' in window&&Notification.permission==='granted'){
     updateNotifUI('granted');
     scheduleNotifCheck();
+    checkRepNotifications();
   } else if('Notification' in window&&Notification.permission==='denied'){
     updateNotifUI('denied');
   }
@@ -5033,6 +5578,128 @@ if ('serviceWorker' in navigator) {
 
 <!-- ══════ TOAST CONFIRMATION ══════ -->
 <div id="mv-toast"><div id="mv-toast-dot"></div><span id="mv-toast-msg"></span></div>
+
+<!-- ══ OVERLAY Fiche entretien ══ -->
+<div class="overlay" id="ovEntretien" onclick="closeOv(event,'ovEntretien')">
+  <div class="modal" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <div class="modal-hd"><div class="modal-title">📋 Fiche d'entretien</div><div class="modal-sub" id="ov-ent-sub"></div></div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div><div class="fl">Date</div><input type="date" class="fi ac" id="ent-date"></div>
+        <div><div class="fl">Conducteur</div><select class="fsel ac" id="ent-cond"></select></div>
+      </div>
+      <div id="ent-travail-section">
+        <div class="fl">Travail effectué</div>
+        <div class="travail-chips" id="ent-travail-chips"></div>
+        <input type="hidden" id="ent-activite">
+      </div>
+      <div class="fl" style="margin-bottom:10px">Points de contrôle</div>
+      <div class="ent-grid" id="ent-checklist"></div>
+      <div class="fl">⚠️ Anomalie <span style="font-weight:400;color:var(--texte-doux)">(laisser vide si aucune)</span></div>
+      <textarea class="fi ac" id="ent-anomalie" rows="3" placeholder="Décrire une anomalie constatée…" style="resize:none;margin-bottom:20px"></textarea>
+      <button class="mbtn acre" onclick="saveEntretien()">Enregistrer la fiche</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ OVERLAY Signaler réparateur ══ -->
+<div class="overlay" id="ovReparateur" onclick="closeOv(event,'ovReparateur')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd"><div class="modal-title" style="color:var(--rouge)">🔧 Chez le réparateur</div><div class="modal-sub" id="ov-rep-sub"></div></div>
+    <div class="modal-body">
+      <div class="fl">Date de départ</div>
+      <input type="date" class="fi ac" id="rep-depuis" style="margin-bottom:14px">
+      <div class="fl">Motif</div>
+      <input type="text" class="fi ac" id="rep-motif" placeholder="Ex : Panne hydraulique, révision…" style="margin-bottom:14px">
+      <div class="fl">Retour prévu <span style="font-weight:400;color:var(--texte-doux)">(optionnel)</span></div>
+      <input type="date" class="fi ac" id="rep-retour" style="margin-bottom:6px">
+      <div style="background:var(--bleu-pale);border:1px solid var(--bleu);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--bleu);margin-bottom:20px">
+        🔔 Si une date de retour est renseignée, vous recevrez une notification la <strong>veille</strong> et le <strong>jour J</strong> — et une alerte si la date est dépassée.
+      </div>
+      <button class="mbtn" style="background:var(--rouge);color:white;border-color:var(--rouge)" onclick="saveReparateur()">Confirmer — Chez le réparateur</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ OVERLAY Reporter date retour ══ -->
+<div class="overlay" id="ovReporter" onclick="closeOv(event,'ovReporter')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd"><div class="modal-title" style="color:var(--orange)">📅 Reporter le retour</div></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--texte-doux);margin:0 0 16px">Le réparateur n'a pas terminé ? Saisissez une nouvelle date. Une nouvelle notification sera programmée.</p>
+      <div class="fl">Nouvelle date de retour prévue</div>
+      <input type="date" class="fi ac" id="reporter-date" style="margin-bottom:20px">
+      <button class="mbtn" style="background:var(--orange);color:white;border-color:var(--orange)" onclick="saveReporter()">Enregistrer la nouvelle date</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ OVERLAY Ajouter tracteur ══ -->
+<div class="overlay" id="ovAddTracteur" onclick="closeOv(event,'ovAddTracteur')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd"><div class="modal-title">🚜 Ajouter un tracteur</div></div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div><div class="fl">Nom (ex: T4)</div><input type="text" class="fi ac" id="at-nom" placeholder="T4"></div>
+        <div><div class="fl">Modèle</div><input type="text" class="fi ac" id="at-modele" placeholder="Ex : Fendt 208"></div>
+      </div>
+      <div class="fl">Type de transmission</div>
+      <div class="trac-type-pick" style="margin-top:6px">
+        <button class="trac-type-btn sel-meca" id="at-btn-meca" onclick="pickTracType('mécanique')">⚙️ Mécanique</button>
+        <button class="trac-type-btn" id="at-btn-hydro" onclick="pickTracType('hydrostatique')">💧 Hydrostatique</button>
+      </div>
+      <div id="at-trait-wrap" style="display:none">
+        <button class="trac-trait-toggle" id="at-trait-btn" onclick="toggleTracTrait('at')">
+          <span id="at-trait-ico" style="font-size:18px">⬜</span>
+          <div style="text-align:left">
+            <div style="font-size:13px" id="at-trait-lbl">Traitement uniquement</div>
+            <div style="font-size:11px;color:var(--texte-doux)">Réservé aux traitements phyto</div>
+          </div>
+        </button>
+      </div>
+      <input type="hidden" id="at-type" value="mécanique">
+      <input type="hidden" id="at-trait" value="0">
+      <button class="mbtn verte" onclick="saveAddTracteur()">Ajouter le tracteur</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ OVERLAY Modifier tracteur ══ -->
+<div class="overlay" id="ovEditTracteur" onclick="closeOv(event,'ovEditTracteur')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd"><div class="modal-title" id="et-title">✏️ Modifier le tracteur</div></div>
+    <input type="hidden" id="et-id">
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div><div class="fl">Nom</div><input type="text" class="fi ac" id="et-nom"></div>
+        <div><div class="fl">Modèle</div><input type="text" class="fi ac" id="et-modele"></div>
+      </div>
+      <div class="fl">Type de transmission</div>
+      <div class="trac-type-pick" style="margin-top:6px">
+        <button class="trac-type-btn" id="et-btn-meca" onclick="pickTracTypeEdit('mécanique')">⚙️ Mécanique</button>
+        <button class="trac-type-btn" id="et-btn-hydro" onclick="pickTracTypeEdit('hydrostatique')">💧 Hydrostatique</button>
+      </div>
+      <div id="et-trait-wrap" style="display:none">
+        <button class="trac-trait-toggle" id="et-trait-btn" onclick="toggleTracTrait('et')">
+          <span id="et-trait-ico" style="font-size:18px">⬜</span>
+          <div style="text-align:left">
+            <div style="font-size:13px" id="et-trait-lbl">Traitement uniquement</div>
+            <div style="font-size:11px;color:var(--texte-doux)">Réservé aux traitements phyto</div>
+          </div>
+        </button>
+      </div>
+      <input type="hidden" id="et-type" value="mécanique">
+      <input type="hidden" id="et-trait" value="0">
+      <button class="mbtn acre" style="margin-bottom:10px" onclick="saveEditTracteur()">Enregistrer</button>
+      <button class="mbtn-del" onclick="deleteTracteuer()">Supprimer ce tracteur</button>
+    </div>
+  </div>
+</div>
 
 <!-- ══════ OVERLAY MENTIONS LÉGALES ══════ -->
 <div class="overlay" id="ovMentions" onclick="closeOv(event,'ovMentions')">
