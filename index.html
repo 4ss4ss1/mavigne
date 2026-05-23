@@ -618,19 +618,15 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .rep-banner-btns{display:flex;gap:8px;margin-top:12px;}
 .rep-banner-btn{flex:1;padding:10px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;min-height:44px;}
 /* ── Fiche entretien ── */
-.fiche-card{background:white;border-radius:14px;margin-bottom:10px;box-shadow:var(--shadow-sm);border:1px solid var(--gris-clair);overflow:hidden;}
-.fiche-card.has-ano{border-color:rgba(192,57,43,0.35);}
+.fiche-card{background:white;border-radius:14px;margin-bottom:10px;box-shadow:0 2px 10px rgba(0,0,0,0.08);border:1.5px solid var(--gris);overflow:hidden;}
+.fiche-card.has-ano{border-color:rgba(192,57,43,0.6);box-shadow:0 2px 10px rgba(192,57,43,0.1);}
 .fiche-hd{padding:12px 16px;border-bottom:1px solid var(--gris-clair);display:flex;justify-content:space-between;align-items:center;}
 .fiche-score{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;}
 .fiche-grid{padding:10px 16px;display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;}
 .fiche-item{display:flex;align-items:center;gap:6px;font-size:12px;}
 .fiche-ano{margin:0 16px 12px;padding:8px 12px;background:var(--rouge-pale);border-radius:8px;border-left:3px solid var(--rouge);}
 .fiche-act-badge{display:inline-block;font-size:11px;background:var(--acier-pale);color:var(--acier);border-radius:6px;padding:2px 8px;margin-top:4px;}
-/* ── Travail effectué chips dans overlay ── */
-.travail-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
-.travail-chip{padding:8px 14px;border-radius:20px;font-size:13px;cursor:pointer;border:1.5px solid var(--gris);color:var(--texte-doux);background:white;font-family:'Outfit',sans-serif;font-weight:400;transition:all 0.15s;min-height:44px;display:flex;align-items:center;}
-.travail-chip.sel{border-color:var(--acier);background:var(--acier-pale);color:var(--acier);font-weight:600;}
-.travail-chip.disabled{opacity:0.35;pointer-events:none;cursor:default;}
+
 /* ── Entretien checklist ── */
 .ent-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
 .ent-btn{display:flex;align-items:center;gap:8px;padding:11px 12px;background:white;border:1.5px solid var(--gris);border-radius:10px;cursor:pointer;text-align:left;transition:all 0.15s;min-height:44px;font-family:'Outfit',sans-serif;}
@@ -3292,28 +3288,7 @@ function openOvEntretien(){
   var cs=document.getElementById('ent-cond');
   cs.innerHTML=CONDUCTEURS.map(function(c){return '<option>'+c.nom+'</option>';}).join('');
 
-  // Travail effectué — désactivé si traitementOnly
-  var travSec=document.getElementById('ent-travail-section');
-  var chips=document.getElementById('ent-travail-chips');
-  var actHid=document.getElementById('ent-activite');
-  if(t.traitementOnly){
-    // Tracteur traitement : afficher en lecture seule "Traitement"
-    travSec.innerHTML='<div class="fl">Travail effectué</div>'
-      +'<div style="background:var(--orange-pale);border:1.5px solid var(--orange);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--orange);font-weight:600;margin-bottom:16px">🌿 Traitement phyto <span style="font-weight:400;font-size:11px;color:var(--texte-doux)">(tracteur dédié)</span></div>'
-      +'<input type="hidden" id="ent-activite" value="Traitement">';
-  } else {
-    travSec.innerHTML='<div class="fl">Travail effectué</div>'
-      +'<div class="travail-chips" id="ent-travail-chips"></div>'
-      +'<input type="hidden" id="ent-activite">';
-    // Remplir les chips
-    var chipsEl=document.getElementById('ent-travail-chips');
-    var actHidEl=document.getElementById('ent-activite');
-    var first=ACTIVITES[0]?.nom||'';
-    actHidEl.value=first;
-    chipsEl.innerHTML=ACTIVITES.map(function(a,i){
-      return '<button class="travail-chip'+(i===0?' sel':'')+'" onclick="pickTravail(this,\''+a.nom+'\')">'+a.emoji+' '+a.nom+'</button>';
-    }).join('');
-  }
+
 
   // Checklist
   var grid=document.getElementById('ent-checklist');
@@ -3328,12 +3303,6 @@ function openOvEntretien(){
   document.getElementById('ent-anomalie').value='';
 
   openOv('ovEntretien');
-}
-
-function pickTravail(el,nom){
-  document.querySelectorAll('.travail-chip').forEach(function(c){c.classList.remove('sel');});
-  el.classList.add('sel');
-  var h=document.getElementById('ent-activite');if(h)h.value=nom;
 }
 
 function toggleEntBtn(el,key){
@@ -3353,7 +3322,7 @@ function saveEntretien(){
     tracteurId:t.id,
     date:date,
     conducteur:cond,
-    activite:document.getElementById('ent-activite')?.value||'',
+
     anomalie:document.getElementById('ent-anomalie').value.trim(),
   };
   _entFields.forEach(function(f){
@@ -3386,7 +3355,7 @@ function renderEntretiens(){
         +'<span style="color:'+(f[ef.key]?'var(--texte)':'var(--texte-doux)')+'">'+ef.label+'</span></div>';
     }).join('');
     var anoHtml=hasAno?'<div class="fiche-ano"><div style="font-size:11px;color:var(--rouge);font-weight:700;margin-bottom:2px">⚠️ Anomalie</div><div style="font-size:12px">'+f.anomalie+'</div></div>':'';
-    var actBadge=f.activite?'<span class="fiche-act-badge">🚜 '+f.activite+'</span>':'';
+    var actBadge='';
     return '<div class="fiche-card'+(hasAno?' has-ano':'')+'"><div class="fiche-hd">'
       +'<div><div style="font-weight:700;font-size:14px">📅 '+fmtDate(f.date)+'</div><div style="font-size:12px;color:var(--texte-doux);margin-top:2px">👤 '+f.conducteur+'</div>'+actBadge+'</div>'
       +'<div style="text-align:right"><div class="fiche-score" style="color:'+scoreColor+'">'+nb+'/6</div><div style="font-size:9px;color:var(--texte-doux)">points OK</div></div>'
@@ -5921,11 +5890,7 @@ if ('serviceWorker' in navigator) {
         <div><div class="fl">Date</div><input type="date" class="fi ac" id="ent-date"></div>
         <div><div class="fl">Conducteur</div><select class="fsel ac" id="ent-cond"></select></div>
       </div>
-      <div id="ent-travail-section">
-        <div class="fl">Travail effectué</div>
-        <div class="travail-chips" id="ent-travail-chips"></div>
-        <input type="hidden" id="ent-activite">
-      </div>
+
       <div class="fl" style="margin-bottom:10px">Points de contrôle</div>
       <div class="ent-grid" id="ent-checklist"></div>
       <div class="fl">⚠️ Anomalie <span style="font-weight:400;color:var(--texte-doux)">(laisser vide si aucune)</span></div>
