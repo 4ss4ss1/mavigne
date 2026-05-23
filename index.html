@@ -2182,9 +2182,6 @@ function initLogin(){
     })(i);
   }
 }
-// ⚠️ Exposé immédiatement sur window pour éviter la race condition iOS :
-// Firebase (cache IndexedDB) peut répondre avant que le DOMContentLoaded l'assigne (ligne ~6156).
-window.initLogin = initLogin;
 
 function selectProfile(idx){
   loginPendingIdx = idx;
