@@ -586,12 +586,33 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .sc-blbl{display:flex;justify-content:space-between;font-size:10px;color:var(--texte-doux);margin-bottom:5px;}
 .sc-btrack{height:6px;background:var(--gris-clair);border-radius:6px;overflow:hidden;}
 .sc-bfill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--acier-med),#6A8090);}
-/* ── Onglets tracteurs ── */
-.trac-tabs{display:flex;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--gris-clair);background:white;}
+/* ── Onglets tracteurs — dans l'en-tête sombre, pas de chevauchement ── */
+.trac-tabs{display:flex;overflow-x:auto;scrollbar-width:none;background:var(--acier);border-bottom:1px solid rgba(255,255,255,0.08);}
 .trac-tabs::-webkit-scrollbar{display:none;}
-.trac-tab{flex:0 0 auto;min-width:80px;max-width:110px;padding:10px 8px;border:none;background:transparent;font-family:'Outfit',sans-serif;font-size:11px;cursor:pointer;color:var(--texte-doux);border-bottom:2px solid transparent;transition:all 0.15s;position:relative;text-align:center;line-height:1.3;}
-.trac-tab.active{color:var(--acier);border-bottom-color:var(--acier);font-weight:700;}
-.trac-tab-rep-badge{position:absolute;top:4px;right:6px;background:var(--rouge);color:#fff;border-radius:5px;font-size:7px;padding:1px 4px;font-weight:700;line-height:14px;}
+.trac-tab{flex:0 0 auto;min-width:88px;max-width:120px;padding:10px 12px 13px;border:none;background:transparent;font-family:'Outfit',sans-serif;font-size:11px;cursor:pointer;color:rgba(255,255,255,0.4);border-bottom:3px solid transparent;transition:all 0.15s;position:relative;text-align:center;line-height:1.3;}
+.trac-tab.active{color:#fff;font-weight:700;}
+.trac-tab-rep-badge{position:absolute;top:5px;right:6px;background:var(--rouge);color:#fff;border-radius:4px;font-size:7px;padding:1px 4px;font-weight:700;line-height:14px;}
+/* ── Stats tracteur — bande blanche séparée ── */
+.trac-sband{background:#fff;border-bottom:1px solid var(--gris-clair);display:grid;grid-template-columns:1fr 1fr 1fr;margin:0;border-radius:0;}
+.trac-sband .sbi{padding:14px 0;border-right:1px solid var(--gris-clair);}
+.trac-sband .sbi:last-child{border-right:none;}
+/* ── Badge tracteur sur session ── */
+.sc-trac-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;display:inline-flex;align-items:center;gap:4px;}
+.sc-trac-badge.defaut{background:var(--acier-pale);color:var(--acier-med);}
+.sc-trac-badge.override{background:rgba(224,123,42,0.15);color:var(--orange);}
+.sc-trac-badge.en-rep{background:rgba(192,57,43,0.15);color:var(--rouge);}
+/* ── Alerte override tracteur sur session ── */
+.sc-override-alert{padding:8px 16px;font-size:11px;border-top:1px solid var(--gris-clair);color:var(--orange);background:rgba(224,123,42,0.05);}
+.scard-enc .sc-override-alert{border-top-color:rgba(255,255,255,0.08);background:rgba(224,123,42,0.1);color:#F0A060;}
+/* ── Sélecteur tracteur dans overlay session ── */
+.trac-sel-btn{width:100%;padding:12px 14px;border-radius:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-family:'Outfit',sans-serif;border:1.5px solid var(--gris);background:white;margin-bottom:8px;min-height:54px;transition:all 0.15s;}
+.trac-sel-btn.selected{border-color:var(--acier);}
+.trac-sel-btn .trac-sel-radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--gris);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all 0.15s;}
+.trac-sel-btn.selected .trac-sel-radio{border-color:var(--acier);background:var(--acier);color:#fff;}
+/* ── Association activité↔tracteur dans Réglages ── */
+.act-trac-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--gris-clair);}
+.act-trac-row:last-child{border-bottom:none;}
+.act-trac-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:10px;cursor:pointer;}
 /* ── Bandeau réparateur ── */
 .rep-banner{border-radius:12px;padding:14px 16px;margin-bottom:14px;}
 .rep-banner-btns{display:flex;gap:8px;margin-top:12px;}
@@ -1377,22 +1398,24 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 
 <!-- ══════ PAGE TRACTEUR ══════ -->
 <div class="page" id="page-tracteur">
-  <div class="ph acier">
-    <div class="ph-top">
+  <!-- En-tête sombre : titre + bouton + onglets tracteurs dans le même bloc -->
+  <div style="background:var(--acier)">
+    <div class="ph-top" style="padding:16px 16px 12px">
       <div style="font-size:26px">🚜</div>
-      <div><div class="ph-title">Tracteur</div><div class="ph-sub">Sessions & entretien</div></div>
+      <div><div class="ph-title" style="color:#fff">Tracteur</div><div class="ph-sub" style="color:rgba(255,255,255,0.5)">Sessions & entretien</div></div>
       <button class="ph-add" id="trac-add-btn" onclick="openNewSession()">＋ Session</button>
     </div>
+    <!-- Onglets tracteurs — dans le bloc sombre, pas de chevauchement -->
+    <div class="trac-tabs" id="trac-tabs"></div>
   </div>
-  <!-- Onglets tracteurs -->
-  <div class="trac-tabs" id="trac-tabs"></div>
-  <!-- Bandeau réparateur (affiché dynamiquement) -->
-  <div id="trac-rep-banner" style="display:none;padding:0 16px;margin-top:14px"></div>
-  <div class="sband c3" id="trac-sband">
+  <!-- Stats — bande blanche séparée -->
+  <div class="trac-sband" id="trac-sband">
     <div class="sbi"><div class="sbi-val cac" id="st-t">3</div><div class="sbi-lbl">Sessions</div></div>
     <div class="sbi"><div class="sbi-val cac" id="st-ter">2</div><div class="sbi-lbl">Terminées</div></div>
     <div class="sbi"><div class="sbi-val" style="color:var(--orange)" id="st-enc">1</div><div class="sbi-lbl">En cours</div></div>
   </div>
+  <!-- Bandeau réparateur (affiché dynamiquement) -->
+  <div id="trac-rep-banner" style="display:none;padding:0 16px;margin-top:14px"></div>
   <div class="content" style="margin-top:-4px">
     <div class="readonly-banner" id="trac-readonly" style="display:none">🔒 Consultation seule — vous n'avez pas le rôle Tractoriste</div>
     <!-- Info tracteur sélectionné -->
@@ -1401,6 +1424,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     <div class="sh">
       <span class="st">Entretien</span>
       <div style="display:flex;gap:8px;align-items:center">
+        <span onclick="ouvrirExportEntretien()" style="cursor:pointer;font-size:12px;padding:4px 10px;border:1.5px solid var(--vert);border-radius:8px;color:var(--vert);font-weight:600;font-family:'Outfit',sans-serif">📄 PDF</span>
         <span class="sa sac" id="ent-add-btn" onclick="openOvEntretien()">＋ Fiche</span>
         <span id="ent-rep-btn" onclick="openReparateur()" style="cursor:pointer;font-size:16px;padding:4px 8px;border:1.5px solid var(--rouge);border-radius:8px;color:var(--rouge);display:none">🔧</span>
       </div>
@@ -1495,6 +1519,12 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     <div class="set-title">🚜 Parc tracteurs</div>
     <div id="tracteurs-set-list" style="padding:0 16px"></div>
     <div style="padding:0 16px;margin-top:8px"><button class="mbtn verte" style="margin-top:0;font-size:13px;padding:10px" onclick="openOv('ovAddTracteur')">＋ Ajouter un tracteur</button></div>
+  </div>
+
+  <div class="set-sec" id="set-sec-act-trac">
+    <div class="set-title">🔗 Association activité ↔ tracteur</div>
+    <div style="font-size:12px;color:var(--texte-doux);padding:0 16px 10px">Tracteur par défaut pour chaque activité. Modifiable à chaque session.</div>
+    <div id="act-trac-list" style="background:white;border-radius:16px;padding:0 16px;margin:0 16px;box-shadow:var(--shadow-sm)"></div>
   </div>
 
   <div class="set-sec">
@@ -1595,7 +1625,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 
 <!-- ══════ OVERLAYS ══════ -->
 
-<div class="overlay" id="ovSession" onclick="closeOv(event,'ovSession')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">🚜 Nouvelle session</div><div class="modal-sub">Avancement calculé depuis les parcelles</div></div><div class="modal-body"><div class="fl">Activité</div><select class="fsel ac" id="s-act"></select><div class="fl">Date</div><input type="date" class="fi ac" id="s-date"><div class="fl">Conducteur</div><div class="ppicker" id="s-cond-pick"></div><div class="fl">Note</div><input type="text" class="fi ac" id="s-note" placeholder="Conditions, zone…"><button class="mbtn acre" onclick="saveSession()">Créer la session</button></div></div></div>
+<div class="overlay" id="ovSession" onclick="closeOv(event,'ovSession')"><div class="modal" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">🚜 Nouvelle session</div><div class="modal-sub">Avancement calculé depuis les parcelles</div></div><div class="modal-body"><div class="fl">Activité</div><select class="fsel ac" id="s-act" onchange="onSessionActChange()"></select><div class="fl">Date</div><input type="date" class="fi ac" id="s-date"><div class="fl">Conducteur</div><div class="ppicker" id="s-cond-pick"></div><div class="fl" style="margin-top:14px">Tracteur utilisé <span id="s-trac-override-lbl" style="font-weight:400;color:var(--orange);font-size:11px;display:none"></span></div><div id="s-trac-pick" style="margin-bottom:4px"></div><div id="s-trac-rep-alert" style="display:none;background:var(--rouge-pale);border:1px solid var(--rouge);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--rouge);margin-bottom:14px"></div><input type="hidden" id="s-trac-id"><input type="hidden" id="s-trac-override" value="0"><div class="fl">Note</div><input type="text" class="fi ac" id="s-note" placeholder="Conditions, zone…"><button class="mbtn acre" onclick="saveSession()">Créer la session</button></div></div></div>
 
 <div class="overlay" id="ovActivite" onclick="closeOv(event,'ovActivite')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">⚙️ Nouvelle activité tracteur</div></div><div class="modal-body"><div class="fl">Nom</div><input type="text" class="fi ac" id="new-act" placeholder="Ex : Oreille de cochon…"><div class="fl">Icône</div><div class="ppicker" id="emoji-pick"><div class="pchk sel acre" data-val="🚜" onclick="pickEmoji(this)">🚜</div><div class="pchk" data-val="✂️" onclick="pickEmoji(this)">✂️</div><div class="pchk" data-val="🌱" onclick="pickEmoji(this)">🌱</div><div class="pchk" data-val="💧" onclick="pickEmoji(this)">💧</div><div class="pchk" data-val="🔧" onclick="pickEmoji(this)">🔧</div><div class="pchk" data-val="🌾" onclick="pickEmoji(this)">🌾</div></div><button class="mbtn acre" onclick="saveActivite()">Créer</button></div></div></div>
 
@@ -1603,7 +1633,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 
 <div class="overlay" id="ovEditCond" onclick="closeOv(event,'ovEditCond')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="ec-title">✏️ Modifier</div></div><input type="hidden" id="ec-nom"><div class="modal-body"><div class="fl">Statut</div><div class="ppicker" id="ec-st-pick"><div class="pchk" data-val="Formé" onclick="pickVal(this,'ec-st','acre')">✅ Formé</div><div class="pchk" data-val="En formation" onclick="pickVal(this,'ec-st','acre')">🎓 En formation</div><div class="pchk" data-val="Suspendu" onclick="pickVal(this,'ec-st','acre')">⏸ Suspendu</div></div><input type="hidden" id="ec-st"><button class="mbtn acre" onclick="saveEditCond()">Enregistrer</button><button class="mbtn-del" onclick="deleteCond()">Supprimer</button></div></div></div>
 
-<div class="overlay" id="ovEditSession" onclick="closeOv(event,'ovEditSession')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">✏️ Modifier la session</div><div class="modal-sub">Admin uniquement</div></div><input type="hidden" id="es-id"><div class="modal-body"><div class="fl">Activité</div><select class="fsel ac" id="es-act"></select><div class="fl">Date</div><input type="date" class="fi ac" id="es-date"><div class="fl">Conducteur</div><div class="ppicker" id="es-cond-pick"></div><input type="hidden" id="es-cond"><div class="fl">Statut</div><div class="ppicker" id="es-st-pick"><div class="pchk" data-val="Terminé" onclick="pickVal(this,'es-st','acre')">✅ Terminé</div><div class="pchk" data-val="En cours" onclick="pickVal(this,'es-st','acre')">🔄 En cours</div></div><input type="hidden" id="es-st" value="Terminé"><div class="fl">Avancement (%)</div><input type="number" class="fi ac" id="es-av" placeholder="100" min="0" max="100"><div class="fl">Note</div><input type="text" class="fi ac" id="es-note" placeholder="Conditions, zone…"><button class="mbtn acre" onclick="saveEditSession()">Enregistrer</button><button class="mbtn-del" id="es-del-btn" onclick="confirmDeleteSession(this)">🗑 Supprimer cette session</button></div></div></div>
+<div class="overlay" id="ovEditSession" onclick="closeOv(event,'ovEditSession')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">✏️ Modifier la session</div><div class="modal-sub">Admin uniquement</div></div><input type="hidden" id="es-id"><div class="modal-body"><div class="fl">Activité</div><select class="fsel ac" id="es-act"></select><div class="fl">Date</div><input type="date" class="fi ac" id="es-date"><div class="fl">Conducteur</div><div class="ppicker" id="es-cond-pick"></div><input type="hidden" id="es-cond"><div class="fl">Statut</div><div class="ppicker" id="es-st-pick"><div class="pchk" data-val="Terminé" onclick="pickVal(this,'es-st','acre')">✅ Terminé</div><div class="pchk" data-val="En cours" onclick="pickVal(this,'es-st','acre')">🔄 En cours</div></div><input type="hidden" id="es-st" value="Terminé"><div class="fl">Avancement (%)</div><input type="number" class="fi ac" id="es-av" placeholder="100" min="0" max="100"><div class="fl" style="margin-top:8px">Tracteur utilisé <span id="es-trac-override-lbl" style="font-weight:400;color:var(--orange);font-size:11px;display:none"></span></div><div id="es-trac-pick" style="margin-bottom:4px"></div><div id="es-trac-rep-alert" style="display:none;background:var(--rouge-pale);border:1px solid var(--rouge);border-radius:10px;padding:8px 12px;font-size:12px;color:var(--rouge);margin-bottom:10px"></div><input type="hidden" id="es-trac-id"><input type="hidden" id="es-trac-override" value="0"><div class="fl">Note</div><input type="text" class="fi ac" id="es-note" placeholder="Conditions, zone…"><button class="mbtn acre" onclick="saveEditSession()">Enregistrer</button><button class="mbtn-del" id="es-del-btn" onclick="confirmDeleteSession(this)">🗑 Supprimer cette session</button></div></div></div>
 
 <div class="overlay" id="ovTraitDetail" onclick="closeOv(event,'ovTraitDetail')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="otd-title">🧪 Traitement</div><div class="modal-sub" id="otd-sub"></div></div><div class="modal-body"><div id="otd-body"></div><button class="mbtn-del" style="margin-top:18px" onclick="confirmDeleteTraitement()">🗑 Supprimer ce traitement</button></div></div></div>
 
@@ -1814,7 +1844,15 @@ const PARCELLES=[{"nom":"Ruchottes","surface":0.077,"statut":"Active","lat":"47.
 
 let JOURNAL=[{"id":"0b550083","date":"2026-05-15","parcelle":"Songe du Haut","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"aae22292","date":"2026-05-15","parcelle":"Songe du Bas","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"7f0cd410","date":"2026-05-15","parcelle":"Sylvie","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"8bb78013","date":"2026-05-15","parcelle":"Créot","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"db024ff1","date":"2026-05-15","parcelle":"Champerrier","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"8145ac12","date":"2026-05-15","parcelle":"Au Velle","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"0ddb359c","date":"2026-05-15","parcelle":"Combe du Bas","tache":"Pioche1","qui":"Nico","statut":"Validé","equipe":false},{"id":"21deacbc","date":"2026-05-15","parcelle":"Combe du Bas","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"e8f3ceda","date":"2026-05-05","parcelle":"Bras","tache":"Plantation","qui":"Nico","statut":"Validé","equipe":false},{"id":"a6cfb7e1","date":"2026-05-05","parcelle":"Batailles","tache":"Plantation","qui":"Nico","statut":"Validé","equipe":false},{"id":"22780352","date":"2026-04-28","parcelle":"Songe du Haut","tache":"Plantation","qui":"Victor","statut":"Validé","equipe":false},{"id":"18eb523b","date":"2026-04-28","parcelle":"20 Rangs","tache":"Plantation","qui":"Victor","statut":"Validé","equipe":false},{"id":"e75e51a2","date":"2026-04-13","parcelle":"Herbiottes","tache":"Pliage","qui":"Victor","statut":"Validé","equipe":true},{"id":"72da567b","date":"2026-04-13","parcelle":"Champerrier","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":true},{"id":"c5033ff8","date":"2026-04-07","parcelle":"Billard Petite","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":false},{"id":"8313d752","date":"2026-04-02","parcelle":"Songe du Bas","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":true},{"id":"528f116a","date":"2026-04-02","parcelle":"Champs","tache":"Reparation","qui":"Victor","statut":"Validé","equipe":true},{"id":"be88676d","date":"2026-04-01","parcelle":"Entre 2 Routes","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":false},{"id":"6fd2d9a1","date":"2026-03-24","parcelle":"Ruchottes","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":false},{"id":"04bcb496","date":"2026-03-14","parcelle":"Crais","tache":"Brulage","qui":"Nico","statut":"Validé","equipe":false},{"id":"39151ef7","date":"2026-03-11","parcelle":"Crotteaux","tache":"Tirage","qui":"Dessi","statut":"Validé","equipe":false},{"id":"a4dd94a4","date":"2026-03-11","parcelle":"Cognées","tache":"Brulage","qui":"Dessi","statut":"Validé","equipe":false},{"id":"7a645c11","date":"2026-03-10","parcelle":"Jouise","tache":"Brulage","qui":"Nico","statut":"Validé","equipe":false},{"id":"02a4a184","date":"2026-02-17","parcelle":"Fourneau Jeune","tache":"Taille","qui":"Dessi","statut":"Validé","equipe":false},{"id":"b1a3699d","date":"2026-02-10","parcelle":"Chaziere","tache":"Brulage","qui":"Dessi","statut":"Validé","equipe":true},{"id":"576c1734","date":"2026-01-31","parcelle":"Cognées","tache":"Taille","qui":"Equipe","statut":"Validé","equipe":true},{"id":"ae77bb18","date":"2026-01-29","parcelle":"Bollery Blanc","tache":"Taille","qui":"Nico","statut":"Validé","equipe":false},{"id":"35d29f03","date":"2026-01-28","parcelle":"Songe du Haut","tache":"Taille","qui":"Nico","statut":"Validé","equipe":false},{"id":"180728da","date":"2026-01-27","parcelle":"Charreux","tache":"Taille","qui":null,"statut":"En cours","equipe":false},{"id":"9f43cea3","date":"2026-01-26","parcelle":"Billard Petite","tache":"Taille","qui":null,"statut":"En cours","equipe":false}];
 
-let ACTIVITES=[{nom:'Griffage',emoji:'🚜'},{nom:'Intercep',emoji:'✂️'},{nom:'Rognage',emoji:'✂️'},{nom:'Buttage',emoji:'🌱'},{nom:'Débuttage',emoji:'🌱'},{nom:'Minibuttage',emoji:'🌱'}];
+let ACTIVITES=[
+  {nom:'Griffage',   emoji:'🚜',tracteurDefautId:'trac1'},
+  {nom:'Intercep',   emoji:'✂️',tracteurDefautId:'trac2'},
+  {nom:'Rognage',    emoji:'✂️',tracteurDefautId:'trac2'},
+  {nom:'Buttage',    emoji:'🌱',tracteurDefautId:'trac1'},
+  {nom:'Débuttage',  emoji:'🌱',tracteurDefautId:'trac1'},
+  {nom:'Minibuttage',emoji:'🌱',tracteurDefautId:'trac1'},
+  {nom:'Traitement', emoji:'🌿',tracteurDefautId:'trac3'},
+];
 let CONDUCTEURS=[{nom:'Nico',statut:'Formé'},{nom:'Etienne',statut:'Formé'}];
 // ── Parc tracteurs (persisté Firebase + localStorage) ──
 let TRACTEURS_LIST=[
@@ -1826,7 +1864,7 @@ let TRACTEURS_LIST=[
 let ENTRETIENS=[];
 // ── État réparateur par tracteur {tracteurId:{depuis,motif,prevu_retour}} ──
 let REPARATEUR={};
-let SESSIONS=[{id:'0b81fe25',activite:'Griffage',date:'2026-03-03',conducteur:'Nico',statut:'Terminé',avancement:100,note:''},{id:'bf8d7558',activite:'Minibuttage',date:'2026-04-10',conducteur:'Nico',statut:'Terminé',avancement:100,note:''},{id:'4b6e4fb0',activite:'Intercep',date:'2026-04-26',conducteur:'Nico',statut:'En cours',avancement:71,note:'13 parcelles restantes (zone sud)'}];
+let SESSIONS=[{id:'0b81fe25',activite:'Griffage',date:'2026-03-03',conducteur:'Nico',statut:'Terminé',avancement:100,note:'',tracteurId:'trac1',tracteurOverride:false},{id:'bf8d7558',activite:'Minibuttage',date:'2026-04-10',conducteur:'Nico',statut:'Terminé',avancement:100,note:'',tracteurId:'trac1',tracteurOverride:false},{id:'4b6e4fb0',activite:'Intercep',date:'2026-04-26',conducteur:'Nico',statut:'En cours',avancement:71,note:'13 parcelles restantes (zone sud)',tracteurId:'trac2',tracteurOverride:false}];
 let CATALOGUE=[
   // ── Cuivre ──
   {nom:'Bouillie bordelaise 20 WG',type:'Cuivre',amm:'2010001',dar:21,drae:24,dose:'4 kg/ha',cible:'Mildiou',usage:'Max 6 kg/ha/an (cuivre métal)',znt:5},
@@ -3067,13 +3105,13 @@ function renderTracTabs(){
   if(!el)return;
   el.innerHTML=TRACTEURS_LIST.map(function(t){
     var enR=REPARATEUR[t.id];
-    var active=t.id===_tracSelId?'active':'';
-    var badge=enR?'<span class="trac-tab-rep-badge">REP</span>':'';
-    return '<button class="trac-tab '+active+'" onclick="selectTracteur(\''+t.id+'\')" style="border-bottom-color:'+(active?couleurTracType(t.type):'transparent')+'">'
-      +badge
+    var active=t.id===_tracSelId;
+    var col=couleurTracType(t.type);
+    return '<button class="trac-tab'+(active?' active':'')+'" onclick="selectTracteur(''+t.id+'')" style="border-bottom-color:'+(active?col:'transparent')+'">'
+      +(enR?'<span class="trac-tab-rep-badge">REP</span>':'')
       +(enR?'🔧':(t.traitementOnly?'🌿':'🚜'))+'<br>'
-      +'<strong>'+t.nom+'</strong><br>'
-      +'<span style="font-size:9px;color:'+couleurTracType(t.type)+'">'+t.type+'</span>'
+      +'<strong style="color:'+(active?'#fff':'rgba(255,255,255,0.4)')+'">'+t.nom+'</strong><br>'
+      +'<span style="font-size:9px;color:'+(active?col:'rgba(255,255,255,0.3)')+'">'+t.type+'</span>'
     +'</button>';
   }).join('');
 }
@@ -3529,7 +3567,17 @@ function renderTracteur(){
     const clk=isTractoriste()?`onclick="openSessionDetail('${s.id}')" style="cursor:pointer"`:'';
     const editBtn=isAdmin?`<button class="sc-edit-btn" onclick="event.stopPropagation();openEditSession('${s.id}')">✏️</button>`:'';
     const encCls=isEnc?' scard-enc':'';
-    return `<div class="scard${encCls}" ${clk}><div class="sc-hd"><div class="sc-ico">${em}</div><div class="sc-info"><div class="sc-act">${s.activite}</div><div class="sc-meta"><span class="sc-date">📅 ${fmtDate(s.date)}</span><span class="sc-cond">👤 ${s.conducteur}</span></div></div><div class="sc-right">${editBtn}<div class="sc-st ${sc}">${s.statut}</div><div class="sc-pct">${pct}%</div></div></div><div class="sc-bwrap"><div class="sc-blbl"><span>Avancement domaine</span><span>${parcellesFaites}/${total} parcelles</span></div><div class="sc-btrack"><div class="sc-bfill ${isEnc?'sc-bfill-enc':''}" style="width:${pct}%"></div></div></div>${s.note?`<div style="padding:0 16px 12px;font-size:11px;color:${isEnc?'rgba(255,255,255,0.45)':'var(--texte-doux)'}">💬 ${s.note}</div>`:''}</div>`;
+    // ── Badge tracteur ──
+    const actDef=ACTIVITES.find(a=>a.nom===s.activite);
+    const trac=TRACTEURS_LIST.find(t=>t.id===s.tracteurId);
+    const isOverride=s.tracteurOverride||(s.tracteurId&&s.tracteurId!==actDef?.tracteurDefautId);
+    const tracRep=s.tracteurId&&REPARATEUR[s.tracteurId];
+    const tracBadgeCls=tracRep?'en-rep':isOverride?'override':'defaut';
+    const tracNom=trac?trac.nom:'';
+    const tracBadge=tracNom?`<span class="sc-trac-badge ${tracBadgeCls}">🚜 ${tracNom}${isOverride?' ✱':''}</span>`:'';
+    const tracRepBadge=tracRep&&isEnc?`<span class="sc-trac-badge en-rep" style="margin-left:4px">⚠️ En répar.</span>`:'';
+    const overrideAlert=isOverride&&actDef?.tracteurDefautId?`<div class="sc-override-alert">✱ Tracteur modifié — défaut : ${TRACTEURS_LIST.find(t=>t.id===actDef.tracteurDefautId)?.nom||'—'}</div>`:'' ;
+    return `<div class="scard${encCls}" ${clk}><div class="sc-hd"><div class="sc-ico">${em}</div><div class="sc-info"><div class="sc-act">${s.activite}</div><div class="sc-meta"><span class="sc-date">📅 ${fmtDate(s.date)}</span><span class="sc-cond">👤 ${s.conducteur}</span>${tracBadge}${tracRepBadge}</div></div><div class="sc-right">${editBtn}<div class="sc-st ${sc}">${s.statut}</div><div class="sc-pct">${pct}%</div></div></div><div class="sc-bwrap"><div class="sc-blbl"><span>Avancement domaine</span><span>${parcellesFaites}/${total} parcelles</span></div><div class="sc-btrack"><div class="sc-bfill ${isEnc?'sc-bfill-enc':''}" style="width:${pct}%"></div></div></div>${s.note?`<div style="padding:0 16px 12px;font-size:11px;color:${isEnc?'rgba(255,255,255,0.45)':'var(--texte-doux)'}">💬 ${s.note}</div>`:'' }${overrideAlert}</div>`;
   };
   sl.innerHTML=[...dataEnc,...dataTer].map(mkScard).join('');
   document.getElementById('s-act').innerHTML=ACTIVITES.map(a=>`<option>${a.emoji} ${a.nom}</option>`).join('');
@@ -3640,19 +3688,35 @@ function openEditSession(id){
   document.getElementById('es-st').value=s.statut;
   document.getElementById('es-av').value=s.avancement||100;
   document.getElementById('es-note').value=s.note||'';
+  // Tracteur
+  var esTracId=document.getElementById('es-trac-id');
+  if(esTracId)esTracId.value=s.tracteurId||'';
+  var esAct=ACTIVITES.find(function(a){return a.nom===s.activite;});
+  _fillTracPickWithId('es', s.activite, s.tracteurId||'', esAct?esAct.tracteurDefautId:'');
+  var esOvLbl=document.getElementById('es-trac-override-lbl');
+  if(esOvLbl&&s.tracteurOverride){
+    var esDefTrac=TRACTEURS_LIST.find(function(t){return t.id===(esAct?esAct.tracteurDefautId:'');});
+    esOvLbl.style.display='inline';
+    esOvLbl.textContent='✱ Modifié — défaut : '+(esDefTrac?esDefTrac.nom:'—');
+  } else if(esOvLbl){esOvLbl.style.display='none';}
+  _updateTracRepAlert('es', s.tracteurId||'');
   openOv('ovEditSession');
 }
 function saveEditSession(){
   const id=document.getElementById('es-id').value;
   const s=SESSIONS.find(x=>x.id===id);if(!s)return;
   const rawAct=document.getElementById('es-act').value;
-  s.activite=rawAct.replace(/^[^\s]+\s/,'').trim();
+  s.activite=rawAct.replace(/^\S+ /,'').trim()||rawAct;
   s.date=document.getElementById('es-date').value;
   const condVal=document.getElementById('es-cond').value;
   if(condVal)s.conducteur=condVal;
   s.statut=document.getElementById('es-st').value;
   s.avancement=parseInt(document.getElementById('es-av').value)||100;
   s.note=document.getElementById('es-note').value;
+  var newTracId=document.getElementById('es-trac-id')?document.getElementById('es-trac-id').value:s.tracteurId||'';
+  var esAct=ACTIVITES.find(function(a){return a.nom===s.activite;});
+  s.tracteurId=newTracId;
+  s.tracteurOverride=newTracId!==(esAct?esAct.tracteurDefautId:'');
   saveData('sessions');
   document.getElementById('ovEditSession').classList.remove('open');
   renderTracteur();
@@ -3697,23 +3761,117 @@ function openNewSession(){
   document.getElementById('s-cond-pick').innerHTML=condHtml;
   document.getElementById('s-date').value=new Date().toISOString().split('T')[0];
   document.getElementById('s-note').value='';
+  // Tracteur par défaut pour la première activité
+  if(document.getElementById('s-trac-id'))document.getElementById('s-trac-id').value='';
+  if(document.getElementById('s-trac-override'))document.getElementById('s-trac-override').value='0';
+  _fillTracPick('s', ACTIVITES[0]?ACTIVITES[0].nom:'');
   openOv('ovSession');
+}
+function onSessionActChange(){
+  var rawAct=document.getElementById('s-act').value;
+  var actNom=rawAct.replace(/^\S+ /,'').trim()||rawAct;
+  if(document.getElementById('s-trac-id'))document.getElementById('s-trac-id').value='';
+  _fillTracPick('s', actNom);
+}
+// Remplit le sélecteur tracteur dans un overlay
+function _fillTracPick(pfx, actNom){
+  var act=ACTIVITES.find(function(a){return a.nom===actNom;});
+  var defId=act?act.tracteurDefautId:(TRACTEURS_LIST[0]?TRACTEURS_LIST[0].id:'');
+  var hidId=document.getElementById(pfx+'-trac-id');
+  var curId=(hidId&&hidId.value)?hidId.value:defId;
+  // S'assurer que curId est dans les éligibles
+  var eligible=actNom==='Traitement'
+    ?TRACTEURS_LIST.filter(function(t){return t.traitementOnly;})
+    :TRACTEURS_LIST.filter(function(t){return !t.traitementOnly;});
+  if(!eligible.length)eligible=TRACTEURS_LIST.slice();
+  if(!eligible.find(function(t){return t.id===curId;}))curId=eligible[0]?eligible[0].id:'';
+  if(hidId)hidId.value=curId;
+  var hidOv=document.getElementById(pfx+'-trac-override');
+  if(hidOv)hidOv.value=(curId!==defId)?'1':'0';
+  var ovLbl=document.getElementById(pfx+'-trac-override-lbl');
+  if(ovLbl){
+    var defTrac=TRACTEURS_LIST.find(function(t){return t.id===defId;});
+    ovLbl.style.display=(curId!==defId)?'inline':'none';
+    ovLbl.textContent='✱ Modifié — défaut : '+(defTrac?defTrac.nom:'—');
+  }
+  _fillTracPickWithId(pfx, actNom, curId, defId);
+  _updateTracRepAlert(pfx, curId);
+}
+function _fillTracPickWithId(pfx, actNom, selId, defId){
+  var tracBtnEl=document.getElementById(pfx+'-trac-pick');
+  if(!tracBtnEl)return;
+  var eligible=actNom==='Traitement'
+    ?TRACTEURS_LIST.filter(function(t){return t.traitementOnly;})
+    :TRACTEURS_LIST.filter(function(t){return !t.traitementOnly;});
+  if(!eligible.length)eligible=TRACTEURS_LIST.slice();
+  tracBtnEl.innerHTML=eligible.map(function(t){
+    var sel=t.id===selId;
+    var rep=REPARATEUR[t.id];
+    var col=couleurTracType(t.type);
+    var isDefaut=t.id===defId;
+    return '<div class="trac-sel-btn'+(sel?' selected':'')+'" onclick="_pickTrac(''+pfx+'',''+t.id+'',''+defId+'');"'+(sel?' style="border-color:'+col+';background:'+col+'18"':'')+'>'+
+      '<div style="display:flex;align-items:center;gap:10px">'+
+        '<div class="trac-sel-radio"'+(sel?' style="border-color:'+col+';background:'+col+'"':'')+'>'+( sel?'✓':'')+'</div>'+
+        '<div>'+
+          '<div style="font-size:13px;font-weight:'+(sel?'700':'500')+';color:'+(sel?'var(--texte)':'var(--texte-doux)')+'">'+t.nom+' — '+t.modele+'</div>'+
+          '<div style="font-size:10px;color:'+col+'">'+t.type+(isDefaut?' · Défaut pour '+actNom:'')+'</div>'+
+        '</div>'+
+      '</div>'+
+      (rep?'<span style="font-size:10px;font-weight:600;background:var(--rouge-pale);color:var(--rouge);border-radius:6px;padding:2px 8px">⚠️ En répar.</span>':'')+
+      ((!rep&&isDefaut)?'<span style="font-size:10px;background:var(--acier-pale);color:var(--acier-med);border-radius:6px;padding:2px 8px">Défaut</span>':'')+
+    '</div>';
+  }).join('');
+}
+function _pickTrac(pfx, id, defId){
+  var hidId=document.getElementById(pfx+'-trac-id');
+  var hidOv=document.getElementById(pfx+'-trac-override');
+  var ovLbl=document.getElementById(pfx+'-trac-override-lbl');
+  if(hidId)hidId.value=id;
+  if(hidOv)hidOv.value=(id!==defId)?'1':'0';
+  if(ovLbl){
+    var defTrac=TRACTEURS_LIST.find(function(t){return t.id===defId;});
+    ovLbl.style.display=(id!==defId)?'inline':'none';
+    ovLbl.textContent='✱ Modifié — défaut : '+(defTrac?defTrac.nom:'—');
+  }
+  var rawAct=document.getElementById(pfx+'-act')?document.getElementById(pfx+'-act').value:'';
+  var actNom=rawAct.replace(/^\S+ /,'').trim()||rawAct;
+  _fillTracPickWithId(pfx, actNom, id, defId);
+  _updateTracRepAlert(pfx, id);
+}
+function _updateTracRepAlert(pfx, id){
+  var alertEl=document.getElementById(pfx+'-trac-rep-alert');
+  if(!alertEl)return;
+  var rep=id?REPARATEUR[id]:null;
+  var trac=TRACTEURS_LIST.find(function(t){return t.id===id;});
+  if(rep&&trac){
+    alertEl.style.display='block';
+    alertEl.innerHTML='⚠️ <strong>'+trac.nom+'</strong> est actuellement chez le réparateur ('+rep.motif+'). La session sera créée et signalée dans les exports.';
+  } else {
+    alertEl.style.display='none';
+  }
 }
 function pickEmoji(el){document.querySelectorAll('#emoji-pick .pchk').forEach(x=>{x.classList.remove('sel','acre');});el.classList.add('sel','acre');selEmoji=el.dataset.val;}
 function saveSession(){
   if(!isTractoriste()){alert('Accès réservé aux tractoristes.');return;}
-  const a=document.getElementById('s-act').value.replace(/^[^\s]+ /,'');
+  var rawAct=document.getElementById('s-act').value;
+  var a=rawAct.replace(/^\S+ /,'').trim()||rawAct;
   const date=document.getElementById('s-date').value;
   if(!date){alert('Date obligatoire');return;}
   const condEl=document.querySelector('#s-cond-pick .pchk.sel');
+  var tracteurId=document.getElementById('s-trac-id')?document.getElementById('s-trac-id').value:'';
+  if(!tracteurId&&TRACTEURS_LIST.length)tracteurId=TRACTEURS_LIST[0].id;
+  var act=ACTIVITES.find(function(x){return x.nom===a;});
+  var tracteurOverride=tracteurId!==act?.tracteurDefautId;
   SESSIONS.push({
     id:Date.now().toString(16),
     activite:a,
-    date,
-    conducteur:condEl?condEl.textContent.trim():CONDUCTEURS[0]?.nom,
+    date:date,
+    conducteur:condEl?condEl.textContent.trim():(CONDUCTEURS[0]?CONDUCTEURS[0].nom:''),
     statut:'En cours',
     avancement:0,
     parcellesFaites:[],
+    tracteurId:tracteurId,
+    tracteurOverride:tracteurOverride,
     note:document.getElementById('s-note').value
   });
   saveData('sessions');
@@ -3724,7 +3882,9 @@ function saveActivite(){
   if(!isTractoriste()){alert('Accès réservé.');return;}
   const nom=document.getElementById('new-act').value.trim();
   if(!nom){alert('Nom obligatoire');return;}
-  ACTIVITES.push({nom,emoji:selEmoji});
+  // Tracteur défaut = premier tracteur non-traitement
+  var defTrac=TRACTEURS_LIST.find(function(t){return !t.traitementOnly;})||TRACTEURS_LIST[0];
+  ACTIVITES.push({nom:nom,emoji:selEmoji,tracteurDefautId:defTrac?defTrac.id:''});
   saveData('activites');
   document.getElementById('ovActivite').classList.remove('open');
   document.getElementById('new-act').value='';
@@ -3930,7 +4090,64 @@ function renderReglages(){
   document.getElementById('nt-saison').innerHTML=['Hiver','Printemps','Été','Automne'].map(s=>`<option value="${s}" ${s===saisonNom?'selected':''}>${s}</option>`).join('');
   // Parc tracteurs (admin)
   renderTracteurSet();
+  // Association activité↔tracteur (admin)
+  renderActTracList();
 }
+// ── Render liste association activité↔tracteur (Réglages) ──
+function renderActTracList(){
+  var el=document.getElementById('act-trac-list');
+  var sec=document.getElementById('set-sec-act-trac');
+  if(!el||!sec)return;
+  sec.style.display=isAdmin()?'block':'none';
+  if(!isAdmin())return;
+  el.innerHTML=ACTIVITES.map(function(a){
+    var trac=TRACTEURS_LIST.find(function(t){return t.id===a.tracteurDefautId;});
+    var col=trac?couleurTracType(trac.type):'#888';
+    return '<div class="act-trac-row">'
+      +'<div style="font-size:13px">'+(a.emoji||'')+ ' '+a.nom+'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px">'
+        +'<span class="act-trac-badge" style="background:'+col+'18;color:'+col+'" onclick="openEditActTrac(''+a.nom+'')">'
+          +'🚜 '+(trac?trac.nom:'—')
+        +'</span>'
+        +'<span style="font-size:16px;cursor:pointer;color:var(--texte-doux)" onclick="openEditActTrac(''+a.nom+'')">✏️</span>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+function openEditActTrac(actNom){
+  if(!isAdmin())return;
+  var act=ACTIVITES.find(function(a){return a.nom===actNom;});
+  if(!act)return;
+  document.getElementById('eat-act-nom').value=actNom;
+  document.getElementById('eat-title').textContent='🔗 '+actNom+' — tracteur par défaut';
+  // Tracteurs éligibles
+  var eligible=actNom==='Traitement'
+    ?TRACTEURS_LIST.filter(function(t){return t.traitementOnly;})
+    :TRACTEURS_LIST.filter(function(t){return !t.traitementOnly;});
+  if(!eligible.length)eligible=TRACTEURS_LIST.slice();
+  document.getElementById('eat-trac-pick').innerHTML=eligible.map(function(t){
+    var sel=t.id===act.tracteurDefautId;
+    var col=couleurTracType(t.type);
+    return '<div class="pchk'+(sel?' sel acre':'')+'" onclick="pickVal(this,'eat-trac','acre')" data-val="'+t.id+'" style="'+(sel?'border-color:'+col:'')+'">'
+      +(t.traitementOnly?'🌿':'🚜')+' '+t.nom+' — '+t.modele
+    +'</div>';
+  }).join('');
+  document.getElementById('eat-trac').value=act.tracteurDefautId||'';
+  openOv('ovEditActTrac');
+}
+function saveEditActTrac(){
+  var actNom=document.getElementById('eat-act-nom').value;
+  var tracId=document.getElementById('eat-trac').value;
+  var act=ACTIVITES.find(function(a){return a.nom===actNom;});
+  if(!act||!tracId)return;
+  act.tracteurDefautId=tracId;
+  window.ACTIVITES=ACTIVITES;
+  saveData('activites');
+  document.getElementById('ovEditActTrac').classList.remove('open');
+  renderActTracList();
+  showToast('Association mise à jour ✓','#3D6B27');
+}
+
 function activateSaison(nom){SAISONS.forEach(s=>s.active=s.nom===nom);saveData('saisons');renderReglages();renderParcelles();computePStats();}
 function saveSaison(){const nom=document.getElementById('ns-nom').value.trim();if(!nom)return;SAISONS.push({nom,periode:document.getElementById('ns-periode').value,active:false});saveData('saisons');document.getElementById('ovSaison').classList.remove('open');document.getElementById('ns-nom').value='';document.getElementById('ns-periode').value='';renderReglages();}
 function saveTache(){const nom=document.getElementById('nt-nom').value.trim(),hha=parseInt(document.getElementById('nt-hha').value)||30,saison=document.getElementById('nt-saison').value;if(!nom)return;TACHES.push({nom,hha,saison});saveData('taches');document.getElementById('ovTache').classList.remove('open');document.getElementById('nt-nom').value='';document.getElementById('nt-hha').value='';renderReglages();}
@@ -5505,7 +5722,104 @@ window.addEventListener('load', function(){
   window.renderParcelles = renderParcelles;
   window.computePStats   = computePStats;
   window.renderJournalList = renderJournalList;
-  window.renderTracteur  = renderTracteur;
+  // ════ EXPORT PDF ENTRETIEN ════
+function ouvrirExportEntretien(){
+  // Remplir années disponibles
+  var annees=new Set();
+  ENTRETIENS.forEach(function(e){if(e.date)annees.add(e.date.slice(0,4));});
+  Object.values(REPARATEUR).forEach(function(r){if(r&&r.depuis)annees.add(r.depuis.slice(0,4));});
+  // Ajouter aussi historique réparateur depuis REPARATEUR_HISTORIQUE si disponible
+  var anArr=[...annees].sort(function(a,b){return b-a;});
+  if(!anArr.length)anArr=[new Date().getFullYear().toString()];
+  var anneeEl=document.getElementById('exp-ent-annee');
+  if(anneeEl){
+    anneeEl.innerHTML=anArr.map(function(a){return '<option value="'+a+'">'+a+'</option>';}).join('');
+  }
+  // Rendre la liste des tracteurs avec checkboxes
+  var listEl=document.getElementById('exp-ent-trac-list');
+  if(listEl){
+    listEl.innerHTML=TRACTEURS_LIST.map(function(t){
+      var col=couleurTracType(t.type);
+      return '<label style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--gris-clair);cursor:pointer;min-height:44px">'
+        +'<input type="checkbox" class="exp-ent-trac-cb" value="'+t.id+'" onchange="_updateExportSummary()" checked style="width:18px;height:18px;accent-color:'+col+';cursor:pointer">'
+        +'<div>'
+          +'<div style="font-weight:600;font-size:13px">'+t.nom+(t.traitementOnly?' <span style="font-size:9px;background:var(--orange-pale);color:var(--orange);border-radius:4px;padding:1px 5px">Traitement</span>':'')+'</div>'
+          +'<div style="font-size:11px;color:'+col+'">🔩 '+(t.modele||'—')+' · '+t.type+'</div>'
+        +'</div>'
+      +'</label>';
+    }).join('');
+  }
+  _updateExportSummary();
+  openOv('ovExportEntretien');
+}
+function _updateExportSummary(){
+  var annee=(document.getElementById('exp-ent-annee')||{}).value||new Date().getFullYear().toString();
+  var selIds=[];
+  document.querySelectorAll('.exp-ent-trac-cb:checked').forEach(function(cb){selIds.push(cb.value);});
+  var nbF=ENTRETIENS.filter(function(e){return selIds.includes(e.tracteurId)&&e.date&&e.date.startsWith(annee);}).length;
+  var nbR=Object.entries(REPARATEUR).filter(function(kv){return selIds.includes(kv[0])&&kv[1]&&kv[1].depuis&&kv[1].depuis.startsWith(annee);}).length;
+  var sumEl=document.getElementById('exp-ent-summary');
+  if(sumEl)sumEl.textContent=nbF+' fiche'+(nbF!==1?'s':'')+' · '+nbR+' répar. · '+selIds.length+' tracteur'+(selIds.length!==1?'s':'');
+}
+function lancerExportEntretienPDF(){
+  var annee=(document.getElementById('exp-ent-annee')||{}).value||new Date().getFullYear().toString();
+  var selIds=[];
+  document.querySelectorAll('.exp-ent-trac-cb:checked').forEach(function(cb){selIds.push(cb.value);});
+  if(!selIds.length){showToast('Sélectionnez au moins un tracteur','#C0392B');return;}
+  var tracteursSelectionnes=TRACTEURS_LIST.filter(function(t){return selIds.includes(t.id);});
+  var fmtD=function(iso){
+    if(!iso)return'—';
+    var p=iso.split('-');
+    var mois=['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct','nov','déc'];
+    return parseInt(p[2])+' '+mois[parseInt(p[1])-1]+' '+p[0];
+  };
+  var champs=[
+    {key:'plein',label:'Plein fait',icon:'⛽'},
+    {key:'huile',label:'Niveau huile',icon:'🛢️'},
+    {key:'filtre_air',label:'Filtre à air',icon:'💨'},
+    {key:'radiateur',label:'Radiateur',icon:'🌀'},
+    {key:'pression_pneu',label:'Pression pneus',icon:'🔵'},
+    {key:'lavage',label:'Lavage',icon:'🪣'},
+  ];
+  var sectionsHTML=tracteursSelectionnes.map(function(t){
+    var fiches=ENTRETIENS.filter(function(e){return e.tracteurId===t.id&&e.date&&e.date.startsWith(annee);}).sort(function(a,b){return b.date.localeCompare(a.date);});
+    var rep=REPARATEUR[t.id];
+    var repsAll=[];
+    if(rep&&rep.depuis&&rep.depuis.startsWith(annee))repsAll.push(rep);
+    var nbAno=fiches.filter(function(f){return f.anomalie;}).length;
+    var moyScore=fiches.length?Math.round(fiches.reduce(function(s,f){return s+champs.filter(function(c){return f[c.key];}).length;},0)/fiches.length*100/6):0;
+    var resumeHTML='<div class="resume-bar"><div class="resume-item"><span class="resume-val">'+fiches.length+'</span><span class="resume-lbl">Fiches</span></div><div class="resume-item"><span class="resume-val '+(nbAno>0?'val-warn':'')+'">'+nbAno+'</span><span class="resume-lbl">Anomalies</span></div><div class="resume-item"><span class="resume-val">'+repsAll.length+'</span><span class="resume-lbl">Répar.</span></div><div class="resume-item"><span class="resume-val">'+moyScore+'%</span><span class="resume-lbl">Moy. contrôle</span></div></div>';
+    var fichesHTML=!fiches.length?'<p class="empty">Aucune fiche pour '+annee+'.</p>':fiches.map(function(f){
+      var nb=champs.filter(function(c){return f[c.key];}).length;
+      var checkHtml=champs.map(function(c){return '<div class="check-item '+(f[c.key]?'ok':'ko')+'">'+c.icon+' '+c.label+' <span>'+(f[c.key]?'✓':'✗')+'</span></div>';}).join('');
+      // Badge tracteur si override
+      var actDef=ACTIVITES.find(function(a){return a.nom===f.activite;});
+      var defTracNom=actDef?((TRACTEURS_LIST.find(function(x){return x.id===actDef.tracteurDefautId;}))||{}).nom||'—':'—';
+      var tracNom=((TRACTEURS_LIST.find(function(x){return x.id===f.tracteurId;}))||{}).nom||'';
+      var overrideInfo=f.tracteurOverride?'<div style="background:#FEF3E2;border-left:3px solid #E07B2A;padding:5px 10px;font-size:10px;color:#935116;margin-top:4px">✱ Tracteur utilisé : '+tracNom+' (défaut : '+defTracNom+')</div>':'';
+      return '<div class="fiche-bloc'+(f.anomalie?' has-anomalie':'')+'"><div class="fiche-header"><div><div class="fiche-date">📅 '+fmtD(f.date)+'</div><div class="fiche-meta">👤 '+f.conducteur+(f.activite?' · 🚜 '+f.activite:'')+(tracNom&&!f.tracteurOverride?' · '+tracNom:'')+'</div></div><div class="fiche-score '+(nb===6?'score-ok':'score-warn')+'">'+nb+'/6</div></div><div class="check-grid">'+checkHtml+'</div>'+(f.anomalie?'<div class="anomalie">⚠️ Anomalie : '+f.anomalie+'</div>':'')+overrideInfo+'</div>';
+    }).join('');
+    var repsHTML=!repsAll.length?'<p class="empty">Aucun passage réparateur pour '+annee+'.</p>':repsAll.map(function(r){
+      var retour=r.retour_reel||null;
+      var enCours=!retour;
+      var nbJ=retour?Math.ceil((new Date(retour)-new Date(r.depuis))/86400000):Math.ceil((new Date()-new Date(r.depuis))/86400000);
+      var depasse=r.prevu_retour&&!retour&&new Date()>new Date(r.prevu_retour);
+      return '<div class="rep-bloc'+(enCours?' rep-en-cours':'')+(depasse?' rep-depasse':'')+'"><div class="rep-header"><div><div class="rep-motif">'+r.motif+'</div><div class="rep-dates">Entrée : <strong>'+fmtD(r.depuis)+'</strong>'+(r.prevu_retour?' · Retour prévu : <strong>'+fmtD(r.prevu_retour)+'</strong>':'')+(retour?' · Retour réel : <strong>'+fmtD(retour)+'</strong>':'')+'</div></div><div class="rep-badge '+(enCours?'badge-cours':'badge-ok')+'">'+( enCours?(depasse?'⚠️ Dépassé':'🔧 En cours'):'✓ '+nbJ+'j')+'</div></div></div>';
+    }).join('');
+    return '<section class="tracteur-section"><div class="tracteur-title"><div><div class="tracteur-nom">'+t.nom+(t.traitementOnly?' <span class="badge-trait">Traitement</span>':'')+'</div><div class="tracteur-modele">🔩 '+(t.modele||'—')+' · '+t.type+'</div></div><div class="tracteur-annee">'+annee+'</div></div>'+resumeHTML+'<h3 class="section-sub">📋 Fiches d'entretien</h3>'+fichesHTML+'<h3 class="section-sub" style="margin-top:20px">🔧 Passages réparateur</h3>'+repsHTML+'</section>';
+  }).join('<div class="page-break"></div>');
+  var aujourd_hui=fmtD(new Date().toISOString().slice(0,10));
+  var html='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Ma Vigne — Entretien '+annee+'</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Georgia,serif;font-size:11px;color:#1A1A1A;padding:20px;}.doc-header{border-bottom:2px solid #3D6B27;padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;}.doc-title{font-size:20px;font-weight:bold;color:#3D6B27;}.doc-meta{text-align:right;font-size:10px;color:#888;}.tracteur-section{margin-bottom:30px;}.tracteur-title{display:flex;justify-content:space-between;align-items:flex-start;background:#2A3547;color:white;padding:12px 16px;border-radius:8px;margin-bottom:12px;}.tracteur-nom{font-size:16px;font-weight:bold;}.tracteur-modele{font-size:10px;color:rgba(255,255,255,0.6);margin-top:3px;}.tracteur-annee{font-size:22px;font-weight:bold;color:rgba(255,255,255,0.35);}.badge-trait{font-size:9px;background:#E07B2A;color:white;border-radius:4px;padding:1px 6px;vertical-align:middle;font-weight:normal;margin-left:6px;}.resume-bar{display:flex;border:1px solid #E0DDD5;border-radius:8px;overflow:hidden;margin-bottom:16px;}.resume-item{flex:1;text-align:center;padding:10px 6px;border-right:1px solid #E0DDD5;}.resume-item:last-child{border-right:none;}.resume-val{display:block;font-size:18px;font-weight:bold;color:#2A3547;}.val-warn{color:#C0392B;}.resume-lbl{display:block;font-size:9px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:0.04em;}.section-sub{font-size:12px;font-weight:bold;color:#2A3547;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E8E4D9;}.fiche-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;overflow:hidden;break-inside:avoid;}.fiche-bloc.has-anomalie{border-color:#F5B8B4;}.fiche-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#F9F8F5;border-bottom:1px solid #E0DDD5;}.fiche-date{font-weight:bold;font-size:11px;}.fiche-meta{font-size:10px;color:#666;margin-top:2px;}.fiche-score{font-size:18px;font-weight:bold;}.score-ok{color:#3D6B27;}.score-warn{color:#E07B2A;}.check-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:8px 12px;}.check-item{font-size:10px;display:flex;justify-content:space-between;align-items:center;padding:3px 6px;border-radius:4px;}.check-item.ok{background:#EAF4E2;color:#2D5A1B;}.check-item.ko{background:#FEF0EF;color:#922B21;}.check-item span{font-weight:bold;}.anomalie{padding:6px 12px 8px;background:#FEF0EF;font-size:10px;color:#922B21;border-top:1px solid #F5B8B4;}.rep-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;padding:10px 14px;break-inside:avoid;}.rep-bloc.rep-en-cours{border-color:#F5CBA7;background:#FEF9F5;}.rep-bloc.rep-depasse{border-color:#F5B8B4;background:#FEF0EF;}.rep-header{display:flex;justify-content:space-between;align-items:center;gap:10px;}.rep-motif{font-weight:bold;font-size:11px;margin-bottom:4px;}.rep-dates{font-size:10px;color:#555;}.rep-badge{font-size:10px;font-weight:bold;padding:4px 10px;border-radius:12px;white-space:nowrap;}.badge-ok{background:#EAF4E2;color:#2D5A1B;}.badge-cours{background:#FEF3E2;color:#935116;}.empty{font-size:10px;color:#999;font-style:italic;padding:8px 0;}.page-break{page-break-after:always;}.doc-footer{border-top:1px solid #E0DDD5;padding-top:8px;margin-top:20px;font-size:9px;color:#AAA;display:flex;justify-content:space-between;}@media print{.page-break{page-break-after:always;border:none;margin:0;}}</style></head><body><div class="doc-header"><div><div class="doc-title">🍇 Ma Vigne — Entretien tracteurs</div><div style="font-size:11px;color:#666;margin-top:2px">Historique '+annee+' · '+tracteursSelectionnes.map(function(t){return t.nom;}).join(', ')+'</div></div><div class="doc-meta">Généré le '+aujourd_hui+'<br>Ma Vigne v4.2 · GUERETTECH</div></div>'+sectionsHTML+'<div class="doc-footer"><span>Ma Vigne — Document confidentiel · Usage interne</span><span>© 2026 Nicolas GUERET / GUERETTECH</span></div></body></html>';
+  var win=window.open('','_blank');
+  if(!win){showToast('Autorisez les popups pour l'impression','#C0392B');return;}
+  win.document.write(html);
+  win.document.close();
+  win.onload=function(){win.focus();win.print();};
+  document.getElementById('ovExportEntretien').classList.remove('open');
+  showToast('PDF ouvert ✓','#3D6B27');
+}
+
+window.renderTracteur  = renderTracteur;
   window.renderPhyto     = renderPhyto;
   window.renderReglages  = renderReglages;
   window.initLogin       = initLogin;
@@ -5633,6 +5947,38 @@ if ('serviceWorker' in navigator) {
       <div class="fl">Nouvelle date de retour prévue</div>
       <input type="date" class="fi ac" id="reporter-date" style="margin-bottom:20px">
       <button class="mbtn" style="background:var(--orange);color:white;border-color:var(--orange)" onclick="saveReporter()">Enregistrer la nouvelle date</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ OVERLAY Export PDF entretien ══ -->
+<div class="overlay" id="ovExportEntretien" onclick="closeOv(event,'ovExportEntretien')">
+  <div class="modal" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <div class="modal-hd"><div class="modal-title">📄 Export PDF entretien</div><div class="modal-sub">Fiches + passages réparateur</div></div>
+    <div class="modal-body">
+      <div class="fl">Année</div>
+      <select class="fsel ac" id="exp-ent-annee" onchange="_updateExportSummary()" style="margin-bottom:16px"></select>
+      <div class="fl">Tracteurs à inclure</div>
+      <div id="exp-ent-trac-list" style="margin-bottom:16px"></div>
+      <div style="background:var(--acier-pale);border-radius:10px;padding:12px;margin-bottom:20px;text-align:center;font-size:13px;color:var(--acier-med)" id="exp-ent-summary"></div>
+      <button class="mbtn verte" onclick="lancerExportEntretienPDF()">🖨️ Générer le PDF</button>
+      <div style="text-align:center;font-size:11px;color:var(--texte-doux);margin-top:8px">Ouverture dans un nouvel onglet → Imprimer / Enregistrer en PDF</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ OVERLAY Association activité↔tracteur ══ -->
+<div class="overlay" id="ovEditActTrac" onclick="closeOv(event,'ovEditActTrac')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd"><div class="modal-title" id="eat-title">🔗 Tracteur par défaut</div><div class="modal-sub">Modifiable à chaque session</div></div>
+    <input type="hidden" id="eat-act-nom">
+    <div class="modal-body">
+      <div class="fl">Tracteur par défaut</div>
+      <div class="ppicker" id="eat-trac-pick"></div>
+      <input type="hidden" id="eat-trac">
+      <button class="mbtn acre" onclick="saveEditActTrac()">Enregistrer</button>
     </div>
   </div>
 </div>
