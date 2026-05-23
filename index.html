@@ -2139,10 +2139,7 @@ let loginPendingIdx = -1;
 
 // Couleurs avatars login — palette ardoise/or sobre
 var LP_COLORS=['#2C4A3E','#3A3A5C','#4A3228','#1E3A4A','#3C2E4A','#2A4028','#4A3C1E'];
-// ⚠️ window.initLogin exposé immédiatement pour éviter la race condition iOS Safari :
-// Firebase (cache IndexedDB) peut répondre AVANT la fin du parsing du script,
-// donc applyFbData vérifie window.initLogin avant que le DOMContentLoaded l'assigne.
-window.initLogin = function initLogin(){
+function initLogin(){
   var profiles = document.getElementById('login-profiles');
   profiles.innerHTML = '';
 
@@ -2184,7 +2181,10 @@ window.initLogin = function initLogin(){
       profiles.appendChild(btn);
     })(i);
   }
-}; // fin window.initLogin
+}
+// ⚠️ Exposé immédiatement sur window pour éviter la race condition iOS :
+// Firebase (cache IndexedDB) peut répondre avant que le DOMContentLoaded l'assigne (ligne ~6156).
+window.initLogin = initLogin;
 
 function selectProfile(idx){
   loginPendingIdx = idx;
