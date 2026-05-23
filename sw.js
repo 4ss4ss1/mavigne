@@ -1,4 +1,4 @@
-// MA VIGNE — Service Worker v1.66
+// MA VIGNE — Service Worker v1.68
 // v1.65 — Tracteur : onglets par tracteur · fiches d'entretien · état réparateur + notifs · parc tracteurs Réglages · fiches d'entretien · état réparateur + notifs · parc tracteurs Réglages
 // v1.58 — Chat réécrit de zéro
 // v1.59 — Fix boîte de saisie invisible : hauteur #page-chat corrigée
@@ -9,7 +9,9 @@
 // v1.64 — Tracteur : sessions "En cours" fond sombre (scard-enc) · tri En cours → Terminées · multi-sessions en cours supportées
 
 // v1.66 — Fix layout onglets (dans en-tête sombre) · Association activité↔tracteur (défaut Réglages + modifiable session) · badge tracteur sur sessions · alerte réparateur · PDF entretien avec tracteur + override
-const CACHE_NAME = 'mavigne-v1.66';
+// v1.67 — Fix chevauchement onglets tracteurs
+// v1.68 — Fix erreurs JS : guillemets inline onclick → data-* + addEventListener (renderTracTabs, _fillTracPickWithId, renderActTracList, openEditActTrac) onglets tracteurs : trac-sband neutralise transform/margin/shadow du .sband global
+const CACHE_NAME = 'mavigne-v1.68';
 const SYNC_TAG   = 'mavigne-sync';
 const APP_SHELL = ['./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 const CDN_URLS = [
@@ -18,7 +20,7 @@ const CDN_URLS = [
   'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap',
 ];
 self.addEventListener('install', event => {
-  console.log('[SW] Install v1.66');
+  console.log('[SW] Install v1.68');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache =>
       cache.addAll(APP_SHELL).then(() =>
@@ -28,7 +30,7 @@ self.addEventListener('install', event => {
   );
 });
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v1.66');
+  console.log('[SW] Activate v1.68');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
