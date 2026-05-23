@@ -705,10 +705,36 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 #mv-toast-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 
 /* ── Dots pagination card accueil ── */
-.hv2-card-dots{display:flex;gap:5px;justify-content:center;margin-top:12px;}
+.hv2-card-dots{display:flex;gap:4px;align-items:center;}
 .hv2-card-dot{height:6px;border-radius:3px;background:rgba(61,107,39,0.25);transition:all 0.25s;}
-.hv2-card-dot.active{background:var(--vert);width:16px;}
+.hv2-card-dot.active{background:var(--vert);width:14px;}
 .hv2-card-dot:not(.active){width:6px;}
+/* Card gauche hauteur fixe — stable au tap */
+.hv2-card-fixed{height:200px;display:flex;flex-direction:column;justify-content:space-between;}
+.hv2-card-content{flex:1;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;}
+/* Barre progression card accueil */
+.hv2-prog-track{height:4px;background:rgba(61,107,39,0.15);border-radius:4px;overflow:hidden;margin:8px 0 6px;}
+.hv2-prog-fill{height:100%;border-radius:4px;transition:width 0.4s;}
+/* Tap hint */
+.hv2-tap-hint{font-size:9px;color:rgba(61,107,39,0.5);font-weight:600;background:rgba(61,107,39,0.08);border-radius:8px;padding:2px 7px;display:flex;align-items:center;gap:3px;white-space:nowrap;}
+/* Card droite priorité — même hauteur */
+.hv2-card-or{background:linear-gradient(135deg,#FFF8E8,#FAF0CC);border:1px solid rgba(184,145,58,0.35);height:200px;display:flex;flex-direction:column;justify-content:space-between;}
+.hv2-card-or-vide{background:var(--or-pale);border:1px solid rgba(184,145,58,0.18);height:200px;display:flex;flex-direction:column;justify-content:space-between;}
+/* Card session en cours épinglée Tracteur */
+.trac-encours-card{background:var(--acier);border-radius:18px;padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow-md);cursor:pointer;transition:transform 0.15s;}
+.trac-encours-card:active{transform:scale(0.98);}
+.trac-encours-label{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:8px;}
+.trac-encours-act{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:#fff;line-height:1;}
+.trac-encours-meta{font-size:11px;color:rgba(255,255,255,0.55);margin-top:4px;}
+.trac-encours-bar-wrap{margin-top:14px;}
+.trac-encours-bar-lbl{display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,0.55);margin-bottom:5px;}
+.trac-encours-bar-track{height:5px;background:rgba(255,255,255,0.15);border-radius:5px;overflow:hidden;}
+.trac-encours-bar-fill{height:100%;background:var(--or);border-radius:5px;transition:width 0.3s;}
+.trac-encours-btn{display:inline-block;margin-top:12px;font-size:11px;font-weight:700;color:rgba(255,255,255,0.85);background:rgba(255,255,255,0.12);border-radius:8px;padding:5px 12px;}
+/* Pill filtres actifs Journal */
+.j-filtres-pill{display:inline-flex;align-items:center;gap:6px;background:var(--or-pale);border:1.5px solid rgba(184,145,58,0.35);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;color:var(--or);margin:0 16px 10px;cursor:pointer;}
+.j-filtres-pill-dot{width:6px;height:6px;border-radius:50%;background:var(--or);flex-shrink:0;}
+.j-filtres-pill-clear{font-size:13px;color:var(--or);margin-left:4px;}
 
 /* ── Section destructive Réglages ── */
 .set-sec-danger .set-row{border-left:3px solid var(--rouge-pale);}
@@ -1136,24 +1162,29 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
   <!-- GRANDES STAT CARDS -->
   <div class="hv2-section-label">Aperçu du domaine</div>
   <div class="hv2-grid2">
-    <div class="hv2-card hv2-card-vert" id="home-stat-card" onclick="toggleHomeCard()">
-      <div class="hv2-card-picto" id="home-stat-picto">🌿</div>
-      <div class="hv2-card-val" id="home-stat-val">—</div>
-      <div class="hv2-card-label" id="home-stat-label">Avancement saison</div>
-      <div class="hv2-card-sub" id="home-stat-sub">Calcul…</div>
-      <div class="hv2-chip hv2-chip-vert" id="home-stat-chip">Domaine</div>
-      <div class="hv2-card-dots" id="home-stat-dots">
-        <div class="hv2-card-dot active"></div>
-        <div class="hv2-card-dot"></div>
-        <div class="hv2-card-dot"></div>
+    <!-- Card gauche : 3 modes tap -->
+    <div class="hv2-card hv2-card-vert hv2-card-fixed" id="home-stat-card" onclick="toggleHomeCard()">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="hv2-card-picto" id="home-stat-picto" style="margin-bottom:0">🌿</div>
+        <div class="hv2-tap-hint">👆 changer</div>
+      </div>
+      <div class="hv2-card-content" id="home-stat-content"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
+        <div class="hv2-chip hv2-chip-vert" id="home-stat-chip">Domaine</div>
+        <div class="hv2-card-dots" id="home-stat-dots">
+          <div class="hv2-card-dot active"></div>
+          <div class="hv2-card-dot"></div>
+          <div class="hv2-card-dot"></div>
+        </div>
       </div>
     </div>
-    <div class="hv2-card hv2-card-terre" onclick="goTo('journal')">
-      <div class="hv2-card-picto">⏱</div>
-      <div class="hv2-card-val" id="hs-hreste">—</div>
-      <div class="hv2-card-label">Heures restantes</div>
-      <div class="hv2-card-sub" id="hv2-h-sub">Calcul…</div>
-      <div class="hv2-chip hv2-chip-terre" id="hv2-h-chip">Printemps</div>
+    <!-- Card droite : priorité fixe -->
+    <div class="hv2-card hv2-card-fixed" id="home-prio-card" onclick="goTo('parcelles')" style="background:var(--or-pale);border:1px solid rgba(184,145,58,0.18)">
+      <div class="hv2-card-picto" id="home-prio-picto" style="margin-bottom:0">⚡</div>
+      <div class="hv2-card-content" id="home-prio-content"></div>
+      <div style="margin-top:10px">
+        <div class="hv2-chip" id="home-prio-chip" style="background:rgba(184,145,58,0.15);color:var(--or)">À prioriser</div>
+      </div>
     </div>
   </div>
 
@@ -1285,6 +1316,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     <span class="j-date-clear" id="jDateClear" onclick="clearJDateFilter()">✕ Dates</span>
   </div>
   <div class="tfilters" id="j-parcelle-filter-row" style="padding:0 16px 12px;overflow-x:auto;scrollbar-width:none;display:flex;gap:6px;flex-wrap:nowrap"></div>
+  <div id="j-filtres-pill" class="j-filtres-pill" style="display:none"></div>
   <div class="timeline" id="timeline"></div>
 </div>
 
@@ -2230,58 +2262,46 @@ function getHomeCardData(){
 }
 
 function renderHomeCard(){
-  const {pctGlobal, tacheLaMoinsAvancee, tacheLaPlusAvancee, parcActives} = getHomeCardData();
+  const {pctGlobal, tacheLaPlusAvancee, parcActives} = getHomeCardData();
   const saison = getSaisonActive();
-  // Reset complet avant toute branche
+  const {totalReste} = calcHeures();
   const _picto=document.getElementById('home-stat-picto');
-  const _val=document.getElementById('home-stat-val');
-  const _lbl=document.getElementById('home-stat-label');
-  const _sub=document.getElementById('home-stat-sub');
   const _chip=document.getElementById('home-stat-chip');
-  _val.style.display=''; _val.textContent=''; _val.style.fontSize='';
-  _lbl.style.cssText=''; _lbl.textContent='';
+  const _content=document.getElementById('home-stat-content');
+  const barCol=pctGlobal>=75?'var(--vert-med)':pctGlobal>=40?'var(--or)':'var(--orange)';
   if(homeCardMode===0){
     _picto.textContent='🌿';
-    _val.textContent=pctGlobal+'%';
-    _lbl.textContent='Avancement saison';
-    _sub.textContent=parcActives.length+' parcelles · 11,76 ha';
     _chip.textContent=saison.nom;
+    _content.innerHTML=`<div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;line-height:1;color:var(--texte)">${pctGlobal}%</div>
+      <div class="hv2-prog-track"><div class="hv2-prog-fill" style="width:${pctGlobal}%;background:${barCol}"></div></div>
+      <div style="font-size:12px;font-weight:500;color:var(--texte-med)">Avancement saison</div>
+      <div style="font-size:11px;color:var(--texte-doux);margin-top:2px">${parcActives.length} parcelles · 11,76 ha</div>`;
   } else if(homeCardMode===1){
-    var pm=(typeof priorityMessage!=='undefined')&&priorityMessage&&priorityMessage.trim()?priorityMessage.trim():'';
-    _val.style.display='none';
-    _picto.textContent='⚡';
-    _chip.textContent='À prioriser';
-    if(pm){
-      _lbl.style.cssText='font-size:13px;font-weight:600;color:var(--texte);line-height:1.4;margin-top:4px;';
-      _lbl.textContent=pm;
-      _sub.textContent='Priorité du moment';
+    const t=tacheLaPlusAvancee;
+    _picto.textContent=t?(TEMOJI[t.nom]||'🌾'):'✅';
+    _chip.textContent=t?'Presque fini':saison.nom;
+    if(t){
+      _content.innerHTML=`<div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;line-height:1;color:var(--texte)">${t.pct}%</div>
+        <div class="hv2-prog-track"><div class="hv2-prog-fill" style="width:${t.pct}%;background:var(--vert-med)"></div></div>
+        <div style="font-size:12px;font-weight:500;color:var(--texte-med)">${t.nom}</div>
+        <div style="font-size:11px;color:var(--texte-doux);margin-top:2px">Presque fini !</div>`;
     } else {
-      _lbl.style.cssText='font-size:13px;font-weight:500;color:var(--texte-doux);line-height:1.4;margin-top:4px;';
-      _lbl.textContent='RAS';
-      _sub.textContent='';
+      _content.innerHTML=`<div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;color:var(--vert-med)">✅</div>
+        <div style="font-size:12px;font-weight:500;color:var(--texte-med);margin-top:8px">Toutes les tâches</div>
+        <div style="font-size:11px;color:var(--texte-doux);margin-top:2px">Saison complète !</div>`;
     }
   } else {
-    const t = tacheLaPlusAvancee;
-    if(t){
-      _picto.textContent=TEMOJI[t.nom]||'🌾';
-      _val.textContent=t.pct+'%';
-      _lbl.textContent=t.nom;
-      _sub.textContent=t.val+'/'+t.total+' parcelles';
-      _chip.textContent='Presque fini';
-    } else {
-      _picto.textContent='✅';
-      _val.textContent='100%';
-      _lbl.textContent='Toutes tâches';
-      _sub.textContent='Saison complète !';
-      _chip.textContent=saison.nom;
-    }
+    _picto.textContent='⏱';
+    _chip.textContent='Charge de travail';
+    _content.innerHTML=`<div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;line-height:1;color:var(--texte)">${totalReste}h</div>
+      <div style="font-size:12px;font-weight:500;color:var(--texte-med);margin-top:8px">Heures restantes</div>
+      <div style="font-size:11px;color:var(--texte-doux);margin-top:2px">${saison.nom}</div>`;
   }
-  // Animation flip
+  // Animation tap
   const card=document.getElementById('home-stat-card');
   card.style.transition='transform 0.15s';
   card.style.transform='scale(0.96)';
   setTimeout(()=>{card.style.transform='scale(1)';},150);
-  // Mettre à jour les dots
   updateHomeDots();
 }
 
@@ -2311,16 +2331,28 @@ function renderHome(){
   const ava=document.getElementById('up-ava-v2');
   if(ava&&currentUser)ava.textContent=currentUser.nom.charAt(0).toUpperCase();
 
-  // Heures restantes
-  const hEl=document.getElementById('hs-hreste');
-  if(hEl)hEl.textContent=totalReste+'h';
-  const nbTravaux=JOURNAL.filter(j=>!j.meteo).length;
-  const hSub=document.getElementById('hv2-h-sub');
-  if(hSub)hSub.textContent=nbTravaux+' travaux enregistrés';
-  const hChip=document.getElementById('hv2-h-chip');
-  if(hChip)hChip.textContent=saison.nom;
+  // Card droite — Priorité du moment
+  const prioContent=document.getElementById('home-prio-content');
+  const prioCard=document.getElementById('home-prio-card');
+  const prioChip=document.getElementById('home-prio-chip');
+  const prioPicto=document.getElementById('home-prio-picto');
+  const pm=(typeof priorityMessage!=='undefined')&&priorityMessage&&priorityMessage.trim()?priorityMessage.trim():'';
+  if(prioCard){
+    prioCard.style.background=pm?'linear-gradient(135deg,#FFF8E8,#FAF0CC)':'var(--or-pale)';
+    prioCard.style.border=pm?'1px solid rgba(184,145,58,0.35)':'1px solid rgba(184,145,58,0.18)';
+  }
+  if(prioPicto)prioPicto.textContent=pm?'⚡':'💤';
+  if(prioChip){prioChip.textContent=pm?'À prioriser':'RAS';}
+  if(prioContent){
+    if(pm){
+      prioContent.innerHTML=`<div style="font-size:13px;font-weight:600;color:#4A3A08;line-height:1.4;margin-top:12px">${pm}</div>`;
+    } else {
+      prioContent.innerHTML=`<div style="font-size:12px;font-weight:500;color:var(--texte-doux);margin-top:12px">Aucune priorité définie</div>`;
+    }
+  }
 
   // Heures cachées compat
+  const nbTravaux=JOURNAL.filter(j=>!j.meteo).length;
   const htEl=document.getElementById('hs-travaux');
   if(htEl)htEl.textContent=nbTravaux;
 
@@ -2419,10 +2451,14 @@ function renderParcelles(){
     // Filtre par tâche : afficher seulement les parcelles où la tâche n'est pas encore Validé
     if(pTacheFilter!=='toutes'){
       const statut=p.taches&&p.taches[pTacheFilter];
+      if(p.statut==='Arrachee')return false; // jamais dans le filtre tâche
       if(statut==='Validé')return false; // cachées si déjà faites
     }
     return true;
   }).sort((a,b)=>{
+    // Parcelles arrachées toujours en dernier
+    const arrA=a.statut==='Arrachee'?1:0, arrB=b.statut==='Arrachee'?1:0;
+    if(arrA!==arrB)return arrA-arrB;
     if(pTacheFilter!=='toutes'){
       // Tri par statut de la tâche filtrée : Non démarré > En cours
       const ordre={'Non démarré':0,'En cours':1};
@@ -2733,6 +2769,7 @@ function saveJournalEntry(){
   document.getElementById('ovJournalEntry').classList.remove('open');
   renderJournalList();
   renderHome();
+  showToast('✅ Travail enregistré', '#3D6B27');
 }
 
 function injectMeteoIfNeeded(date){
@@ -2870,6 +2907,22 @@ function renderJournalList(){
   document.getElementById('js-val').textContent=val;
   document.getElementById('js-e').textContent=enc;
   document.getElementById('j-sub').textContent=`${tot} entrées · Saison ${getSaisonActive().nom}`;
+  // Pill filtres actifs
+  var _jFiltres=[];
+  if(jQui!=='tous')_jFiltres.push(jQui);
+  if(jTache!=='toutes')_jFiltres.push(jTache);
+  if(jParcelle!=='toutes')_jFiltres.push(jParcelle);
+  if(jDateDeb||jDateFin)_jFiltres.push('Dates');
+  if(jSearch)_jFiltres.push('Recherche');
+  var _pillEl=document.getElementById('j-filtres-pill');
+  if(_pillEl){
+    if(_jFiltres.length>0){
+      _pillEl.style.display='inline-flex';
+      _pillEl.innerHTML=`<div class="j-filtres-pill-dot"></div><span>${_jFiltres.length} filtre${_jFiltres.length>1?'s':''} actif${_jFiltres.length>1?'s':''} — ${_jFiltres.join(' · ')}</span><span class="j-filtres-pill-clear" onclick="clearAllJFiltres()">✕</span>`;
+    } else {
+      _pillEl.style.display='none';
+    }
+  }
   const grouped={};
   data.forEach(r=>{if(!grouped[r.date])grouped[r.date]=[];grouped[r.date].push(r);});
   const tl=document.getElementById('timeline');
@@ -2911,7 +2964,26 @@ function renderTracteur(){
   if(!data.length){sl.innerHTML='<div class="empty-state"><div class="ei">🚜</div><p>Aucune session.</p></div>';return;}
   const amap=ACTIVITES.reduce((m,a)=>{m[a.nom]=a;return m},{});
   const isAdmin=currentUser&&currentUser.roles&&currentUser.roles.includes('admin');
-  sl.innerHTML=data.map(s=>{
+  // ── Card session en cours épinglée ──
+  const sEnCours=SESSIONS.find(s=>s.statut==='En cours');
+  var pinnedHtml='';
+  if(sEnCours&&isTractoriste()){
+    const emE=amap[sEnCours.activite]?.emoji||'🚜';
+    const pctE=sEnCours.avancement||0;
+    const pfE=(sEnCours.parcellesFaites||[]).length;
+    const totE=PARCELLES.filter(p=>p.statut!=='Arrachee').length;
+    pinnedHtml=`<div class="trac-encours-card" onclick="openSessionDetail('${sEnCours.id}')">
+      <div class="trac-encours-label">En cours</div>
+      <div class="trac-encours-act">${emE} ${sEnCours.activite}</div>
+      <div class="trac-encours-meta">📅 ${fmtDate(sEnCours.date)} · 👤 ${sEnCours.conducteur}</div>
+      <div class="trac-encours-bar-wrap">
+        <div class="trac-encours-bar-lbl"><span>Avancement domaine</span><span>${pfE}/${totE} parcelles · ${pctE}%</span></div>
+        <div class="trac-encours-bar-track"><div class="trac-encours-bar-fill" style="width:${pctE}%"></div></div>
+      </div>
+      <div class="trac-encours-btn">Reprendre →</div>
+    </div>`;
+  }
+  sl.innerHTML=pinnedHtml+data.map(s=>{
     const em=amap[s.activite]?.emoji||'🚜';
     const sc=s.statut==='En cours'?'ssenc':'sster';
     const pct=s.avancement!=null?s.avancement:0;
@@ -4866,6 +4938,19 @@ function clearJDateFilter(){
   var clr=document.getElementById('jDateClear');
   if(clr)clr.style.display='none';
   renderJournalList();
+}
+function clearAllJFiltres(){
+  jQui='tous';jTache='toutes';jParcelle='toutes';jSearch='';jDateDeb='';jDateFin='';
+  var dd=document.getElementById('jDateDeb');var df=document.getElementById('jDateFin');
+  if(dd)dd.value='';if(df)df.value='';
+  var clr=document.getElementById('jDateClear');if(clr)clr.style.display='none';
+  var js=document.getElementById('jSearch');if(js)js.value='';
+  var jsc=document.getElementById('jSearch-clear');if(jsc)jsc.style.display='none';
+  document.querySelectorAll('.ochip').forEach(x=>x.classList.remove('active'));
+  var oc=document.querySelector('.ochip[data-qui="tous"]');if(oc)oc.classList.add('active');
+  document.querySelectorAll('.tfchip').forEach(x=>x.classList.remove('active'));
+  var tc=document.querySelector('.tfchip[data-t="toutes"]');if(tc)tc.classList.add('active');
+  renderParcelleFilterChips();renderJournalList();
 }
 
 window.addEventListener('load', function(){
