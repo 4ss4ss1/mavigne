@@ -593,8 +593,8 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .trac-tab.active{color:#fff;font-weight:700;}
 .trac-tab-rep-badge{position:absolute;top:5px;right:6px;background:var(--rouge);color:#fff;border-radius:4px;font-size:7px;padding:1px 4px;font-weight:700;line-height:14px;}
 /* ── Stats tracteur — bande blanche séparée ── */
-.trac-sband{background:#fff;border-bottom:1px solid var(--gris-clair);display:grid;grid-template-columns:1fr 1fr 1fr;margin:0;border-radius:0;}
-.trac-sband .sbi{padding:14px 0;border-right:1px solid var(--gris-clair);}
+.trac-sband{background:#fff;border-bottom:1px solid var(--gris-clair);display:grid;grid-template-columns:1fr 1fr 1fr;margin:0 !important;border-radius:0 !important;box-shadow:none !important;transform:none !important;position:static !important;overflow:hidden;}
+.trac-sband .sbi{padding:14px 0;border-right:1px solid var(--gris-clair);text-align:center;}
 .trac-sband .sbi:last-child{border-right:none;}
 /* ── Badge tracteur sur session ── */
 .sc-trac-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;display:inline-flex;align-items:center;gap:4px;}
@@ -1416,7 +1416,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
   </div>
   <!-- Bandeau réparateur (affiché dynamiquement) -->
   <div id="trac-rep-banner" style="display:none;padding:0 16px;margin-top:14px"></div>
-  <div class="content" style="margin-top:-4px">
+  <div class="content" style="margin-top:0">
     <div class="readonly-banner" id="trac-readonly" style="display:none">🔒 Consultation seule — vous n'avez pas le rôle Tractoriste</div>
     <!-- Info tracteur sélectionné -->
     <div class="trac-info-bar" id="trac-info-bar" style="display:none"></div>
