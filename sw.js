@@ -1,4 +1,4 @@
-// MA VIGNE — Service Worker v1.77
+// MA VIGNE — Service Worker v1.78
 // v1.65 — Tracteur : onglets par tracteur · fiches d'entretien · état réparateur + notifs · parc tracteurs Réglages
 // v1.58 — Chat réécrit de zéro
 // v1.59 — Fix boîte de saisie invisible : hauteur #page-chat corrigée
@@ -18,8 +18,9 @@
 // v1.74 — Fix perte données mise à jour : COLLECTIONS inclut tracteurs_list/entretiens/reparateur · fbPushAll complète · _fbLoad : pull d'abord + fbPushIfAbsent par collection (jamais d'écrasement accidentel)
 // v1.75 — Haptique showToast (navigator.vibrate) · Blocage création session si tracteur défaut en répar (ovRepBlock) · Changement tracteur sur session en cours (encart + picker interne ovSessionDetail)
 // v1.76 — Blocage coche parcelle (toggleSessionParcelle) · Décoche autorisée · renderSDTracEncart fallback id→nom
-// v1.77 — Fix résolution tracteur/réparateur quand id Firebase = nom (ex: '550') : double recherche REPARATEUR[id]+REPARATEUR[nom], modele=nom affiché une seule fois si tracteur en répar (toggle protégé + blink encart) · Décoche toujours autorisée (rattrapage oubli) · renderSDTracEncart robuste (fallback id→nom Firebase) (navigator.vibrate) · Blocage création session si tracteur défaut en répar (ovRepBlock) · Changement tracteur sur session en cours (encart + picker interne ovSessionDetail)
-const CACHE_NAME = 'mavigne-v1.77';
+// v1.77 — Fix résolution tracteur/réparateur quand id Firebase = nom : double recherche REPARATEUR[id]+REPARATEUR[nom]
+// v1.78 — Fix race condition : applyFbData re-render encart tracteur si session ouverte (données Firebase arrivées après ouverture modale)/réparateur quand id Firebase = nom (ex: '550') : double recherche REPARATEUR[id]+REPARATEUR[nom], modele=nom affiché une seule fois si tracteur en répar (toggle protégé + blink encart) · Décoche toujours autorisée (rattrapage oubli) · renderSDTracEncart robuste (fallback id→nom Firebase) (navigator.vibrate) · Blocage création session si tracteur défaut en répar (ovRepBlock) · Changement tracteur sur session en cours (encart + picker interne ovSessionDetail)
+const CACHE_NAME = 'mavigne-v1.78';
 const SYNC_TAG   = 'mavigne-sync';
 const APP_SHELL = ['./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 const CDN_URLS = [
@@ -28,7 +29,7 @@ const CDN_URLS = [
   'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap',
 ];
 self.addEventListener('install', event => {
-  console.log('[SW] Install v1.77');
+  console.log('[SW] Install v1.78');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache =>
       cache.addAll(APP_SHELL).then(() =>
@@ -38,7 +39,7 @@ self.addEventListener('install', event => {
   );
 });
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v1.77');
+  console.log('[SW] Activate v1.78');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))

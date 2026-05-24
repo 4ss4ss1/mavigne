@@ -193,6 +193,12 @@ function applyFbData(key, value) {
     window[key.toUpperCase()] = value;
   }
   if(window._syncLocalVars) window._syncLocalVars();
+  // Rafraîchir l'encart tracteur si une session est ouverte (données Firebase arrivées après ouverture)
+  if(window.tracSessionId && document.getElementById('ovSessionDetail') &&
+     document.getElementById('ovSessionDetail').classList.contains('open') &&
+     typeof renderSDTracEncart === 'function') {
+    renderSDTracEncart();
+  }
 }
 
 // ── Charger toutes les collections depuis Firestore ──
