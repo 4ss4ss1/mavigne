@@ -4158,8 +4158,12 @@ function toggleSessionParcelle(nom,row){
   if(!s.parcellesFaites)s.parcellesFaites=[];
   const idx=s.parcellesFaites.indexOf(nom);
   const estDecoche=idx>=0;
-  // Bloquer nouvelle coche si tracteur en réparation
-  if(!estDecoche&&s.tracteurId&&REPARATEUR[s.tracteurId]){
+  // Bloquer nouvelle coche si tracteur en réparation (cherche par id ET par nom)
+  var _stid=s.tracteurId||'';
+  var _strac=TRACTEURS_LIST.find(function(t){return t.id===_stid||t.nom===_stid;});
+  var _sTracId=_strac?_strac.id:_stid;
+  var _sTracRep=REPARATEUR[_sTracId]||REPARATEUR[_stid]||null;
+  if(!estDecoche&&_sTracRep){
     if(navigator.vibrate)navigator.vibrate([80,60,80]);
     showToast('\uD83D\uDD27 Tracteur en répar. — Change le tracteur d\'abord','#C0392B');
     var encart=document.getElementById('sd-trac-encart');
@@ -4408,24 +4412,32 @@ function renderSDTracEncart(){
   if(!isTractoriste()){encart.style.display='none';return;}
   var s=SESSIONS.find(function(x){return x.id===tracSessionId;});
   if(!s){encart.style.display='none';return;}
-  // Chercher par id, fallback: par nom (anciens enregistrements Firebase)
-  var trac=TRACTEURS_LIST.find(function(t){return t.id===s.tracteurId;})
-        ||TRACTEURS_LIST.find(function(t){return t.nom===s.tracteurId;});
+  // Chercher le tracteur : par id OU par nom (Firebase stocke parfois le nom comme id)
+  var tid=s.tracteurId||'';
+  var trac=TRACTEURS_LIST.find(function(t){return t.id===tid||t.nom===tid;});
+  // tracId = clé réelle à utiliser pour REPARATEUR (id si trouvé, sinon la valeur brute)
+  var tracId=trac?trac.id:tid;
+  // Tracteur défaut de l'activité — même logique de résolution
   var act=ACTIVITES.find(function(a){return a.nom===s.activite;});
-  var defId=act?act.tracteurDefautId:'';
-  var defTrac=TRACTEURS_LIST.find(function(t){return t.id===defId;})||TRACTEURS_LIST.find(function(t){return t.nom===defId;});
-  // Résolution du tracteur réel utilisé pour comparaison override
-  var tracId=trac?trac.id:s.tracteurId;
-  var isOverride=tracId!==defId&&tracId!==(defTrac?defTrac.nom:'');
-  var tracRep=tracId?REPARATEUR[tracId]:null;
-  var tracNomAff=trac?(trac.nom+(trac.modele?' — '+trac.modele:'')):(s.tracteurId||'—');
+  var defRaw=act?act.tracteurDefautId:'';
+  var defTrac=TRACTEURS_LIST.find(function(t){return t.id===defRaw||t.nom===defRaw;});
+  var defId=defTrac?defTrac.id:defRaw;
+  // Override : le tracteur utilisé est différent du défaut (comparaison sur IDs résolus)
+  var isOverride=tracId&&defId&&tracId!==defId;
+  // Réparateur : chercher par tracId ET par tid (couvre tous les formats de clé Firebase)
+  var tracRep=REPARATEUR[tracId]||REPARATEUR[tid]||null;
+  // Nom affiché : si nom===modele, afficher juste le nom une fois
+  var tracNomAff=trac
+    ?(trac.modele&&trac.modele!==trac.nom?trac.nom+' — '+trac.modele:trac.nom)
+    :(tid||'—');
   var col=trac?couleurTracType(trac.type):'#888';
+  var repKey=tracId||tid;
   var cls=tracRep?'sd-trac-encart is-rep':isOverride?'sd-trac-encart is-override':'sd-trac-encart';
   var nomCls=tracRep?'sd-trac-encart-nom is-rep':isOverride?'sd-trac-encart-nom is-override':'sd-trac-encart-nom';
   var sub=tracRep
-    ?'Chez le réparateur · Retour '+fmtDate((REPARATEUR[tracId]||{}).prevu_retour||'')
+    ?'Chez le réparateur · Retour '+fmtDate((tracRep).prevu_retour||'')
     :isOverride
-    ?'✚ Override — défaut : '+(defTrac?defTrac.nom:(defId||'—'))
+    ?'✱ Override — défaut : '+(defTrac?defTrac.nom:(defRaw||'—'))
     :'Tracteur dédié '+s.activite;
   var btnCls=tracRep?'sd-trac-changer-btn is-rep':'sd-trac-changer-btn';
   var dot='<div style="width:9px;height:9px;border-radius:50%;background:'+col+';flex-shrink:0;margin-top:1px"></div>';
