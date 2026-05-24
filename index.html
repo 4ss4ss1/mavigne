@@ -64,6 +64,9 @@ const COLLECTIONS = ['parcelles','journal','sessions','travaux','traitements',
 
 function fbDoc(key) { return db.collection('mavigne').doc(key); }
 
+// ── Helper deep clone (remplace JSON.parse/JSON.stringify partout) ──
+function deepClone(v) { return JSON.parse(JSON.stringify(v)); }
+
 // ════════════════════════════════════
 // QUEUE OFFLINE — sync différée
 // Stocke les sauvegardes ratées hors ligne
@@ -94,7 +97,7 @@ async function _flushQueue() {
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i];
     try {
-      await fbDoc(key).set({ value: JSON.parse(JSON.stringify(_offlineQueue[key])) });
+      await fbDoc(key).set({ value: deepClone(_offlineQueue[key]) });
       delete _offlineQueue[key];
     } catch(e) {
       console.warn('[Sync] Échec clé', key, e);
@@ -193,8 +196,12 @@ function applyFbData(key, value) {
     window[key.toUpperCase()] = value;
   }
   if(window._syncLocalVars) window._syncLocalVars();
-  // Rafraîchir l'encart tracteur si une session est ouverte (données Firebase arrivées après ouverture)
-  if(window.tracSessionId && document.getElementById('ovSessionDetail') &&
+  // Rafraîchir l'encart tracteur — uniquement si la session est ouverte
+  // ET si la collection reçue est susceptible d'affecter l'encart
+  var _tracRelevant = {sessions:1, tracteurs_list:1, reparateur:1, activites:1};
+  if(_tracRelevant[key] &&
+     window.tracSessionId &&
+     document.getElementById('ovSessionDetail') &&
      document.getElementById('ovSessionDetail').classList.contains('open') &&
      typeof renderSDTracEncart === 'function') {
     renderSDTracEncart();
@@ -235,7 +242,7 @@ async function fbPushAll() {
   };
   for(var key in map) {
     if(map[key] !== undefined) {
-      try { await fbDoc(key).set({ value: JSON.parse(JSON.stringify(map[key])) }); }
+      try { await fbDoc(key).set({ value: deepClone(map[key]) }); }
       catch(e) { console.warn('fbPushAll error', key, e); }
     }
   }
@@ -247,16 +254,35 @@ async function fbPushIfAbsent(key, value) {
   try {
     var snap = await fbDoc(key).get();
     if (!snap.exists && value !== undefined) {
-      await fbDoc(key).set({ value: JSON.parse(JSON.stringify(value)) });
+      await fbDoc(key).set({ value: deepClone(value) });
       console.log('[Firebase] Init collection absente :', key);
     }
   } catch(e) { console.warn('fbPushIfAbsent error', key, e); }
 }
 
-// ── Écoute temps réel ──
+// ── Collections temps réel (onSnapshot) vs pull ponctuel ──
+// FB_REALTIME : changent pendant le travail quotidien → listener permanent
+// FB_STATIC   : changent rarement → pull ponctuel au login + à l'ouverture des Réglages
+var FB_REALTIME = ['parcelles','journal','sessions','traitements','reparateur','entretiens'];
+var FB_STATIC   = ['travaux','catalogue','conducteurs','activites',
+                   'membres','saisons','taches','config','historique','tracteurs_list'];
+
+// ── Pull ponctuel des collections statiques ──
+async function fbPullStatic() {
+  for (var i = 0; i < FB_STATIC.length; i++) {
+    var key = FB_STATIC[i];
+    try {
+      var snap = await fbDoc(key).get();
+      if (snap.exists) applyFbData(key, snap.data().value);
+    } catch(e) { console.warn('fbPullStatic error', key, e); }
+  }
+}
+window.fbPullStatic = fbPullStatic;
+
+// ── Écoute temps réel — uniquement les 6 collections dynamiques ──
 var _ignoreNext = {};
 function fbListen() {
-  COLLECTIONS.forEach(function(key) {
+  FB_REALTIME.forEach(function(key) {
     fbDoc(key).onSnapshot(function(snap) {
       if(!snap.exists) return;
       if(_ignoreNext[key]) { _ignoreNext[key] = false; return; }
@@ -275,7 +301,7 @@ function fbListen() {
           }
           if(key==='sessions'&&pid==='page-tracteur'&&window.renderTracteur) window.renderTracteur();
           if((key==='traitements'||key==='catalogue')&&pid==='page-phyto'&&window.renderPhyto) window.renderPhyto();
-          if((key==='membres'||key==='saisons'||key==='taches')&&pid==='page-reglages'&&window.renderReglages) window.renderReglages();
+          if((key==='reparateur'||key==='entretiens')&&pid==='page-tracteur'&&window.renderTracteur) window.renderTracteur();
         }
         showSyncBadge('🔄 Mis à jour', '#1A4A7A');
         setTimeout(function(){ showSyncBadge('✅ Synchronisé','#3D6B27'); }, 1500);
@@ -296,7 +322,7 @@ window.fbSave = async function(key, value) {
     return;
   }
   try {
-    await fbDoc(key).set({ value: JSON.parse(JSON.stringify(value)) });
+    await fbDoc(key).set({ value: deepClone(value) });
     showSyncBadge('✅ Sauvegardé', '#3D6B27');
   } catch(e) {
     console.warn('fbSave error', key, e);
@@ -323,7 +349,8 @@ window._fbLoad = async function() {
   try {
     // ── Charger toutes les collections depuis Firebase ──
     console.log('🔥 Chargement depuis Firebase');
-    await fbPullAll();
+    await fbPullStatic(); // pull ponctuel collections statiques
+    await fbPullAll();    // pull complet (inclut les collections temps réel)
 
     // ── Initialiser les collections absentes de Firebase (sans écraser les existantes) ──
     // Chaque collection est vérifiée individuellement : si elle n'existe pas dans Firebase,
@@ -2692,7 +2719,11 @@ function goTo(page){
   if(page==='journal')renderJournal();
   if(page==='tracteur')renderTracteur();
   if(page==='phyto')renderPhyto();
-  if(page==='reglages')renderReglages();
+  if(page==='reglages'){
+    // Re-pull des collections statiques (membres, saisons, tâches…) pour avoir les données fraîches
+    if(window.fbPullStatic && navigator.onLine) window.fbPullStatic().then(function(){ renderReglages(); });
+    else renderReglages();
+  }
   if(page==='chat')chatRender();
 }
 
@@ -5484,11 +5515,11 @@ function archiveSaisonActive(){
     periode: saison.periode,
     archivedAt: new Date().toISOString(),
     // Snapshot complet
-    parcelles: JSON.parse(JSON.stringify(PARCELLES)),
-    journal: JSON.parse(JSON.stringify(JOURNAL.filter(j=>!j.meteo))),
-    sessions: JSON.parse(JSON.stringify(SESSIONS)),
-    taches: JSON.parse(JSON.stringify(getTachesSaison())),
-    travaux: JSON.parse(JSON.stringify(TRAVAUX)),
+    parcelles: deepClone(PARCELLES),
+    journal: deepClone(JOURNAL.filter(j=>!j.meteo)),
+    sessions: deepClone(SESSIONS),
+    taches: deepClone(getTachesSaison()),
+    travaux: deepClone(TRAVAUX),
     // Calculs récap
     stats: _calcHistoStats(
       PARCELLES, JOURNAL.filter(j=>!j.meteo), getTachesSaison(), TRAVAUX
@@ -7020,15 +7051,20 @@ window.renderTracteur  = renderTracteur;
   pTacheFilter='toutes';
   renderParcelles();
 }));
+  // ── Debounce 300ms sur les champs de recherche (évite un render par frappe sur Android) ──
+  var _dbPSearch=null;
   document.getElementById('pSearch').addEventListener('input',function(){
     pSearch=this.value;
     document.getElementById('pSearch-clear').style.display=this.value?'inline':'none';
-    renderParcelles();
+    clearTimeout(_dbPSearch);
+    _dbPSearch=setTimeout(renderParcelles,300);
   });
+  var _dbJSearch=null;
   document.getElementById('jSearch').addEventListener('input',function(){
     jSearch=this.value;
     document.getElementById('jSearch-clear').style.display=this.value?'inline':'none';
-    renderJournalList();
+    clearTimeout(_dbJSearch);
+    _dbJSearch=setTimeout(renderJournalList,300);
   });
   if('Notification' in window&&Notification.permission==='granted'){
     updateNotifUI('granted');

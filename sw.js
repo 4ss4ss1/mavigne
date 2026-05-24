@@ -1,4 +1,4 @@
-// MA VIGNE — Service Worker v1.81
+// MA VIGNE — Service Worker v1.84
 // v1.65 — Tracteur : onglets par tracteur · fiches d'entretien · état réparateur + notifs · parc tracteurs Réglages
 // v1.66 — Fix layout onglets · Association activité↔tracteur · badge tracteur sessions · alerte réparateur · PDF entretien
 // v1.67 — Fix chevauchement onglets tracteurs
@@ -16,7 +16,10 @@
 // v1.79 — Audit CSS/UX : --texte-doux · --radius-card · segmented-control · fade pages
 // v1.80 — Transition pages fade pur · Card accueil 2 modes · Pill priorité ⚡ · Card stat pleine largeur
 // v1.81 — Redesign module Tracteur : 2 onglets Sessions/Entretiens · pills parc tracteurs en-tête · FAB + · filtres dans contenu · toast systématique sur toutes les actions · hint tap sessions en cours
-const CACHE_NAME = 'mavigne-v1.81';
+// v1.82 — Optimisation Firebase : FB_REALTIME (6 listeners) · fbPullStatic ponctuel · re-pull Réglages
+// v1.83 — Debounce 300ms pSearch + jSearch
+// v1.84 — Guard renderSDTracEncart : re-render uniquement sur sessions/tracteurs_list/reparateur/activites
+const CACHE_NAME = 'mavigne-v1.84';
 const SYNC_TAG   = 'mavigne-sync';
 const APP_SHELL = ['./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 const CDN_URLS = [
@@ -25,7 +28,7 @@ const CDN_URLS = [
   'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap',
 ];
 self.addEventListener('install', event => {
-  console.log('[SW] Install v1.81');
+  console.log('[SW] Install v1.84');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache =>
       cache.addAll(APP_SHELL).then(() =>
@@ -35,7 +38,7 @@ self.addEventListener('install', event => {
   );
 });
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v1.81');
+  console.log('[SW] Activate v1.84');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
