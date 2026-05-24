@@ -300,7 +300,7 @@ window._fbLoad = async function() {
       await fbPullAll();
       // ── Réparation automatique des mdp manquants ──
       var MDP_SOURCE = {Nico:'vigne21',Victor:'victor21',Dessi:'dessi21',Etienne:'etienne21',Chloe:'chloe21',Shana:'shana21',Alicia:'alicia21'};
-      var membresFb = window.MEMBRES || [];
+      var membresFb = window.MEMBRES || MEMBRES || [];
       var repaired = false;
       membresFb.forEach(function(m) {
         if(!m.mdp && MDP_SOURCE[m.nom]) {
@@ -2182,6 +2182,9 @@ function initLogin(){
     })(i);
   }
 }
+// ⚠️ Exposé immédiatement sur window pour éviter la race condition iOS :
+// Firebase (cache IndexedDB) peut répondre avant que le DOMContentLoaded l'assigne (ligne ~6156).
+window.initLogin = initLogin;
 
 function selectProfile(idx){
   loginPendingIdx = idx;
@@ -5509,13 +5512,6 @@ function exportPDFPhyto(){
   showExportFeedback(`✅ Registre phyto ${annee} généré — ${nbTotal} traitement${nbTotal>1?'s':''} !`);
 }
 
-  const win=window.open('','_blank','width=1000,height=750');
-  win.document.write(html);
-  win.document.close();
-  win.onload=()=>{win.focus();win.print();};
-  showExportFeedback(`✅ Registre phyto ${annee} généré — ${nbTotal} traitement${nbTotal>1?'s':''} !`);
-}
-
 // ════ PDF RAPPORT DE SAISON ════
 function exportPDFRapportSaison(){
   const saison=getSaisonActive();
@@ -5533,9 +5529,9 @@ function exportPDFRapportSaison(){
   const traitements=[...TRAITEMENTS].sort((a,b)=>a.date>b.date?1:-1);
 
   // ── Stats couverture ──
-  const nbParcelles=PARCELLES.filter(p=>p.statut!=='Arrachée').length;
-  const surfTot=PARCELLES.filter(p=>p.statut!=='Arrachée').reduce((s,p)=>s+(p.surface||0),0);
-  const pctGlobal=PARCELLES.length?Math.round(PARCELLES.filter(p=>p.statut!=='Arrachée').reduce((s,p)=>{
+  const nbParcelles=PARCELLES.filter(p=>p.statut!=='Arrachee').length;
+  const surfTot=PARCELLES.filter(p=>p.statut!=='Arrachee').reduce((s,p)=>s+(p.surface||0),0);
+  const pctGlobal=PARCELLES.length?Math.round(PARCELLES.filter(p=>p.statut!=='Arrachee').reduce((s,p)=>{
     const ts=getTachesSaison();const tot=ts.length;if(!tot)return s;
     const done=ts.filter(t=>p.taches&&p.taches[t.nom]==='Validé').length;
     return s+done/tot;
