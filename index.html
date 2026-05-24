@@ -4157,7 +4157,20 @@ function toggleSessionParcelle(nom,row){
   const s=SESSIONS.find(x=>x.id===tracSessionId);if(!s)return;
   if(!s.parcellesFaites)s.parcellesFaites=[];
   const idx=s.parcellesFaites.indexOf(nom);
-  if(idx>=0){s.parcellesFaites.splice(idx,1);}else{s.parcellesFaites.push(nom);}
+  const estDecoche=idx>=0;
+  // Bloquer nouvelle coche si tracteur en réparation
+  if(!estDecoche&&s.tracteurId&&REPARATEUR[s.tracteurId]){
+    if(navigator.vibrate)navigator.vibrate([80,60,80]);
+    showToast('\uD83D\uDD27 Tracteur en répar. — Change le tracteur d\'abord','#C0392B');
+    var encart=document.getElementById('sd-trac-encart');
+    if(encart){
+      var t=0;
+      var blink=function(){encart.style.opacity=encart.style.opacity==='0.3'?'1':'0.3';t++;if(t<4)setTimeout(blink,150);else encart.style.opacity='1';};
+      blink();
+    }
+    return;
+  }
+  if(estDecoche){s.parcellesFaites.splice(idx,1);}else{s.parcellesFaites.push(nom);}
   saveData('sessions');renderSessionProgress();renderSDParcelles();
 }
 function toggleSessionSkip(nom){
@@ -4395,18 +4408,24 @@ function renderSDTracEncart(){
   if(!isTractoriste()){encart.style.display='none';return;}
   var s=SESSIONS.find(function(x){return x.id===tracSessionId;});
   if(!s){encart.style.display='none';return;}
-  var trac=TRACTEURS_LIST.find(function(t){return t.id===s.tracteurId;});
+  // Chercher par id, fallback: par nom (anciens enregistrements Firebase)
+  var trac=TRACTEURS_LIST.find(function(t){return t.id===s.tracteurId;})
+        ||TRACTEURS_LIST.find(function(t){return t.nom===s.tracteurId;});
   var act=ACTIVITES.find(function(a){return a.nom===s.activite;});
   var defId=act?act.tracteurDefautId:'';
-  var isOverride=s.tracteurId!==defId;
-  var tracRep=s.tracteurId?REPARATEUR[s.tracteurId]:null;
+  var defTrac=TRACTEURS_LIST.find(function(t){return t.id===defId;})||TRACTEURS_LIST.find(function(t){return t.nom===defId;});
+  // Résolution du tracteur réel utilisé pour comparaison override
+  var tracId=trac?trac.id:s.tracteurId;
+  var isOverride=tracId!==defId&&tracId!==(defTrac?defTrac.nom:'');
+  var tracRep=tracId?REPARATEUR[tracId]:null;
+  var tracNomAff=trac?(trac.nom+(trac.modele?' — '+trac.modele:'')):(s.tracteurId||'—');
   var col=trac?couleurTracType(trac.type):'#888';
   var cls=tracRep?'sd-trac-encart is-rep':isOverride?'sd-trac-encart is-override':'sd-trac-encart';
   var nomCls=tracRep?'sd-trac-encart-nom is-rep':isOverride?'sd-trac-encart-nom is-override':'sd-trac-encart-nom';
   var sub=tracRep
-    ?'Chez le réparateur · Retour '+fmtDate((REPARATEUR[s.tracteurId]||{}).prevu_retour||'')
+    ?'Chez le réparateur · Retour '+fmtDate((REPARATEUR[tracId]||{}).prevu_retour||'')
     :isOverride
-    ?'✱ Override — défaut : '+(TRACTEURS_LIST.find(function(t){return t.id===defId;})||{nom:'—'}).nom
+    ?'✚ Override — défaut : '+(defTrac?defTrac.nom:(defId||'—'))
     :'Tracteur dédié '+s.activite;
   var btnCls=tracRep?'sd-trac-changer-btn is-rep':'sd-trac-changer-btn';
   var dot='<div style="width:9px;height:9px;border-radius:50%;background:'+col+';flex-shrink:0;margin-top:1px"></div>';
@@ -4414,7 +4433,7 @@ function renderSDTracEncart(){
   encart.style.display='flex';
   encart.innerHTML=dot
     +'<div class="sd-trac-encart-info">'
-      +'<div class="'+nomCls+'">'+(trac?trac.nom+' — '+trac.modele:'—')+(tracRep?' ⚠️':'')+'</div>'
+      +'<div class="'+nomCls+'">'+tracNomAff+(tracRep?' ⚠️':'')+'</div>'
       +'<div class="sd-trac-encart-sub">'+sub+'</div>'
     +'</div>'
     +'<button class="'+btnCls+'" onclick="openSdTracPicker()">🔄 Changer</button>';
