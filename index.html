@@ -300,7 +300,7 @@ window._fbLoad = async function() {
       await fbPullAll();
       // ── Réparation automatique des mdp manquants ──
       var MDP_SOURCE = {Nico:'vigne21',Victor:'victor21',Dessi:'dessi21',Etienne:'etienne21',Chloe:'chloe21',Shana:'shana21',Alicia:'alicia21'};
-      var membresFb = window.MEMBRES || MEMBRES || [];
+      var membresFb = window.MEMBRES || [];
       var repaired = false;
       membresFb.forEach(function(m) {
         if(!m.mdp && MDP_SOURCE[m.nom]) {
@@ -642,15 +642,40 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .rep-banner{border-radius:12px;padding:14px 16px;margin-bottom:14px;}
 .rep-banner-btns{display:flex;gap:8px;margin-top:12px;}
 .rep-banner-btn{flex:1;padding:10px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;min-height:44px;}
-/* ── Fiche entretien ── */
-.fiche-card{background:white;border-radius:14px;margin-bottom:10px;box-shadow:0 2px 10px rgba(0,0,0,0.08);border:1.5px solid var(--gris);overflow:hidden;}
-.fiche-card.has-ano{border-color:rgba(192,57,43,0.6);box-shadow:0 2px 10px rgba(192,57,43,0.1);}
-.fiche-hd{padding:12px 16px;border-bottom:1px solid var(--gris-clair);display:flex;justify-content:space-between;align-items:center;}
-.fiche-score{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;}
-.fiche-grid{padding:10px 16px;display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;}
-.fiche-item{display:flex;align-items:center;gap:6px;font-size:12px;}
-.fiche-ano{margin:0 16px 12px;padding:8px 12px;background:var(--rouge-pale);border-radius:8px;border-left:3px solid var(--rouge);}
+/* ── Encart résumé entretien ── */
+.ent-resume-card{background:white;border-radius:14px;margin-bottom:10px;box-shadow:0 2px 10px rgba(0,0,0,0.06);border:1.5px solid var(--gris);overflow:hidden;transition:border-color 0.2s,box-shadow 0.2s;}
+.ent-resume-card.has-ano-active{border-color:rgba(192,57,43,0.45);box-shadow:0 2px 12px rgba(192,57,43,0.10);}
+.ent-resume-hd{padding:12px 16px 10px;border-bottom:1px solid var(--gris-clair);display:flex;justify-content:space-between;align-items:center;}
+.ent-resume-grid{display:grid;grid-template-columns:1fr 1fr;}
+.ent-resume-cell{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--gris-clair);border-right:1px solid var(--gris-clair);}
+.ent-resume-cell:nth-child(even){border-right:none;}
+.ent-resume-cell:nth-last-child(-n+2){border-bottom:none;}
+.ent-ano-banner{border-top:1px solid rgba(192,57,43,0.15);background:rgba(192,57,43,0.05);padding:10px 14px;}
+.ent-ano-row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px;}
+/* ── Fiche entretien (dans liste modal) ── */
+.fiche-card{background:white;border-radius:12px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,0.05);border:1.5px solid var(--gris);overflow:hidden;}
+.fiche-card.has-ano{border-color:rgba(192,57,43,0.4);}
+.fiche-card.ano-traitee{border-color:rgba(61,107,39,0.3);}
+.fiche-hd{padding:10px 14px;border-bottom:1px solid var(--gris-clair);display:flex;justify-content:space-between;align-items:center;}
+.fiche-score{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;}
+.fiche-grid{padding:8px 14px;display:grid;grid-template-columns:repeat(3,1fr);gap:3px 8px;border-bottom:1px solid var(--gris-clair);}
+.fiche-grid.no-border{border-bottom:none;}
+.fiche-item{display:flex;align-items:center;gap:5px;font-size:11px;padding:3px 0;}
+.fiche-ano-bloc{padding:10px 14px;}
+.fiche-ano-toggle{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:9px 14px;border-radius:8px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;min-height:40px;transition:all 0.2s;margin-top:8px;}
+.fiche-ano-toggle.non-traite{border:1.5px solid rgba(192,57,43,0.4);background:rgba(192,57,43,0.06);color:var(--rouge);}
+.fiche-ano-toggle.traite{border:1.5px solid var(--vert);background:var(--vert-pale);color:var(--vert);}
 .fiche-act-badge{display:inline-block;font-size:11px;background:var(--acier-pale);color:var(--acier);border-radius:6px;padding:2px 8px;margin-top:4px;}
+/* ── Admin actions fiches ── */
+.fiche-admin-btns{display:flex;gap:6px;}
+.fiche-admin-btn{width:32px;height:32px;border-radius:8px;border:1.5px solid var(--gris);background:white;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.fiche-admin-btn.del{border-color:rgba(192,57,43,0.3);background:rgba(192,57,43,0.06);}
+/* ── Overlay liste fiches ── */
+.ov-liste-fiches{max-height:88vh;display:flex;flex-direction:column;overflow:hidden;}
+/* ── Overlay édition fiche ── */
+.ent-ano-check{width:20px;height:20px;border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:white;transition:all 0.2s;}
+/* ── Confirmation entretien ── */
+.ent-confirm-modal{background:white;border-radius:18px;padding:24px;width:100%;max-width:360px;box-shadow:0 8px 32px rgba(0,0,0,0.18);}
 
 /* ── Entretien checklist ── */
 .ent-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
@@ -3414,9 +3439,7 @@ function openOvEntretien(){
   var cs=document.getElementById('ent-cond');
   cs.innerHTML=CONDUCTEURS.map(function(c){return '<option>'+c.nom+'</option>';}).join('');
 
-
-
-  // Checklist
+  // Checklist création
   var grid=document.getElementById('ent-checklist');
   grid.innerHTML=_entFields.map(function(f){
     return '<button class="ent-btn" id="ent-btn-'+f.key+'" onclick="toggleEntBtn(this,\''+f.key+'\')">'
@@ -3425,8 +3448,23 @@ function openOvEntretien(){
     +'</button>';
   }).join('');
 
-  // Anomalie
+  // Checklist édition — peupler aussi ef-checklist si pas encore fait
+  var efGrid=document.getElementById('ef-checklist');
+  if(efGrid&&!efGrid.children.length){
+    efGrid.innerHTML=_entFields.map(function(f){
+      return '<button class="ent-btn" id="ef-btn-'+f.key+'" onclick="toggleEntBtn(this,\''+f.key+'\')">'
+        +'<span class="ent-btn-ico">'+f.icon+'</span>'
+        +'<div><div class="ent-btn-lbl">'+f.label+'</div><div class="ent-btn-sub">Non fait</div></div>'
+      +'</button>';
+    }).join('');
+  }
+
+  // Reset anomalie + case traitée
   document.getElementById('ent-anomalie').value='';
+  var wrap=document.getElementById('ent-ano-traitee-wrap');
+  if(wrap)wrap.style.display='none';
+  var btn=document.getElementById('ent-anomalie-traitee');
+  if(btn&&btn.classList.contains('checked'))toggleEntAnoTraitee();
 
   openOv('ovEntretien');
 }
@@ -3438,18 +3476,44 @@ function toggleEntBtn(el,key){
   else{sub.textContent='Non fait';}
 }
 
+// ── Préparer et afficher la confirmation avant saveEntretien ──
+function confirmEntretien(){
+  var t=getTracteurSel();if(!t)return;
+  var date=document.getElementById('ent-date').value;
+  var cond=document.getElementById('ent-cond').value;
+  if(!date||!cond){showToast('Date et conducteur requis','#C0392B');return;}
+  var nb=_entFields.filter(function(f){return document.getElementById('ent-btn-'+f.key)?.classList.contains('checked');}).length;
+  var anomalie=document.getElementById('ent-anomalie').value.trim();
+  var traitee=document.getElementById('ent-anomalie-traitee')?.classList.contains('checked')||false;
+  // Peupler la modal de confirmation
+  document.getElementById('ent-conf-date').textContent=fmtDate(date)+' · '+cond;
+  document.getElementById('ent-conf-score').textContent=nb+'/6 points OK';
+  var anoLine=document.getElementById('ent-conf-ano');
+  if(anomalie){
+    anoLine.style.display='block';
+    anoLine.textContent=traitee?'✅ Anomalie marquée traitée':'⚠️ Anomalie signalée — non traitée';
+    anoLine.style.color=traitee?'var(--vert)':'var(--rouge)';
+    anoLine.style.fontWeight='600';
+  } else {
+    anoLine.style.display='none';
+  }
+  openOv('ovConfirmEntretien');
+}
+
 function saveEntretien(){
   var t=getTracteurSel();if(!t)return;
   var date=document.getElementById('ent-date').value;
   var cond=document.getElementById('ent-cond').value;
   if(!date||!cond){showToast('Date et conducteur requis','#C0392B');return;}
+  var anomalie=document.getElementById('ent-anomalie').value.trim();
+  var traitee=anomalie?(document.getElementById('ent-anomalie-traitee')?.classList.contains('checked')||false):false;
   var fiche={
     id:'ent'+Date.now(),
     tracteurId:t.id,
     date:date,
     conducteur:cond,
-
-    anomalie:document.getElementById('ent-anomalie').value.trim(),
+    anomalie:anomalie,
+    anomalie_traitee:traitee,
   };
   _entFields.forEach(function(f){
     fiche[f.key]=document.getElementById('ent-btn-'+f.key)?.classList.contains('checked')||false;
@@ -3457,36 +3521,289 @@ function saveEntretien(){
   ENTRETIENS.unshift(fiche);
   window.ENTRETIENS=ENTRETIENS;
   saveData('entretiens');
+  closeOv(null,'ovConfirmEntretien');
   closeOv(null,'ovEntretien');
   renderEntretiens();
   showToast('Fiche enregistrée ✓','#3D6B27');
 }
 
+// ── Toggle case "Anomalie traitée" dans ovEntretien ──
+function toggleEntAnoTraitee(){
+  var btn=document.getElementById('ent-anomalie-traitee');
+  if(!btn)return;
+  var on=btn.classList.toggle('checked');
+  var ico=btn.querySelector('.ent-ano-check');
+  var lbl=btn.querySelector('.ent-ano-lbl');
+  if(on){
+    btn.style.borderColor='var(--vert)';btn.style.background='var(--vert-pale)';btn.style.color='var(--vert)';
+    if(ico){ico.style.background='var(--vert)';ico.style.borderColor='var(--vert)';ico.textContent='✓';}
+    if(lbl)lbl.textContent='Anomalie traitée';
+  } else {
+    btn.style.borderColor='rgba(192,57,43,0.4)';btn.style.background='rgba(192,57,43,0.05)';btn.style.color='var(--rouge)';
+    if(ico){ico.style.background='transparent';ico.style.borderColor='rgba(192,57,43,0.5)';ico.textContent='';}
+    if(lbl)lbl.textContent='Marquer comme traitée';
+  }
+}
+
+// ── Afficher/masquer la case traitée selon le contenu du textarea ──
+function onEntAnomalieInput(){
+  var val=document.getElementById('ent-anomalie').value.trim();
+  var wrap=document.getElementById('ent-ano-traitee-wrap');
+  if(wrap)wrap.style.display=val?'block':'none';
+  // Si on efface l'anomalie, décocher
+  if(!val){
+    var btn=document.getElementById('ent-anomalie-traitee');
+    if(btn&&btn.classList.contains('checked'))toggleEntAnoTraitee();
+  }
+}
+
+// ── Toggle rapide "traitée" depuis la liste des fiches ──
+function toggleAnomalieTraitee(id){
+  var f=ENTRETIENS.find(function(x){return x.id===id;});
+  if(!f)return;
+  f.anomalie_traitee=!f.anomalie_traitee;
+  window.ENTRETIENS=ENTRETIENS;
+  saveData('entretiens');
+  renderEntretiens();
+  // Re-render la liste si le modal est ouvert
+  var ov=document.getElementById('ovListeFiches');
+  if(ov&&ov.classList.contains('open'))renderListeFiches();
+  showToast(f.anomalie_traitee?'Anomalie marquée traitée ✓':'Anomalie rouverte','#3D6B27');
+}
+
+// ── Encart résumé compact (remplace l'ancienne liste inline) ──
 function renderEntretiens(){
   var el=document.getElementById('entretiens-list');
   if(!el)return;
   var t=getTracteurSel();
   if(!t){el.innerHTML='';return;}
   var fiches=ENTRETIENS.filter(function(f){return f.tracteurId===t.id;}).sort(function(a,b){return b.date.localeCompare(a.date);});
+
+  // Dernière date par champ
+  var lastDates={};
+  _entFields.forEach(function(fi){
+    var match=fiches.find(function(f){return f[fi.key];});
+    lastDates[fi.key]=match?match.date:null;
+  });
+
+  // Anomalies non traitées
+  var anomActives=fiches.filter(function(f){return f.anomalie&&!f.anomalie_traitee;});
+  var hasAnoActive=anomActives.length>0;
+
   if(!fiches.length){
-    el.innerHTML='<div style="text-align:center;padding:24px 0;color:var(--texte-doux);font-size:13px">📋 Aucune fiche d\'entretien</div>';
+    el.innerHTML='<div style="text-align:center;padding:24px 0;color:var(--texte-doux);font-size:13px">📋 Aucune fiche d\'entretien<br><span style="font-size:11px">Ajoutez une fiche avec le bouton ＋</span></div>';
     return;
   }
+
+  // Grille 6 cellules
+  var gridHtml=_entFields.map(function(fi,i){
+    var d=lastDates[fi.key];
+    var ok=!!d;
+    return '<div class="ent-resume-cell">'
+      +'<span style="font-size:16px">'+fi.icon+'</span>'
+      +'<div>'
+        +'<div style="font-size:11px;color:var(--texte-doux);line-height:1.2">'+fi.label+'</div>'
+        +'<div style="font-size:12px;font-weight:600;color:'+(ok?'var(--vert)':'var(--rouge)')+';margin-top:1px">'+(ok?fmtDate(d):'Jamais')+'</div>'
+      +'</div></div>';
+  }).join('');
+
+  // Bandeau anomalies actives
+  var anoBanner='';
+  if(hasAnoActive){
+    var rows=anomActives.map(function(f){
+      return '<div class="ent-ano-row">'
+        +'<div style="font-size:12px;color:var(--texte);flex:1">'+f.anomalie+'</div>'
+        +'<div style="font-size:11px;color:var(--texte-doux);white-space:nowrap">'+fmtDate(f.date)+' · '+f.conducteur+'</div>'
+      +'</div>';
+    }).join('');
+    anoBanner='<div class="ent-ano-banner">'
+      +'<div style="font-size:11px;font-weight:700;color:var(--rouge);margin-bottom:6px">⚠️ Anomalie'+(anomActives.length>1?'s':'')+' en attente de traitement</div>'
+      +rows
+      +'<div style="font-size:10px;color:var(--texte-doux);margin-top:6px">Ouvrez les fiches pour marquer comme traitée →</div>'
+    +'</div>';
+  }
+
+  var nbF=fiches.length;
+  var nbAnoText=hasAnoActive?('<span style="margin-left:8px;color:var(--rouge);font-weight:700">⚠️ '+anomActives.length+' non traitée'+(anomActives.length>1?'s':'')+'</span>'):'';
+
+  el.innerHTML='<div class="ent-resume-card'+(hasAnoActive?' has-ano-active':'')+'">'
+    +'<div class="ent-resume-hd">'
+      +'<div>'
+        +'<div style="font-size:13px;font-weight:600;color:var(--texte)">📋 Derniers contrôles</div>'
+        +'<div style="font-size:11px;color:var(--texte-doux);margin-top:2px">'+nbF+' fiche'+(nbF>1?'s':'')+nbAnoText+'</div>'
+      +'</div>'
+      +'<button onclick="openListeFiches()" style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--acier);background:transparent;color:var(--acier);font-size:12px;font-weight:600;font-family:\'Outfit\',sans-serif;cursor:pointer;min-height:36px">Voir tout →</button>'
+    +'</div>'
+    +'<div class="ent-resume-grid">'+gridHtml+'</div>'
+    +anoBanner
+  +'</div>';
+}
+
+// ── Ouvrir le modal liste des fiches ──
+function openListeFiches(){
+  renderListeFiches();
+  openOv('ovListeFiches');
+}
+
+// ── Rendre la liste des fiches dans le modal ──
+function renderListeFiches(){
+  var el=document.getElementById('ov-liste-fiches-body');
+  if(!el)return;
+  var t=getTracteurSel();
+  if(!t){el.innerHTML='';return;}
+  var fiches=ENTRETIENS.filter(function(f){return f.tracteurId===t.id;}).sort(function(a,b){return b.date.localeCompare(a.date);});
+  var admin=isAdmin();
+
+  if(!fiches.length){
+    el.innerHTML='<div style="text-align:center;padding:32px 0;color:var(--texte-doux);font-size:13px">📋 Aucune fiche d\'entretien</div>';
+    return;
+  }
+
   el.innerHTML=fiches.map(function(f){
     var nb=_entFields.filter(function(ef){return f[ef.key];}).length;
-    var scoreColor=nb===6?'var(--vert)':'var(--orange)';
+    var pct=Math.round(nb/6*100);
+    var scoreColor=pct===100?'var(--vert)':pct>=50?'var(--orange)':'var(--rouge)';
     var hasAno=!!f.anomalie;
+    var traitee=f.anomalie_traitee||false;
+    var cardCls='fiche-card'+(hasAno&&!traitee?' has-ano':hasAno&&traitee?' ano-traitee':'');
+
+    // Checklist en grille 3 colonnes
     var checkHtml=_entFields.map(function(ef){
-      return '<div class="fiche-item"><span style="font-size:14px">'+(f[ef.key]?'✅':'❌')+'</span>'
+      return '<div class="fiche-item"><span style="font-size:13px">'+(f[ef.key]?'✅':'❌')+'</span>'
         +'<span style="color:'+(f[ef.key]?'var(--texte)':'var(--texte-doux)')+'">'+ef.label+'</span></div>';
     }).join('');
-    var anoHtml=hasAno?'<div class="fiche-ano"><div style="font-size:11px;color:var(--rouge);font-weight:700;margin-bottom:2px">⚠️ Anomalie</div><div style="font-size:12px">'+f.anomalie+'</div></div>':'';
-    var actBadge='';
-    return '<div class="fiche-card'+(hasAno?' has-ano':'')+'"><div class="fiche-hd">'
-      +'<div><div style="font-weight:700;font-size:14px">📅 '+fmtDate(f.date)+'</div><div style="font-size:12px;color:var(--texte-doux);margin-top:2px">👤 '+f.conducteur+'</div>'+actBadge+'</div>'
-      +'<div style="text-align:right"><div class="fiche-score" style="color:'+scoreColor+'">'+nb+'/6</div><div style="font-size:9px;color:var(--texte-doux)">points OK</div></div>'
-    +'</div><div class="fiche-grid">'+checkHtml+'</div>'+anoHtml+'</div>';
+
+    // Boutons admin
+    var adminHtml=admin?'<div class="fiche-admin-btns">'
+      +'<button class="fiche-admin-btn" data-id="'+f.id+'" onclick="openOvEditFiche(\''+f.id+'\')">✏️</button>'
+      +'<button class="fiche-admin-btn del" data-id="'+f.id+'" onclick="deleteFiche(\''+f.id+'\')">🗑️</button>'
+    +'</div>':'';
+
+    // Bloc anomalie
+    var anoHtml='';
+    if(hasAno){
+      var toggleLabel=traitee?'✓ Anomalie traitée — appuyer pour annuler':'Marquer comme traitée';
+      var toggleCls=traitee?'fiche-ano-toggle traite':'fiche-ano-toggle non-traite';
+      anoHtml='<div class="fiche-ano-bloc">'
+        +'<div style="font-size:12px;color:var(--texte);display:flex;gap:6px;align-items:flex-start;margin-bottom:8px">'
+          +'<span>'+(traitee?'✅':'⚠️')+'</span><span>'+f.anomalie+'</span>'
+        +'</div>'
+        +'<button class="'+toggleCls+'" onclick="toggleAnomalieTraitee(\''+f.id+'\')">'+toggleLabel+'</button>'
+      +'</div>';
+    }
+
+    return '<div class="'+cardCls+'">'
+      +'<div class="fiche-hd">'
+        +'<div style="flex:1">'
+          +'<div style="font-weight:700;font-size:13px">'+fmtDate(f.date)+' · '+f.conducteur+'</div>'
+        +'</div>'
+        +'<div style="display:flex;align-items:center;gap:8px">'
+          +'<div class="fiche-score" style="color:'+scoreColor+'">'+nb+'/6</div>'
+          +adminHtml
+        +'</div>'
+      +'</div>'
+      +'<div class="fiche-grid'+(hasAno?'':' no-border')+'">'+checkHtml+'</div>'
+      +anoHtml
+    +'</div>';
   }).join('');
+
+  // Mettre à jour le compteur
+  var cpt=document.getElementById('ov-liste-fiches-count');
+  if(cpt)cpt.textContent=fiches.length+' fiche'+(fiches.length>1?'s':'');
+}
+
+// ── Supprimer une fiche (admin) ──
+function deleteFiche(id){
+  if(!isAdmin())return;
+  if(!confirm('Supprimer cette fiche ? Cette action est irréversible.'))return;
+  ENTRETIENS=ENTRETIENS.filter(function(f){return f.id!==id;});
+  window.ENTRETIENS=ENTRETIENS;
+  saveData('entretiens');
+  renderListeFiches();
+  renderEntretiens();
+  showToast('Fiche supprimée','#C0392B');
+}
+
+// ── Ouvrir l'overlay édition d'une fiche existante (admin) ──
+function openOvEditFiche(id){
+  if(!isAdmin())return;
+  var f=ENTRETIENS.find(function(x){return x.id===id;});
+  if(!f)return;
+  document.getElementById('ef-id').value=id;
+  document.getElementById('ef-date').value=f.date;
+  var cs=document.getElementById('ef-cond');
+  cs.innerHTML=CONDUCTEURS.map(function(c){return '<option'+(c.nom===f.conducteur?' selected':'')+'>'+c.nom+'</option>';}).join('');
+  // Checklist
+  _entFields.forEach(function(fi){
+    var btn=document.getElementById('ef-btn-'+fi.key);
+    if(!btn)return;
+    var sub=btn.querySelector('.ent-btn-sub');
+    if(f[fi.key]){btn.classList.add('checked');if(sub)sub.textContent='OK ✓';}
+    else{btn.classList.remove('checked');if(sub)sub.textContent='Non fait';}
+  });
+  // Anomalie
+  var anoEl=document.getElementById('ef-anomalie');
+  if(anoEl)anoEl.value=f.anomalie||'';
+  var wrap=document.getElementById('ef-ano-traitee-wrap');
+  if(wrap)wrap.style.display=f.anomalie?'block':'none';
+  // Case traitée
+  var btn=document.getElementById('ef-anomalie-traitee');
+  if(btn){
+    if(f.anomalie_traitee){if(!btn.classList.contains('checked'))toggleEfAnoTraitee();}
+    else{if(btn.classList.contains('checked'))toggleEfAnoTraitee();}
+  }
+  // Fermer la liste et ouvrir édition
+  closeOv(null,'ovListeFiches');
+  openOv('ovEditFiche');
+}
+
+function toggleEfAnoTraitee(){
+  var btn=document.getElementById('ef-anomalie-traitee');
+  if(!btn)return;
+  var on=btn.classList.toggle('checked');
+  var ico=btn.querySelector('.ent-ano-check');
+  var lbl=btn.querySelector('.ent-ano-lbl');
+  if(on){
+    btn.style.borderColor='var(--vert)';btn.style.background='var(--vert-pale)';btn.style.color='var(--vert)';
+    if(ico){ico.style.background='var(--vert)';ico.style.borderColor='var(--vert)';ico.textContent='✓';}
+    if(lbl)lbl.textContent='Anomalie traitée';
+  } else {
+    btn.style.borderColor='rgba(192,57,43,0.4)';btn.style.background='rgba(192,57,43,0.05)';btn.style.color='var(--rouge)';
+    if(ico){ico.style.background='transparent';ico.style.borderColor='rgba(192,57,43,0.5)';ico.textContent='';}
+    if(lbl)lbl.textContent='Marquer comme traitée';
+  }
+}
+
+function onEfAnomalieInput(){
+  var val=document.getElementById('ef-anomalie').value.trim();
+  var wrap=document.getElementById('ef-ano-traitee-wrap');
+  if(wrap)wrap.style.display=val?'block':'none';
+  if(!val){
+    var btn=document.getElementById('ef-anomalie-traitee');
+    if(btn&&btn.classList.contains('checked'))toggleEfAnoTraitee();
+  }
+}
+
+function saveEditFiche(){
+  var id=document.getElementById('ef-id').value;
+  var f=ENTRETIENS.find(function(x){return x.id===id;});
+  if(!f)return;
+  f.date=document.getElementById('ef-date').value;
+  f.conducteur=document.getElementById('ef-cond').value;
+  var anomalie=document.getElementById('ef-anomalie').value.trim();
+  f.anomalie=anomalie;
+  f.anomalie_traitee=anomalie?(document.getElementById('ef-anomalie-traitee')?.classList.contains('checked')||false):false;
+  _entFields.forEach(function(fi){
+    f[fi.key]=document.getElementById('ef-btn-'+fi.key)?.classList.contains('checked')||false;
+  });
+  window.ENTRETIENS=ENTRETIENS;
+  saveData('entretiens');
+  closeOv(null,'ovEditFiche');
+  renderEntretiens();
+  // Rouvrir la liste
+  renderListeFiches();
+  openOv('ovListeFiches');
+  showToast('Fiche modifiée ✓','#3D6B27');
 }
 
 // ════ GESTION DU PARC TRACTEURS (Réglages) ════
@@ -5512,6 +5829,13 @@ function exportPDFPhyto(){
   showExportFeedback(`✅ Registre phyto ${annee} généré — ${nbTotal} traitement${nbTotal>1?'s':''} !`);
 }
 
+  const win=window.open('','_blank','width=1000,height=750');
+  win.document.write(html);
+  win.document.close();
+  win.onload=()=>{win.focus();win.print();};
+  showExportFeedback(`✅ Registre phyto ${annee} généré — ${nbTotal} traitement${nbTotal>1?'s':''} !`);
+}
+
 // ════ PDF RAPPORT DE SAISON ════
 function exportPDFRapportSaison(){
   const saison=getSaisonActive();
@@ -5529,9 +5853,9 @@ function exportPDFRapportSaison(){
   const traitements=[...TRAITEMENTS].sort((a,b)=>a.date>b.date?1:-1);
 
   // ── Stats couverture ──
-  const nbParcelles=PARCELLES.filter(p=>p.statut!=='Arrachee').length;
-  const surfTot=PARCELLES.filter(p=>p.statut!=='Arrachee').reduce((s,p)=>s+(p.surface||0),0);
-  const pctGlobal=PARCELLES.length?Math.round(PARCELLES.filter(p=>p.statut!=='Arrachee').reduce((s,p)=>{
+  const nbParcelles=PARCELLES.filter(p=>p.statut!=='Arrachée').length;
+  const surfTot=PARCELLES.filter(p=>p.statut!=='Arrachée').reduce((s,p)=>s+(p.surface||0),0);
+  const pctGlobal=PARCELLES.length?Math.round(PARCELLES.filter(p=>p.statut!=='Arrachée').reduce((s,p)=>{
     const ts=getTachesSaison();const tot=ts.length;if(!tot)return s;
     const done=ts.filter(t=>p.taches&&p.taches[t.nom]==='Validé').length;
     return s+done/tot;
@@ -6217,7 +6541,7 @@ if ('serviceWorker' in navigator) {
 <!-- ══════ TOAST CONFIRMATION ══════ -->
 <div id="mv-toast"><div id="mv-toast-dot"></div><span id="mv-toast-msg"></span></div>
 
-<!-- ══ OVERLAY Fiche entretien ══ -->
+<!-- ══ OVERLAY Nouvelle fiche entretien ══ -->
 <div class="overlay" id="ovEntretien" onclick="closeOv(event,'ovEntretien')">
   <div class="modal" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto">
     <div class="modal-handle"></div>
@@ -6227,12 +6551,76 @@ if ('serviceWorker' in navigator) {
         <div><div class="fl">Date</div><input type="date" class="fi ac" id="ent-date"></div>
         <div><div class="fl">Conducteur</div><select class="fsel ac" id="ent-cond"></select></div>
       </div>
-
       <div class="fl" style="margin-bottom:10px">Points de contrôle</div>
       <div class="ent-grid" id="ent-checklist"></div>
       <div class="fl">⚠️ Anomalie <span style="font-weight:400;color:var(--texte-doux)">(laisser vide si aucune)</span></div>
-      <textarea class="fi ac" id="ent-anomalie" rows="3" placeholder="Décrire une anomalie constatée…" style="resize:none;margin-bottom:20px"></textarea>
-      <button class="mbtn acre" onclick="saveEntretien()">Enregistrer la fiche</button>
+      <textarea class="fi ac" id="ent-anomalie" rows="3" placeholder="Décrire une anomalie constatée…" style="resize:none;margin-bottom:10px" oninput="onEntAnomalieInput()"></textarea>
+      <div id="ent-ano-traitee-wrap" style="display:none;margin-bottom:20px">
+        <button id="ent-anomalie-traitee" onclick="toggleEntAnoTraitee()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:11px 14px;border-radius:10px;cursor:pointer;border:1.5px solid rgba(192,57,43,0.4);background:rgba(192,57,43,0.05);color:var(--rouge);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;min-height:44px;transition:all 0.2s">
+          <span class="ent-ano-check" style="width:20px;height:20px;border-radius:4px;flex-shrink:0;border:2px solid rgba(192,57,43,0.5);background:transparent;display:flex;align-items:center;justify-content:center;font-size:13px;color:white;transition:all 0.2s"></span>
+          <span class="ent-ano-lbl">Marquer comme traitée</span>
+        </button>
+      </div>
+      <button class="mbtn acre" onclick="confirmEntretien()">Enregistrer la fiche</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ OVERLAY Confirmation enregistrement fiche ══ -->
+<div class="overlay" id="ovConfirmEntretien" onclick="closeOv(event,'ovConfirmEntretien')">
+  <div onclick="event.stopPropagation()" style="background:white;border-radius:18px;padding:24px;width:calc(100% - 48px);max-width:360px;margin:auto;margin-top:30vh;box-shadow:0 8px 32px rgba(0,0,0,0.18)">
+    <div style="font-size:28px;text-align:center;margin-bottom:10px">📋</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;text-align:center;margin-bottom:6px">Confirmer la fiche ?</div>
+    <div style="font-family:'Outfit',sans-serif;font-size:13px;color:var(--texte-doux);text-align:center;margin-bottom:4px" id="ent-conf-date"></div>
+    <div style="font-family:'Outfit',sans-serif;font-size:13px;color:var(--texte-doux);text-align:center;margin-bottom:4px" id="ent-conf-score"></div>
+    <div style="font-family:'Outfit',sans-serif;font-size:13px;text-align:center;margin-bottom:20px;display:none" id="ent-conf-ano"></div>
+    <div style="display:flex;gap:10px">
+      <button onclick="closeOv(event,'ovConfirmEntretien')" style="flex:1;padding:12px 0;border-radius:10px;border:1.5px solid var(--gris);background:white;font-family:'Outfit',sans-serif;font-size:14px;cursor:pointer;min-height:44px">Annuler</button>
+      <button onclick="saveEntretien()" style="flex:2;padding:12px 0;border-radius:10px;border:none;background:var(--vert);color:white;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;min-height:44px">Enregistrer ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ OVERLAY Liste des fiches ══ -->
+<div class="overlay" id="ovListeFiches" onclick="closeOv(event,'ovListeFiches')">
+  <div class="modal ov-liste-fiches" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div style="padding:4px 16px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--gris-clair)">
+      <div>
+        <div class="modal-title" style="font-size:17px">Fiches d'entretien</div>
+        <div style="font-size:12px;color:var(--texte-doux);font-family:'Outfit',sans-serif" id="ov-liste-fiches-count"></div>
+      </div>
+      <span class="sa sac" onclick="closeOv(null,'ovListeFiches');openOvEntretien()">＋ Fiche</span>
+    </div>
+    <div id="ov-liste-fiches-body" style="overflow-y:auto;flex:1;padding:12px 16px"></div>
+  </div>
+</div>
+
+<!-- ══ OVERLAY Édition fiche (admin) ══ -->
+<div class="overlay" id="ovEditFiche" onclick="closeOv(event,'ovEditFiche')">
+  <div class="modal" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <div class="modal-hd" style="display:flex;justify-content:space-between;align-items:center">
+      <div><div class="modal-title">✏️ Modifier la fiche</div></div>
+      <button onclick="closeOv(null,'ovEditFiche');renderListeFiches();openOv('ovListeFiches')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--texte-doux);min-height:44px;min-width:44px">×</button>
+    </div>
+    <input type="hidden" id="ef-id">
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div><div class="fl">Date</div><input type="date" class="fi ac" id="ef-date"></div>
+        <div><div class="fl">Conducteur</div><select class="fsel ac" id="ef-cond"></select></div>
+      </div>
+      <div class="fl" style="margin-bottom:10px">Points de contrôle</div>
+      <div class="ent-grid" id="ef-checklist"></div>
+      <div class="fl">⚠️ Anomalie <span style="font-weight:400;color:var(--texte-doux)">(laisser vide si aucune)</span></div>
+      <textarea class="fi ac" id="ef-anomalie" rows="3" placeholder="Décrire une anomalie constatée…" style="resize:none;margin-bottom:10px" oninput="onEfAnomalieInput()"></textarea>
+      <div id="ef-ano-traitee-wrap" style="display:none;margin-bottom:20px">
+        <button id="ef-anomalie-traitee" onclick="toggleEfAnoTraitee()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:11px 14px;border-radius:10px;cursor:pointer;border:1.5px solid rgba(192,57,43,0.4);background:rgba(192,57,43,0.05);color:var(--rouge);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;min-height:44px;transition:all 0.2s">
+          <span class="ent-ano-check" style="width:20px;height:20px;border-radius:4px;flex-shrink:0;border:2px solid rgba(192,57,43,0.5);background:transparent;display:flex;align-items:center;justify-content:center;font-size:13px;color:white;transition:all 0.2s"></span>
+          <span class="ent-ano-lbl">Marquer comme traitée</span>
+        </button>
+      </div>
+      <button class="mbtn acre" onclick="saveEditFiche()">Enregistrer les modifications</button>
     </div>
   </div>
 </div>
