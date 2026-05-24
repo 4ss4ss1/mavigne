@@ -182,9 +182,7 @@ function applyFbData(key, value) {
       return m;
     });
     window.MEMBRES = merged;
-    // Synchroniser les variables let locales AVANT d'appeler initLogin
-    // (sinon initLogin lit MEMBRES vide car la synchro arrivait trop tard)
-    if(window._syncLocalVars) window._syncLocalVars();
+    MEMBRES = merged;
     // Rafraîchir la liste de profils si l'écran login est visible
     if(window.initLogin && document.getElementById('login-screen') &&
        document.getElementById('login-screen').style.display !== 'none') {
@@ -2177,20 +2175,10 @@ function initLogin(){
       + '<div style="font-size:28px;margin-bottom:12px;animation:spin 1.2s linear infinite;display:inline-block">⏳</div>'
       + '<div>Chargement en cours…</div>'
       + '</div>';
-    // Réessayer jusqu'à 5 fois toutes les 1.5s si Firebase n'a pas encore chargé
-    var _loginRetry = 0;
-    (function _retry(){
-      _loginRetry++;
-      setTimeout(function(){
-        if(window._syncLocalVars) window._syncLocalVars();
-        if(MEMBRES && MEMBRES.length > 0) { initLogin(); }
-        else if(_loginRetry < 5) { _retry(); }
-        else {
-          // Dernier recours : charger depuis localStorage
-          if(window.loadData) { window.loadData(); initLogin(); }
-        }
-      }, 1500);
-    })();
+    // Réessayer dans 1.5s (Firebase cache IndexedDB souvent lent au cold start)
+    setTimeout(function(){
+      if(MEMBRES && MEMBRES.length > 0) initLogin();
+    }, 1500);
     return;
   }
 
@@ -5833,13 +5821,6 @@ function exportPDFPhyto(){
 </div>
 
 </body></html>`;
-
-  const win=window.open('','_blank','width=1000,height=750');
-  win.document.write(html);
-  win.document.close();
-  win.onload=()=>{win.focus();win.print();};
-  showExportFeedback(`✅ Registre phyto ${annee} généré — ${nbTotal} traitement${nbTotal>1?'s':''} !`);
-}
 
   const win=window.open('','_blank','width=1000,height=750');
   win.document.write(html);
