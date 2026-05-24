@@ -2700,14 +2700,9 @@ function goTo(page){
   if(page!=='parcelles'&&leafMap){leafMap.remove();leafMap=null;mapInit=false;}
   // Reset filtre parcelle Journal à chaque sortie du journal
   if(page!=='journal'){jParcelle='toutes';}
-  // Animation de sortie sur la page active
+  // Masquage immédiat de l'ancienne page (évite le double-affichage et le scroll infini)
   const oldPage=document.querySelector('.page.active');
-  if(oldPage){
-    oldPage.classList.add('pageOut');
-    oldPage.addEventListener('animationend',()=>{
-      oldPage.classList.remove('active','pageOut');
-    },{once:true});
-  }
+  if(oldPage){oldPage.classList.remove('active','pageOut');}
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   const newPage=document.getElementById('page-'+page);
   if(newPage){newPage.classList.add('active');}
