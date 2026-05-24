@@ -1,4 +1,4 @@
-// MA VIGNE — Service Worker v1.72
+// MA VIGNE — Service Worker v1.73
 // v1.65 — Tracteur : onglets par tracteur · fiches d'entretien · état réparateur + notifs · parc tracteurs Réglages
 // v1.58 — Chat réécrit de zéro
 // v1.59 — Fix boîte de saisie invisible : hauteur #page-chat corrigée
@@ -14,7 +14,8 @@
 // v1.70 — Dark mode (Auto/Clair/Sombre) · États vides soignés · Météo cache offline · Bandeau offline persistant · --texte-doux:#767676 · PDF rapport de saison complet · app-root
 // v1.71 — Fix race condition iOS Safari : window.initLogin exposé avant DOMContentLoaded (écran login vide après maj)
 // v1.72 — Entretien : encart résumé compact (derniers contrôles par point) · modal liste fiches · suppression/édition admin · toggle anomalie traitée · confirmation enregistrement · champ anomalie_traitee
-const CACHE_NAME = 'mavigne-v1.72';
+// v1.73 — debounce(fn,300) globale sur pSearch+jSearch · _unsubListeners pattern (anti-fuite mémoire onSnapshot) · retour haptique navigator.vibrate(60) dans showToast · "Plus d'options" Journal Entry (statut+équipe masqués par défaut)
+const CACHE_NAME = 'mavigne-v1.73';
 const SYNC_TAG   = 'mavigne-sync';
 const APP_SHELL = ['./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 const CDN_URLS = [
