@@ -1,27 +1,22 @@
-// MA VIGNE — Service Worker v1.79
+// MA VIGNE — Service Worker v1.81
 // v1.65 — Tracteur : onglets par tracteur · fiches d'entretien · état réparateur + notifs · parc tracteurs Réglages
-// v1.58 — Chat réécrit de zéro
-// v1.59 — Fix boîte de saisie invisible : hauteur #page-chat corrigée
-// v1.60 — Fix mentions légales accessibles depuis l'écran de login (mini-modal z-index 10000)
-// v1.61 — Bouton ✕ recherche Parcelles/Journal · Filtre Journal par parcelle · editCond réservé admin
-// v1.62 — Toast confirmation validation · Dots pagination card Accueil · Filtre Journal par dates · Colorisation Leaflet dynamique · Actions destructives Réglages · Reset filtre parcelle au changement de page
-// v1.63 — Cards Accueil 3 modes tap + card Priorité fixe · Pill filtres Journal · Arrachées en fin liste · Toast saveJournalEntry · Card session Tracteur épinglée
-// v1.64 — Tracteur : sessions "En cours" fond sombre (scard-enc) · tri En cours → Terminées · multi-sessions en cours supportées
-// v1.66 — Fix layout onglets (dans en-tête sombre) · Association activité↔tracteur (défaut Réglages + modifiable session) · badge tracteur sur sessions · alerte réparateur · PDF entretien avec tracteur + override
+// v1.66 — Fix layout onglets · Association activité↔tracteur · badge tracteur sessions · alerte réparateur · PDF entretien
 // v1.67 — Fix chevauchement onglets tracteurs
 // v1.68 — Fix erreurs JS : guillemets inline onclick → data-* + addEventListener
 // v1.69 — Fiche entretien : suppression champ travail effectué · encadrement renforcé
-// v1.70 — Dark mode (Auto/Clair/Sombre) · États vides soignés · Météo cache offline · Bandeau offline persistant · --texte-doux:#767676 · PDF rapport de saison complet · app-root
-// v1.71 — Fix race condition iOS Safari : window.initLogin exposé avant DOMContentLoaded (écran login vide après maj)
-// v1.72 — Entretien : encart résumé compact (derniers contrôles par point) · modal liste fiches · suppression/édition admin · toggle anomalie traitée · confirmation enregistrement · champ anomalie_traitee
-// v1.73 — Fix critique : suppression des 6 lignes orphelines dupliquées après exportPDFPhyto (SyntaxError qui cassait tout le JS → profils login invisibles)
-// v1.74 — Fix perte données mise à jour : COLLECTIONS inclut tracteurs_list/entretiens/reparateur · fbPushAll complète · _fbLoad : pull d'abord + fbPushIfAbsent par collection (jamais d'écrasement accidentel)
-// v1.75 — Haptique showToast (navigator.vibrate) · Blocage création session si tracteur défaut en répar (ovRepBlock) · Changement tracteur sur session en cours (encart + picker interne ovSessionDetail)
-// v1.76 — Blocage coche parcelle (toggleSessionParcelle) · Décoche autorisée · renderSDTracEncart fallback id→nom
-// v1.77 — Fix résolution tracteur/réparateur quand id Firebase = nom : double recherche REPARATEUR[id]+REPARATEUR[nom]
-// v1.78 — Fix race condition : applyFbData re-render encart tracteur si session ouverte (données Firebase arrivées après ouverture modale)
-// v1.79 — Audit CSS/UX : --texte-doux:#5F5F5F (contraste +1.26:1) · --radius-card:16px (uniformisation cards) · .segmented-control/.tab-item (générique) · @keyframes pageOut + animation goTo() · ontouchstart="" body (fix :active iOS)
-const CACHE_NAME = 'mavigne-v1.79';
+// v1.70 — Dark mode · États vides · Météo cache offline · Bandeau offline persistant · PDF rapport saison
+// v1.71 — Fix race condition iOS Safari : window.initLogin exposé avant DOMContentLoaded
+// v1.72 — Entretien : encart résumé compact · modal liste fiches · suppression/édition admin · toggle anomalie
+// v1.73 — Fix critique : suppression lignes orphelines dupliquées après exportPDFPhyto
+// v1.74 — Fix perte données : COLLECTIONS complète · fbPushIfAbsent par collection
+// v1.75 — Haptique showToast · Blocage session si tracteur en répar · Changement tracteur session en cours
+// v1.76 — Blocage coche parcelle · Décoche autorisée · renderSDTracEncart fallback id→nom
+// v1.77 — Fix résolution tracteur/réparateur quand id Firebase = nom
+// v1.78 — Fix race condition : applyFbData re-render encart tracteur si session ouverte
+// v1.79 — Audit CSS/UX : --texte-doux · --radius-card · segmented-control · fade pages
+// v1.80 — Transition pages fade pur · Card accueil 2 modes · Pill priorité ⚡ · Card stat pleine largeur
+// v1.81 — Redesign module Tracteur : 2 onglets Sessions/Entretiens · pills parc tracteurs en-tête · FAB + · filtres dans contenu · toast systématique sur toutes les actions · hint tap sessions en cours
+const CACHE_NAME = 'mavigne-v1.81';
 const SYNC_TAG   = 'mavigne-sync';
 const APP_SHELL = ['./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 const CDN_URLS = [
@@ -30,7 +25,7 @@ const CDN_URLS = [
   'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap',
 ];
 self.addEventListener('install', event => {
-  console.log('[SW] Install v1.79');
+  console.log('[SW] Install v1.81');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache =>
       cache.addAll(APP_SHELL).then(() =>
@@ -40,7 +35,7 @@ self.addEventListener('install', event => {
   );
 });
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v1.79');
+  console.log('[SW] Activate v1.81');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))

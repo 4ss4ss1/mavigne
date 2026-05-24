@@ -472,10 +472,10 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 
 /* ══ PAGES ══ */
 .page{display:none;min-height:100vh;padding-bottom:calc(var(--nav-h) + 24px + env(safe-area-inset-bottom, 0px));}
-.page.active{display:block;animation:pageIn 0.22s ease forwards;}
-@keyframes pageIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pageOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(10px)}}
-.pageOut{animation:pageOut 0.22s ease forwards;pointer-events:none;}
+.page.active{display:block;animation:pageIn 0.18s ease forwards;}
+@keyframes pageIn{from{opacity:0}to{opacity:1}}
+@keyframes pageOut{from{opacity:1}to{opacity:0}}
+.pageOut{animation:pageOut 0.18s ease forwards;pointer-events:none;}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
 /* ══ HEADERS ══ */
@@ -684,6 +684,18 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .trac-sband{background:#fff;border-bottom:1px solid var(--gris-clair);display:grid;grid-template-columns:1fr 1fr 1fr;margin:0 !important;border-radius:0 !important;box-shadow:none !important;transform:none !important;position:static !important;overflow:hidden;}
 .trac-sband .sbi{padding:14px 0;border-right:1px solid var(--gris-clair);text-align:center;}
 .trac-sband .sbi:last-child{border-right:none;}
+/* ── Onglets tracteur (Sessions / Entretiens) ── */
+.trac-ong-btn{flex:1;padding:10px 0 12px;border:none;background:none;cursor:pointer;font-family:'Outfit',sans-serif;font-size:14px;font-weight:400;color:rgba(255,255,255,0.45);border-bottom:2px solid transparent;transition:all 0.15s;min-height:44px;}
+.trac-ong-btn.trac-ong-active{font-weight:700;color:#fff;border-bottom-color:#fff;}
+/* ── Pills parc tracteurs dans en-tête ── */
+.trac-parc-pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.1);border-radius:20px;padding:5px 12px 5px 6px;border:1px solid rgba(255,255,255,0.12);font-family:'Outfit',sans-serif;}
+.trac-parc-pill.en-rep{background:rgba(160,41,30,0.25);border-color:rgba(160,41,30,0.4);}
+.trac-parc-pill-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.trac-parc-pill-nom{font-size:12px;color:#fff;font-weight:600;}
+.trac-parc-pill-mod{font-size:11px;color:rgba(255,255,255,0.5);}
+.trac-parc-pill-rep{font-size:10px;color:#FF7070;font-weight:700;margin-left:2px;}
+/* ── Hint tap session en cours ── */
+.scard-enc-hint{margin-top:10px;background:rgba(255,255,255,0.12);border-radius:8px;padding:8px 12px;font-size:12px;font-family:'Outfit',sans-serif;color:rgba(255,255,255,0.8);text-align:center;}
 /* ── Badge tracteur sur session ── */
 .sc-trac-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;display:inline-flex;align-items:center;gap:4px;}
 .sc-trac-badge.defaut{background:var(--acier-pale);color:var(--acier-med);}
@@ -943,7 +955,28 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 /* Card droite priorité — même hauteur */
 .hv2-card-or{background:linear-gradient(135deg,#FFF8E8,#FAF0CC);border:1px solid rgba(184,145,58,0.35);height:200px;display:flex;flex-direction:column;justify-content:space-between;}
 .hv2-card-or-vide{background:var(--or-pale);border:1px solid rgba(184,145,58,0.18);height:200px;display:flex;flex-direction:column;justify-content:space-between;}
-/* Card session en cours épinglée Tracteur */
+/* ── Pill priorité dépliable (Accueil) ── */
+.home-prio-pill-wrap{background:white;border-bottom:1px solid var(--gris-clair);}
+.home-prio-pill-row{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;}
+.home-prio-pill{background:var(--or-pale);border:1.5px solid rgba(184,145,58,0.35);border-radius:8px;padding:5px 11px;display:flex;align-items:center;gap:7px;flex:1;transition:background 0.15s;}
+.home-prio-pill:active{background:#f5eacf;}
+.home-prio-pill-txt{font-size:11px;font-weight:700;color:var(--or);flex:1;line-height:1.3;}
+.home-prio-pill-chevron{font-size:10px;color:var(--or);transition:transform 0.22s ease;display:inline-block;}
+.home-prio-pill-chevron.open{transform:rotate(180deg);}
+.home-prio-pill-edit{font-size:13px;color:var(--texte-doux);flex-shrink:0;padding:4px 2px;min-width:32px;text-align:center;}
+.home-prio-detail{overflow:hidden;max-height:0;transition:max-height 0.28s cubic-bezier(0.4,0,0.2,1);}
+.home-prio-detail.open{max-height:100px;}
+.home-prio-detail-inner{font-size:12px;color:#4A3A08;line-height:1.6;padding:0 16px 12px 20px;border-left:3px solid var(--or);margin:0 16px 0 16px;}
+
+/* Card stat seule, pleine largeur */
+.hv2-card-solo{padding:0 16px;}
+
+/* ── Pill priorité vide ── */
+.home-prio-pill-vide .home-prio-pill{background:var(--gris-clair);border-color:var(--gris);}
+.home-prio-pill-vide .home-prio-pill-txt{color:var(--texte-doux);font-weight:500;}
+.home-prio-pill-vide .home-prio-pill-chevron{color:var(--texte-doux);}
+
+
 .trac-encours-card{background:var(--acier);border-radius:18px;padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow-md);cursor:pointer;transition:transform 0.15s;}
 .trac-encours-card:active{transform:scale(0.98);}
 .trac-encours-label{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:8px;}
@@ -1382,11 +1415,10 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     </div>
   </div>
 
-  <!-- GRANDES STAT CARDS -->
+  <!-- GRANDE STAT CARD — pleine largeur -->
   <div class="hv2-section-label">Aperçu du domaine</div>
-  <div class="hv2-grid2">
-    <!-- Card gauche : 3 modes tap -->
-    <div class="hv2-card hv2-card-vert hv2-card-fixed" id="home-stat-card" onclick="toggleHomeCard()">
+  <div class="hv2-card-solo">
+    <div class="hv2-card hv2-card-vert hv2-card-fixed" id="home-stat-card" onclick="toggleHomeCard()" style="width:100%">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div class="hv2-card-picto" id="home-stat-picto" style="margin-bottom:0">🌿</div>
         <div class="hv2-tap-hint">👆 changer</div>
@@ -1397,19 +1429,32 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
         <div class="hv2-card-dots" id="home-stat-dots">
           <div class="hv2-card-dot active"></div>
           <div class="hv2-card-dot"></div>
-          <div class="hv2-card-dot"></div>
         </div>
       </div>
     </div>
-    <!-- Card droite : priorité fixe -->
-    <div class="hv2-card hv2-card-fixed" id="home-prio-card" onclick="goTo('parcelles')" style="background:var(--or-pale);border:1px solid rgba(184,145,58,0.18)">
-      <div class="hv2-card-picto" id="home-prio-picto" style="margin-bottom:0">⚡</div>
-      <div class="hv2-card-content" id="home-prio-content"></div>
-      <div style="margin-top:10px">
-        <div class="hv2-chip" id="home-prio-chip" style="background:rgba(184,145,58,0.15);color:var(--or)">À prioriser</div>
+  </div>
+
+  <!-- PILL PRIORITÉ — dépliable -->
+  <div class="home-prio-pill-wrap" id="home-prio-pill-wrap">
+    <div class="home-prio-pill-row" onclick="togglePrioPill()">
+      <div class="home-prio-pill" id="home-prio-pill">
+        <span style="font-size:14px">⚡</span>
+        <span class="home-prio-pill-txt" id="home-prio-pill-txt">Aucune priorité définie</span>
+        <span class="home-prio-pill-chevron" id="home-prio-chevron">▼</span>
       </div>
+      <div class="home-prio-pill-edit" id="home-prio-edit-btn" onclick="event.stopPropagation();openPriorityEdit()" style="display:none">✏️</div>
+    </div>
+    <div class="home-prio-detail" id="home-prio-detail">
+      <div class="home-prio-detail-inner" id="home-prio-detail-txt"></div>
     </div>
   </div>
+
+  <!-- IDs cachés pour compatibilité renderHome() -->
+  <span id="home-prio-card" style="display:none"></span>
+  <span id="home-prio-content" style="display:none"></span>
+  <span id="home-prio-chip" style="display:none"></span>
+  <span id="home-prio-picto" style="display:none"></span>
+
 
   <!-- AVANCEMENT PAR TÂCHE -->
   <div class="hv2-section-head" style="cursor:pointer;margin-top:20px" onclick="document.getElementById('hv2-hcard').classList.toggle('hv2-collapsed')">
@@ -1545,45 +1590,53 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 
 <!-- ══════ PAGE TRACTEUR ══════ -->
 <div class="page" id="page-tracteur">
-  <!-- En-tête sombre : titre + bouton + onglets tracteurs dans le même bloc -->
+  <!-- En-tête sombre : parc tracteurs (pills) + onglets Sessions/Entretiens -->
   <div style="background:var(--acier)">
-    <div class="ph-top" style="padding:16px 16px 12px">
-      <div style="font-size:26px">🚜</div>
-      <div><div class="ph-title" style="color:#fff">Tracteur</div><div class="ph-sub" style="color:rgba(255,255,255,0.5)">Sessions & entretien</div></div>
-      <button class="ph-add" id="trac-add-btn" onclick="openNewSession()">＋ Session</button>
-    </div>
-    <!-- Onglets tracteurs — dans le bloc sombre, pas de chevauchement -->
-    <div class="trac-tabs" id="trac-tabs"></div>
-  </div>
-  <!-- Stats — bande blanche séparée -->
-  <div class="trac-sband" id="trac-sband">
-    <div class="sbi"><div class="sbi-val cac" id="st-t">3</div><div class="sbi-lbl">Sessions</div></div>
-    <div class="sbi"><div class="sbi-val cac" id="st-ter">2</div><div class="sbi-lbl">Terminées</div></div>
-    <div class="sbi"><div class="sbi-val" style="color:var(--orange)" id="st-enc">1</div><div class="sbi-lbl">En cours</div></div>
-  </div>
-  <!-- Bandeau réparateur (affiché dynamiquement) -->
-  <div id="trac-rep-banner" style="display:none;padding:0 16px;margin-top:14px"></div>
-  <div class="content" style="margin-top:0">
-    <div class="readonly-banner" id="trac-readonly" style="display:none">🔒 Consultation seule — vous n'avez pas le rôle Tractoriste</div>
-    <!-- Info tracteur sélectionné -->
-    <div class="trac-info-bar" id="trac-info-bar" style="display:none"></div>
-    <!-- Section entretien -->
-    <div class="sh">
-      <span class="st">Entretien</span>
-      <div style="display:flex;gap:8px;align-items:center">
-        <span onclick="ouvrirExportEntretien()" style="cursor:pointer;font-size:12px;padding:4px 10px;border:1.5px solid var(--vert);border-radius:8px;color:var(--vert);font-weight:600;font-family:'Outfit',sans-serif">📄 PDF</span>
-        <span class="sa sac" id="ent-add-btn" onclick="openOvEntretien()">＋ Fiche</span>
-        <span id="ent-rep-btn" onclick="openReparateur()" style="cursor:pointer;font-size:16px;padding:4px 8px;border:1.5px solid var(--rouge);border-radius:8px;color:var(--rouge);display:none">🔧</span>
+    <div style="padding:14px 16px 0">
+      <!-- Pills parc tracteurs -->
+      <div id="trac-parc-pills" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"></div>
+      <!-- Onglets -->
+      <div style="display:flex">
+        <button id="trac-ong-sessions" onclick="switchTracOnglet('sessions')" class="trac-ong-btn trac-ong-active" style="min-height:44px">Sessions</button>
+        <button id="trac-ong-entretiens" onclick="switchTracOnglet('entretiens')" class="trac-ong-btn" style="min-height:44px">Entretiens</button>
       </div>
     </div>
-    <div id="entretiens-list" style="margin-bottom:6px"></div>
-    <div class="sh"><span class="st">Conducteurs</span><span class="sa sac" id="cond-add-btn" onclick="openOv('ovConducteur')">＋ Ajouter</span></div>
-    <div class="chips-row" id="cond-chips"></div>
-    <div class="sh"><span class="st">Activités</span><span class="sa sac" id="act-add-btn" onclick="openOv('ovActivite')">＋ Créer</span></div>
-    <div class="chips-row" id="act-chips"></div>
-    <div class="sh"><span class="st">Sessions</span></div>
+  </div>
+
+  <!-- Contenu onglet Sessions -->
+  <div id="trac-panel-sessions" class="content" style="margin-top:0;padding-bottom:100px">
+    <div class="readonly-banner" id="trac-readonly" style="display:none">🔒 Consultation seule — vous n'avez pas le rôle Tractoriste</div>
+    <!-- Résumé session en cours -->
+    <div id="trac-enc-banner" style="display:none;background:var(--acier-pale);border-radius:12px;padding:10px 14px;margin-bottom:14px;display:none;align-items:center;gap:10px">
+      <div style="width:8px;height:8px;border-radius:50%;background:var(--acier);flex-shrink:0"></div>
+      <div id="trac-enc-txt" style="font-size:13px;color:var(--acier-med);font-weight:600;font-family:'Outfit',sans-serif"></div>
+    </div>
+    <!-- Filtres conducteurs -->
+    <div class="chips-row" id="cond-chips" style="margin-bottom:8px"></div>
+    <!-- Filtres activités -->
+    <div class="chips-row" id="act-chips" style="margin-bottom:14px"></div>
+    <!-- Liste sessions -->
     <div id="sessions-list"></div>
   </div>
+
+  <!-- Contenu onglet Entretiens -->
+  <div id="trac-panel-entretiens" style="display:none;padding:16px 16px 100px">
+    <!-- Sélecteur tracteur (pills) -->
+    <div id="ent-trac-filter" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
+    <!-- Bandeau réparateur -->
+    <div id="trac-rep-banner" style="display:none;margin-bottom:14px"></div>
+    <!-- Encart résumé entretien -->
+    <div id="entretiens-list" style="margin-bottom:6px"></div>
+    <!-- CTA nouvelle fiche -->
+    <button id="ent-add-btn" onclick="openOvEntretien()" style="width:100%;padding:14px;background:var(--acier);color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;min-height:48px;margin-top:4px">＋ Nouvelle fiche d'entretien</button>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button onclick="ouvrirExportEntretien()" style="flex:1;padding:11px;border:1.5px solid var(--vert);background:transparent;color:var(--vert);border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;min-height:44px">📄 Export PDF</button>
+      <button id="ent-rep-btn" onclick="openReparateur()" style="flex:1;padding:11px;border:1.5px solid var(--rouge);background:transparent;color:var(--rouge);border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;min-height:44px;display:none">🔧 Réparation</button>
+    </div>
+  </div>
+
+  <!-- FAB + session (visible seulement sur onglet sessions, tractoriste uniquement) -->
+  <button id="trac-fab" onclick="openNewSession()" style="position:fixed;bottom:84px;right:20px;width:52px;height:52px;border-radius:26px;background:var(--acier);color:white;border:none;font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(44,62,80,0.35);z-index:100;display:none;align-items:center;justify-content:center;line-height:1">＋</button>
 </div>
 
 <!-- ══════ PAGE PHYTO ══════ -->
@@ -2680,26 +2733,21 @@ function renderHomeCard(){
       <div class="hv2-prog-track"><div class="hv2-prog-fill" style="width:${pctGlobal}%;background:${barCol}"></div></div>
       <div style="font-size:12px;font-weight:500;color:var(--texte-med)">Avancement saison</div>
       <div style="font-size:11px;color:var(--texte-doux);margin-top:2px">${parcActives.length} parcelles · 11,76 ha</div>`;
-  } else if(homeCardMode===1){
-    const t=tacheLaPlusAvancee;
+  } else {
+    const t=tacheLaMoinsAvancee;
     _picto.textContent=t?(TEMOJI[t.nom]||'🌾'):'✅';
-    _chip.textContent=t?'Presque fini':saison.nom;
+    _chip.textContent=t?'À traiter':'Saison complète';
     if(t){
+      const colT=t.pct>=75?'var(--or)':'var(--orange)';
       _content.innerHTML=`<div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;line-height:1;color:var(--texte)">${t.pct}%</div>
-        <div class="hv2-prog-track"><div class="hv2-prog-fill" style="width:${t.pct}%;background:var(--vert-med)"></div></div>
-        <div style="font-size:12px;font-weight:500;color:var(--texte-med)">${t.nom}</div>
-        <div style="font-size:11px;color:var(--texte-doux);margin-top:2px">Presque fini !</div>`;
+        <div class="hv2-prog-track"><div class="hv2-prog-fill" style="width:${t.pct}%;background:${colT}"></div></div>
+        <div style="font-size:12px;font-weight:500;color:var(--texte-med)">${tNom(t.nom)}</div>
+        <div style="font-size:11px;color:var(--texte-doux);margin-top:2px">${t.val}/${t.total} parcelles</div>`;
     } else {
       _content.innerHTML=`<div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;color:var(--vert-med)">✅</div>
         <div style="font-size:12px;font-weight:500;color:var(--texte-med);margin-top:8px">Toutes les tâches</div>
         <div style="font-size:11px;color:var(--texte-doux);margin-top:2px">Saison complète !</div>`;
     }
-  } else {
-    _picto.textContent='⏱';
-    _chip.textContent='Charge de travail';
-    _content.innerHTML=`<div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;line-height:1;color:var(--texte)">${totalReste}h</div>
-      <div style="font-size:12px;font-weight:500;color:var(--texte-med);margin-top:8px">Heures restantes</div>
-      <div style="font-size:11px;color:var(--texte-doux);margin-top:2px">${saison.nom}</div>`;
   }
   // Animation tap
   const card=document.getElementById('home-stat-card');
@@ -2710,9 +2758,19 @@ function renderHomeCard(){
 }
 
 function toggleHomeCard(){
-  homeCardMode = (homeCardMode+1) % 3;
+  homeCardMode = (homeCardMode+1) % 2;
   renderHomeCard();
 }
+
+function togglePrioPill(){
+  const detail=document.getElementById('home-prio-detail');
+  const chevron=document.getElementById('home-prio-chevron');
+  if(!detail)return;
+  const isOpen=detail.classList.contains('open');
+  detail.classList.toggle('open',!isOpen);
+  if(chevron)chevron.classList.toggle('open',!isOpen);
+}
+
 
 function renderHome(){
   const {totalReste}=calcHeures();
@@ -2735,25 +2793,31 @@ function renderHome(){
   const ava=document.getElementById('up-ava-v2');
   if(ava&&currentUser)ava.textContent=currentUser.nom.charAt(0).toUpperCase();
 
-  // Card droite — Priorité du moment
-  const prioContent=document.getElementById('home-prio-content');
-  const prioCard=document.getElementById('home-prio-card');
-  const prioChip=document.getElementById('home-prio-chip');
-  const prioPicto=document.getElementById('home-prio-picto');
+  // Pill priorité — dépliable
   const pm=(typeof priorityMessage!=='undefined')&&priorityMessage&&priorityMessage.trim()?priorityMessage.trim():'';
-  if(prioCard){
-    prioCard.style.background=pm?'linear-gradient(135deg,#FFF8E8,#FAF0CC)':'var(--or-pale)';
-    prioCard.style.border=pm?'1px solid rgba(184,145,58,0.35)':'1px solid rgba(184,145,58,0.18)';
-  }
-  if(prioPicto)prioPicto.textContent=pm?'⚡':'💤';
-  if(prioChip){prioChip.textContent=pm?'À prioriser':'RAS';}
-  if(prioContent){
+  const pillTxt=document.getElementById('home-prio-pill-txt');
+  const pillEl=document.getElementById('home-prio-pill');
+  const pillWrap=document.getElementById('home-prio-pill-wrap');
+  const editBtn=document.getElementById('home-prio-edit-btn');
+  const detailTxt=document.getElementById('home-prio-detail-txt');
+  if(pillTxt){
     if(pm){
-      prioContent.innerHTML=`<div style="font-size:13px;font-weight:600;color:#4A3A08;line-height:1.4;margin-top:12px">${pm}</div>`;
+      pillTxt.textContent=pm.length>60?pm.substring(0,60)+'…':pm;
+      if(pillEl){pillEl.style.background='var(--or-pale)';pillEl.style.borderColor='rgba(184,145,58,0.35)';}
+      if(pillTxt)pillTxt.style.color='var(--or)';
+      if(editBtn)editBtn.style.display='flex';
+      if(detailTxt)detailTxt.textContent=pm;
+      if(pillWrap)pillWrap.classList.remove('home-prio-pill-vide');
     } else {
-      prioContent.innerHTML=`<div style="font-size:12px;font-weight:500;color:var(--texte-doux);margin-top:12px">Aucune priorité définie</div>`;
+      pillTxt.textContent='Aucune priorité définie';
+      if(pillEl){pillEl.style.background='var(--gris-clair)';pillEl.style.borderColor='var(--gris)';}
+      if(pillTxt)pillTxt.style.color='var(--texte-doux)';
+      if(editBtn)editBtn.style.display='none';
+      if(detailTxt)detailTxt.textContent='';
+      if(pillWrap)pillWrap.classList.add('home-prio-pill-vide');
     }
   }
+
 
   // Heures cachées compat
   const nbTravaux=JOURNAL.filter(j=>!j.meteo).length;
@@ -3357,6 +3421,53 @@ function renderJournalList(){
 
 // ════ TRACTEUR — ONGLETS & ENTRETIEN ════
 
+// ── Onglet actif ──
+var _tracOnglet = 'sessions'; // 'sessions' | 'entretiens'
+
+function switchTracOnglet(ong){
+  _tracOnglet = ong;
+  document.getElementById('trac-panel-sessions').style.display = ong==='sessions' ? '' : 'none';
+  document.getElementById('trac-panel-entretiens').style.display = ong==='entretiens' ? '' : 'none';
+  var btnS = document.getElementById('trac-ong-sessions');
+  var btnE = document.getElementById('trac-ong-entretiens');
+  if(btnS){ btnS.classList.toggle('trac-ong-active', ong==='sessions'); }
+  if(btnE){ btnE.classList.toggle('trac-ong-active', ong==='entretiens'); }
+  // FAB visible seulement sur Sessions si tractoriste
+  var fab = document.getElementById('trac-fab');
+  if(fab) fab.style.display = (ong==='sessions' && isTractoriste()) ? 'flex' : 'none';
+  if(ong==='entretiens') { renderTracParcPills(); renderRepBanner(); renderEntretiens(); renderEntTracFilter(); }
+}
+
+// ── Pills parc tracteurs dans l'en-tête ──
+function renderTracParcPills(){
+  var el = document.getElementById('trac-parc-pills');
+  if(!el) return;
+  el.innerHTML = TRACTEURS_LIST.map(function(t){
+    var enR = REPARATEUR[t.id];
+    var col = couleurTracType(t.type);
+    return '<div class="trac-parc-pill'+(enR?' en-rep':'')+'">'
+      +'<div class="trac-parc-pill-dot" style="background:'+(enR?'var(--rouge)':col)+'"></div>'
+      +'<span class="trac-parc-pill-nom">'+t.nom+'</span>'
+      +'<span class="trac-parc-pill-mod">'+( t.modele||t.type )+'</span>'
+      +(enR?'<span class="trac-parc-pill-rep">⚠️ Répare</span>':'')
+    +'</div>';
+  }).join('');
+}
+
+// ── Pills filtre tracteur dans onglet Entretiens ──
+function renderEntTracFilter(){
+  var el = document.getElementById('ent-trac-filter');
+  if(!el) return;
+  el.innerHTML = '<button onclick="selectTracteur(null)" class="chip'+((!_tracSelId)?'  active ac':'')+'" style="min-height:40px">🚜 Tous</button>'
+    + TRACTEURS_LIST.map(function(t){
+      var active = _tracSelId===t.id;
+      var enR = REPARATEUR[t.id];
+      return '<button onclick="selectTracteur(\''+t.id+'\')" class="chip'+(active?' active ac':'')+'" style="min-height:40px">'
+        +(enR?'⚠️ ':'🚜 ')+t.nom
+      +'</button>';
+    }).join('');
+}
+
 // ── Tracteur actuellement sélectionné ──
 var _tracSelId = null;
 
@@ -3371,50 +3482,24 @@ function couleurTracType(type){
   return type==='mécanique' ? '#3D6B27' : '#1A4A7A';
 }
 
-// ── Render onglets tracteurs ──
+// ── Render onglets tracteurs (conservé pour compatibilité, remplacé par pills) ──
 function renderTracTabs(){
-  var el=document.getElementById('trac-tabs');
-  if(!el)return;
-  el.innerHTML=TRACTEURS_LIST.map(function(t){
-    var enR=REPARATEUR[t.id];
-    var active=t.id===_tracSelId;
-    var col=couleurTracType(t.type);
-    return '<button class="trac-tab'+(active?' active':'')+'" data-tracid="'+t.id+'" style="border-bottom-color:'+(active?col:'transparent')+'">'
-      +(enR?'<span class="trac-tab-rep-badge">REP</span>':'')
-      +(enR?'🔧':(t.traitementOnly?'🌿':'🚜'))+'<br>'
-      +'<strong style="color:'+(active?'#fff':'rgba(255,255,255,0.4)')+'">'+t.nom+'</strong><br>'
-      +'<span style="font-size:9px;color:'+(active?col:'rgba(255,255,255,0.3)')+'">'+t.type+'</span>'
-    +'</button>';
-  }).join('');
-  el.querySelectorAll('.trac-tab').forEach(function(btn){
-    btn.addEventListener('click', function(){selectTracteur(this.dataset.tracid);});
-  });
+  // Les onglets par tracteur sont remplacés par les pills dans renderTracParcPills()
+  // Appel redirigé vers renderTracParcPills si on est sur la page tracteur
+  renderTracParcPills();
 }
 
 // ── Sélection d'un tracteur ──
 function selectTracteur(id){
-  _tracSelId=id;
-  renderTracTabs();
-  renderTracInfoBar();
+  _tracSelId=id||null;
+  renderEntTracFilter();
   renderRepBanner();
   renderEntretiens();
 }
 
-// ── Barre info tracteur ──
+// ── Barre info tracteur (remplacée par pills — conservé pour compatibilité) ──
 function renderTracInfoBar(){
-  var bar=document.getElementById('trac-info-bar');
-  if(!bar)return;
-  var t=getTracteurSel();
-  if(!t){bar.style.display='none';return;}
-  bar.style.display='flex';
-  var dot='<div class="trac-info-dot" style="background:'+couleurTracType(t.type)+'"></div>';
-  var modele=t.modele?'<span style="font-size:11px;color:var(--texte-doux)">🔩 '+t.modele+'</span>':'';
-  var trait=t.traitementOnly?'<span style="font-size:10px;background:var(--orange-pale);color:var(--orange);border-radius:5px;padding:2px 7px;margin-left:4px">Traitement</span>':'';
-  bar.innerHTML=dot
-    +'<div style="flex:1;min-width:0">'
-      +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:15px;font-weight:600;color:'+couleurTracType(t.type)+'">'+t.nom+trait+'</div>'
-      +(t.modele?'<div style="font-size:11px;color:var(--texte-doux);margin-top:2px">🔩 '+t.modele+' · '+t.type+'</div>':'<div style="font-size:11px;color:var(--texte-doux);margin-top:2px">'+t.type+'</div>')
-    +'</div>';
+  // Remplacé par renderTracParcPills() dans le nouveau layout
 }
 
 // ════ RÉPARATEUR ════
@@ -3425,11 +3510,9 @@ function addDays(iso,n){var d=new Date(iso);d.setDate(d.getDate()+n);return d.to
 function renderRepBanner(){
   var wrap=document.getElementById('trac-rep-banner');
   if(!wrap)return;
-  var t=getTracteurSel();
+  var t=_tracSelId?getTracteurSel():null;
   if(!t){wrap.style.display='none';return;}
   var rep=REPARATEUR[t.id];
-  var repBtn=document.getElementById('ent-rep-btn');
-  if(repBtn)repBtn.style.display=(!rep)?'inline-block':'none';
   if(!rep){wrap.style.display='none';return;}
   wrap.style.display='block';
   var today=todayStr();
@@ -3700,9 +3783,18 @@ function toggleAnomalieTraitee(id){
 function renderEntretiens(){
   var el=document.getElementById('entretiens-list');
   if(!el)return;
-  var t=getTracteurSel();
-  if(!t){el.innerHTML='';return;}
-  var fiches=ENTRETIENS.filter(function(f){return f.tracteurId===t.id;}).sort(function(a,b){return b.date.localeCompare(a.date);});
+  // Si pas de tracteur sélectionné → afficher résumé global de tous
+  var t=_tracSelId?getTracteurSel():null;
+  var fiches=_tracSelId
+    ? ENTRETIENS.filter(function(f){return f.tracteurId===t.id;}).sort(function(a,b){return b.date.localeCompare(a.date);})
+    : [...ENTRETIENS].sort(function(a,b){return b.date.localeCompare(a.date);});
+
+  // Bouton réparateur : afficher si tracteur sélectionné et pas en répar
+  var repBtn=document.getElementById('ent-rep-btn');
+  if(repBtn){
+    var showRep=t&&!REPARATEUR[t.id];
+    repBtn.style.display=showRep?'':'none';
+  }
 
   // Dernière date par champ
   var lastDates={};
@@ -4073,41 +4165,87 @@ function deleteTracteuer(){
 function renderTracteur(){
   // Init sélection tracteur au premier render
   if(!_tracSelId&&TRACTEURS_LIST.length)_tracSelId=TRACTEURS_LIST[0].id;
-  renderTracTabs();
-  renderTracInfoBar();
-  renderRepBanner();
-  renderEntretiens();
-  // Normaliser les anciens "Validé" en "Terminé" à la volée
+
+  // Render pills parc tracteurs en en-tête
+  renderTracParcPills();
+
+  // FAB visible si tractoriste + onglet sessions
+  var fab=document.getElementById('trac-fab');
+  if(fab)fab.style.display=(_tracOnglet==='sessions'&&isTractoriste())?'flex':'none';
+
+  // Readonly banner
+  var rb=document.getElementById('trac-readonly');
+  if(rb)rb.style.display=isReadOnly?'':'none';
+
+  // ── Onglet actif : s'assurer du bon état ──
+  document.getElementById('trac-panel-sessions').style.display=_tracOnglet==='sessions'?'':'none';
+  document.getElementById('trac-panel-entretiens').style.display=_tracOnglet==='entretiens'?'':'none';
+  var btnS=document.getElementById('trac-ong-sessions');
+  var btnE=document.getElementById('trac-ong-entretiens');
+  if(btnS)btnS.classList.toggle('trac-ong-active',_tracOnglet==='sessions');
+  if(btnE)btnE.classList.toggle('trac-ong-active',_tracOnglet==='entretiens');
+
+  if(_tracOnglet==='entretiens'){
+    renderEntTracFilter();
+    renderRepBanner();
+    renderEntretiens();
+    return;
+  }
+
+  // ── ONGLET SESSIONS ──
+
+  // Normaliser "Validé" → "Terminé"
   SESSIONS.forEach(s=>{if(s.statut==='Validé')s.statut='Terminé';});
-  const tot=SESSIONS.length,ter=SESSIONS.filter(s=>s.statut==='Terminé').length,enc=SESSIONS.filter(s=>s.statut==='En cours').length;
-  document.getElementById('st-t').textContent=tot;
-  document.getElementById('st-ter').textContent=ter;
-  document.getElementById('st-enc').textContent=enc;
+
+  // Filtres conducteurs
   const cc=document.getElementById('cond-chips');
-  cc.innerHTML=`<div class="chip ${fCond==='tous'?'active ac':''}" onclick="fCond='tous';renderTracteur()">👥 Tous</div>`
-    +CONDUCTEURS.map(c=>`<div class="chip ${fCond===c.nom?'active ac':''}" onclick="fCond='${c.nom}';renderTracteur()">${c.statut==='En formation'?'🎓':'✅'} ${c.nom} <span style="opacity:0.5;margin-left:2px" onclick="event.stopPropagation();editCond('${c.nom}')">✏️</span></div>`).join('');
+  if(cc)cc.innerHTML=`<div class="chip ${fCond==='tous'?'active ac':''}" onclick="fCond='tous';renderTracteur()">👥 Tous</div>`
+    +CONDUCTEURS.map(c=>`<div class="chip ${fCond===c.nom?'active ac':''}" onclick="fCond='${c.nom}';renderTracteur()">${c.statut==='En formation'?'🎓':'✅'} ${c.nom}<span style="opacity:0.5;margin-left:4px" onclick="event.stopPropagation();editCond('${c.nom}')">✏️</span></div>`).join('');
+
+  // Filtres activités
   const ac=document.getElementById('act-chips');
-  ac.innerHTML=`<div class="chip ${fAct==='toutes'?'active ac':''}" onclick="fAct='toutes';renderTracteur()">Toutes</div>`
+  if(ac)ac.innerHTML=`<div class="chip ${fAct==='toutes'?'active ac':''}" onclick="fAct='toutes';renderTracteur()">Toutes</div>`
     +ACTIVITES.map(a=>`<div class="chip ${fAct===a.nom?'active ac':''}" onclick="fAct='${a.nom}';renderTracteur()">${a.emoji} ${a.nom}</div>`).join('');
-  let data=SESSIONS.filter(s=>{if(fCond!=='tous'&&s.conducteur!==fCond)return false;if(fAct!=='toutes'&&s.activite!==fAct)return false;return true;}).sort((a,b)=>b.date.localeCompare(a.date));
+
+  // Données filtrées + triées (en cours en premier)
+  let data=SESSIONS.filter(s=>{if(fCond!=='tous'&&s.conducteur!==fCond)return false;if(fAct!=='toutes'&&s.activite!==fAct)return false;return true;});
+  const dataEnc=data.filter(s=>s.statut==='En cours').sort((a,b)=>b.date.localeCompare(a.date));
+  const dataTer=data.filter(s=>s.statut!=='En cours').sort((a,b)=>b.date.localeCompare(a.date));
+
+  // Résumé session en cours
+  var encBanner=document.getElementById('trac-enc-banner');
+  var encTxt=document.getElementById('trac-enc-txt');
+  if(encBanner&&encTxt){
+    if(dataEnc.length){
+      encBanner.style.display='flex';
+      encTxt.textContent=dataEnc.length+' session'+(dataEnc.length>1?'s':'')+' en cours · '+dataEnc[0].avancement+'% d\'avancement';
+    } else {
+      encBanner.style.display='none';
+    }
+  }
+
   const sl=document.getElementById('sessions-list');
-  if(!data.length){sl.innerHTML=`<div class="empty-state"><div class="ei">🚜</div><div class="et">Aucune session</div><div class="ed">Aucun passage tracteur enregistré pour cette saison. Démarrez une session pour suivre l'avancement des activités.</div>${!isReadOnly?'<button class="empty-cta-ac" onclick="openOv(\'ovNewSession\')">+ Démarrer une session</button>':''}</div>`;return;}
+  if(!sl)return;
+  if(!data.length){
+    sl.innerHTML=`<div class="empty-state"><div class="ei">🚜</div><div class="et">Aucune session</div><div class="ed">Aucun passage tracteur enregistré pour cette saison.</div>${isTractoriste()?'<button class="empty-cta-ac" onclick="openNewSession()">＋ Démarrer une session</button>':''}</div>`;
+    // Peupler quand même les selects du form nouvelle session
+    _fillNewSessionForm();
+    return;
+  }
+
   const amap=ACTIVITES.reduce((m,a)=>{m[a.nom]=a;return m},{});
-  const isAdmin=currentUser&&currentUser.roles&&currentUser.roles.includes('admin');
-  // ── Tri : sessions en cours en premier (fond sombre), puis terminées ──
-  const dataEnc=data.filter(s=>s.statut==='En cours');
-  const dataTer=data.filter(s=>s.statut!=='En cours');
+  const isAdm=currentUser&&currentUser.roles&&currentUser.roles.includes('admin');
+
   const mkScard=s=>{
     const em=amap[s.activite]?.emoji||'🚜';
     const isEnc=s.statut==='En cours';
-    const sc=isEnc?'ssenc':'sster';
     const pct=s.avancement!=null?s.avancement:0;
     const parcellesFaites=(s.parcellesFaites||[]).length;
     const total=PARCELLES.filter(p=>p.statut!=='Arrachee').length;
-    const clk=isTractoriste()?`onclick="openSessionDetail('${s.id}')" style="cursor:pointer"`:'';
-    const editBtn=isAdmin?`<button class="sc-edit-btn" onclick="event.stopPropagation();openEditSession('${s.id}')">✏️</button>`:'';
+    const clk=isTractoriste()&&isEnc?`onclick="openSessionDetail('${s.id}')" style="cursor:pointer"`:'';
+    const editBtn=isAdm?`<button class="sc-edit-btn" onclick="event.stopPropagation();openEditSession('${s.id}')" style="min-height:44px;min-width:44px">✏️</button>`:'';
     const encCls=isEnc?' scard-enc':'';
-    // ── Badge tracteur ──
+    // Badge tracteur
     const actDef=ACTIVITES.find(a=>a.nom===s.activite);
     const trac=TRACTEURS_LIST.find(t=>t.id===s.tracteurId);
     const isOverride=s.tracteurOverride||(s.tracteurId&&s.tracteurId!==actDef?.tracteurDefautId);
@@ -4116,12 +4254,26 @@ function renderTracteur(){
     const tracNom=trac?trac.nom:'';
     const tracBadge=tracNom?`<span class="sc-trac-badge ${tracBadgeCls}">🚜 ${tracNom}${isOverride?' ✱':''}</span>`:'';
     const tracRepBadge=tracRep&&isEnc?`<span class="sc-trac-badge en-rep" style="margin-left:4px">⚠️ En répar.</span>`:'';
-    const overrideAlert=isOverride&&actDef?.tracteurDefautId?`<div class="sc-override-alert">✱ Tracteur modifié — défaut : ${TRACTEURS_LIST.find(t=>t.id===actDef.tracteurDefautId)?.nom||'—'}</div>`:'' ;
-    return `<div class="scard${encCls}" ${clk}><div class="sc-hd"><div class="sc-ico">${em}</div><div class="sc-info"><div class="sc-act">${s.activite}</div><div class="sc-meta"><span class="sc-date">📅 ${fmtDate(s.date)}</span><span class="sc-cond">👤 ${s.conducteur}</span>${tracBadge}${tracRepBadge}</div></div><div class="sc-right">${editBtn}<div class="sc-st ${sc}">${s.statut}</div><div class="sc-pct">${pct}%</div></div></div><div class="sc-bwrap"><div class="sc-blbl"><span>Avancement domaine</span><span>${parcellesFaites}/${total} parcelles</span></div><div class="sc-btrack"><div class="sc-bfill ${isEnc?'sc-bfill-enc':''}" style="width:${pct}%"></div></div></div>${s.note?`<div style="padding:0 16px 12px;font-size:11px;color:${isEnc?'rgba(255,255,255,0.45)':'var(--texte-doux)'}">💬 ${s.note}</div>`:'' }${overrideAlert}</div>`;
+    const overrideAlert=isOverride&&actDef?.tracteurDefautId?`<div class="sc-override-alert">✱ Tracteur modifié — défaut : ${TRACTEURS_LIST.find(t=>t.id===actDef.tracteurDefautId)?.nom||'—'}</div>`:'';
+    // Hint tactile si en cours + tractoriste
+    const hint=isEnc&&isTractoriste()?`<div class="scard-enc-hint">Tap pour enregistrer l'avancement →</div>`:'';
+    return `<div class="scard${encCls}" ${clk}>`
+      +`<div class="sc-hd"><div class="sc-ico">${em}</div><div class="sc-info"><div class="sc-act">${s.activite}</div><div class="sc-meta"><span class="sc-date">📅 ${fmtDate(s.date)}</span><span class="sc-cond">👤 ${s.conducteur}</span>${tracBadge}${tracRepBadge}</div></div><div class="sc-right">${editBtn}<div class="sc-st ${isEnc?'ssenc':'sster'}">${s.statut}</div><div class="sc-pct">${pct}%</div></div></div>`
+      +`<div class="sc-bwrap"><div class="sc-blbl"><span>Avancement domaine</span><span>${parcellesFaites}/${total} parcelles</span></div><div class="sc-btrack"><div class="sc-bfill ${isEnc?'sc-bfill-enc':''}" style="width:${pct}%"></div></div></div>`
+      +(s.note?`<div style="padding:0 16px 12px;font-size:11px;color:${isEnc?'rgba(255,255,255,0.45)':'var(--texte-doux)'}">💬 ${s.note}</div>`:'')
+      +overrideAlert+hint
+    +`</div>`;
   };
+
   sl.innerHTML=[...dataEnc,...dataTer].map(mkScard).join('');
-  document.getElementById('s-act').innerHTML=ACTIVITES.map(a=>`<option>${a.emoji} ${a.nom}</option>`).join('');
-  document.getElementById('s-cond-pick').innerHTML=CONDUCTEURS.map((c,i)=>`<div class="pchk ${i===0?'sel acre':''}" onclick="pickCond(this)">${c.nom}</div>`).join('');
+  _fillNewSessionForm();
+}
+
+function _fillNewSessionForm(){
+  var sa=document.getElementById('s-act');
+  if(sa)sa.innerHTML=ACTIVITES.map(a=>`<option>${a.emoji} ${a.nom}</option>`).join('');
+  var sc=document.getElementById('s-cond-pick');
+  if(sc)sc.innerHTML=CONDUCTEURS.map((c,i)=>`<div class="pchk ${i===0?'sel acre':''}" onclick="pickCond(this)">${c.nom}</div>`).join('');
 }
 let sdShowDone=false;
 let sdSkipMode=false;
@@ -4227,8 +4379,9 @@ function renderSessionProgress(){
   else if(pct<100&&s.statut==='Terminé')s.statut='En cours';
 }
 function closeSessionDetail(){
-  document.getElementById('ovSessionDetail').classList.remove('open');
+  closeOv(null,'ovSessionDetail');
   renderTracteur();
+  showToast('Passage enregistré ✓','#3D6B27');
 }
 function openEditSession(id){
   console.log('openEditSession appelé, id=', id, 'isAdmin=', currentUser?.roles?.includes('admin'));
@@ -4277,8 +4430,9 @@ function saveEditSession(){
   s.tracteurId=newTracId;
   s.tracteurOverride=newTracId!==(esAct?esAct.tracteurDefautId:'');
   saveData('sessions');
-  document.getElementById('ovEditSession').classList.remove('open');
+  closeOv(null,'ovEditSession');
   renderTracteur();
+  showToast('Session modifiée ✓','#3D6B27');
 }
 function confirmDeleteSession(btn){
   if(btn.dataset.confirm==='1'){
@@ -4667,8 +4821,9 @@ function saveSession(){
     note:document.getElementById('s-note').value
   });
   saveData('sessions');
-  document.getElementById('ovSession').classList.remove('open');
+  closeOv(null,'ovSession');
   renderTracteur();
+  showToast('Session '+(a||'')+ ' démarrée ✓','#2C3E50');
 }
 function saveActivite(){
   if(!isTractoriste()){alert('Accès réservé.');return;}
