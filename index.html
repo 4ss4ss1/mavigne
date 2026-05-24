@@ -682,6 +682,37 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .act-trac-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--gris-clair);}
 .act-trac-row:last-child{border-bottom:none;}
 .act-trac-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:10px;cursor:pointer;}
+/* ── Encart tracteur dans session detail ── */
+.sd-trac-encart{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding:10px 14px;border-radius:12px;border:1.5px solid var(--gris-clair);background:var(--bg-card);transition:border-color 0.2s,background 0.2s;}
+.sd-trac-encart.is-rep{border-color:rgba(192,57,43,0.4);background:rgba(192,57,43,0.05);}
+.sd-trac-encart.is-override{border-color:rgba(224,123,42,0.4);background:rgba(224,123,42,0.04);}
+.sd-trac-encart-info{flex:1;min-width:0;}
+.sd-trac-encart-nom{font-size:13px;font-weight:600;color:var(--texte);}
+.sd-trac-encart-nom.is-rep{color:var(--rouge);}
+.sd-trac-encart-nom.is-override{color:var(--orange);}
+.sd-trac-encart-sub{font-size:11px;color:var(--texte-doux);margin-top:2px;}
+.sd-trac-changer-btn{flex-shrink:0;padding:8px 12px;border-radius:10px;border:none;background:var(--acier-pale);color:var(--acier);font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;cursor:pointer;min-height:44px;min-width:44px;display:flex;align-items:center;gap:4px;transition:background 0.15s;}
+.sd-trac-changer-btn.is-rep{background:rgba(192,57,43,0.12);color:var(--rouge);}
+/* ── Overlay interne picker tracteur session ── */
+.sd-trac-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.5);border-radius:inherit;z-index:10;display:flex;flex-direction:column;justify-content:flex-end;}
+.sd-trac-sheet{background:#1C2128;border-radius:20px 20px 0 0;padding:0 0 32px;}
+.sd-trac-sheet-handle{display:flex;justify-content:center;padding:12px 0 4px;}
+.sd-trac-sheet-bar{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,0.15);}
+.sd-trac-sheet-hd{padding:8px 20px 14px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.sd-trac-sheet-title{font-size:16px;font-weight:700;color:#fff;}
+.sd-trac-sheet-sub{font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px;}
+.sd-trac-sheet-list{padding:12px 16px 0;}
+.sd-trac-sheet-btn{width:100%;display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:14px;margin-bottom:8px;cursor:pointer;border:1.5px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);font-family:'Outfit',sans-serif;transition:all 0.15s;min-height:54px;}
+.sd-trac-sheet-btn.sel{border-color:var(--acier);background:rgba(26,74,122,0.18);}
+.sd-trac-sheet-radio{width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,0.2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;transition:all 0.15s;}
+.sd-trac-sheet-btn.sel .sd-trac-sheet-radio{border-color:var(--acier);background:var(--acier);}
+.sd-trac-sheet-warn{margin:0 16px 12px;background:rgba(192,57,43,0.12);border:1px solid rgba(192,57,43,0.35);border-radius:10px;padding:10px 12px;}
+.sd-trac-sheet-actions{padding:4px 16px 0;display:flex;flex-direction:column;gap:8px;}
+.sd-trac-confirm-btn{width:100%;padding:14px;border-radius:12px;border:none;background:var(--vert);color:#fff;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;min-height:44px;transition:all 0.2s;}
+.sd-trac-confirm-btn:disabled{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.2);cursor:default;}
+.sd-trac-cancel-btn{width:100%;padding:12px;border-radius:12px;border:none;background:transparent;color:rgba(255,255,255,0.4);font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;min-height:44px;}
+/* ── Overlay blocage répar à la création ── */
+.ov-rep-block-sheet{background:#1C2128;border-radius:20px 20px 0 0;padding:0 0 32px;font-family:'Outfit',sans-serif;}
 /* ── Bandeau réparateur ── */
 .rep-banner{border-radius:12px;padding:14px 16px;margin-bottom:14px;}
 .rep-banner-btns{display:flex;gap:8px;margin-top:12px;}
@@ -1772,7 +1803,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 </div></div></div>
 
 <!-- Overlay détail session tracteur -->
-<div class="overlay" id="ovSessionDetail" onclick="closeOv(event,'ovSessionDetail')"><div class="modal" style="max-height:92vh"><div class="modal-handle"></div>
+<div class="overlay" id="ovSessionDetail" onclick="closeOv(event,'ovSessionDetail')"><div class="modal" style="max-height:92vh;position:relative"><div class="modal-handle"></div>
   <div class="modal-hd" style="position:sticky;top:0;background:white;z-index:2;border-radius:24px 24px 0 0">
     <div class="modal-title" id="sd-titre"></div>
     <div class="modal-sub" id="sd-meta"></div>
@@ -1782,6 +1813,28 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
         <button onclick="closeSessionDetail()" style="background:var(--acier);color:white;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer">Enregistrer</button>
       </div>
       <div style="height:6px;background:rgba(0,0,0,0.1);border-radius:6px;overflow:hidden"><div id="sd-bar" style="height:100%;background:var(--acier);border-radius:6px;transition:width 0.2s;width:0%"></div></div>
+    </div>
+    <!-- Encart tracteur (affiché si tractoriste) -->
+    <div id="sd-trac-encart" style="display:none"></div>
+  </div>
+  <!-- Overlay picker tracteur (interne à la modal) -->
+  <div id="sd-trac-picker-overlay" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.55);border-radius:inherit;z-index:10;display:none;flex-direction:column;justify-content:flex-end;" onclick="closeSdTracPicker()">
+    <div class="sd-trac-sheet" onclick="event.stopPropagation()">
+      <div class="sd-trac-sheet-handle"><div class="sd-trac-sheet-bar"></div></div>
+      <div class="sd-trac-sheet-hd">
+        <div class="sd-trac-sheet-title">🚜 Changer de tracteur</div>
+        <div class="sd-trac-sheet-sub" id="sd-picker-sub">Session en cours</div>
+      </div>
+      <div class="sd-trac-sheet-list" id="sd-trac-picker-list"></div>
+      <div id="sd-trac-picker-warn" style="display:none" class="sd-trac-sheet-warn">
+        <div style="font-size:12px;color:#E07070;font-weight:600;margin-bottom:2px">⚠️ Ce tracteur est en réparation</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4)" id="sd-picker-warn-txt"></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px">La session sera signalée dans les exports.</div>
+      </div>
+      <div class="sd-trac-sheet-actions">
+        <button class="sd-trac-confirm-btn" id="sd-trac-confirm-btn" onclick="saveSdTracPicker()" disabled>Confirmer le changement</button>
+        <button class="sd-trac-cancel-btn" onclick="closeSdTracPicker()">Annuler</button>
+      </div>
     </div>
   </div>
   <div class="modal-body" style="padding-top:8px">
@@ -4053,6 +4106,8 @@ function openSessionDetail(id){
   const em=amap[s.activite]?.emoji||'🚜';
   document.getElementById('sd-titre').textContent=`${em} ${s.activite}`;
   document.getElementById('sd-meta').textContent=`${fmtDate(s.date)} · ${s.conducteur}`;
+  renderSDTracEncart();
+  closeSdTracPicker();
   updateSDSkipBtn();
   renderSDParcelles();
   renderSessionProgress();
@@ -4231,6 +4286,220 @@ function onSessionActChange(){
   var actNom=rawAct.replace(/^\S+ /,'').trim()||rawAct;
   if(document.getElementById('s-trac-id'))document.getElementById('s-trac-id').value='';
   _fillTracPick('s', actNom);
+  // Vérifier si le tracteur défaut est en répar → bloquer avec modal
+  var act=ACTIVITES.find(function(a){return a.nom===actNom;});
+  if(act&&REPARATEUR[act.tracteurDefautId]){
+    if(navigator.vibrate)navigator.vibrate([80,60,80]);
+    _openRepBlock(actNom,act.tracteurDefautId);
+  }
+}
+
+// ── Blocage répar création session ──────────────────────────────────
+var _rbPfx='s'; // préfixe overlay source (toujours 's' pour nouvelle session)
+var _rbSelTracId=null;
+
+function _openRepBlock(actNom,defTracId){
+  var act=ACTIVITES.find(function(a){return a.nom===actNom;});
+  var trac=TRACTEURS_LIST.find(function(t){return t.id===defTracId;});
+  var rep=REPARATEUR[defTracId]||{};
+  // Titre
+  var em=act?act.emoji:'🚜';
+  document.getElementById('rb-titre').textContent=em+' '+actNom;
+  document.getElementById('rb-sub').textContent=(trac?trac.nom:'')+(trac&&trac.modele?' — '+trac.modele:'')+' est chez le réparateur';
+  // Info répar
+  var infoEl=document.getElementById('rb-info');
+  infoEl.innerHTML='<div style="font-size:12px;color:#E07070;font-weight:600;margin-bottom:4px">🔧 '+(rep.motif||'Réparation en cours')+'</div>'
+    +'<div style="font-size:11px;color:rgba(255,255,255,0.45)">Depuis le '+fmtDate(rep.depuis||'')+(rep.prevu_retour?' · Retour prévu le '+fmtDate(rep.prevu_retour):'')+'</div>';
+  // Liste alternatifs
+  var eligible=actNom==='Traitement'
+    ?TRACTEURS_LIST.filter(function(t){return t.traitementOnly&&t.id!==defTracId;})
+    :TRACTEURS_LIST.filter(function(t){return !t.traitementOnly&&t.id!==defTracId;});
+  if(!eligible.length)eligible=TRACTEURS_LIST.filter(function(t){return t.id!==defTracId;});
+  _rbSelTracId=null;
+  var listEl=document.getElementById('rb-trac-list');
+  listEl.innerHTML=eligible.map(function(t){
+    var col=couleurTracType(t.type);
+    var rep2=REPARATEUR[t.id];
+    return '<div class="sd-trac-sheet-btn" data-tracid="'+t.id+'" onclick="_rbPick(this,\''+t.id+'\',\''+actNom+'\',\''+defTracId+'\')">'
+      +'<div class="sd-trac-sheet-radio"></div>'
+      +'<div style="flex:1;min-width:0">'
+        +'<div style="font-size:14px;font-weight:500;color:'+(rep2?'#E07070':'rgba(255,255,255,0.85)')+'">'+t.nom+(t.modele?'<span style="font-weight:400;font-size:12px;margin-left:6px;color:rgba(255,255,255,0.4)">'+t.modele+'</span>':'')+' </div>'
+        +'<div style="font-size:11px;margin-top:2px;color:'+col+'">'+t.type+(rep2?' · <span style="color:#E07070">⚠️ En répar.</span>':'')+'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+  document.getElementById('rb-confirm-btn').disabled=true;
+  document.getElementById('rb-warn').style.display='none';
+  openOv('ovRepBlock');
+}
+
+function _rbPick(el,tracId,actNom,defTracId){
+  if(navigator.vibrate)navigator.vibrate(40);
+  _rbSelTracId=tracId;
+  // Mettre à jour visuellement
+  document.querySelectorAll('#rb-trac-list .sd-trac-sheet-btn').forEach(function(b){
+    var sel=b.dataset.tracid===tracId;
+    b.classList.toggle('sel',sel);
+    var radio=b.querySelector('.sd-trac-sheet-radio');
+    if(radio){radio.textContent=sel?'✓':'';radio.style.background=sel?'var(--acier)':'transparent';radio.style.borderColor=sel?'var(--acier)':'rgba(255,255,255,0.2)';}
+  });
+  // Avertissement si choix lui-même en répar
+  var rep=REPARATEUR[tracId];
+  var warnEl=document.getElementById('rb-warn');
+  if(rep){
+    warnEl.style.display='block';
+    document.getElementById('rb-warn-txt').textContent=(rep.motif||'Réparation')+(rep.prevu_retour?' · Retour prévu '+fmtDate(rep.prevu_retour):'');
+  } else { warnEl.style.display='none'; }
+  document.getElementById('rb-confirm-btn').disabled=false;
+}
+
+function saveRepBlockChoice(){
+  if(!_rbSelTracId)return;
+  if(navigator.vibrate)navigator.vibrate(60);
+  // Appliquer le tracteur choisi dans l'overlay de session
+  var hidId=document.getElementById('s-trac-id');
+  var hidOv=document.getElementById('s-trac-override');
+  var rawAct=document.getElementById('s-act').value;
+  var actNom=rawAct.replace(/^\S+ /,'').trim()||rawAct;
+  var act=ACTIVITES.find(function(a){return a.nom===actNom;});
+  if(hidId)hidId.value=_rbSelTracId;
+  if(hidOv)hidOv.value=(act&&_rbSelTracId!==act.tracteurDefautId)?'1':'0';
+  var ovLbl=document.getElementById('s-trac-override-lbl');
+  if(ovLbl){
+    var defTrac=act?TRACTEURS_LIST.find(function(t){return t.id===act.tracteurDefautId;}):null;
+    ovLbl.style.display='inline';
+    ovLbl.textContent='✱ Modifié — défaut : '+(defTrac?defTrac.nom:'—');
+  }
+  _fillTracPickWithId('s', actNom, _rbSelTracId, act?act.tracteurDefautId:'');
+  _updateTracRepAlert('s', _rbSelTracId);
+  document.getElementById('ovRepBlock').classList.remove('open');
+  var trac=TRACTEURS_LIST.find(function(t){return t.id===_rbSelTracId;});
+  showToast('Tracteur changé → '+(trac?trac.nom:''),'#E07B2A');
+}
+
+function closeRepBlock(){
+  if(navigator.vibrate)navigator.vibrate(40);
+  document.getElementById('ovRepBlock').classList.remove('open');
+  // Remettre la sélection sur le premier tracteur dispo
+  var rawAct=document.getElementById('s-act').value;
+  var actNom=rawAct.replace(/^\S+ /,'').trim()||rawAct;
+  _fillTracPick('s',actNom);
+}
+
+// ── Picker tracteur sur session EN COURS ──────────────────────────────
+var _sdPickerSelId=null;
+
+function renderSDTracEncart(){
+  var encart=document.getElementById('sd-trac-encart');
+  if(!encart)return;
+  if(!isTractoriste()){encart.style.display='none';return;}
+  var s=SESSIONS.find(function(x){return x.id===tracSessionId;});
+  if(!s){encart.style.display='none';return;}
+  var trac=TRACTEURS_LIST.find(function(t){return t.id===s.tracteurId;});
+  var act=ACTIVITES.find(function(a){return a.nom===s.activite;});
+  var defId=act?act.tracteurDefautId:'';
+  var isOverride=s.tracteurId!==defId;
+  var tracRep=s.tracteurId?REPARATEUR[s.tracteurId]:null;
+  var col=trac?couleurTracType(trac.type):'#888';
+  var cls=tracRep?'sd-trac-encart is-rep':isOverride?'sd-trac-encart is-override':'sd-trac-encart';
+  var nomCls=tracRep?'sd-trac-encart-nom is-rep':isOverride?'sd-trac-encart-nom is-override':'sd-trac-encart-nom';
+  var sub=tracRep
+    ?'Chez le réparateur · Retour '+fmtDate((REPARATEUR[s.tracteurId]||{}).prevu_retour||'')
+    :isOverride
+    ?'✱ Override — défaut : '+(TRACTEURS_LIST.find(function(t){return t.id===defId;})||{nom:'—'}).nom
+    :'Tracteur dédié '+s.activite;
+  var btnCls=tracRep?'sd-trac-changer-btn is-rep':'sd-trac-changer-btn';
+  var dot='<div style="width:9px;height:9px;border-radius:50%;background:'+col+';flex-shrink:0;margin-top:1px"></div>';
+  encart.className=cls;
+  encart.style.display='flex';
+  encart.innerHTML=dot
+    +'<div class="sd-trac-encart-info">'
+      +'<div class="'+nomCls+'">'+(trac?trac.nom+' — '+trac.modele:'—')+(tracRep?' ⚠️':'')+'</div>'
+      +'<div class="sd-trac-encart-sub">'+sub+'</div>'
+    +'</div>'
+    +'<button class="'+btnCls+'" onclick="openSdTracPicker()">🔄 Changer</button>';
+}
+
+function openSdTracPicker(){
+  if(navigator.vibrate)navigator.vibrate(40);
+  var s=SESSIONS.find(function(x){return x.id===tracSessionId;});
+  if(!s)return;
+  var act=ACTIVITES.find(function(a){return a.nom===s.activite;});
+  var defId=act?act.tracteurDefautId:'';
+  var actNom=s.activite;
+  // Sous-titre
+  var em=act?act.emoji:'🚜';
+  document.getElementById('sd-picker-sub').textContent='Session en cours · '+em+' '+actNom;
+  // Liste tracteurs éligibles
+  var eligible=actNom==='Traitement'
+    ?TRACTEURS_LIST.filter(function(t){return t.traitementOnly;})
+    :TRACTEURS_LIST.filter(function(t){return !t.traitementOnly;});
+  if(!eligible.length)eligible=TRACTEURS_LIST.slice();
+  _sdPickerSelId=s.tracteurId;
+  var listEl=document.getElementById('sd-trac-picker-list');
+  listEl.innerHTML=eligible.map(function(t){
+    var sel=t.id===s.tracteurId;
+    var col=couleurTracType(t.type);
+    var rep=REPARATEUR[t.id];
+    var isDefaut=t.id===defId;
+    return '<div class="sd-trac-sheet-btn'+(sel?' sel':'')+'" data-tracid="'+t.id+'" onclick="_sdPickTrac(this,\''+t.id+'\')">'
+      +'<div class="sd-trac-sheet-radio"'+(sel?' style="border-color:var(--acier);background:var(--acier)"':'')+'>'+( sel?'✓':'')+'</div>'
+      +'<div style="flex:1;min-width:0">'
+        +'<div style="font-size:14px;font-weight:'+(sel?'700':'500')+';color:'+(rep?'#E07070':sel?'var(--acier)':'rgba(255,255,255,0.8)')+'">'+t.nom+(t.modele?'<span style="font-weight:400;font-size:12px;margin-left:6px;color:rgba(255,255,255,0.4)">'+t.modele+'</span>':'')+'</div>'
+        +'<div style="font-size:11px;margin-top:2px;display:flex;gap:6px"><span style="color:'+col+'">'+t.type+'</span>'+(isDefaut?'<span style="color:rgba(255,255,255,0.3)">· Défaut '+actNom+'</span>':'')+(rep?'<span style="color:#E07070">· ⚠️ En répar.</span>':'')+'</div>'
+      +'</div>'
+      +(sel?'<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.4)">Actuel</span>':'')
+    +'</div>';
+  }).join('');
+  document.getElementById('sd-trac-confirm-btn').disabled=true;
+  document.getElementById('sd-trac-picker-warn').style.display='none';
+  // Afficher l'overlay
+  var ov=document.getElementById('sd-trac-picker-overlay');
+  ov.style.display='flex';
+}
+
+function _sdPickTrac(el,tracId){
+  if(navigator.vibrate)navigator.vibrate(40);
+  var s=SESSIONS.find(function(x){return x.id===tracSessionId;});
+  if(!s)return;
+  _sdPickerSelId=tracId;
+  document.querySelectorAll('#sd-trac-picker-list .sd-trac-sheet-btn').forEach(function(b){
+    var sel=b.dataset.tracid===tracId;
+    b.classList.toggle('sel',sel);
+    var radio=b.querySelector('.sd-trac-sheet-radio');
+    if(radio){radio.textContent=sel?'✓':'';radio.style.background=sel?'var(--acier)':'transparent';radio.style.borderColor=sel?'var(--acier)':'rgba(255,255,255,0.2)';}
+  });
+  // Warning si en répar
+  var rep=REPARATEUR[tracId];
+  var warnEl=document.getElementById('sd-trac-picker-warn');
+  if(rep){
+    warnEl.style.display='block';
+    document.getElementById('sd-picker-warn-txt').textContent=(rep.motif||'')+(rep.prevu_retour?' · Retour prévu '+fmtDate(rep.prevu_retour):'');
+  } else { warnEl.style.display='none'; }
+  // Désactiver confirm si même tracteur
+  document.getElementById('sd-trac-confirm-btn').disabled=(tracId===s.tracteurId);
+}
+
+function saveSdTracPicker(){
+  if(!_sdPickerSelId)return;
+  var s=SESSIONS.find(function(x){return x.id===tracSessionId;});
+  if(!s)return;
+  var act=ACTIVITES.find(function(a){return a.nom===s.activite;});
+  var defId=act?act.tracteurDefautId:'';
+  s.tracteurId=_sdPickerSelId;
+  s.tracteurOverride=(_sdPickerSelId!==defId);
+  saveData('sessions');
+  closeSdTracPicker();
+  renderSDTracEncart();
+  renderTracteur();
+  var trac=TRACTEURS_LIST.find(function(t){return t.id===_sdPickerSelId;});
+  showToast('Tracteur changé → '+(trac?trac.nom:''),'#3D6B27');
+}
+
+function closeSdTracPicker(){
+  if(navigator.vibrate)navigator.vibrate(40);
+  var ov=document.getElementById('sd-trac-picker-overlay');
+  if(ov)ov.style.display='none';
 }
 // Remplit le sélecteur tracteur dans un overlay
 function _fillTracPick(pfx, actNom){
@@ -6347,6 +6616,7 @@ function showToast(msg,color){
   var d=document.getElementById('mv-toast-dot');
   var m=document.getElementById('mv-toast-msg');
   if(!t)return;
+  if(navigator.vibrate)navigator.vibrate(60);
   d.style.background=color;
   m.textContent=msg;
   clearTimeout(_toastTimer);
@@ -6788,6 +7058,29 @@ if ('serviceWorker' in navigator) {
       <input type="hidden" id="et-trait" value="0">
       <button class="mbtn acre" style="margin-bottom:10px" onclick="saveEditTracteur()">Enregistrer</button>
       <button class="mbtn-del" onclick="deleteTracteuer()">Supprimer ce tracteur</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ OVERLAY BLOCAGE TRACTEUR EN RÉPARATION (création session) ══════ -->
+<div class="overlay" id="ovRepBlock" onclick="closeOv(event,'ovRepBlock')">
+  <div class="modal ov-rep-block-sheet" onclick="event.stopPropagation()">
+    <div class="sd-trac-sheet-handle"><div class="sd-trac-sheet-bar"></div></div>
+    <div class="sd-trac-sheet-hd">
+      <div style="font-size:13px;font-weight:700;color:var(--rouge);margin-bottom:4px">⚠️ Tracteur indisponible</div>
+      <div class="sd-trac-sheet-title" id="rb-titre"></div>
+      <div class="sd-trac-sheet-sub" id="rb-sub"></div>
+    </div>
+    <div style="margin:14px 16px 4px;background:rgba(192,57,43,0.12);border:1px solid rgba(192,57,43,0.35);border-radius:12px;padding:12px 14px" id="rb-info"></div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.4);padding:14px 20px 8px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Choisir un autre tracteur</div>
+    <div class="sd-trac-sheet-list" id="rb-trac-list"></div>
+    <div id="rb-warn" style="display:none" class="sd-trac-sheet-warn">
+      <div style="font-size:12px;color:#E07070;font-weight:600;margin-bottom:2px">⚠️ Ce tracteur est aussi en réparation</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4)" id="rb-warn-txt"></div>
+    </div>
+    <div class="sd-trac-sheet-actions">
+      <button class="sd-trac-confirm-btn" id="rb-confirm-btn" onclick="saveRepBlockChoice()" disabled>Utiliser ce tracteur pour la session</button>
+      <button class="sd-trac-cancel-btn" onclick="closeRepBlock()">Annuler</button>
     </div>
   </div>
 </div>
