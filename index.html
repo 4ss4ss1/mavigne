@@ -59,7 +59,8 @@ const db = firebase.firestore();
 // enablePersistence() bloque toutes les requêtes Firestore sur iOS → supprimé
 
 const COLLECTIONS = ['parcelles','journal','sessions','travaux','traitements',
-                     'catalogue','conducteurs','activites','membres','saisons','taches','config','historique'];
+                     'catalogue','conducteurs','activites','membres','saisons','taches','config','historique',
+                     'tracteurs_list','entretiens','reparateur'];
 
 function fbDoc(key) { return db.collection('mavigne').doc(key); }
 
@@ -206,13 +207,25 @@ async function fbPullAll() {
 }
 
 // ── Pousser toutes les variables locales vers Firestore (premier démarrage) ──
+// ⚠️ N'utiliser que pour initialiser des collections ABSENTES de Firebase.
+//    Utiliser fbSave() pour les mises à jour normales.
 async function fbPushAll() {
   var map = {
-    parcelles: window.PARCELLES, journal: window.JOURNAL,
-    sessions: window.SESSIONS, travaux: window.TRAVAUX,
-    traitements: window.TRAITEMENTS, catalogue: window.CATALOGUE,
-    conducteurs: window.CONDUCTEURS, activites: window.ACTIVITES,
-    membres: window.MEMBRES, saisons: window.SAISONS, taches: window.TACHES
+    parcelles:      window.PARCELLES,
+    journal:        window.JOURNAL,
+    sessions:       window.SESSIONS,
+    travaux:        window.TRAVAUX,
+    traitements:    window.TRAITEMENTS,
+    catalogue:      window.CATALOGUE,
+    conducteurs:    window.CONDUCTEURS,
+    activites:      window.ACTIVITES,
+    membres:        window.MEMBRES,
+    saisons:        window.SAISONS,
+    taches:         window.TACHES,
+    tracteurs_list: window.TRACTEURS_LIST,
+    entretiens:     window.ENTRETIENS,
+    reparateur:     window.REPARATEUR,
+    historique:     window.HISTORIQUE,
   };
   for(var key in map) {
     if(map[key] !== undefined) {
@@ -220,6 +233,18 @@ async function fbPushAll() {
       catch(e) { console.warn('fbPushAll error', key, e); }
     }
   }
+}
+
+// ── Pousser une collection UNIQUEMENT si elle est absente de Firebase ──
+// Évite d'écraser des données existantes lors d'un redémarrage inattendu.
+async function fbPushIfAbsent(key, value) {
+  try {
+    var snap = await fbDoc(key).get();
+    if (!snap.exists && value !== undefined) {
+      await fbDoc(key).set({ value: JSON.parse(JSON.stringify(value)) });
+      console.log('[Firebase] Init collection absente :', key);
+    }
+  } catch(e) { console.warn('fbPushIfAbsent error', key, e); }
 }
 
 // ── Écoute temps réel ──
@@ -290,37 +315,56 @@ window._fbLoad = async function() {
 
   showSyncBadge('⏳ Connexion…', '#B8913A');
   try {
-    var snap = await fbDoc('parcelles').get();
-    if(!snap.exists) {
-      console.log('🔥 Premier démarrage — envoi données initiales');
-      await fbPushAll();
-      showSyncBadge('☁️ Données envoyées', '#3D6B27');
-    } else {
-      console.log('🔥 Chargement depuis Firebase');
-      await fbPullAll();
-      // ── Réparation automatique des mdp manquants ──
-      var MDP_SOURCE = {Nico:'vigne21',Victor:'victor21',Dessi:'dessi21',Etienne:'etienne21',Chloe:'chloe21',Shana:'shana21',Alicia:'alicia21'};
-      var membresFb = window.MEMBRES || [];
-      var repaired = false;
-      membresFb.forEach(function(m) {
-        if(!m.mdp && MDP_SOURCE[m.nom]) {
-          m.mdp = MDP_SOURCE[m.nom];
-          repaired = true;
-          console.log('[MDP] Réparation automatique pour', m.nom);
-        }
-        // Membres sans mdp (ex : saisonniers créés via UI) → mdp par défaut vigne21
-        if(!m.mdp) {
-          m.mdp = 'vigne21';
-          repaired = true;
-          console.log('[MDP] MDP par défaut assigné à', m.nom);
-        }
-      });
-      if(repaired && window.fbSave) {
-        window.fbSave('membres', membresFb);
-        console.log('[MDP] Membres resauvegardés avec mdp réparés');
-      }
-      showSyncBadge('✅ Synchronisé', '#3D6B27');
+    // ── Charger toutes les collections depuis Firebase ──
+    console.log('🔥 Chargement depuis Firebase');
+    await fbPullAll();
+
+    // ── Initialiser les collections absentes de Firebase (sans écraser les existantes) ──
+    // Chaque collection est vérifiée individuellement : si elle n'existe pas dans Firebase,
+    // on la crée avec les données locales. Cela évite tout écrasement accidentel lors d'une
+    // mise à jour ou d'un redémarrage, y compris pour tracteurs_list/entretiens/reparateur.
+    var initMap = {
+      parcelles:      window.PARCELLES,
+      journal:        window.JOURNAL,
+      sessions:       window.SESSIONS,
+      travaux:        window.TRAVAUX,
+      traitements:    window.TRAITEMENTS,
+      catalogue:      window.CATALOGUE,
+      conducteurs:    window.CONDUCTEURS,
+      activites:      window.ACTIVITES,
+      membres:        window.MEMBRES,
+      saisons:        window.SAISONS,
+      taches:         window.TACHES,
+      tracteurs_list: window.TRACTEURS_LIST,
+      entretiens:     window.ENTRETIENS,
+      reparateur:     window.REPARATEUR,
+      historique:     window.HISTORIQUE,
+    };
+    for (var initKey in initMap) {
+      await fbPushIfAbsent(initKey, initMap[initKey]);
     }
+    // ── Réparation automatique des mdp manquants ──
+    var MDP_SOURCE = {Nico:'vigne21',Victor:'victor21',Dessi:'dessi21',Etienne:'etienne21',Chloe:'chloe21',Shana:'shana21',Alicia:'alicia21'};
+    var membresFb = window.MEMBRES || [];
+    var repaired = false;
+    membresFb.forEach(function(m) {
+      if(!m.mdp && MDP_SOURCE[m.nom]) {
+        m.mdp = MDP_SOURCE[m.nom];
+        repaired = true;
+        console.log('[MDP] Réparation automatique pour', m.nom);
+      }
+      // Membres sans mdp (ex : saisonniers créés via UI) → mdp par défaut vigne21
+      if(!m.mdp) {
+        m.mdp = 'vigne21';
+        repaired = true;
+        console.log('[MDP] MDP par défaut assigné à', m.nom);
+      }
+    });
+    if(repaired && window.fbSave) {
+      window.fbSave('membres', membresFb);
+      console.log('[MDP] Membres resauvegardés avec mdp réparés');
+    }
+    showSyncBadge('✅ Synchronisé', '#3D6B27');
     fbListen();
     // Vider la queue si des sauvegardes avaient été mises en attente hors ligne
     if(Object.keys(_offlineQueue).length > 0) {
