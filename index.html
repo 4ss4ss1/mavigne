@@ -1038,7 +1038,40 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .role-chk.on{background:var(--vert);border-color:var(--vert);}
 
 /* ══ ACCUEIL V2 ══ */
-.hv2-header{background:var(--vert);padding:50px 22px 26px;position:relative;overflow:hidden;}
+.hv2-header{background:#1B2E1A;padding:50px 22px 26px;position:relative;overflow:hidden;}
+
+/* ══ MOD-HEADER — en-tête unifié par module ══ */
+.mod-header{padding:14px 16px 0;flex-shrink:0;}
+.mod-header.h-parcelles{background:#2B1A10;}
+.mod-header.h-journal{background:#201E1B;}
+.mod-header.h-tracteur{background:#121E2B;}
+.mod-header.h-phyto{background:#0F1C2E;}
+.mod-header.h-reglages{background:#1A1A22;}
+.mod-header-top{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.mod-header-icon{font-size:22px;line-height:1;flex-shrink:0;}
+.mod-header-titles{flex:1;min-width:0;}
+.mod-header-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:#fff;line-height:1.05;}
+.mod-header-sub{font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;}
+.mod-header-badge{font-size:11px;font-weight:500;color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.08);border-radius:20px;padding:4px 10px;white-space:nowrap;flex-shrink:0;}
+.mod-header-action{padding:7px 14px;border-radius:20px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);color:#fff;font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;cursor:pointer;min-height:34px;flex-shrink:0;}
+.mod-stats-band{display:flex;border-top:1px solid rgba(255,255,255,0.07);padding:10px 0 12px;}
+.mod-stat{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border-right:1px solid rgba(255,255,255,0.07);}
+.mod-stat:last-child{border-right:none;}
+.mod-stat-val{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:#fff;line-height:1;}
+.mod-stat-lbl{font-size:9px;color:rgba(255,255,255,0.38);font-weight:500;letter-spacing:0.3px;}
+/* Accents par module */
+.mod-stat-val.acc-parc{color:#C0845A;}
+.mod-stat-val.acc-jour{color:#C8BCA8;}
+.mod-stat-val.acc-trac{color:#4A9FC8;}
+.mod-stat-val.acc-phyto{color:#5A9FD4;}
+.mod-stat-val.acc-regl{color:#A0A8B8;}
+/* Onglets dans mod-header */
+.mod-ong-wrap{display:flex;border-top:1px solid rgba(255,255,255,0.07);}
+.mod-ong-tab{flex:1;padding:12px 0 13px;border:none;background:none;cursor:pointer;font-family:'Outfit',sans-serif;font-size:13px;font-weight:400;color:rgba(255,255,255,0.38);border-bottom:2px solid transparent;min-height:44px;transition:all 0.15s;}
+.mod-ong-tab.active{font-weight:700;color:#fff;}
+/* Accent underline onglet par module */
+.h-tracteur .mod-ong-tab.active{border-bottom-color:#4A9FC8;}
+.h-phyto .mod-ong-tab.active{border-bottom-color:#5A9FD4;}
 .hv2-header::before{content:'';position:absolute;top:-50px;right:-30px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,0.05);}
 .hv2-header::after{content:'';position:absolute;bottom:-25px;left:-25px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,0.04);}
 .hv2-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1;}
@@ -1517,21 +1550,26 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 
 <!-- ══════ PAGE PARCELLES ══════ -->
 <div class="page" id="page-parcelles">
-  <div class="ph verde">
-    <div class="ph-top">
-      <div><div class="ph-title">Mes Parcelles</div><div class="ph-sub" id="p-saison-sub"></div></div>
+  <div class="mod-header h-parcelles">
+    <div class="mod-header-top">
+      <span class="mod-header-icon">🗺️</span>
+      <div class="mod-header-titles">
+        <div class="mod-header-title">Mes Parcelles</div>
+        <div class="mod-header-sub" id="p-saison-sub"></div>
+      </div>
+      <span class="mod-header-badge" id="pc-badge">45 actives</span>
     </div>
-    <div class="frow">
+    <div class="frow" style="padding-bottom:14px">
       <div class="fchip active" data-filter="toutes">Toutes</div>
       <div class="fchip" data-filter="complet">✅ Finies</div>
       <div class="fchip" data-filter="avance">🟡 En cours</div>
       <div class="fchip" data-filter="arrachee">Arrachées</div>
     </div>
-  </div>
-  <div class="sband c4" style="transform:translateY(-14px)">
-    <div class="sbi"><div class="sbi-val cv" id="pc-c">0</div><div class="sbi-lbl">Finies</div></div>
-    <div class="sbi"><div class="sbi-val cor" id="pc-e">0</div><div class="sbi-lbl">Cours</div></div>
-    <div class="sbi"><div class="sbi-val" style="color:var(--rouge)" id="pc-a">0</div><div class="sbi-lbl">Arrach.</div></div>
+    <div class="mod-stats-band">
+      <div class="mod-stat"><span class="mod-stat-val acc-parc" id="pc-c">0</span><span class="mod-stat-lbl">Finies</span></div>
+      <div class="mod-stat"><span class="mod-stat-val" id="pc-e">0</span><span class="mod-stat-lbl">En cours</span></div>
+      <div class="mod-stat"><span class="mod-stat-val" style="color:rgba(255,255,255,0.6)" id="pc-a">0</span><span class="mod-stat-lbl">Arrach.</span></div>
+    </div>
   </div>
   <div class="readonly-banner saisonnier-readonly-banner" style="display:none;margin:0 16px 12px;">🔒 Accès lecture seule — consultation uniquement en mode saisonnier</div>
   <div class="tabs2">
@@ -1592,16 +1630,22 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 
 <!-- ══════ PAGE JOURNAL ══════ -->
 <div class="page" id="page-journal">
-  <div class="ph verde">
-    <div class="ph-top"><div><div class="ph-title">Journal des travaux</div><div class="ph-sub" id="j-sub">0 entrées</div></div><button id="journal-add-btn" class="ph-add" onclick="openJournalEntry()">＋ Ajouter</button></div>
+  <div class="mod-header h-journal">
+    <div class="mod-header-top">
+      <span class="mod-header-icon">📓</span>
+      <div class="mod-header-titles">
+        <div class="mod-header-title">Journal</div>
+        <div class="mod-header-sub" id="j-sub">0 entrées</div>
+      </div>
+      <button id="journal-add-btn" class="mod-header-action" onclick="openJournalEntry()">＋ Ajouter</button>
+    </div>
+    <div class="mod-stats-band">
+      <div class="mod-stat"><span class="mod-stat-val acc-jour" id="js-tot">0</span><span class="mod-stat-lbl">Total</span></div>
+      <div class="mod-stat"><span class="mod-stat-val acc-jour" id="js-val">0</span><span class="mod-stat-lbl">Validés</span></div>
+      <div class="mod-stat"><span class="mod-stat-val" style="color:rgba(255,255,255,0.6)" id="js-e">0</span><span class="mod-stat-lbl">En cours</span></div>
+    </div>
   </div>
   <div class="readonly-banner saisonnier-readonly-banner" style="display:none;margin:12px 16px 0;">🔒 Accès lecture seule — vous consultez le journal en mode saisonnier</div>
-  <div class="sband c4">
-    <div class="sbi"><div class="sbi-val cv" id="js-tot">0</div><div class="sbi-lbl">Total</div></div>
-    <div class="sbi"><div class="sbi-val cv" id="js-val">0</div><div class="sbi-lbl">Validés</div></div>
-    <div class="sbi"><div class="sbi-val" style="color:var(--orange)" id="js-e">0</div><div class="sbi-lbl">En cours</div></div>
-  </div>
-  <div class="ost-card" id="ouvrier-stats-card"></div>
   <div class="orow" id="ouvrier-chips-row"></div>
   <div class="tfilters" id="tache-chips-row"></div>
   <div style="padding:0 16px 4px"><div class="sbox"><span>🔍</span><input type="text" id="jSearch" placeholder="Parcelle, tâche, ouvrier…"><span id="jSearch-clear" onclick="clearJSearch()" style="display:none;cursor:pointer;font-size:16px;color:var(--texte-doux);padding:2px 4px;line-height:1">✕</span></div></div>
@@ -1618,16 +1662,28 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 
 <!-- ══════ PAGE TRACTEUR ══════ -->
 <div class="page" id="page-tracteur">
-  <!-- En-tête sombre : parc tracteurs (pills) + onglets Sessions/Entretiens -->
-  <div style="background:var(--acier)">
-    <div style="padding:14px 16px 0">
-      <!-- Pills parc tracteurs -->
-      <div id="trac-parc-pills" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"></div>
-      <!-- Onglets -->
-      <div style="display:flex">
-        <button id="trac-ong-sessions" onclick="switchTracOnglet('sessions')" class="trac-ong-btn trac-ong-active" style="min-height:44px">Sessions</button>
-        <button id="trac-ong-entretiens" onclick="switchTracOnglet('entretiens')" class="trac-ong-btn" style="min-height:44px">Entretiens</button>
+  <!-- En-tête sombre : parc tracteurs (pills) + stats + onglets Sessions/Entretiens -->
+  <div class="mod-header h-tracteur">
+    <div class="mod-header-top">
+      <span class="mod-header-icon">🚜</span>
+      <div class="mod-header-titles">
+        <div class="mod-header-title">Tracteur</div>
+        <div class="mod-header-sub" id="trac-header-sub">Parc · Saison 2026</div>
       </div>
+      <span class="mod-header-badge" id="trac-header-badge">0 sessions</span>
+    </div>
+    <!-- Pills parc tracteurs -->
+    <div id="trac-parc-pills" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"></div>
+    <!-- Stats band -->
+    <div class="mod-stats-band" id="trac-stats-band">
+      <div class="mod-stat"><span class="mod-stat-val" id="trac-stat-sessions">0</span><span class="mod-stat-lbl">Sessions</span></div>
+      <div class="mod-stat"><span class="mod-stat-val acc-trac" id="trac-stat-enc">0</span><span class="mod-stat-lbl">En cours</span></div>
+      <div class="mod-stat"><span class="mod-stat-val" id="trac-stat-rep" style="color:rgba(255,255,255,0.6)">0</span><span class="mod-stat-lbl">En répar.</span></div>
+    </div>
+    <!-- Onglets -->
+    <div class="mod-ong-wrap">
+      <button id="trac-ong-sessions" onclick="switchTracOnglet('sessions')" class="mod-ong-tab active" style="min-height:44px">Sessions</button>
+      <button id="trac-ong-entretiens" onclick="switchTracOnglet('entretiens')" class="mod-ong-tab" style="min-height:44px">Entretiens</button>
     </div>
   </div>
 
@@ -1669,24 +1725,27 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 
 <!-- ══════ PAGE PHYTO ══════ -->
 <div class="page" id="page-phyto">
-  <div class="ph phyto">
-    <div class="ph-top">
-      <div style="font-size:26px">🧪</div>
-      <div><div class="ph-title">Phytosanitaire</div><div class="ph-sub">Registre réglementaire · 2026</div></div>
-      <button class="ph-add" onclick="openOv('ovPhyto')">＋ Traitement</button>
+  <div class="mod-header h-phyto">
+    <div class="mod-header-top">
+      <span class="mod-header-icon">🧪</span>
+      <div class="mod-header-titles">
+        <div class="mod-header-title">Phytosanitaire</div>
+        <div class="mod-header-sub">Registre réglementaire · 2026</div>
+      </div>
+      <button class="mod-header-action" onclick="openOv('ovPhyto')">＋ Traitement</button>
+    </div>
+    <div class="mod-stats-band">
+      <div class="mod-stat"><span class="mod-stat-val acc-phyto" id="sp-tot">0</span><span class="mod-stat-lbl">Total</span></div>
+      <div class="mod-stat"><span class="mod-stat-val" style="color:rgba(255,255,255,0.75)" id="sp-cu">0</span><span class="mod-stat-lbl">Cuivre</span></div>
+      <div class="mod-stat"><span class="mod-stat-val" style="color:rgba(255,255,255,0.75)" id="sp-so">0</span><span class="mod-stat-lbl">Soufre</span></div>
+      <div class="mod-stat"><span class="mod-stat-val" style="color:#E87070" id="sp-dar">0</span><span class="mod-stat-lbl">DAR actifs</span></div>
+    </div>
+    <div class="mod-ong-wrap">
+      <button class="mod-ong-tab active" id="tb-reg" onclick="switchPhTab('reg')">📋 Registre</button>
+      <button class="mod-ong-tab" id="tb-cat" onclick="switchPhTab('cat')">📦 Catalogue</button>
     </div>
   </div>
-  <div class="sband c4">
-    <div class="sbi"><div class="sbi-val cph" id="sp-tot">0</div><div class="sbi-lbl">Total</div></div>
-    <div class="sbi"><div class="sbi-val" style="color:var(--bleu)" id="sp-cu">0</div><div class="sbi-lbl">Cuivre</div></div>
-    <div class="sbi"><div class="sbi-val" style="color:#7D6608" id="sp-so">0</div><div class="sbi-lbl">Soufre</div></div>
-    <div class="sbi"><div class="sbi-val" style="color:var(--rouge)" id="sp-dar">0</div><div class="sbi-lbl">DAR actifs</div></div>
-  </div>
   <div class="dar-alert" id="dar-alert" style="display:none">⚠️ <div><strong>DAR en cours</strong> — délais avant récolte à respecter</div></div>
-  <div class="tabs3">
-    <div class="tab3 active" id="tb-reg" onclick="switchPhTab('reg')">📋 Registre</div>
-    <div class="tab3" id="tb-cat" onclick="switchPhTab('cat')">📦 Catalogue</div>
-  </div>
   <div class="content">
     <div class="chips-row" id="phyto-type-row"></div>
     <div class="tabcont vis" id="tab-reg"><div id="traitements-list"></div></div>
@@ -1699,10 +1758,22 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 
 <!-- ══════ PAGE RÉGLAGES ══════ -->
 <div class="page" id="page-reglages">
-  <div class="ph gris" style="padding-bottom:16px">
-    <div class="ph-top"><div><div class="ph-title">Réglages</div><div class="ph-sub">Ma Vigne v4.3</div></div></div>
+  <div class="mod-header h-reglages">
+    <div class="mod-header-top">
+      <span class="mod-header-icon">⚙️</span>
+      <div class="mod-header-titles">
+        <div class="mod-header-title">Réglages</div>
+        <div class="mod-header-sub">Ma Vigne v4.3</div>
+      </div>
+      <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
+    </div>
+    <div class="mod-stats-band">
+      <div class="mod-stat"><span class="mod-stat-val acc-regl" id="regl-stat-membres">0</span><span class="mod-stat-lbl">Membres</span></div>
+      <div class="mod-stat"><span class="mod-stat-val" id="regl-stat-taches">0</span><span class="mod-stat-lbl">Tâches</span></div>
+      <div class="mod-stat"><span class="mod-stat-val" id="regl-stat-tracteurs">0</span><span class="mod-stat-lbl">Tracteurs</span></div>
+    </div>
   </div>
-  <div style="height:14px"></div>
+  <div style="height:8px"></div>
   <div class="dom-badge"><div class="db-logo">🍇 Ma Vigne</div><div class="db-sub" id="dom-badge-sub">Domaine · 11,76 ha actifs</div></div>
 
   <div class="set-sec">
@@ -2931,6 +3002,8 @@ function computePStats(){
   document.getElementById('pc-c').textContent=c;
   document.getElementById('pc-e').textContent=e;
   document.getElementById('pc-a').textContent=a;
+  const pcBadge=document.getElementById('pc-badge');
+  if(pcBadge)pcBadge.textContent=(c+e+r)+' actives';
   document.getElementById('p-saison-sub').textContent=`${c+e+r} actives · ${getSaisonActive().nom}`;
 }
 function renderParcelles(){
@@ -3473,8 +3546,8 @@ function switchTracOnglet(ong){
   document.getElementById('trac-panel-entretiens').style.display = ong==='entretiens' ? '' : 'none';
   var btnS = document.getElementById('trac-ong-sessions');
   var btnE = document.getElementById('trac-ong-entretiens');
-  if(btnS){ btnS.classList.toggle('trac-ong-active', ong==='sessions'); }
-  if(btnE){ btnE.classList.toggle('trac-ong-active', ong==='entretiens'); }
+  if(btnS){ btnS.classList.toggle('active', ong==='sessions'); }
+  if(btnE){ btnE.classList.toggle('active', ong==='entretiens'); }
   // FAB visible seulement sur Sessions si tractoriste
   var fab = document.getElementById('trac-fab');
   if(fab) fab.style.display = (ong==='sessions' && isTractoriste()) ? 'flex' : 'none';
@@ -4216,6 +4289,14 @@ function renderTracteur(){
     return;
   }
 
+  // Stats band en-tête
+  var stSess=document.getElementById('trac-stat-sessions');
+  var stEnc=document.getElementById('trac-stat-enc');
+  var stRep=document.getElementById('trac-stat-rep');
+  if(stSess)stSess.textContent=SESSIONS.length;
+  if(stEnc)stEnc.textContent=SESSIONS.filter(function(s){return s.statut==='En cours';}).length;
+  if(stRep)stRep.textContent=Object.keys(REPARATEUR).length;
+
   // Render pills parc tracteurs en en-tête
   renderTracParcPills();
 
@@ -4232,8 +4313,8 @@ function renderTracteur(){
   document.getElementById('trac-panel-entretiens').style.display=_tracOnglet==='entretiens'?'':'none';
   var btnS=document.getElementById('trac-ong-sessions');
   var btnE=document.getElementById('trac-ong-entretiens');
-  if(btnS)btnS.classList.toggle('trac-ong-active',_tracOnglet==='sessions');
-  if(btnE)btnE.classList.toggle('trac-ong-active',_tracOnglet==='entretiens');
+  if(btnS)btnS.classList.toggle('active',_tracOnglet==='sessions');
+  if(btnE)btnE.classList.toggle('active',_tracOnglet==='entretiens');
 
   if(_tracOnglet==='entretiens'){
     renderEntTracFilter();
@@ -5128,6 +5209,13 @@ function confirmDeleteTraitement(){
 
 // ════ RÉGLAGES ════
 function renderReglages(){
+  // Stats band en-tête
+  const smb=document.getElementById('regl-stat-membres');
+  const stk=document.getElementById('regl-stat-taches');
+  const str=document.getElementById('regl-stat-tracteurs');
+  if(smb)smb.textContent=MEMBRES.length;
+  if(stk)stk.textContent=TACHES.length;
+  if(str)str.textContent=TRACTEURS_LIST.length;
   // Aperçu domaine — avancement global saison
   const tachesSaison=getTachesSaison();
   const parcActives=PARCELLES.filter(p=>p.statut!=='Arrachee');

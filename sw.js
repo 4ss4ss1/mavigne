@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v1.91
+// MA VIGNE — Service Worker v1.92
+// v1.92 — Design unifié 6 modules : mod-header thématique par module · stats band intégrée · onglets mod-ong-tab · palette couleurs (Accueil vert vigne · Parcelles terre · Journal papier · Tracteur acier · Phyto bleu nuit · Réglages ardoise)
 // v1.91 — Création activité depuis Réglages (admin) · Champ custom par activité (ex: Tarière → Nombre de trous) · Overlay saisie avant validation parcelle · Format parcellesFaites mixte string|{nom,data} · Suppression activité · renderActTracList redesign
 // v1.90 — PDF mensuel : nouvelle structure 2 pages · Heures sous météo · Avancement · Tracteur résumé · Anomalies tracteur · Saut de page · Détails page 2
 // v1.89 — Mise à jour auto sans unregister : controllerchange + _swReload() + rechargement différé si overlay ouvert
@@ -12,7 +13,7 @@
 // v1.81 — Redesign module Tracteur : 2 onglets Sessions/Entretiens · pills parc tracteurs en-tête · FAB + · filtres dans contenu · toast systématique · hint tap sessions en cours
 // v1.80 — Transition pages fade pur · Card accueil 2 modes · Pill priorité ⚡ · Card stat pleine largeur
 // v1.79 — Audit CSS/UX : --texte-doux · --radius-card · segmented-control · fade pages
-const CACHE_NAME = 'mavigne-v1.91';
+const CACHE_NAME = 'mavigne-v1.92';
 const SYNC_TAG   = 'mavigne-sync';
 const APP_SHELL = ['./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 const CDN_URLS = [
@@ -21,7 +22,7 @@ const CDN_URLS = [
   'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap',
 ];
 self.addEventListener('install', event => {
-  console.log('[SW] Install v1.91');
+  console.log('[SW] Install v1.92');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache =>
       cache.addAll(APP_SHELL).then(() =>
@@ -31,7 +32,7 @@ self.addEventListener('install', event => {
   );
 });
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v1.90');
+  console.log('[SW] Activate v1.92');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
