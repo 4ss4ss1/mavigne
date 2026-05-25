@@ -1,30 +1,17 @@
-// MA VIGNE — Service Worker v1.89
-// v1.88 — Fix critique : renderTracteur — isReadOnly (var locale applyRoles) remplacé par !isTractoriste()
-// v1.65 — Tracteur : onglets par tracteur · fiches d'entretien · état réparateur + notifs · parc tracteurs Réglages
-// v1.66 — Fix layout onglets · Association activité↔tracteur · badge tracteur sessions · alerte réparateur · PDF entretien
-// v1.67 — Fix chevauchement onglets tracteurs
-// v1.68 — Fix erreurs JS : guillemets inline onclick → data-* + addEventListener
-// v1.69 — Fiche entretien : suppression champ travail effectué · encadrement renforcé
-// v1.70 — Dark mode · États vides · Météo cache offline · Bandeau offline persistant · PDF rapport saison
-// v1.71 — Fix race condition iOS Safari : window.initLogin exposé avant DOMContentLoaded
-// v1.72 — Entretien : encart résumé compact · modal liste fiches · suppression/édition admin · toggle anomalie
-// v1.73 — Fix critique : suppression lignes orphelines dupliquées après exportPDFPhyto
-// v1.74 — Fix perte données : COLLECTIONS complète · fbPushIfAbsent par collection
-// v1.75 — Haptique showToast · Blocage session si tracteur en répar · Changement tracteur session en cours
-// v1.76 — Blocage coche parcelle · Décoche autorisée · renderSDTracEncart fallback id→nom
-// v1.77 — Fix résolution tracteur/réparateur quand id Firebase = nom
-// v1.78 — Fix race condition : applyFbData re-render encart tracteur si session ouverte
-// v1.79 — Audit CSS/UX : --texte-doux · --radius-card · segmented-control · fade pages
-// v1.80 — Transition pages fade pur · Card accueil 2 modes · Pill priorité ⚡ · Card stat pleine largeur
-// v1.81 — Redesign module Tracteur : 2 onglets Sessions/Entretiens · pills parc tracteurs en-tête · FAB + · filtres dans contenu · toast systématique sur toutes les actions · hint tap sessions en cours
-// v1.82 — Optimisation Firebase : FB_REALTIME (6 listeners) · fbPullStatic ponctuel · re-pull Réglages
-// v1.83 — Debounce 300ms pSearch + jSearch
-// v1.84 — Guard renderSDTracEncart : re-render uniquement sur sessions/tracteurs_list/reparateur/activites
-// v1.85 — Fix navigation : masquage immédiat ancienne page (suppression pageOut/animationend → fin scroll infini)
-// v1.86 — Météo mini badge dans bannière header · Fix toggle card (tacheLaMoinsAvancee) · Pill priorité collée · Fix sessions tracteur vides (re-pull)
-// v1.87 — Refacto stabilité : icon-192.png unifié · closeOv(null) sécurisé · fonctions export entretien hors bloc load · window.render* indentation normalisée
+// MA VIGNE — Service Worker v1.90
+// v1.90 — PDF mensuel : nouvelle structure 2 pages · Heures sous météo · Avancement · Tracteur résumé · Anomalies tracteur · Saut de page · Détails page 2
 // v1.89 — Mise à jour auto sans unregister : controllerchange + _swReload() + rechargement différé si overlay ouvert
-const CACHE_NAME = 'mavigne-v1.89';
+// v1.88 — Fix critique : renderTracteur — isReadOnly (var locale applyRoles) remplacé par !isTractoriste()
+// v1.87 — Refacto stabilité : icon-192.png unifié · closeOv(null) sécurisé · fonctions export entretien hors bloc load · window.render* indentation normalisée
+// v1.86 — Météo mini badge dans bannière header · Fix toggle card (tacheLaMoinsAvancee) · Pill priorité collée · Fix sessions tracteur vides (re-pull)
+// v1.85 — Fix navigation : masquage immédiat ancienne page (suppression pageOut/animationend → fin scroll infini)
+// v1.84 — Guard renderSDTracEncart : re-render uniquement sur sessions/tracteurs_list/reparateur/activites
+// v1.83 — Debounce 300ms pSearch + jSearch
+// v1.82 — Optimisation Firebase : FB_REALTIME (6 listeners) · fbPullStatic ponctuel · re-pull Réglages
+// v1.81 — Redesign module Tracteur : 2 onglets Sessions/Entretiens · pills parc tracteurs en-tête · FAB + · filtres dans contenu · toast systématique · hint tap sessions en cours
+// v1.80 — Transition pages fade pur · Card accueil 2 modes · Pill priorité ⚡ · Card stat pleine largeur
+// v1.79 — Audit CSS/UX : --texte-doux · --radius-card · segmented-control · fade pages
+const CACHE_NAME = 'mavigne-v1.90';
 const SYNC_TAG   = 'mavigne-sync';
 const APP_SHELL = ['./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 const CDN_URLS = [
@@ -33,7 +20,7 @@ const CDN_URLS = [
   'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap',
 ];
 self.addEventListener('install', event => {
-  console.log('[SW] Install v1.89');
+  console.log('[SW] Install v1.90');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache =>
       cache.addAll(APP_SHELL).then(() =>
@@ -43,7 +30,7 @@ self.addEventListener('install', event => {
   );
 });
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v1.89');
+  console.log('[SW] Activate v1.90');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))

@@ -5862,21 +5862,20 @@ function exportPDFMois(){
   const [annee,mois]=moisVal.split('-');
   const moisNoms=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
   const moisNom=moisNoms[parseInt(mois)-1]+' '+annee;
+  const domaine=(window.CONFIG&&window.CONFIG.nomDomaine)||'Domaine Marchand-Grillot';
 
   // Champs saisis manuellement
   const heuresTotales=(document.getElementById('pdf-heures').value||'').trim();
   const heuresDues=(document.getElementById('pdf-heures-dues').value||'').trim();
   const commentaire=(document.getElementById('pdf-commentaire').value||'').trim();
-  // ETP = heures travaillées ÷ heures dues conventionnelles du mois
-  const etpVal = (heuresTotales && heuresDues && parseFloat(heuresDues)>0)
-    ? (parseFloat(heuresTotales)/parseFloat(heuresDues)).toFixed(2)
-    : null;
+  const etpVal=(heuresTotales&&heuresDues&&parseFloat(heuresDues)>0)
+    ?(parseFloat(heuresTotales)/parseFloat(heuresDues)).toFixed(2):null;
 
   // Filtrer le journal pour ce mois
   const travaux=JOURNAL.filter(j=>!j.meteo&&j.date&&j.date.startsWith(moisVal));
   const meteoMois=JOURNAL.filter(j=>j.meteo&&j.date&&j.date.startsWith(moisVal));
 
-  // Grouper par date
+  // Grouper par date pour le détail
   const grouped={};
   [...travaux,...meteoMois].forEach(r=>{if(!grouped[r.date])grouped[r.date]=[];grouped[r.date].push(r);});
   const datesTri=Object.keys(grouped).sort((a,b)=>a.localeCompare(b));
@@ -5885,12 +5884,12 @@ function exportPDFMois(){
   const nbTravaux=travaux.length;
   const nbVal=travaux.filter(j=>j.statut==='Validé').length;
   const parcellesTouchees=[...new Set(travaux.map(j=>j.parcelle))];
-  const tachesTouchees=[...new Set(travaux.map(j=>j.tache))];
   const ouvrierStats={};
   travaux.forEach(j=>{const n=j.equipe?'Équipe':(j.qui||'—');ouvrierStats[n]=(ouvrierStats[n]||0)+1;});
 
-  // ── Météo résumée du mois ──
-  // Agréger température moy/min/max, conditions dominantes
+  const fmtD=d=>{if(!d)return'—';const[y,m,j]=d.split('-');return`${parseInt(j)} ${moisNoms[parseInt(m)-1].slice(0,3)} ${y}`;};
+
+  // ── 1. MÉTÉO ──
   const meteoValides=meteoMois.filter(m=>m.temp!==undefined&&m.temp!==null);
   let meteoResume='';
   if(meteoValides.length>0){
@@ -5898,12 +5897,9 @@ function exportPDFMois(){
     const tMoy=(temps.reduce((a,b)=>a+b,0)/temps.length).toFixed(1);
     const tMin=Math.min(...temps).toFixed(1);
     const tMax=Math.max(...temps).toFixed(1);
-    // Conditions dominantes (desc)
     const condCount={};
     meteoValides.forEach(m=>{const d=m.desc||'—';condCount[d]=(condCount[d]||0)+1;});
-    const condTri=Object.entries(condCount).sort((a,b)=>b[1]-a[1]);
-    const condTop=condTri.slice(0,3).map(([d,n])=>`${d} (${n}j)`).join(', ');
-    // Vents
+    const condTop=Object.entries(condCount).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([d,n])=>`${d} (${n}j)`).join(', ');
     const vents=meteoValides.filter(m=>m.wind).map(m=>parseFloat(m.wind));
     const ventMoy=vents.length>0?(vents.reduce((a,b)=>a+b,0)/vents.length).toFixed(0):'—';
     meteoResume=`<div class="meteo-resume">
@@ -5920,11 +5916,23 @@ function exportPDFMois(){
     meteoResume='<p style="color:#7A7A6A;font-style:italic">Aucune donnée météo enregistrée ce mois.</p>';
   }
 
-  // ── Avancement des tâches du domaine ──
+  // ── 2. HEURES ──
+  let heuresSection='<p style="color:#7A7A6A;font-style:italic">Aucune saisie d\'heures pour ce mois.</p>';
+  if(heuresTotales){
+    heuresSection=`<div class="heures-box">
+      <div class="h-item"><div class="h-val">${heuresTotales} h</div><div class="h-lbl">Travaillées</div></div>
+      ${heuresDues?`<div class="h-sep"></div><div class="h-item"><div class="h-val" style="opacity:0.6">${heuresDues} h</div><div class="h-lbl">Dues (conv.)</div></div>`:''}
+      ${etpVal?`<div class="h-sep"></div><div class="h-item"><div class="h-val" style="color:${parseFloat(etpVal)>=1?'#3D6B27':'#B85A1A'}">${etpVal}</div><div class="h-lbl">ETP ce mois</div></div>`:''}
+    </div>`;
+  }
+  if(commentaire){
+    heuresSection+=`<div class="commentaire-box" style="margin-top:10px">${commentaire}</div>`;
+  }
+
+  // ── 3. AVANCEMENT DES TÂCHES ──
   const tachesSaison=getTachesSaison();
-  let tachesAvancement='';
+  let tachesAvancement='<p style="color:#7A7A6A;font-style:italic">Aucune tâche configurée pour cette saison.</p>';
   if(tachesSaison.length>0){
-    // Pour chaque tâche : compter parcelles validées / total
     const lignesTaches=tachesSaison.map(t=>{
       const nom=t.nom;
       const total=PARCELLES.length;
@@ -5932,32 +5940,22 @@ function exportPDFMois(){
       const enCours=PARCELLES.filter(p=>p.taches&&p.taches[nom]==='En cours').length;
       const pct=total>0?Math.round(valide/total*100):0;
       const reste=total-valide;
-      const pctReste=100-pct;
-      return {nom,total,valide,enCours,reste,pct,pctReste};
+      return {nom,total,valide,enCours,reste,pct};
     });
-    // Totaux globaux domaine
     const totalCases=lignesTaches.reduce((s,t)=>s+t.total,0);
     const totalVal=lignesTaches.reduce((s,t)=>s+t.valide,0);
     const pctGlobal=totalCases>0?Math.round(totalVal/totalCases*100):0;
-    const pctRestGlobal=100-pctGlobal;
-
     tachesAvancement=`
     <div class="avancement-global">
-      <div class="ag-left">
-        <div class="ag-pct">${pctGlobal}%</div>
-        <div class="ag-lbl">Effectué</div>
-      </div>
+      <div class="ag-left"><div class="ag-pct">${pctGlobal}%</div><div class="ag-lbl">Effectué</div></div>
       <div class="ag-bar-wrap">
         <div class="ag-bar"><div class="ag-fill" style="width:${pctGlobal}%"></div></div>
-        <div class="ag-bar ag-bar-reste"><div class="ag-fill-reste" style="width:${pctRestGlobal}%"></div></div>
+        <div class="ag-bar ag-bar-reste"><div class="ag-fill-reste" style="width:${100-pctGlobal}%"></div></div>
       </div>
-      <div class="ag-right">
-        <div class="ag-pct" style="color:#B85A1A">${pctRestGlobal}%</div>
-        <div class="ag-lbl">Restant</div>
-      </div>
+      <div class="ag-right"><div class="ag-pct" style="color:#B85A1A">${100-pctGlobal}%</div><div class="ag-lbl">Restant</div></div>
     </div>
     <table class="taches-table">
-      <thead><tr><th>Tâche</th><th>Validées</th><th>En cours</th><th>Restantes</th><th>% fait</th><th>% restant</th></tr></thead>
+      <thead><tr><th>Tâche</th><th>Validées</th><th>En cours</th><th>Restantes</th><th>% fait</th></tr></thead>
       <tbody>
         ${lignesTaches.map(t=>`<tr>
           <td>${TEMOJI&&TEMOJI[t.nom]?TEMOJI[t.nom]+' ':''}<strong>${t.nom}</strong></td>
@@ -5965,23 +5963,18 @@ function exportPDFMois(){
           <td class="tc-val co">${t.enCours}</td>
           <td class="tc-val cr">${t.reste}</td>
           <td><div class="mini-bar"><div class="mini-fill" style="width:${t.pct}%"></div></div><span class="mini-pct cv">${t.pct}%</span></td>
-          <td><span class="mini-pct cr">${t.pctReste}%</span></td>
         </tr>`).join('')}
       </tbody>
     </table>`;
-  } else {
-    tachesAvancement='<p style="color:#7A7A6A;font-style:italic">Aucune tâche configurée pour cette saison.</p>';
   }
 
-  const fmtD=d=>{if(!d)return'—';const[y,m,j]=d.split('-');return`${parseInt(j)} ${moisNoms[parseInt(m)-1].slice(0,3)} ${y}`;};
-
-  // ── Sessions tracteur du mois ──
+  // ── 4. TRACTEUR RÉSUMÉ (sans détail parcelles) ──
   const sessionsMois=SESSIONS.filter(s=>s.date&&s.date.startsWith(moisVal)).sort((a,b)=>a.date.localeCompare(b.date));
   const amapPdf=ACTIVITES.reduce((m,a)=>{m[a.nom]=a;return m},{});
-  let tracteurSection='';
+  const parcActives=PARCELLES.filter(p=>p.statut!=='Arrachee');
+  let tracResume='<p style="color:#7A7A6A;font-style:italic">Aucune session tracteur ce mois.</p>';
   if(sessionsMois.length>0){
-    const parcActives=PARCELLES.filter(p=>p.statut!=='Arrachee');
-    const lignesSessions=sessionsMois.map(s=>{
+    const lignes=sessionsMois.map(s=>{
       const em=amapPdf[s.activite]?.emoji||'🚜';
       const pct=s.avancement!=null?s.avancement:0;
       const statCls=s.statut==='En cours'?'trac-enc':'trac-ter';
@@ -5989,55 +5982,95 @@ function exportPDFMois(){
       const skip=s.parcellesSkip||[];
       const faites=s.parcellesFaites||[];
       const total=parcActives.filter(p=>!skip.includes(p.nom)).length;
-      const nbFaites=faites.length;
-      const nbSkip=skip.length;
-
-      // Liste parcelles faites triées
-      const parcellesFaitesTriees=[...faites].sort((a,b)=>a.localeCompare(b,'fr'));
-      // Parcelles restantes (actives - faites - skip)
-      const parcRestantes=parcActives.filter(p=>!faites.includes(p.nom)&&!skip.includes(p.nom)).map(p=>p.nom).sort((a,b)=>a.localeCompare(b,'fr'));
-      const parcSkipTriees=[...skip].sort((a,b)=>a.localeCompare(b,'fr'));
-
-      // Lignes du détail parcelles (grille compacte)
-      const mkPillList=(noms,cls)=>noms.length===0?'<span style="color:#aaa;font-style:italic;font-size:10px">—</span>'
-        :noms.map(n=>`<span class="parc-pill ${cls}">${n}</span>`).join('');
-
       return `<tr>
         <td>${em} <strong>${s.activite}</strong></td>
         <td>${fmtD(s.date)}</td>
         <td>${s.conducteur||'—'}</td>
-        <td><span class="trac-badge ${statCls}">${s.statut}</span></td>
         <td><div class="trac-bar-wrap"><div class="trac-bar"><div class="${fillCls}" style="width:${pct}%"></div></div><span style="font-size:10px;font-weight:700;color:${s.statut==='En cours'?'#B85A1A':'#2C3E50'}">${pct}%</span></div></td>
-        <td style="font-size:10px;color:#7A7A6A">${nbFaites}/${total} parc.${nbSkip>0?` · ${nbSkip} désact.`:''}</td>
-      </tr>
-      <tr class="trac-detail-row">
-        <td colspan="6" style="padding:0 8px 14px 28px">
-          <div class="trac-detail-block">
-            <div class="trac-detail-col">
-              <div class="trac-detail-label trac-det-ok">✓ Travaillées (${nbFaites})</div>
-              <div class="trac-pills">${mkPillList(parcellesFaitesTriees,'pill-ok')}</div>
-            </div>
-            ${parcRestantes.length>0?`<div class="trac-detail-col">
-              <div class="trac-detail-label trac-det-rest">⏳ Restantes (${parcRestantes.length})</div>
-              <div class="trac-pills">${mkPillList(parcRestantes,'pill-rest')}</div>
-            </div>`:''}
-            ${nbSkip>0?`<div class="trac-detail-col">
-              <div class="trac-detail-label trac-det-skip">⊘ Désactivées (${nbSkip})</div>
-              <div class="trac-pills">${mkPillList(parcSkipTriees,'pill-skip')}</div>
-            </div>`:''}
-          </div>
-          ${s.note?`<div style="margin-top:6px;font-size:10px;color:#7A7A6A;font-style:italic">📝 ${s.note}</div>`:''}
-        </td>
+        <td style="font-size:10px;color:#7A7A6A">${faites.length}/${total} parc.</td>
+        <td><span class="trac-badge ${statCls}">${s.statut}</span></td>
       </tr>`;
     }).join('');
-    tracteurSection=`<div class="section">
-  <div class="section-title">🚜 Activité tracteur — ${moisNom}</div>
-  <table class="trac-table">
-    <thead><tr><th>Activité</th><th>Date</th><th>Conducteur</th><th>Statut</th><th>Avancement</th><th>Parcelles</th></tr></thead>
-    <tbody>${lignesSessions}</tbody>
-  </table>
-</div>`;
-  };
+    tracResume=`<table class="trac-table">
+      <thead><tr><th>Activité</th><th>Date</th><th>Conducteur</th><th>Avancement</th><th>Parcelles</th><th>Statut</th></tr></thead>
+      <tbody>${lignes}</tbody>
+    </table>`;
+  }
+
+  // ── 5. ANOMALIES TRACTEUR ──
+  // Tracteurs au réparateur ce mois + anomalies ENTRETIENS non traitées
+  let anomaliesHTML='';
+  const anomBlocs=[];
+  // 5a. Tracteurs au réparateur
+  const repData=window.REPARATEUR||REPARATEUR||{};
+  Object.entries(repData).forEach(([tid,rep])=>{
+    if(!rep||!rep.depuis)return;
+    const tracObj=(window.TRACTEURS_LIST||[]).find(t=>t.id===tid||t.nom===tid);
+    const nomTrac=tracObj?tracObj.nom:tid;
+    anomBlocs.push(`<div class="anomalie-item anomalie-rep">
+      <div class="an-icon">🔧</div>
+      <div>
+        <div class="an-title">${nomTrac} — chez le réparateur</div>
+        ${rep.motif?`<div class="an-detail">${rep.motif}</div>`:''}
+        <div class="an-date">Depuis le ${fmtD(rep.depuis)}${rep.prevu_retour?' · Retour prévu : '+fmtD(rep.prevu_retour):' · Date de retour inconnue'}</div>
+      </div>
+    </div>`);
+  });
+  // 5b. Anomalies non traitées dans fiches d'entretien
+  const entData=window.ENTRETIENS||[];
+  entData.filter(f=>f.anomalie&&!f.anomalie_traitee).forEach(f=>{
+    const tracObj=(window.TRACTEURS_LIST||[]).find(t=>t.id===f.tracteurId||t.nom===f.tracteurId);
+    const nomTrac=tracObj?tracObj.nom:(f.tracteurId||'Tracteur inconnu');
+    anomBlocs.push(`<div class="anomalie-item anomalie-ent">
+      <div class="an-icon">⚠️</div>
+      <div>
+        <div class="an-title">${nomTrac} — anomalie non traitée</div>
+        <div class="an-detail">${f.anomalie}</div>
+        <div class="an-date">Signalé le ${fmtD(f.date)}</div>
+      </div>
+    </div>`);
+  });
+  if(anomBlocs.length>0){
+    anomaliesHTML=anomBlocs.join('');
+  } else {
+    anomaliesHTML='<p style="color:#7A7A6A;font-style:italic">Aucune anomalie tracteur ce mois.</p>';
+  }
+
+  // ── PAGE 2 : DÉTAIL TRACTEUR (parcelles) ──
+  let tracDetailHTML='<p style="color:#7A7A6A;font-style:italic">Aucune session tracteur ce mois.</p>';
+  if(sessionsMois.length>0){
+    const mkPillList=(noms,cls)=>noms.length===0
+      ?'<span style="color:#aaa;font-style:italic;font-size:10px">—</span>'
+      :noms.map(n=>`<span class="parc-pill ${cls}">${n}</span>`).join('');
+    tracDetailHTML=sessionsMois.map(s=>{
+      const em=amapPdf[s.activite]?.emoji||'🚜';
+      const pct=s.avancement!=null?s.avancement:0;
+      const skip=s.parcellesSkip||[];
+      const faites=s.parcellesFaites||[];
+      const parcRestantes=parcActives.filter(p=>!faites.includes(p.nom)&&!skip.includes(p.nom)).map(p=>p.nom).sort((a,b)=>a.localeCompare(b,'fr'));
+      const faitesTri=[...faites].sort((a,b)=>a.localeCompare(b,'fr'));
+      const skipTri=[...skip].sort((a,b)=>a.localeCompare(b,'fr'));
+      const total=parcActives.filter(p=>!skip.includes(p.nom)).length;
+      return `<div class="trac-session-block">
+        <div class="trac-session-head">${em} ${s.activite} — ${fmtD(s.date)} · ${s.conducteur||'—'} · ${pct}%</div>
+        <div class="trac-detail-block">
+          <div class="trac-detail-col">
+            <div class="trac-detail-label trac-det-ok">✓ Travaillées (${faitesTri.length}/${total})</div>
+            <div class="trac-pills">${mkPillList(faitesTri,'pill-ok')}</div>
+          </div>
+          ${parcRestantes.length>0?`<div class="trac-detail-col">
+            <div class="trac-detail-label trac-det-rest">⏳ Restantes (${parcRestantes.length})</div>
+            <div class="trac-pills">${mkPillList(parcRestantes,'pill-rest')}</div>
+          </div>`:''}
+          ${skipTri.length>0?`<div class="trac-detail-col">
+            <div class="trac-detail-label trac-det-skip">⊘ Désactivées (${skipTri.length})</div>
+            <div class="trac-pills">${mkPillList(skipTri,'pill-skip')}</div>
+          </div>`:''}
+        </div>
+        ${s.note?`<div style="margin-top:8px;font-size:10px;color:#7A7A6A;font-style:italic">📝 ${s.note}</div>`:''}
+      </div>`;
+    }).join('');
+  }
 
   const html=`<!DOCTYPE html>
 <html lang="fr"><head><meta charset="UTF-8">
@@ -6045,95 +6078,117 @@ function exportPDFMois(){
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1A1A14;background:white;font-size:12px;}
-  .cover{background:#1E3A12;color:white;padding:40px;min-height:180px;position:relative;}
-  .cover-brand{font-size:10px;letter-spacing:3px;text-transform:uppercase;opacity:0.5;margin-bottom:8px;}
-  .cover-title{font-size:32px;font-weight:700;margin-bottom:4px;}
-  .cover-sub{opacity:0.6;font-size:13px;}
-  .cover-date{position:absolute;top:40px;right:40px;text-align:right;opacity:0.6;font-size:11px;}
+  /* ── COVER ── */
+  .cover{background:#1E3A12;color:white;padding:32px 40px;display:flex;justify-content:space-between;align-items:flex-end;}
+  .cover-left{}
+  .cover-brand{font-size:9px;letter-spacing:3px;text-transform:uppercase;opacity:0.5;margin-bottom:6px;}
+  .cover-title{font-size:28px;font-weight:700;margin-bottom:2px;}
+  .cover-sub{opacity:0.5;font-size:11px;}
+  .cover-right{text-align:right;}
+  .cover-date{opacity:0.5;font-size:10px;}
+  .cover-domaine{opacity:0.7;font-size:11px;font-weight:600;margin-top:2px;}
+  /* ── STATS ── */
   .stats-row{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:2px solid #EAF3E2;}
-  .stat{padding:16px 20px;border-right:1px solid #EAF3E2;}
+  .stat{padding:14px 20px;border-right:1px solid #EAF3E2;}
   .stat:last-child{border-right:none;}
-  .stat-val{font-size:28px;font-weight:700;color:#1E3A12;}
-  .stat-lbl{font-size:10px;color:#7A7A6A;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
-  .section{padding:20px 24px;border-bottom:1px solid #EFEDE8;}
+  .stat-val{font-size:26px;font-weight:700;color:#1E3A12;}
+  .stat-lbl{font-size:9px;color:#7A7A6A;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
+  /* ── SECTIONS ── */
+  .section{padding:18px 24px;border-bottom:1px solid #EFEDE8;}
   .section:last-of-type{border-bottom:none;}
   .section-title{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#7A7A6A;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #EFEDE8;}
-  /* Météo */
+  /* ── MÉTÉO ── */
   .meteo-resume{background:#E8F0FA;border-radius:10px;padding:14px 16px;}
   .meteo-cols{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:8px;}
   .meteo-col{text-align:center;}
-  .mc-val{font-size:16px;font-weight:700;color:#1A4A7A;}
+  .mc-val{font-size:15px;font-weight:700;color:#1A4A7A;}
   .mc-lbl{font-size:9px;color:#7A7A6A;margin-top:2px;text-transform:uppercase;}
   .mc-cond{font-size:10px;color:#4A4A3A;font-style:italic;}
-  /* Avancement tâches */
-  .avancement-global{display:flex;align-items:center;gap:14px;background:#F5F5F0;border-radius:10px;padding:14px 16px;margin-bottom:14px;}
-  .ag-left,.ag-right{text-align:center;min-width:52px;}
-  .ag-pct{font-size:22px;font-weight:700;color:#1E3A12;}
+  /* ── HEURES ── */
+  .heures-box{display:flex;border:1px solid #EFEDE8;border-radius:10px;overflow:hidden;}
+  .h-item{flex:1;padding:12px 16px;text-align:center;background:white;}
+  .h-sep{width:1px;background:#EFEDE8;flex-shrink:0;}
+  .h-val{font-size:22px;font-weight:700;color:#1A1A14;line-height:1;}
+  .h-lbl{font-size:9px;color:#7A7A6A;margin-top:3px;text-transform:uppercase;letter-spacing:0.4px;}
+  .commentaire-box{background:#F8F7F3;border-left:3px solid #3D6B27;border-radius:0 8px 8px 0;padding:12px 14px;font-size:11px;line-height:1.6;color:#1A1A14;font-style:italic;white-space:pre-wrap;}
+  /* ── AVANCEMENT ── */
+  .avancement-global{display:flex;align-items:center;gap:14px;background:#F5F5F0;border-radius:10px;padding:12px 16px;margin-bottom:12px;}
+  .ag-left,.ag-right{text-align:center;min-width:48px;}
+  .ag-pct{font-size:20px;font-weight:700;color:#1E3A12;}
   .ag-lbl{font-size:9px;color:#7A7A6A;text-transform:uppercase;margin-top:2px;}
   .ag-bar-wrap{flex:1;display:flex;flex-direction:column;gap:4px;}
-  .ag-bar{height:10px;background:#EFEDE8;border-radius:6px;overflow:hidden;}
-  .ag-bar-reste{background:#EFEDE8;}
-  .ag-fill{height:100%;background:#3D6B27;border-radius:6px;}
-  .ag-fill-reste{height:100%;background:#D4A56A;border-radius:6px;}
+  .ag-bar{height:8px;background:#EFEDE8;border-radius:4px;overflow:hidden;}
+  .ag-fill{height:100%;background:#3D6B27;border-radius:4px;}
+  .ag-fill-reste{height:100%;background:#D4A56A;border-radius:4px;}
   .taches-table{width:100%;border-collapse:collapse;}
-  .taches-table th{font-size:9px;font-weight:700;text-transform:uppercase;color:#7A7A6A;padding:6px 8px;text-align:left;border-bottom:2px solid #EFEDE8;}
-  .taches-table td{padding:7px 8px;border-bottom:1px solid #F5F5F0;font-size:11px;vertical-align:middle;}
+  .taches-table th{font-size:9px;font-weight:700;text-transform:uppercase;color:#7A7A6A;padding:5px 8px;text-align:left;border-bottom:2px solid #EFEDE8;}
+  .taches-table td{padding:6px 8px;border-bottom:1px solid #F5F5F0;font-size:11px;vertical-align:middle;}
   .tc-val{text-align:center;font-weight:600;}
   .cv{color:#1E3A12;}.co{color:#B85A1A;}.cr{color:#A0291E;}
-  .mini-bar{display:inline-block;width:60px;height:6px;background:#EFEDE8;border-radius:4px;overflow:hidden;vertical-align:middle;margin-right:5px;}
-  .mini-fill{height:100%;background:#3D6B27;border-radius:4px;}
+  .mini-bar{display:inline-block;width:56px;height:5px;background:#EFEDE8;border-radius:3px;overflow:hidden;vertical-align:middle;margin-right:4px;}
+  .mini-fill{height:100%;background:#3D6B27;border-radius:3px;}
   .mini-pct{font-size:10px;font-weight:700;vertical-align:middle;}
-  /* Heures */
-  .heures-box{display:flex;align-items:center;gap:20px;background:#FAF3E0;border-radius:10px;padding:16px 20px;}
-  .heures-val{font-size:40px;font-weight:700;color:#B8913A;line-height:1;}
-  .heures-label{font-size:11px;color:#7A4F2E;font-weight:600;margin-top:4px;}
-  /* Commentaire */
-  .commentaire-box{background:#F8F7F3;border-left:3px solid #3D6B27;border-radius:0 8px 8px 0;padding:14px 16px;font-size:12px;line-height:1.7;color:#1A1A14;font-style:italic;white-space:pre-wrap;}
-  /* Journal */
-  .day-block{margin-bottom:16px;}
-  .day-head{font-size:11px;font-weight:700;color:#1E3A12;background:#EAF3E2;padding:5px 10px;border-radius:6px;margin-bottom:6px;}
-  table{width:100%;border-collapse:collapse;}
-  td{padding:6px 10px;border-bottom:1px solid #EFEDE8;font-size:11px;}
-  td:first-child{width:30%;font-weight:600;}
-  .badge{display:inline-block;padding:2px 7px;border-radius:6px;font-size:9px;font-weight:700;}
-  .bv{background:#EAF3E2;color:#1E3A12;}.bf{background:#FAF3E0;color:#7A4F2E;}.be{background:#FBF0E6;color:#B85A1A;}
-  .meteo-row{background:#F8F7F3;font-style:italic;color:#7A7A6A;}
-  .ouvrier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-  .ouvrier-item{background:#F5F5F0;border-radius:8px;padding:10px 12px;}
-  .ouvrier-nom{font-weight:700;font-size:12px;}
-  .ouvrier-nb{font-size:18px;font-weight:700;color:#1E3A12;margin-top:2px;}
-  .footer{border-top:1px solid #EFEDE8;padding:12px 24px;font-size:9px;color:#7A7A6A;display:flex;justify-content:space-between;}
-  /* Tracteur */
-  .trac-table{width:100%;border-collapse:collapse;margin-top:4px;}
-  .trac-table th{font-size:9px;font-weight:700;text-transform:uppercase;color:#7A7A6A;padding:6px 8px;text-align:left;border-bottom:2px solid #ECF0F4;}
-  .trac-table td{padding:8px;border-bottom:1px solid #F5F5F0;font-size:11px;vertical-align:middle;}
+  /* ── TRACTEUR RÉSUMÉ ── */
+  .trac-table{width:100%;border-collapse:collapse;}
+  .trac-table th{font-size:9px;font-weight:700;text-transform:uppercase;color:#7A7A6A;padding:5px 8px;text-align:left;border-bottom:2px solid #ECF0F4;}
+  .trac-table td{padding:7px 8px;border-bottom:1px solid #F5F5F0;font-size:11px;vertical-align:middle;}
   .trac-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;}
   .trac-ter{background:#ECF0F4;color:#2C3E50;}.trac-enc{background:#FBF0E6;color:#B85A1A;}
-  .trac-bar-wrap{display:flex;align-items:center;gap:6px;}
-  .trac-bar{width:80px;height:6px;background:#EFEDE8;border-radius:4px;overflow:hidden;display:inline-block;vertical-align:middle;}
-  .trac-fill{height:100%;border-radius:4px;background:#2C3E50;}
-  .trac-fill-enc{background:#B85A1A;}
-  /* Détail parcelles tracteur */
-  .trac-detail-row td{background:#F8F8F5;border-bottom:2px solid #ECF0F4;}
-  .trac-detail-block{display:flex;flex-wrap:wrap;gap:12px;padding-top:8px;}
-  .trac-detail-col{flex:1;min-width:160px;}
-  .trac-detail-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;padding:2px 6px;border-radius:4px;display:inline-block;}
+  .trac-bar-wrap{display:flex;align-items:center;gap:5px;}
+  .trac-bar{width:70px;height:5px;background:#EFEDE8;border-radius:3px;overflow:hidden;}
+  .trac-fill{height:100%;background:#2C3E50;}.trac-fill-enc{height:100%;background:#B85A1A;}
+  /* ── ANOMALIES ── */
+  .anomalie-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:8px;margin-bottom:8px;}
+  .anomalie-item:last-child{margin-bottom:0;}
+  .anomalie-rep{background:#FEF4F2;border-left:3px solid #C0392B;}
+  .anomalie-ent{background:#FEF8ED;border-left:3px solid #E67E22;}
+  .an-icon{font-size:15px;flex-shrink:0;margin-top:1px;}
+  .an-title{font-size:12px;font-weight:700;color:#1A1A14;}
+  .an-detail{font-size:10px;color:#555;margin-top:2px;}
+  .an-date{font-size:9px;color:#999;margin-top:3px;}
+  /* ── PAGE 2 ── */
+  .page2{page-break-before:always;}
+  .page2-header{background:#1E3A12;color:white;padding:14px 24px;font-size:9px;letter-spacing:2px;text-transform:uppercase;opacity:1;}
+  .page2-header span{opacity:0.6;}
+  /* Détail journées */
+  .day-block{margin-bottom:14px;}
+  .day-head{font-size:10px;font-weight:700;color:#1E3A12;background:#EAF3E2;padding:4px 10px;border-radius:5px;margin-bottom:5px;}
+  table{width:100%;border-collapse:collapse;}
+  td{padding:5px 8px;border-bottom:1px solid #EFEDE8;font-size:10px;}
+  td:first-child{width:28%;font-weight:600;}
+  .badge{display:inline-block;padding:2px 6px;border-radius:5px;font-size:9px;font-weight:700;}
+  .bv{background:#EAF3E2;color:#1E3A12;}.be{background:#FBF0E6;color:#B85A1A;}
+  .meteo-row td{color:#9A9A8A!important;font-style:italic;font-size:9px!important;}
+  /* Détail tracteur page 2 */
+  .trac-session-block{background:#F8F8F5;border-radius:8px;padding:12px 14px;margin-bottom:10px;}
+  .trac-session-block:last-child{margin-bottom:0;}
+  .trac-session-head{font-size:11px;font-weight:700;color:#1A1A14;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #EBEBEB;}
+  .trac-detail-block{display:flex;flex-wrap:wrap;gap:12px;}
+  .trac-detail-col{flex:1;min-width:150px;}
+  .trac-detail-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;padding:2px 6px;border-radius:4px;display:inline-block;}
   .trac-det-ok{background:#EAF3E2;color:#1E3A12;}
   .trac-det-rest{background:#FBF0E6;color:#8B4A1A;}
   .trac-det-skip{background:#F5E8E5;color:#7A2A1A;}
-  .trac-pills{display:flex;flex-wrap:wrap;gap:4px;}
-  .parc-pill{display:inline-block;padding:2px 7px;border-radius:5px;font-size:9px;font-weight:600;}
+  .trac-pills{display:flex;flex-wrap:wrap;gap:3px;}
+  .parc-pill{display:inline-block;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:600;}
   .pill-ok{background:#EAF3E2;color:#1E3A12;}
   .pill-rest{background:#FBF0E6;color:#8B4A1A;}
   .pill-skip{background:#F5E8E5;color:#7A2A1A;text-decoration:line-through;opacity:0.8;}
-  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+  /* ── FOOTER ── */
+  .footer{border-top:1px solid #EFEDE8;padding:10px 24px;font-size:9px;color:#7A7A6A;display:flex;justify-content:space-between;}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.page2{page-break-before:always;}}
 </style></head><body>
 
 <div class="cover">
-  <div class="cover-date">Généré le ${new Date().toLocaleDateString('fr-FR')}</div>
-  <div class="cover-brand">🍇 Ma Vigne · Rapport mensuel</div>
-  <div class="cover-title">${moisNom}</div>
-  <div class="cover-sub">${getSaisonActive().nom} · Domaine</div>
+  <div class="cover-left">
+    <div class="cover-brand">Ma Vigne · Rapport mensuel</div>
+    <div class="cover-title">${moisNom}</div>
+    <div class="cover-sub">${getSaisonActive().nom} · ${domaine}</div>
+  </div>
+  <div class="cover-right">
+    <div class="cover-date">Généré le ${new Date().toLocaleDateString('fr-FR')}</div>
+    <div class="cover-domaine">Confidentiel — usage interne</div>
+  </div>
 </div>
 
 <div class="stats-row">
@@ -6143,52 +6198,56 @@ function exportPDFMois(){
   <div class="stat"><div class="stat-val">${heuresTotales?heuresTotales+'h':'—'}</div><div class="stat-lbl">Heures</div></div>
 </div>
 
-<!-- ── 1. MÉTÉO DU MOIS ── -->
+<!-- ── 1. MÉTÉO ── -->
 <div class="section">
   <div class="section-title">🌤 Météo du mois — ${moisNom}</div>
   ${meteoResume}
 </div>
 
-<!-- ── 2. AVANCEMENT DES TÂCHES ── -->
+<!-- ── 2. HEURES (juste après météo) ── -->
+<div class="section">
+  <div class="section-title">⏱ Heures de travail — ${moisNom}</div>
+  ${heuresSection}
+</div>
+
+<!-- ── 3. AVANCEMENT DES TÂCHES ── -->
 <div class="section">
   <div class="section-title">📊 Avancement des travaux — domaine</div>
   ${tachesAvancement}
 </div>
 
-<!-- ── 3. HEURES TOTALES ── -->
+<!-- ── 4. TRACTEUR RÉSUMÉ (sans détail parcelles) ── -->
 <div class="section">
-  <div class="section-title">⏱ Heures de travail — ${moisNom}</div>
-  ${heuresTotales?`<div class="heures-box"><div><div class="heures-val">${heuresTotales}</div><div class="heures-label">heures travaillées</div></div>${heuresDues?`<div style="width:1px;background:#E8D9B8;align-self:stretch;margin:0 4px"></div><div><div class="heures-val" style="color:#7A4F2E;opacity:0.6">${heuresDues}</div><div class="heures-label">heures dues</div></div>`:''}${etpVal?`<div style="width:1px;background:#E8D9B8;align-self:stretch;margin:0 4px"></div><div><div class="heures-val" style="color:${parseFloat(etpVal)>=1?'#3D6B27':'#B85A1A'}">${etpVal}</div><div class="heures-label" style="color:${parseFloat(etpVal)>=1?'#1E3A12':'#7A2A1A'}">ETP ce mois</div></div>`:''}}</div></div>`:'<p style="color:#7A7A6A;font-style:italic">Aucune saisie d\'heures pour ce mois.</p>'}
+  <div class="section-title">🚜 Activité tracteur — ${moisNom}</div>
+  ${tracResume}
 </div>
 
-<!-- ── 4. COMMENTAIRE ── -->
+<!-- ── 5. ANOMALIES TRACTEUR ── -->
 <div class="section">
-  <div class="section-title">💬 Commentaire mensuel</div>
-  ${commentaire?`<div class="commentaire-box">${commentaire}</div>`:'<p style="color:#7A7A6A;font-style:italic">Aucun commentaire saisi.</p>'}
+  <div class="section-title">⚠️ Anomalies tracteur</div>
+  ${anomaliesHTML}
 </div>
 
-<!-- ── 5. TRACTEUR ── -->
-${tracteurSection}
+<div class="footer">
+  <span>${domaine} · ${moisNom}</span>
+  <span>Page 1 / 2</span>
+</div>
 
-<!-- ── TRAVAUX PAR OUVRIER ── -->
-${Object.keys(ouvrierStats).length>0?`
-<div class="section">
-  <div class="section-title">👷 Travaux par ouvrier</div>
-  <div class="ouvrier-grid">
-    ${Object.entries(ouvrierStats).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`<div class="ouvrier-item"><div class="ouvrier-nom">${n}</div><div class="ouvrier-nb">${v}</div><div style="font-size:9px;color:#7A7A6A">travaux</div></div>`).join('')}
-  </div>
-</div>`:''}
+<!-- ══════════════════ PAGE 2 ══════════════════ -->
+<div class="page2">
 
-<!-- ── DÉTAIL PAR JOURNÉE ── -->
+<div class="page2-header">${domaine} · ${moisNom} <span>— Détails</span></div>
+
+<!-- ── DÉTAIL DES TRAVAUX PAR JOURNÉE ── -->
 <div class="section">
-  <div class="section-title">📅 Détail par journée</div>
+  <div class="section-title">📅 Détail des travaux par journée</div>
   ${datesTri.length===0?'<p style="color:#7A7A6A;font-style:italic">Aucun travail enregistré ce mois.</p>':
     datesTri.map(date=>{
       const items=grouped[date].sort((a,b)=>(a.meteo?1:-1));
       return `<div class="day-block">
         <div class="day-head">${fmtD(date)}</div>
         <table>${items.map(r=>{
-          if(r.meteo)return`<tr class="meteo-row"><td>🌤 Météo</td><td colspan="3">${r.emoji||''} ${r.temp}°C · ${r.desc} · Vent ${r.wind} km/h</td></tr>`;
+          if(r.meteo)return`<tr class="meteo-row"><td colspan="4">🌤 ${r.emoji||''} ${r.temp}°C · ${r.desc} · Vent ${r.wind} km/h</td></tr>`;
           const sb=r.statut==='Validé'?'bv':'be';
           const affQui=r.equipe?'Équipe 👥':(r.qui||'—');
           return`<tr><td>${TEMOJI[r.tache]||'📋'} ${r.tache}</td><td>${r.parcelle}</td><td>${affQui}</td><td><span class="badge ${sb}">${r.statut}</span></td></tr>`;
@@ -6198,20 +6257,27 @@ ${Object.keys(ouvrierStats).length>0?`
   }
 </div>
 
-<div class="footer">
-  <span>Ma Vigne · ${moisNom}</span>
-  <span>Confidentiel — usage interne</span>
+<!-- ── DÉTAIL TRACTEUR (parcelles session par session) ── -->
+<div class="section">
+  <div class="section-title">🚜 Détail tracteur — parcelles par session</div>
+  ${tracDetailHTML}
 </div>
 
+<div class="footer">
+  <span>${domaine} · ${moisNom}</span>
+  <span>Page 2 / 2</span>
+</div>
+
+</div>
 </body></html>`;
 
-  // Ouvrir dans une nouvelle fenêtre et lancer l'impression
   const win=window.open('','_blank','width=900,height=700');
   win.document.write(html);
   win.document.close();
   win.onload=()=>{win.focus();win.print();};
   showExportFeedback(`✅ Rapport ${moisNom} généré !`);
 }
+
 
 // ════ EXPORT PDF REGISTRE PHYTO ════
 function exportPDFPhyto(){
