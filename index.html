@@ -983,7 +983,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .hv2-card-or{background:linear-gradient(135deg,#FFF8E8,#FAF0CC);border:1px solid rgba(184,145,58,0.35);height:200px;display:flex;flex-direction:column;justify-content:space-between;}
 .hv2-card-or-vide{background:var(--or-pale);border:1px solid rgba(184,145,58,0.18);height:200px;display:flex;flex-direction:column;justify-content:space-between;}
 /* ── Pill priorité dépliable (Accueil) ── */
-.home-prio-pill-wrap{background:white;border-bottom:1px solid var(--gris-clair);}
+.home-prio-pill-wrap{}
 .home-prio-pill-row{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;}
 .home-prio-pill{background:var(--or-pale);border:1.5px solid rgba(184,145,58,0.35);border-radius:8px;padding:5px 11px;display:flex;align-items:center;gap:7px;flex:1;transition:background 0.15s;}
 .home-prio-pill:active{background:#f5eacf;}
@@ -2833,7 +2833,7 @@ function getHomeCardData(){
 }
 
 function renderHomeCard(){
-  const {pctGlobal, tacheLaMoinsAvancee, parcActives} = getHomeCardData();
+  const {pctGlobal, tacheLaPlusAvancee, parcActives} = getHomeCardData();
   const saison = getSaisonActive();
   const {totalReste} = calcHeures();
   const _picto=document.getElementById('home-stat-picto');
@@ -2848,9 +2848,9 @@ function renderHomeCard(){
       <div style="font-size:12px;font-weight:500;color:var(--texte-med)">Avancement saison</div>
       <div style="font-size:11px;color:var(--texte-doux);margin-top:2px">${parcActives.length} parcelles · 11,76 ha</div>`;
   } else {
-    const t=tacheLaMoinsAvancee;
+    const t=tacheLaPlusAvancee;
     _picto.textContent=t?(TEMOJI[t.nom]||'🌾'):'✅';
-    _chip.textContent=t?'À traiter':'Saison complète';
+    _chip.textContent=t?'En cours':'Saison complète';
     if(t){
       const colT=t.pct>=75?'var(--or)':'var(--orange)';
       _content.innerHTML=`<div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;line-height:1;color:var(--texte)">${t.pct}%</div>
@@ -2919,7 +2919,7 @@ function renderHome(){
       pillTxt.textContent=pm.length>60?pm.substring(0,60)+'…':pm;
       if(pillEl){pillEl.style.background='var(--or-pale)';pillEl.style.borderColor='rgba(184,145,58,0.35)';}
       if(pillTxt)pillTxt.style.color='var(--or)';
-      if(editBtn)editBtn.style.display='flex';
+      if(editBtn)editBtn.style.display='none';
       if(detailTxt)detailTxt.textContent=pm;
       if(pillWrap)pillWrap.classList.remove('home-prio-pill-vide');
     } else {
