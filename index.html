@@ -5163,7 +5163,7 @@ function deleteMembre(){
 
 // ════ OVERLAYS ════
 function openOv(id){document.getElementById(id).classList.add('open');}
-function closeOv(e,id){if(e.target===document.getElementById(id))document.getElementById(id).classList.remove('open');}
+function closeOv(e,id){if(!e||e.target===document.getElementById(id))document.getElementById(id).classList.remove('open');}
 function pickVal(el,hid,cls){el.parentElement.querySelectorAll('.pchk').forEach(x=>{x.classList.remove('sel','vert','acre','phyt');});el.classList.add('sel',cls);document.getElementById(hid).value=el.dataset.val;}
 
 // ════ MOT DE PASSE — SHA-256 + EmailJS ════
@@ -5453,7 +5453,7 @@ function updateNotifUI(perm){
   else{sub.textContent='Alertes gel, DAR, validations';}
 }
 function sendTestNotif(){
-  new Notification('🍇 Ma Vigne',{body:'Notifications activées ! Vous recevrez les alertes gel, DAR et priorités.',icon:'icon192.png'});
+  new Notification('🍇 Ma Vigne',{body:'Notifications activées ! Vous recevrez les alertes gel, DAR et priorités.',icon:'icon-192.png'});
 }
 function scheduleNotifCheck(){
   setInterval(checkNotifAlerts,3600000);
@@ -5468,18 +5468,18 @@ function checkNotifAlerts(){
     if(!prod||prod.dar===0)return;
     const darR=Math.max(0,prod.dar-Math.floor((today-new Date(t.date))/86400000));
     if(darR>0&&darR<=3){
-      new Notification('⚠️ DAR Ma Vigne',{body:`${t.produit} : ${darR}j avant récolte possible`,icon:'icon192.png'});
+      new Notification('⚠️ DAR Ma Vigne',{body:`${t.produit} : ${darR}j avant récolte possible`,icon:'icon-192.png'});
     }
   });
   // Alerte priorité du moment (si définie)
   if(priorityMessage&&priorityMessage.trim()){
-    new Notification('⚡ Priorité Ma Vigne',{body:priorityMessage,icon:'icon192.png'});
+    new Notification('⚡ Priorité Ma Vigne',{body:priorityMessage,icon:'icon-192.png'});
   }
 }
 // Appelé après savePriority() pour notifier si activé
 function notifyPriorityChange(){
   if(Notification.permission!=='granted'||!priorityMessage)return;
-  new Notification('⚡ Nouvelle priorité',{body:priorityMessage,icon:'icon192.png'});
+  new Notification('⚡ Nouvelle priorité',{body:priorityMessage,icon:'icon-192.png'});
 }
 
 // ════ HISTORIQUE MULTI-SAISONS ════
@@ -6892,44 +6892,23 @@ function clearAllJFiltres(){
   renderParcelleFilterChips();renderJournalList();
 }
 
-window.addEventListener('load', function(){
-  // Initialiser le thème dès le chargement
-  if(typeof initTheme==='function') initTheme();
-
-  var todayStr = new Date().toISOString().split('T')[0];
-  var sd = document.getElementById('s-date'); if(sd) sd.value = todayStr;
-  var pd = document.getElementById('p-date'); if(pd) pd.value = todayStr;
-  var pm = document.getElementById('pdf-mois'); if(pm) pm.value = todayStr.slice(0,7);
-
-  // Exposer les fonctions render sur window pour le module Firebase
-  window.renderHome      = renderHome;
-  window.renderParcelles = renderParcelles;
-  window.computePStats   = computePStats;
-  window.renderJournalList = renderJournalList;
-  // ════ EXPORT PDF ENTRETIEN ════
+// ════ EXPORT PDF ENTRETIEN ════
 function ouvrirExportEntretien(){
-  // Remplir années disponibles
   var annees=new Set();
   ENTRETIENS.forEach(function(e){if(e.date)annees.add(e.date.slice(0,4));});
   Object.values(REPARATEUR).forEach(function(r){if(r&&r.depuis)annees.add(r.depuis.slice(0,4));});
-  // Ajouter aussi historique réparateur depuis REPARATEUR_HISTORIQUE si disponible
   var anArr=[...annees].sort(function(a,b){return b-a;});
   if(!anArr.length)anArr=[new Date().getFullYear().toString()];
   var anneeEl=document.getElementById('exp-ent-annee');
-  if(anneeEl){
-    anneeEl.innerHTML=anArr.map(function(a){return '<option value="'+a+'">'+a+'</option>';}).join('');
-  }
-  // Rendre la liste des tracteurs avec checkboxes
+  if(anneeEl){anneeEl.innerHTML=anArr.map(function(a){return '<option value="'+a+'">'+a+'</option>';}).join('');}
   var listEl=document.getElementById('exp-ent-trac-list');
   if(listEl){
     listEl.innerHTML=TRACTEURS_LIST.map(function(t){
       var col=couleurTracType(t.type);
       return '<label style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--gris-clair);cursor:pointer;min-height:44px">'
         +'<input type="checkbox" class="exp-ent-trac-cb" value="'+t.id+'" onchange="_updateExportSummary()" checked style="width:18px;height:18px;accent-color:'+col+';cursor:pointer">'
-        +'<div>'
-          +'<div style="font-weight:600;font-size:13px">'+t.nom+(t.traitementOnly?' <span style="font-size:9px;background:var(--orange-pale);color:var(--orange);border-radius:4px;padding:1px 5px">Traitement</span>':'')+'</div>'
-          +'<div style="font-size:11px;color:'+col+'">🔩 '+(t.modele||'—')+' · '+t.type+'</div>'
-        +'</div>'
+        +'<div><div style="font-weight:600;font-size:13px">'+t.nom+(t.traitementOnly?' <span style="font-size:9px;background:var(--orange-pale);color:var(--orange);border-radius:4px;padding:1px 5px">Traitement</span>':'')+'</div>'
+        +'<div style="font-size:11px;color:'+col+'">🔩 '+(t.modele||'—')+' · '+t.type+'</div></div>'
       +'</label>';
     }).join('');
   }
@@ -6951,20 +6930,8 @@ function lancerExportEntretienPDF(){
   document.querySelectorAll('.exp-ent-trac-cb:checked').forEach(function(cb){selIds.push(cb.value);});
   if(!selIds.length){showToast('Sélectionnez au moins un tracteur','#C0392B');return;}
   var tracteursSelectionnes=TRACTEURS_LIST.filter(function(t){return selIds.includes(t.id);});
-  var fmtD=function(iso){
-    if(!iso)return'—';
-    var p=iso.split('-');
-    var mois=['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct','nov','déc'];
-    return parseInt(p[2])+' '+mois[parseInt(p[1])-1]+' '+p[0];
-  };
-  var champs=[
-    {key:'plein',label:'Plein fait',icon:'⛽'},
-    {key:'huile',label:'Niveau huile',icon:'🛢️'},
-    {key:'filtre_air',label:'Filtre à air',icon:'💨'},
-    {key:'radiateur',label:'Radiateur',icon:'🌀'},
-    {key:'pression_pneu',label:'Pression pneus',icon:'🔵'},
-    {key:'lavage',label:'Lavage',icon:'🪣'},
-  ];
+  var fmtD=function(iso){if(!iso)return'—';var p=iso.split('-');var mois=['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct','nov','déc'];return parseInt(p[2])+' '+mois[parseInt(p[1])-1]+' '+p[0];};
+  var champs=[{key:'plein',label:'Plein fait',icon:'⛽'},{key:'huile',label:'Niveau huile',icon:'🛢️'},{key:'filtre_air',label:'Filtre à air',icon:'💨'},{key:'radiateur',label:'Radiateur',icon:'🌀'},{key:'pression_pneu',label:'Pression pneus',icon:'🔵'},{key:'lavage',label:'Lavage',icon:'🪣'}];
   var sectionsHTML=tracteursSelectionnes.map(function(t){
     var fiches=ENTRETIENS.filter(function(e){return e.tracteurId===t.id&&e.date&&e.date.startsWith(annee);}).sort(function(a,b){return b.date.localeCompare(a.date);});
     var rep=REPARATEUR[t.id];
@@ -6976,7 +6943,6 @@ function lancerExportEntretienPDF(){
     var fichesHTML=!fiches.length?'<p class="empty">Aucune fiche pour '+annee+'.</p>':fiches.map(function(f){
       var nb=champs.filter(function(c){return f[c.key];}).length;
       var checkHtml=champs.map(function(c){return '<div class="check-item '+(f[c.key]?'ok':'ko')+'">'+c.icon+' '+c.label+' <span>'+(f[c.key]?'✓':'✗')+'</span></div>';}).join('');
-      // Badge tracteur si override
       var actDef=ACTIVITES.find(function(a){return a.nom===f.activite;});
       var defTracNom=actDef?((TRACTEURS_LIST.find(function(x){return x.id===actDef.tracteurDefautId;}))||{}).nom||'—':'—';
       var tracNom=((TRACTEURS_LIST.find(function(x){return x.id===f.tracteurId;}))||{}).nom||'';
@@ -6984,8 +6950,7 @@ function lancerExportEntretienPDF(){
       return '<div class="fiche-bloc'+(f.anomalie?' has-anomalie':'')+'"><div class="fiche-header"><div><div class="fiche-date">📅 '+fmtD(f.date)+'</div><div class="fiche-meta">👤 '+f.conducteur+(f.activite?' · 🚜 '+f.activite:'')+(tracNom&&!f.tracteurOverride?' · '+tracNom:'')+'</div></div><div class="fiche-score '+(nb===6?'score-ok':'score-warn')+'">'+nb+'/6</div></div><div class="check-grid">'+checkHtml+'</div>'+(f.anomalie?'<div class="anomalie">⚠️ Anomalie : '+f.anomalie+'</div>':'')+overrideInfo+'</div>';
     }).join('');
     var repsHTML=!repsAll.length?'<p class="empty">Aucun passage réparateur pour '+annee+'.</p>':repsAll.map(function(r){
-      var retour=r.retour_reel||null;
-      var enCours=!retour;
+      var retour=r.retour_reel||null;var enCours=!retour;
       var nbJ=retour?Math.ceil((new Date(retour)-new Date(r.depuis))/86400000):Math.ceil((new Date()-new Date(r.depuis))/86400000);
       var depasse=r.prevu_retour&&!retour&&new Date()>new Date(r.prevu_retour);
       return '<div class="rep-bloc'+(enCours?' rep-en-cours':'')+(depasse?' rep-depasse':'')+'"><div class="rep-header"><div><div class="rep-motif">'+r.motif+'</div><div class="rep-dates">Entrée : <strong>'+fmtD(r.depuis)+'</strong>'+(r.prevu_retour?' · Retour prévu : <strong>'+fmtD(r.prevu_retour)+'</strong>':'')+(retour?' · Retour réel : <strong>'+fmtD(retour)+'</strong>':'')+'</div></div><div class="rep-badge '+(enCours?'badge-cours':'badge-ok')+'">'+( enCours?(depasse?'⚠️ Dépassé':'🔧 En cours'):'✓ '+nbJ+'j')+'</div></div></div>';
@@ -7003,10 +6968,24 @@ function lancerExportEntretienPDF(){
   showToast('PDF ouvert ✓','#3D6B27');
 }
 
-window.renderTracteur  = renderTracteur;
-  window.renderPhyto     = renderPhyto;
-  window.renderReglages  = renderReglages;
-  window.initLogin       = initLogin;
+window.addEventListener('load', function(){
+  // Initialiser le thème dès le chargement
+  if(typeof initTheme==='function') initTheme();
+
+  var todayStr = new Date().toISOString().split('T')[0];
+  var sd = document.getElementById('s-date'); if(sd) sd.value = todayStr;
+  var pd = document.getElementById('p-date'); if(pd) pd.value = todayStr;
+  var pm = document.getElementById('pdf-mois'); if(pm) pm.value = todayStr.slice(0,7);
+
+  // Exposer les fonctions render sur window pour le module Firebase
+  window.renderHome        = renderHome;
+  window.renderParcelles   = renderParcelles;
+  window.computePStats     = computePStats;
+  window.renderJournalList = renderJournalList;
+  window.renderTracteur    = renderTracteur;
+  window.renderPhyto       = renderPhyto;
+  window.renderReglages    = renderReglages;
+  window.initLogin         = initLogin;
 
   // Initialisation : Firebase en priorité, localStorage en fallback
   // try/catch global pour éviter l'écran noir iOS en cas d'erreur silencieuse
