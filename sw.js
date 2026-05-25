@@ -1,5 +1,5 @@
 // MA VIGNE — Service Worker v1.91
-// v1.91 — Header Tracteur vert · Pill priorité collée · Tâche plus avancée card Accueil · NomDomaine configurable Réglages
+// v1.91 — Création activité depuis Réglages (admin) · Champ custom par activité (ex: Tarière → Nombre de trous) · Overlay saisie avant validation parcelle · Format parcellesFaites mixte string|{nom,data} · Suppression activité · renderActTracList redesign
 // v1.90 — PDF mensuel : nouvelle structure 2 pages · Heures sous météo · Avancement · Tracteur résumé · Anomalies tracteur · Saut de page · Détails page 2
 // v1.89 — Mise à jour auto sans unregister : controllerchange + _swReload() + rechargement différé si overlay ouvert
 // v1.88 — Fix critique : renderTracteur — isReadOnly (var locale applyRoles) remplacé par !isTractoriste()
@@ -31,7 +31,7 @@ self.addEventListener('install', event => {
   );
 });
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v1.91');
+  console.log('[SW] Activate v1.90');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))

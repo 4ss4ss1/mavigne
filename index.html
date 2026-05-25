@@ -174,12 +174,6 @@ function applyFbData(key, value) {
       window.priorityMessage = value.priorityMessage;
       if(window._syncLocalVars) window._syncLocalVars();
     }
-    if(value.nomDomaine !== undefined) {
-      if(!window.CONFIG) window.CONFIG = {};
-      window.CONFIG.nomDomaine = value.nomDomaine;
-      var titleEl = document.getElementById('hv2-domaine-title');
-      if(titleEl) titleEl.textContent = value.nomDomaine || 'Ma Vigne';
-    }
   } else if(key === 'membres') {
     // ⚠️ Protection du champ mdp :
     // Si Firebase renvoie des membres sans mdp (ex : sauvegarde ancienne),
@@ -718,11 +712,11 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .trac-sband .sbi{padding:14px 0;border-right:1px solid var(--gris-clair);text-align:center;}
 .trac-sband .sbi:last-child{border-right:none;}
 /* ── Onglets tracteur (Sessions / Entretiens) ── */
-.trac-ong-btn{flex:1;padding:10px 0 12px;border:none;background:rgba(0,0,0,0.15);cursor:pointer;font-family:'Outfit',sans-serif;font-size:14px;font-weight:400;color:rgba(255,255,255,0.55);border-bottom:2px solid transparent;transition:all 0.15s;min-height:44px;}
-.trac-ong-btn.trac-ong-active{font-weight:700;color:#fff;border-bottom-color:#fff;background:rgba(0,0,0,0.05);}
+.trac-ong-btn{flex:1;padding:10px 0 12px;border:none;background:none;cursor:pointer;font-family:'Outfit',sans-serif;font-size:14px;font-weight:400;color:rgba(255,255,255,0.45);border-bottom:2px solid transparent;transition:all 0.15s;min-height:44px;}
+.trac-ong-btn.trac-ong-active{font-weight:700;color:#fff;border-bottom-color:#fff;}
 /* ── Pills parc tracteurs dans en-tête ── */
-.trac-parc-pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.15);border-radius:20px;padding:5px 12px 5px 6px;border:1px solid rgba(255,255,255,0.2);font-family:'Outfit',sans-serif;}
-.trac-parc-pill.en-rep{background:rgba(160,41,30,0.3);border-color:rgba(160,41,30,0.5);}
+.trac-parc-pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.1);border-radius:20px;padding:5px 12px 5px 6px;border:1px solid rgba(255,255,255,0.12);font-family:'Outfit',sans-serif;}
+.trac-parc-pill.en-rep{background:rgba(160,41,30,0.25);border-color:rgba(160,41,30,0.4);}
 .trac-parc-pill-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .trac-parc-pill-nom{font-size:12px;color:#fff;font-weight:600;}
 .trac-parc-pill-mod{font-size:11px;color:rgba(255,255,255,0.5);}
@@ -989,7 +983,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .hv2-card-or{background:linear-gradient(135deg,#FFF8E8,#FAF0CC);border:1px solid rgba(184,145,58,0.35);height:200px;display:flex;flex-direction:column;justify-content:space-between;}
 .hv2-card-or-vide{background:var(--or-pale);border:1px solid rgba(184,145,58,0.18);height:200px;display:flex;flex-direction:column;justify-content:space-between;}
 /* ── Pill priorité dépliable (Accueil) ── */
-.home-prio-pill-wrap{background:var(--vert-pale);border-top:1px solid rgba(61,107,39,0.15);}
+.home-prio-pill-wrap{background:white;border-bottom:1px solid var(--gris-clair);}
 .home-prio-pill-row{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;}
 .home-prio-pill{background:var(--or-pale);border:1.5px solid rgba(184,145,58,0.35);border-radius:8px;padding:5px 11px;display:flex;align-items:center;gap:7px;flex:1;transition:background 0.15s;}
 .home-prio-pill:active{background:#f5eacf;}
@@ -1044,7 +1038,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .role-chk.on{background:var(--vert);border-color:var(--vert);}
 
 /* ══ ACCUEIL V2 ══ */
-.hv2-header{background:var(--vert);padding:36px 22px 20px;position:relative;overflow:hidden;}
+.hv2-header{background:var(--vert);padding:50px 22px 26px;position:relative;overflow:hidden;}
 .hv2-header::before{content:'';position:absolute;top:-50px;right:-30px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,0.05);}
 .hv2-header::after{content:'';position:absolute;bottom:-25px;left:-25px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,0.04);}
 .hv2-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1;}
@@ -1429,7 +1423,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     <div class="hv2-top">
       <div>
         <div class="hv2-brand">Domaine</div>
-        <div class="hv2-title" id="hv2-domaine-title">Ma Vigne</div>
+        <div class="hv2-title">Ma Vigne</div>
       </div>
       <div class="hv2-top-right">
         <div class="hv2-avatar-wrap" onclick="logout()">
@@ -1451,9 +1445,9 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     </div>
   </div>
 
-  <!-- GRANDE STAT CARD + PILL PRIORITÉ collée -->
-  <div class="hv2-card-solo" style="margin-top:12px">
-    <div class="hv2-card hv2-card-vert hv2-card-fixed" id="home-stat-card" onclick="toggleHomeCard()" style="width:100%;border-radius:18px 18px 0 0">
+  <!-- GRANDE STAT CARD — pleine largeur, directement sous le header -->
+  <div class="hv2-card-solo" style="margin-top:16px">
+    <div class="hv2-card hv2-card-vert hv2-card-fixed" id="home-stat-card" onclick="toggleHomeCard()" style="width:100%">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div class="hv2-card-picto" id="home-stat-picto" style="margin-bottom:0">🌿</div>
         <div class="hv2-tap-hint">👆 changer</div>
@@ -1467,19 +1461,19 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
         </div>
       </div>
     </div>
-    <!-- PILL PRIORITÉ — collée en bas de la card -->
-    <div class="home-prio-pill-wrap" id="home-prio-pill-wrap" style="border-radius:0 0 18px 18px;overflow:hidden">
-      <div class="home-prio-pill-row" onclick="togglePrioPill()">
-        <div class="home-prio-pill" id="home-prio-pill">
-          <span style="font-size:14px">⚡</span>
-          <span class="home-prio-pill-txt" id="home-prio-pill-txt">Aucune priorité définie</span>
-          <span class="home-prio-pill-chevron" id="home-prio-chevron">▼</span>
-        </div>
-        <div class="home-prio-pill-edit" id="home-prio-edit-btn" onclick="event.stopPropagation();openPriorityEdit()" style="display:none">✏️</div>
+  </div>
+  <!-- PILL PRIORITÉ — dépliable -->
+  <div class="home-prio-pill-wrap" id="home-prio-pill-wrap">
+    <div class="home-prio-pill-row" onclick="togglePrioPill()">
+      <div class="home-prio-pill" id="home-prio-pill">
+        <span style="font-size:14px">⚡</span>
+        <span class="home-prio-pill-txt" id="home-prio-pill-txt">Aucune priorité définie</span>
+        <span class="home-prio-pill-chevron" id="home-prio-chevron">▼</span>
       </div>
-      <div class="home-prio-detail" id="home-prio-detail">
-        <div class="home-prio-detail-inner" id="home-prio-detail-txt"></div>
-      </div>
+      <div class="home-prio-pill-edit" id="home-prio-edit-btn" onclick="event.stopPropagation();openPriorityEdit()" style="display:none">✏️</div>
+    </div>
+    <div class="home-prio-detail" id="home-prio-detail">
+      <div class="home-prio-detail-inner" id="home-prio-detail-txt"></div>
     </div>
   </div>
 
@@ -1624,18 +1618,16 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 
 <!-- ══════ PAGE TRACTEUR ══════ -->
 <div class="page" id="page-tracteur">
-  <!-- En-tête vert — même style que les autres pages -->
-  <div class="ph verde" style="padding-bottom:0">
-    <div class="ph-top" style="padding-bottom:10px">
-      <div><div class="ph-title">Tracteur</div></div>
-      <div id="up-ava-trac" style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:#fff;flex-shrink:0;cursor:pointer" onclick="logout()">N</div>
-    </div>
-    <!-- Pills parc tracteurs -->
-    <div id="trac-parc-pills" style="display:flex;gap:8px;flex-wrap:wrap;padding:0 16px 12px"></div>
-    <!-- Onglets Sessions / Entretiens -->
-    <div style="display:flex;border-top:1px solid rgba(255,255,255,0.15)">
-      <button id="trac-ong-sessions" onclick="switchTracOnglet('sessions')" class="trac-ong-btn trac-ong-active" style="min-height:44px">Sessions</button>
-      <button id="trac-ong-entretiens" onclick="switchTracOnglet('entretiens')" class="trac-ong-btn" style="min-height:44px">Entretiens</button>
+  <!-- En-tête sombre : parc tracteurs (pills) + onglets Sessions/Entretiens -->
+  <div style="background:var(--acier)">
+    <div style="padding:14px 16px 0">
+      <!-- Pills parc tracteurs -->
+      <div id="trac-parc-pills" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"></div>
+      <!-- Onglets -->
+      <div style="display:flex">
+        <button id="trac-ong-sessions" onclick="switchTracOnglet('sessions')" class="trac-ong-btn trac-ong-active" style="min-height:44px">Sessions</button>
+        <button id="trac-ong-entretiens" onclick="switchTracOnglet('entretiens')" class="trac-ong-btn" style="min-height:44px">Entretiens</button>
+      </div>
     </div>
   </div>
 
@@ -1713,16 +1705,6 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
   <div style="height:14px"></div>
   <div class="dom-badge"><div class="db-logo">🍇 Ma Vigne</div><div class="db-sub" id="dom-badge-sub">Domaine · 11,76 ha actifs</div></div>
 
-  <div class="set-sec" id="set-sec-domaine">
-    <div class="set-title">Domaine</div>
-    <div style="margin:0 16px">
-      <div class="set-row" style="border-radius:16px;gap:12px">
-        <div class="sr-l"><div class="sr-ico" style="background:var(--vert-pale)">🍇</div><div><div class="sr-lbl">Nom du domaine</div><div class="sr-sub">Affiché dans l'app et les exports PDF</div></div></div>
-        <input type="text" id="input-nom-domaine" class="fi" placeholder="Ex : Marchand-Grillot" style="max-width:150px;margin:0;font-size:13px;text-align:right;border-radius:10px;padding:6px 10px" oninput="saveNomDomaine(this.value)">
-      </div>
-    </div>
-  </div>
-
   <div class="set-sec">
     <div class="set-title">Mon compte</div>
     <div style="margin:0 16px">
@@ -1776,8 +1758,11 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
   </div>
 
   <div class="set-sec" id="set-sec-act-trac">
-    <div class="set-title">🔗 Association activité ↔ tracteur</div>
-    <div style="font-size:12px;color:var(--texte-doux);padding:0 16px 10px">Tracteur par défaut pour chaque activité. Modifiable à chaque session.</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px 0">
+      <div class="set-title" style="padding:0;margin:0">🔗 Activités tracteur</div>
+      <button onclick="openOvNouvelleActivite()" style="background:var(--vert);color:#fff;border:none;border-radius:8px;padding:6px 13px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;min-height:36px">＋ Ajouter</button>
+    </div>
+    <div style="font-size:12px;color:var(--texte-doux);padding:4px 16px 10px">Tracteur par défaut + champ de saisie optionnel lors de la validation.</div>
     <div id="act-trac-list" style="background:white;border-radius:16px;padding:0 16px;margin:0 16px;box-shadow:var(--shadow-sm)"></div>
   </div>
 
@@ -1881,7 +1866,39 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 
 <div class="overlay" id="ovSession" onclick="closeOv(event,'ovSession')"><div class="modal" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">🚜 Nouvelle session</div><div class="modal-sub">Avancement calculé depuis les parcelles</div></div><div class="modal-body"><div class="fl">Activité</div><select class="fsel ac" id="s-act" onchange="onSessionActChange()"></select><div class="fl">Date</div><input type="date" class="fi ac" id="s-date"><div class="fl">Conducteur</div><div class="ppicker" id="s-cond-pick"></div><div class="fl" style="margin-top:14px">Tracteur utilisé <span id="s-trac-override-lbl" style="font-weight:400;color:var(--orange);font-size:11px;display:none"></span></div><div id="s-trac-pick" style="margin-bottom:4px"></div><div id="s-trac-rep-alert" style="display:none;background:var(--rouge-pale);border:1px solid var(--rouge);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--rouge);margin-bottom:14px"></div><input type="hidden" id="s-trac-id"><input type="hidden" id="s-trac-override" value="0"><div class="fl">Note</div><input type="text" class="fi ac" id="s-note" placeholder="Conditions, zone…"><button class="mbtn acre" onclick="saveSession()">Créer la session</button></div></div></div>
 
-<div class="overlay" id="ovActivite" onclick="closeOv(event,'ovActivite')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">⚙️ Nouvelle activité tracteur</div></div><div class="modal-body"><div class="fl">Nom</div><input type="text" class="fi ac" id="new-act" placeholder="Ex : Oreille de cochon…"><div class="fl">Icône</div><div class="ppicker" id="emoji-pick"><div class="pchk sel acre" data-val="🚜" onclick="pickEmoji(this)">🚜</div><div class="pchk" data-val="✂️" onclick="pickEmoji(this)">✂️</div><div class="pchk" data-val="🌱" onclick="pickEmoji(this)">🌱</div><div class="pchk" data-val="💧" onclick="pickEmoji(this)">💧</div><div class="pchk" data-val="🔧" onclick="pickEmoji(this)">🔧</div><div class="pchk" data-val="🌾" onclick="pickEmoji(this)">🌾</div></div><button class="mbtn acre" onclick="saveActivite()">Créer</button></div></div></div>
+<div class="overlay" id="ovActivite" onclick="closeOv(event,'ovActivite')"><div class="modal" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">⚙️ Nouvelle activité tracteur</div></div><div class="modal-body">
+  <div class="fl">Emoji + Nom</div>
+  <div style="display:flex;gap:10px;margin-bottom:14px">
+    <button id="new-act-emoji-btn" onclick="_toggleActEmojiPick('new')" style="width:52px;height:52px;border-radius:12px;background:var(--gris-clair);border:1.5px solid var(--gris);font-size:22px;cursor:pointer;flex-shrink:0">🚜</button>
+    <input type="text" class="fi ac" id="new-act" placeholder="Ex : Tarière, Oreille de cochon…" style="flex:1;margin:0">
+  </div>
+  <div id="new-act-emoji-pick" style="display:none;flex-wrap:wrap;gap:6px;margin-bottom:14px;background:var(--gris-clair);border-radius:12px;padding:10px" class="ppicker"></div>
+  <div class="fl">Tracteur par défaut</div>
+  <div class="ppicker" id="new-act-trac-pick" style="margin-bottom:14px"></div>
+  <input type="hidden" id="new-act-trac">
+  <div style="border:1.5px solid var(--gris);border-radius:14px;padding:14px;transition:all 0.2s" id="new-act-champ-section">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--texte)">📋 Champ de saisie lors de la validation</div>
+        <div style="font-size:11px;color:var(--texte-doux);margin-top:2px">Ex : Nombre de trous, Dose, Profondeur…</div>
+      </div>
+      <button onclick="_toggleActChamp('new')" id="new-act-champ-toggle" style="width:44px;height:26px;border-radius:13px;border:none;cursor:pointer;background:rgba(0,0,0,0.1);position:relative;flex-shrink:0;transition:background 0.2s">
+        <div id="new-act-champ-knob" style="position:absolute;top:3px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform 0.2s"></div>
+      </button>
+    </div>
+    <div id="new-act-champ-fields" style="display:none;margin-top:12px">
+      <input type="text" class="fi ac" id="new-act-champ-label" placeholder="Libellé (ex: Nombre de trous)" style="margin-bottom:8px">
+      <div style="display:flex;gap:8px">
+        <button class="pchk sel acre" id="new-act-champ-type-nb" onclick="_setActChampType('new','nombre')" style="flex:1;min-height:40px">🔢 Nombre</button>
+        <button class="pchk" id="new-act-champ-type-txt" onclick="_setActChampType('new','texte')" style="flex:1;min-height:40px">✏️ Texte</button>
+      </div>
+      <div style="font-size:11px;color:var(--texte-doux);font-style:italic;margin-top:6px">Sera demandé parcelle par parcelle lors de la validation ✓</div>
+    </div>
+  </div>
+  <input type="hidden" id="new-act-champ-actif" value="0">
+  <input type="hidden" id="new-act-champ-type-val" value="nombre">
+  <button class="mbtn acre" style="margin-top:14px" onclick="saveActivite()">Créer l'activité</button>
+</div></div></div>
 
 <div class="overlay" id="ovConducteur" onclick="closeOv(event,'ovConducteur')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">👤 Nouveau conducteur</div></div><div class="modal-body"><div class="fl">Prénom</div><input type="text" class="fi ac" id="new-cond" placeholder="Prénom"><div class="fl">Statut</div><div class="ppicker"><div class="pchk sel acre" data-val="Formé" onclick="pickVal(this,'nc-st','acre')">✅ Formé</div><div class="pchk" data-val="En formation" onclick="pickVal(this,'nc-st','acre')">🎓 En formation</div></div><input type="hidden" id="nc-st" value="Formé"><button class="mbtn acre" onclick="saveConducteur()">Ajouter</button></div></div></div>
 
@@ -2122,13 +2139,13 @@ const PARCELLES=[{"nom":"Ruchottes","surface":0.077,"statut":"Active","lat":"47.
 let JOURNAL=[{"id":"0b550083","date":"2026-05-15","parcelle":"Songe du Haut","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"aae22292","date":"2026-05-15","parcelle":"Songe du Bas","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"7f0cd410","date":"2026-05-15","parcelle":"Sylvie","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"8bb78013","date":"2026-05-15","parcelle":"Créot","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"db024ff1","date":"2026-05-15","parcelle":"Champerrier","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"8145ac12","date":"2026-05-15","parcelle":"Au Velle","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"0ddb359c","date":"2026-05-15","parcelle":"Combe du Bas","tache":"Pioche1","qui":"Nico","statut":"Validé","equipe":false},{"id":"21deacbc","date":"2026-05-15","parcelle":"Combe du Bas","tache":"Ebourgeonnage1","qui":"Nico","statut":"Validé","equipe":false},{"id":"e8f3ceda","date":"2026-05-05","parcelle":"Bras","tache":"Plantation","qui":"Nico","statut":"Validé","equipe":false},{"id":"a6cfb7e1","date":"2026-05-05","parcelle":"Batailles","tache":"Plantation","qui":"Nico","statut":"Validé","equipe":false},{"id":"22780352","date":"2026-04-28","parcelle":"Songe du Haut","tache":"Plantation","qui":"Victor","statut":"Validé","equipe":false},{"id":"18eb523b","date":"2026-04-28","parcelle":"20 Rangs","tache":"Plantation","qui":"Victor","statut":"Validé","equipe":false},{"id":"e75e51a2","date":"2026-04-13","parcelle":"Herbiottes","tache":"Pliage","qui":"Victor","statut":"Validé","equipe":true},{"id":"72da567b","date":"2026-04-13","parcelle":"Champerrier","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":true},{"id":"c5033ff8","date":"2026-04-07","parcelle":"Billard Petite","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":false},{"id":"8313d752","date":"2026-04-02","parcelle":"Songe du Bas","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":true},{"id":"528f116a","date":"2026-04-02","parcelle":"Champs","tache":"Reparation","qui":"Victor","statut":"Validé","equipe":true},{"id":"be88676d","date":"2026-04-01","parcelle":"Entre 2 Routes","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":false},{"id":"6fd2d9a1","date":"2026-03-24","parcelle":"Ruchottes","tache":"Pliage","qui":"Nico","statut":"Validé","equipe":false},{"id":"04bcb496","date":"2026-03-14","parcelle":"Crais","tache":"Brulage","qui":"Nico","statut":"Validé","equipe":false},{"id":"39151ef7","date":"2026-03-11","parcelle":"Crotteaux","tache":"Tirage","qui":"Dessi","statut":"Validé","equipe":false},{"id":"a4dd94a4","date":"2026-03-11","parcelle":"Cognées","tache":"Brulage","qui":"Dessi","statut":"Validé","equipe":false},{"id":"7a645c11","date":"2026-03-10","parcelle":"Jouise","tache":"Brulage","qui":"Nico","statut":"Validé","equipe":false},{"id":"02a4a184","date":"2026-02-17","parcelle":"Fourneau Jeune","tache":"Taille","qui":"Dessi","statut":"Validé","equipe":false},{"id":"b1a3699d","date":"2026-02-10","parcelle":"Chaziere","tache":"Brulage","qui":"Dessi","statut":"Validé","equipe":true},{"id":"576c1734","date":"2026-01-31","parcelle":"Cognées","tache":"Taille","qui":"Equipe","statut":"Validé","equipe":true},{"id":"ae77bb18","date":"2026-01-29","parcelle":"Bollery Blanc","tache":"Taille","qui":"Nico","statut":"Validé","equipe":false},{"id":"35d29f03","date":"2026-01-28","parcelle":"Songe du Haut","tache":"Taille","qui":"Nico","statut":"Validé","equipe":false},{"id":"180728da","date":"2026-01-27","parcelle":"Charreux","tache":"Taille","qui":null,"statut":"En cours","equipe":false},{"id":"9f43cea3","date":"2026-01-26","parcelle":"Billard Petite","tache":"Taille","qui":null,"statut":"En cours","equipe":false}];
 
 let ACTIVITES=[
-  {nom:'Griffage',   emoji:'🚜',tracteurDefautId:'trac1'},
-  {nom:'Intercep',   emoji:'✂️',tracteurDefautId:'trac2'},
-  {nom:'Rognage',    emoji:'✂️',tracteurDefautId:'trac2'},
-  {nom:'Buttage',    emoji:'🌱',tracteurDefautId:'trac1'},
-  {nom:'Débuttage',  emoji:'🌱',tracteurDefautId:'trac1'},
-  {nom:'Minibuttage',emoji:'🌱',tracteurDefautId:'trac1'},
-  {nom:'Traitement', emoji:'🌿',tracteurDefautId:'trac3'},
+  {nom:'Griffage',   emoji:'🚜',tracteurDefautId:'trac1',champCustom:null},
+  {nom:'Intercep',   emoji:'✂️',tracteurDefautId:'trac2',champCustom:null},
+  {nom:'Rognage',    emoji:'✂️',tracteurDefautId:'trac2',champCustom:null},
+  {nom:'Buttage',    emoji:'🌱',tracteurDefautId:'trac1',champCustom:null},
+  {nom:'Débuttage',  emoji:'🌱',tracteurDefautId:'trac1',champCustom:null},
+  {nom:'Minibuttage',emoji:'🌱',tracteurDefautId:'trac1',champCustom:null},
+  {nom:'Traitement', emoji:'🌿',tracteurDefautId:'trac3',champCustom:null},
 ];
 let CONDUCTEURS=[{nom:'Nico',statut:'Formé'},{nom:'Etienne',statut:'Formé'}];
 // ── Parc tracteurs (persisté Firebase + localStorage) ──
@@ -2294,9 +2311,6 @@ function loadData() {
     if (d.TACHES)       { TACHES = d.TACHES; window.TACHES = TACHES; }
     if (d.HISTORIQUE)   { HISTORIQUE = d.HISTORIQUE; window.HISTORIQUE = HISTORIQUE; }
     if (d.priorityMessage !== undefined) { priorityMessage = d.priorityMessage; window.priorityMessage = priorityMessage; }
-    // Charger nomDomaine (clé dédiée)
-    var nd = localStorage.getItem('mavigne_nom_domaine');
-    if(nd) { if(!window.CONFIG)window.CONFIG={}; window.CONFIG.nomDomaine=nd; }
     return true;
   } catch(e) { return false; }
 }
@@ -2748,7 +2762,7 @@ function getHomeCardData(){
 }
 
 function renderHomeCard(){
-  const {pctGlobal, tacheLaPlusAvancee, parcActives} = getHomeCardData();
+  const {pctGlobal, tacheLaMoinsAvancee, parcActives} = getHomeCardData();
   const saison = getSaisonActive();
   const {totalReste} = calcHeures();
   const _picto=document.getElementById('home-stat-picto');
@@ -2763,9 +2777,9 @@ function renderHomeCard(){
       <div style="font-size:12px;font-weight:500;color:var(--texte-med)">Avancement saison</div>
       <div style="font-size:11px;color:var(--texte-doux);margin-top:2px">${parcActives.length} parcelles · 11,76 ha</div>`;
   } else {
-    const t=tacheLaPlusAvancee;
+    const t=tacheLaMoinsAvancee;
     _picto.textContent=t?(TEMOJI[t.nom]||'🌾'):'✅';
-    _chip.textContent=t?'La plus avancée':'Saison complète';
+    _chip.textContent=t?'À traiter':'Saison complète';
     if(t){
       const colT=t.pct>=75?'var(--or)':'var(--orange)';
       _content.innerHTML=`<div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;line-height:1;color:var(--texte)">${t.pct}%</div>
@@ -2804,10 +2818,6 @@ function togglePrioPill(){
 function renderHome(){
   const {totalReste}=calcHeures();
   const saison=getSaisonActive();
-
-  // Titre domaine
-  var titleEl=document.getElementById('hv2-domaine-title');
-  if(titleEl) titleEl.textContent=(window.CONFIG&&window.CONFIG.nomDomaine)||'Ma Vigne';
 
   // Saison badge
   document.getElementById('saison-badge-home').textContent=saison.nom;
@@ -3159,19 +3169,6 @@ function savePriorityData(){
   try { localStorage.setItem('mavigne_priority', priorityMessage); } catch(e){}
   // Firebase
   if(window.fbSave) window.fbSave('config', { priorityMessage: priorityMessage });
-}
-
-function saveNomDomaine(val){
-  val = val.trim();
-  if(!window.CONFIG) window.CONFIG = {};
-  window.CONFIG.nomDomaine = val;
-  // Mettre à jour le titre header Accueil en temps réel
-  var titleEl = document.getElementById('hv2-domaine-title');
-  if(titleEl) titleEl.textContent = val || 'Ma Vigne';
-  // Sauvegarder dans Firebase (merge avec priorityMessage existant)
-  if(window.fbSave) window.fbSave('config', { nomDomaine: val, priorityMessage: priorityMessage });
-  // localStorage fallback
-  try { localStorage.setItem('mavigne_nom_domaine', val); } catch(e){}
 }
 function toggleTravail(nomParcelle,nomTache,btn){
   const p=PARCELLES.find(x=>x.nom===nomParcelle);if(!p)return;
@@ -4222,10 +4219,6 @@ function renderTracteur(){
   // Render pills parc tracteurs en en-tête
   renderTracParcPills();
 
-  // Avatar tracteur
-  var avaTrac=document.getElementById('up-ava-trac');
-  if(avaTrac&&currentUser)avaTrac.textContent=currentUser.nom.charAt(0).toUpperCase();
-
   // FAB visible si tractoriste + onglet sessions
   var fab=document.getElementById('trac-fab');
   if(fab)fab.style.display=(_tracOnglet==='sessions'&&isTractoriste())?'flex':'none';
@@ -4361,18 +4354,27 @@ function renderSDParcelles(){
   const actives=PARCELLES.filter(p=>p.statut!=='Arrachee');
   const done=s.parcellesFaites||[];
   const skip=s.parcellesSkip||[];
+  // Helper : résoudre le nom depuis string ou objet
+  function _pfNom(x){return typeof x==='string'?x:(x&&x.nom)||'';}
+  function _pfData(x){return (typeof x==='object'&&x&&x.data)?x.data:null;}
+  const doneNoms=done.map(_pfNom);
   let toShow;
   if(sdSkipMode){
-    toShow=actives.filter(p=>!done.includes(p.nom)).slice().sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
+    toShow=actives.filter(p=>!doneNoms.includes(p.nom)).slice().sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
   } else {
-    toShow=(sdShowDone?actives:actives.filter(p=>!done.includes(p.nom)&&!skip.includes(p.nom))).slice().sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
+    toShow=(sdShowDone?actives:actives.filter(p=>!doneNoms.includes(p.nom)&&!skip.includes(p.nom))).slice().sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
   }
   const btn=document.getElementById('sd-show-done-btn');
   if(btn)btn.textContent=sdShowDone?'Masquer faites':'Voir toutes';
   if(toShow.length===0){document.getElementById('sd-parcelles').innerHTML='<div style="text-align:center;padding:24px;color:var(--texte-doux);font-size:13px">✅ Toutes les parcelles sont cochées</div>';return;}
+  // Activité courante pour savoir si il y a un champ custom
+  var act=ACTIVITES.find(function(a){return a.nom===s.activite;});
+  var hasChamp=!!(act&&act.champCustom&&act.champCustom.label);
   document.getElementById('sd-parcelles').innerHTML=toShow.map(p=>{
-    const fait=done.includes(p.nom);
+    const fait=doneNoms.includes(p.nom);
     const skipped=skip.includes(p.nom);
+    const entryFaite=done.find(function(x){return _pfNom(x)===p.nom;});
+    const dataFaite=entryFaite?_pfData(entryFaite):null;
     if(sdSkipMode){
       return `<div class="sdp-row ${skipped?'sdp-skip':''}" style="cursor:default">
         <div class="sdp-check ${skipped?'skip':''}">${skipped?'⊘':''}</div>
@@ -4381,9 +4383,12 @@ function renderSDParcelles(){
         <button class="sdp-skip-btn ${skipped?'active':'inactive'}" onclick="toggleSessionSkip('${p.nom}')">${skipped?'Réactiver':'Désactiver'}</button>
       </div>`;
     } else {
+      const dataHtml=fait&&dataFaite&&Object.keys(dataFaite).length
+        ?'<div style="font-size:10px;color:var(--acier-med);margin-top:2px">'+Object.entries(dataFaite).map(function(kv){return kv[0]+' : '+kv[1];}).join(' · ')+'</div>'
+        :'';
       return `<div class="sdp-row ${fait?'sdp-done':''}" onclick="toggleSessionParcelle('${p.nom}',this)">
         <div class="sdp-check ${fait?'on':''}">${fait?'✓':''}</div>
-        <div class="sdp-nom">${p.nom}</div>
+        <div style="flex:1;min-width:0"><div class="sdp-nom">${p.nom}</div>${dataHtml}</div>
         <div class="sdp-surf">${p.surface} ha</div>
       </div>`;
     }
@@ -4393,7 +4398,9 @@ function toggleSDShowDone(){sdShowDone=!sdShowDone;renderSDParcelles();}
 function toggleSessionParcelle(nom,row){
   const s=SESSIONS.find(x=>x.id===tracSessionId);if(!s)return;
   if(!s.parcellesFaites)s.parcellesFaites=[];
-  const idx=s.parcellesFaites.indexOf(nom);
+  // Déterminer si c'est une coche ou une décoche
+  // parcellesFaites peut contenir des strings ou des objets {nom, data}
+  const idx=s.parcellesFaites.findIndex(function(x){return (typeof x==='string'?x:(x&&x.nom))===nom;});
   const estDecoche=idx>=0;
   // Bloquer nouvelle coche si tracteur en réparation (cherche par id ET par nom)
   var _stid=s.tracteurId||'';
@@ -4411,8 +4418,51 @@ function toggleSessionParcelle(nom,row){
     }
     return;
   }
-  if(estDecoche){s.parcellesFaites.splice(idx,1);}else{s.parcellesFaites.push(nom);}
+  if(estDecoche){
+    s.parcellesFaites.splice(idx,1);
+    saveData('sessions');renderSessionProgress();renderSDParcelles();
+    return;
+  }
+  // Vérifier si l'activité a un champ custom
+  var act=ACTIVITES.find(function(a){return a.nom===s.activite;});
+  if(act&&act.champCustom&&act.champCustom.label){
+    // Ouvrir overlay de saisie
+    _ocvNomParcelle=nom;
+    document.getElementById('ocv-titre').textContent='Valider — '+nom;
+    document.getElementById('ocv-sub').textContent=(act.emoji||'🚜')+' '+s.activite;
+    document.getElementById('ocv-label').textContent=act.champCustom.label+' *';
+    var ocvVal=document.getElementById('ocv-val');
+    ocvVal.type=act.champCustom.type==='nombre'?'number':'text';
+    ocvVal.placeholder=act.champCustom.type==='nombre'?'0':'Saisir…';
+    ocvVal.min=0;
+    ocvVal.value='';
+    openOv('ovChampValidation');
+    setTimeout(function(){ocvVal.focus();},200);
+    return;
+  }
+  // Pas de champ custom : coche directe (string)
+  s.parcellesFaites.push(nom);
   saveData('sessions');renderSessionProgress();renderSDParcelles();
+}
+
+// Variable temporaire pour stocker la parcelle en attente de validation champ
+var _ocvNomParcelle=null;
+
+function confirmerValidationChamp(){
+  var val=document.getElementById('ocv-val').value.trim();
+  if(!val){if(navigator.vibrate)navigator.vibrate([60,40,60]);showToast('Champ obligatoire','#C0392B');return;}
+  var s=SESSIONS.find(function(x){return x.id===tracSessionId;});
+  if(!s||!_ocvNomParcelle)return;
+  if(!s.parcellesFaites)s.parcellesFaites=[];
+  var act=ACTIVITES.find(function(a){return a.nom===s.activite;});
+  var data={};
+  if(act&&act.champCustom&&act.champCustom.label){data[act.champCustom.label]=val;}
+  s.parcellesFaites.push({nom:_ocvNomParcelle,data:data});
+  var nomAff=_ocvNomParcelle;
+  _ocvNomParcelle=null;
+  closeOv(null,'ovChampValidation');
+  saveData('sessions');renderSessionProgress();renderSDParcelles();
+  showToast(nomAff+' validée ✓','#3D6B27');
 }
 function toggleSessionSkip(nom){
   const s=SESSIONS.find(x=>x.id===tracSessionId);if(!s)return;
@@ -4883,16 +4933,25 @@ function saveSession(){
   showToast('Session '+(a||'')+ ' démarrée ✓','#2C3E50');
 }
 function saveActivite(){
-  if(!isTractoriste()){alert('Accès réservé.');return;}
-  const nom=document.getElementById('new-act').value.trim();
+  if(!isAdmin()){alert('Accès réservé aux admins.');return;}
+  var nom=document.getElementById('new-act').value.trim();
   if(!nom){alert('Nom obligatoire');return;}
-  // Tracteur défaut = premier tracteur non-traitement
-  var defTrac=TRACTEURS_LIST.find(function(t){return !t.traitementOnly;})||TRACTEURS_LIST[0];
-  ACTIVITES.push({nom:nom,emoji:selEmoji,tracteurDefautId:defTrac?defTrac.id:''});
+  var tracId=document.getElementById('new-act-trac').value;
+  if(!tracId&&TRACTEURS_LIST.length){tracId=(TRACTEURS_LIST.find(function(t){return !t.traitementOnly;})||TRACTEURS_LIST[0]).id;}
+  var champActif=document.getElementById('new-act-champ-actif').value==='1';
+  var champLabel=(document.getElementById('new-act-champ-label').value||'').trim();
+  var champType=document.getElementById('new-act-champ-type-val').value||'nombre';
+  var champCustom=(champActif&&champLabel)?{label:champLabel,type:champType}:null;
+  var emojiBtn=document.getElementById('new-act-emoji-btn');
+  var emoji=emojiBtn?emojiBtn.textContent.trim():'🚜';
+  ACTIVITES.push({nom:nom,emoji:emoji,tracteurDefautId:tracId,champCustom:champCustom});
+  window.ACTIVITES=ACTIVITES;
   saveData('activites');
-  document.getElementById('ovActivite').classList.remove('open');
+  closeOv(null,'ovActivite');
   document.getElementById('new-act').value='';
+  renderActTracList();
   renderTracteur();
+  showToast('Activité "'+nom+'" créée ✓','#3D6B27');
 }
 function saveConducteur(){
   const nom=document.getElementById('new-cond').value.trim();
@@ -5069,9 +5128,6 @@ function confirmDeleteTraitement(){
 
 // ════ RÉGLAGES ════
 function renderReglages(){
-  // Champ nom domaine
-  var inputDom = document.getElementById('input-nom-domaine');
-  if(inputDom) inputDom.value = (window.CONFIG&&window.CONFIG.nomDomaine)||'';
   // Aperçu domaine — avancement global saison
   const tachesSaison=getTachesSaison();
   const parcActives=PARCELLES.filter(p=>p.statut!=='Arrachee');
@@ -5110,36 +5166,37 @@ function renderActTracList(){
   el.innerHTML=ACTIVITES.map(function(a){
     var trac=TRACTEURS_LIST.find(function(t){return t.id===a.tracteurDefautId;});
     var col=trac?couleurTracType(trac.type):'#888';
-    return '<div class="act-trac-row">'
-      +'<div style="font-size:13px">'+(a.emoji||'')+' '+a.nom+'</div>'
-      +'<div style="display:flex;align-items:center;gap:8px">'
-        +'<span class="act-trac-badge" style="background:'+col+'18;color:'+col+'" data-actnom="'+a.nom+'">'
-          +'🚜 '+(trac?trac.nom:'—')
-        +'</span>'
-        +'<span style="font-size:16px;cursor:pointer;color:var(--texte-doux)" data-actnom="'+a.nom+'">✏️</span>'
+    var champBadge=a.champCustom&&a.champCustom.label
+      ?'<span style="font-size:10px;background:#E8F0FA;color:#2C5F8A;border-radius:6px;padding:2px 8px;font-weight:600;margin-left:4px">📋 '+a.champCustom.label+'</span>'
+      :'';
+    return '<div class="act-trac-row" style="cursor:pointer" onclick="openEditActTrac(\''+a.nom.replace(/'/g,"\\'")+'\')">'
+      +'<div style="flex:1">'
+        +'<div style="font-size:13px;font-weight:600">'+(a.emoji||'')+' '+a.nom+'</div>'
+        +'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-top:4px">'
+          +'<span class="act-trac-badge" style="background:'+col+'18;color:'+col+'">🚜 '+(trac?trac.nom:'—')+'</span>'
+          +champBadge
+        +'</div>'
       +'</div>'
+      +'<span style="font-size:18px;color:var(--texte-doux)">›</span>'
     +'</div>';
   }).join('');
-  el.querySelectorAll('[data-actnom]').forEach(function(btn){
-    btn.addEventListener('click', function(){openEditActTrac(this.dataset.actnom);});
-  });
 }
 function openEditActTrac(actNom){
   if(!isAdmin())return;
   var act=ACTIVITES.find(function(a){return a.nom===actNom;});
   if(!act)return;
   document.getElementById('eat-act-nom').value=actNom;
-  document.getElementById('eat-title').textContent='🔗 '+actNom+' — tracteur par défaut';
+  document.getElementById('eat-title').textContent='✏️ '+actNom;
   // Tracteurs éligibles
   var eligible=actNom==='Traitement'
     ?TRACTEURS_LIST.filter(function(t){return t.traitementOnly;})
     :TRACTEURS_LIST.filter(function(t){return !t.traitementOnly;});
   if(!eligible.length)eligible=TRACTEURS_LIST.slice();
-   document.getElementById('eat-trac-pick').innerHTML=eligible.map(function(t){
+  document.getElementById('eat-trac-pick').innerHTML=eligible.map(function(t){
     var sel=t.id===act.tracteurDefautId;
     var col=couleurTracType(t.type);
     return '<div class="pchk'+(sel?' sel acre':'')+'" data-val="'+t.id+'" style="'+(sel?'border-color:'+col:'')+'">'
-      +(t.traitementOnly?'🌿':'🚜')+' '+t.nom+' — '+t.modele
+      +(t.traitementOnly?'🌿':'🚜')+' '+t.nom+(t.modele?' — '+t.modele:'')
     +'</div>';
   }).join('');
   document.getElementById('eat-trac-pick').querySelectorAll('.pchk').forEach(function(btn){
@@ -5150,6 +5207,28 @@ function openEditActTrac(actNom){
     });
   });
   document.getElementById('eat-trac').value=act.tracteurDefautId||'';
+  // Pré-remplir champ custom
+  var hasChamp=!!(act.champCustom&&act.champCustom.label);
+  document.getElementById('eat-champ-actif').value=hasChamp?'1':'0';
+  document.getElementById('eat-champ-fields').style.display=hasChamp?'':'none';
+  var toggle=document.getElementById('eat-champ-toggle');
+  var knob=document.getElementById('eat-champ-knob');
+  if(toggle)toggle.style.background=hasChamp?'var(--vert)':'rgba(0,0,0,0.1)';
+  if(knob)knob.style.transform=hasChamp?'translateX(20px)':'translateX(0)';
+  if(hasChamp){
+    document.getElementById('eat-champ-label').value=act.champCustom.label;
+    var t=act.champCustom.type||'nombre';
+    document.getElementById('eat-champ-type-val').value=t;
+    document.getElementById('eat-champ-type-nb').classList.toggle('sel',t==='nombre');
+    document.getElementById('eat-champ-type-nb').classList.toggle('acre',t==='nombre');
+    document.getElementById('eat-champ-type-txt').classList.toggle('sel',t==='texte');
+    document.getElementById('eat-champ-type-txt').classList.toggle('acre',t==='texte');
+  } else {
+    document.getElementById('eat-champ-label').value='';
+    document.getElementById('eat-champ-type-val').value='nombre';
+    document.getElementById('eat-champ-type-nb').classList.add('sel','acre');
+    document.getElementById('eat-champ-type-txt').classList.remove('sel','acre');
+  }
   openOv('ovEditActTrac');
 }
 function saveEditActTrac(){
@@ -5158,11 +5237,120 @@ function saveEditActTrac(){
   var act=ACTIVITES.find(function(a){return a.nom===actNom;});
   if(!act||!tracId)return;
   act.tracteurDefautId=tracId;
+  var champActif=document.getElementById('eat-champ-actif').value==='1';
+  var champLabel=(document.getElementById('eat-champ-label').value||'').trim();
+  var champType=document.getElementById('eat-champ-type-val').value||'nombre';
+  act.champCustom=(champActif&&champLabel)?{label:champLabel,type:champType}:null;
   window.ACTIVITES=ACTIVITES;
   saveData('activites');
-  document.getElementById('ovEditActTrac').classList.remove('open');
+  closeOv(null,'ovEditActTrac');
   renderActTracList();
-  showToast('Association mise à jour ✓','#3D6B27');
+  showToast('Activité mise à jour ✓','#3D6B27');
+}
+function deleteActivite(){
+  var actNom=document.getElementById('eat-act-nom').value;
+  if(!actNom)return;
+  if(!confirm('Supprimer l\'activité "'+actNom+'" ? Les sessions existantes ne seront pas affectées.'))return;
+  ACTIVITES=ACTIVITES.filter(function(a){return a.nom!==actNom;});
+  window.ACTIVITES=ACTIVITES;
+  saveData('activites');
+  closeOv(null,'ovEditActTrac');
+  renderActTracList();
+  renderTracteur();
+  showToast('"'+actNom+'" supprimée','#C0392B');
+}
+
+// ── Ouvrir overlay nouvelle activité (reset + pré-remplissage) ──
+function openOvNouvelleActivite(){
+  if(!isAdmin()){showToast('Admin requis','#C0392B');return;}
+  document.getElementById('new-act').value='';
+  // Emoji
+  var emojiBtn=document.getElementById('new-act-emoji-btn');
+  if(emojiBtn)emojiBtn.textContent='🚜';
+  // Tracteurs
+  var tracPick=document.getElementById('new-act-trac-pick');
+  if(tracPick){
+    var eligible=TRACTEURS_LIST.filter(function(t){return !t.traitementOnly;});
+    if(!eligible.length)eligible=TRACTEURS_LIST.slice();
+    tracPick.innerHTML=eligible.map(function(t,i){
+      var col=couleurTracType(t.type);
+      return '<div class="pchk'+(i===0?' sel acre':'')+'" data-val="'+t.id+'" style="'+(i===0?'border-color:'+col:'')+'" onclick="_pickNewActTrac(this)">'
+        +'🚜 '+t.nom+(t.modele?' — '+t.modele:'')
+      +'</div>';
+    }).join('');
+    var defId=eligible.length?eligible[0].id:'';
+    document.getElementById('new-act-trac').value=defId;
+  }
+  // Reset champ custom
+  _toggleActChampReset('new');
+  // Fermer emoji picker
+  var ep=document.getElementById('new-act-emoji-pick');
+  if(ep)ep.style.display='none';
+  openOv('ovActivite');
+}
+
+function _pickNewActTrac(el){
+  var parent=el.closest('.ppicker')||el.parentElement;
+  parent.querySelectorAll('.pchk').forEach(function(b){b.classList.remove('sel','acre');});
+  el.classList.add('sel','acre');
+  document.getElementById('new-act-trac').value=el.dataset.val;
+}
+
+var _ACT_EMOJIS=['🚜','✂️','🌱','🌿','🕳️','💧','🔥','⚡','🌾','🪚','🔩','🧪','🛤️','📍','🌀','🔄','⛏️','🔗'];
+
+function _toggleActEmojiPick(pfx){
+  var ep=document.getElementById(pfx+'-act-emoji-pick');
+  if(!ep)return;
+  var showing=ep.style.display!=='none';
+  if(showing){ep.style.display='none';return;}
+  // Peupler
+  ep.innerHTML=_ACT_EMOJIS.map(function(e){
+    return '<div class="pchk" style="font-size:20px;padding:6px 10px" onclick="_pickActEmoji(\''+pfx+'\',\''+e+'\')">'+e+'</div>';
+  }).join('');
+  ep.style.display='flex';
+}
+
+function _pickActEmoji(pfx,emoji){
+  var btn=document.getElementById(pfx+'-act-emoji-btn');
+  if(btn)btn.textContent=emoji;
+  var ep=document.getElementById(pfx+'-act-emoji-pick');
+  if(ep)ep.style.display='none';
+}
+
+function _toggleActChamp(pfx){
+  var actif=document.getElementById(pfx+'-champ-actif').value==='1';
+  var nouveau=!actif;
+  document.getElementById(pfx+'-champ-actif').value=nouveau?'1':'0';
+  document.getElementById(pfx+'-champ-fields').style.display=nouveau?'':'none';
+  var toggle=document.getElementById(pfx+'-champ-toggle');
+  var knob=document.getElementById(pfx+'-champ-knob');
+  if(toggle)toggle.style.background=nouveau?'var(--vert)':'rgba(0,0,0,0.1)';
+  if(knob)knob.style.transform=nouveau?'translateX(20px)':'translateX(0)';
+}
+
+function _toggleActChampReset(pfx){
+  document.getElementById(pfx+'-champ-actif').value='0';
+  var fields=document.getElementById(pfx+'-champ-fields');
+  if(fields)fields.style.display='none';
+  var lbl=document.getElementById(pfx+'-champ-label');
+  if(lbl)lbl.value='';
+  var toggle=document.getElementById(pfx+'-champ-toggle');
+  var knob=document.getElementById(pfx+'-champ-knob');
+  if(toggle)toggle.style.background='rgba(0,0,0,0.1)';
+  if(knob)knob.style.transform='translateX(0)';
+  document.getElementById(pfx+'-champ-type-val').value='nombre';
+  var nb=document.getElementById(pfx+'-champ-type-nb');
+  var txt=document.getElementById(pfx+'-champ-type-txt');
+  if(nb){nb.classList.add('sel','acre');}
+  if(txt){txt.classList.remove('sel','acre');}
+}
+
+function _setActChampType(pfx,type){
+  document.getElementById(pfx+'-champ-type-val').value=type;
+  var nb=document.getElementById(pfx+'-champ-type-nb');
+  var txt=document.getElementById(pfx+'-champ-type-txt');
+  if(nb){nb.classList.toggle('sel',type==='nombre');nb.classList.toggle('acre',type==='nombre');}
+  if(txt){txt.classList.toggle('sel',type==='texte');txt.classList.toggle('acre',type==='texte');}
 }
 
 function activateSaison(nom){SAISONS.forEach(s=>s.active=s.nom===nom);saveData('saisons');renderReglages();renderParcelles();computePStats();}
@@ -6092,8 +6280,9 @@ function exportPDFMois(){
       const pct=s.avancement!=null?s.avancement:0;
       const skip=s.parcellesSkip||[];
       const faites=s.parcellesFaites||[];
-      const parcRestantes=parcActives.filter(p=>!faites.includes(p.nom)&&!skip.includes(p.nom)).map(p=>p.nom).sort((a,b)=>a.localeCompare(b,'fr'));
-      const faitesTri=[...faites].sort((a,b)=>a.localeCompare(b,'fr'));
+      const faitesNoms=faites.map(function(x){return typeof x==='string'?x:(x&&x.nom)||'';}).filter(Boolean);
+      const parcRestantes=parcActives.filter(p=>!faitesNoms.includes(p.nom)&&!skip.includes(p.nom)).map(p=>p.nom).sort((a,b)=>a.localeCompare(b,'fr'));
+      const faitesTri=[...faitesNoms].sort((a,b)=>a.localeCompare(b,'fr'));
       const skipTri=[...skip].sort((a,b)=>a.localeCompare(b,'fr'));
       const total=parcActives.filter(p=>!skip.includes(p.nom)).length;
       return `<div class="trac-session-block">
@@ -7336,15 +7525,37 @@ function _swReload() {
 
 <!-- ══ OVERLAY Association activité↔tracteur ══ -->
 <div class="overlay" id="ovEditActTrac" onclick="closeOv(event,'ovEditActTrac')">
-  <div class="modal" onclick="event.stopPropagation()">
+  <div class="modal" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto">
     <div class="modal-handle"></div>
-    <div class="modal-hd"><div class="modal-title" id="eat-title">🔗 Tracteur par défaut</div><div class="modal-sub">Modifiable à chaque session</div></div>
+    <div class="modal-hd"><div class="modal-title" id="eat-title">✏️ Modifier l'activité</div><div class="modal-sub">Admin uniquement</div></div>
     <input type="hidden" id="eat-act-nom">
     <div class="modal-body">
       <div class="fl">Tracteur par défaut</div>
       <div class="ppicker" id="eat-trac-pick"></div>
       <input type="hidden" id="eat-trac">
+      <div style="margin-top:14px;border:1.5px solid var(--gris);border-radius:14px;padding:14px;transition:all 0.2s" id="eat-champ-section">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--texte)">📋 Champ de saisie lors de la validation</div>
+            <div style="font-size:11px;color:var(--texte-doux);margin-top:2px">Ex : Nombre de trous, Dose, Profondeur…</div>
+          </div>
+          <button onclick="_toggleActChamp('eat')" id="eat-champ-toggle" style="width:44px;height:26px;border-radius:13px;border:none;cursor:pointer;background:rgba(0,0,0,0.1);position:relative;flex-shrink:0;transition:background 0.2s">
+            <div id="eat-champ-knob" style="position:absolute;top:3px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform 0.2s"></div>
+          </button>
+        </div>
+        <div id="eat-champ-fields" style="display:none;margin-top:12px">
+          <input type="text" class="fi ac" id="eat-champ-label" placeholder="Libellé (ex: Nombre de trous)" style="margin-bottom:8px">
+          <div style="display:flex;gap:8px">
+            <button class="pchk sel acre" id="eat-champ-type-nb" onclick="_setActChampType('eat','nombre')" style="flex:1;min-height:40px">🔢 Nombre</button>
+            <button class="pchk" id="eat-champ-type-txt" onclick="_setActChampType('eat','texte')" style="flex:1;min-height:40px">✏️ Texte</button>
+          </div>
+          <div style="font-size:11px;color:var(--texte-doux);font-style:italic;margin-top:6px">Sera demandé parcelle par parcelle lors de la validation ✓</div>
+        </div>
+      </div>
+      <input type="hidden" id="eat-champ-actif" value="0">
+      <input type="hidden" id="eat-champ-type-val" value="nombre">
       <button class="mbtn acre" onclick="saveEditActTrac()">Enregistrer</button>
+      <button class="mbtn-del" onclick="deleteActivite()">🗑 Supprimer cette activité</button>
     </div>
   </div>
 </div>
@@ -7474,5 +7685,22 @@ function _swReload() {
   </div>
 </div>
 </div><!-- /#app-root -->
+
+<!-- ══ OVERLAY : Saisie champ custom validation parcelle ══ -->
+<div class="overlay" id="ovChampValidation" onclick="closeOv(event,'ovChampValidation')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd">
+      <div class="modal-title" id="ocv-titre">Valider la parcelle</div>
+      <div class="modal-sub" id="ocv-sub"></div>
+    </div>
+    <div class="modal-body">
+      <div class="fl" id="ocv-label">Information requise</div>
+      <input class="fi ac" id="ocv-val" placeholder="" style="font-size:20px;text-align:center;font-weight:700">
+      <button class="mbtn acre" onclick="confirmerValidationChamp()">✓ Confirmer</button>
+      <button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux)" onclick="closeOv(null,'ovChampValidation')">Annuler</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
