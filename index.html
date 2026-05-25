@@ -174,6 +174,12 @@ function applyFbData(key, value) {
       window.priorityMessage = value.priorityMessage;
       if(window._syncLocalVars) window._syncLocalVars();
     }
+    if(value.nomDomaine !== undefined) {
+      if(!window.CONFIG) window.CONFIG = {};
+      window.CONFIG.nomDomaine = value.nomDomaine;
+      var titleEl = document.getElementById('hv2-domaine-title');
+      if(titleEl) titleEl.textContent = value.nomDomaine || 'Ma Vigne';
+    }
   } else if(key === 'membres') {
     // ⚠️ Protection du champ mdp :
     // Si Firebase renvoie des membres sans mdp (ex : sauvegarde ancienne),
@@ -712,11 +718,11 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .trac-sband .sbi{padding:14px 0;border-right:1px solid var(--gris-clair);text-align:center;}
 .trac-sband .sbi:last-child{border-right:none;}
 /* ── Onglets tracteur (Sessions / Entretiens) ── */
-.trac-ong-btn{flex:1;padding:10px 0 12px;border:none;background:none;cursor:pointer;font-family:'Outfit',sans-serif;font-size:14px;font-weight:400;color:rgba(255,255,255,0.45);border-bottom:2px solid transparent;transition:all 0.15s;min-height:44px;}
-.trac-ong-btn.trac-ong-active{font-weight:700;color:#fff;border-bottom-color:#fff;}
+.trac-ong-btn{flex:1;padding:10px 0 12px;border:none;background:rgba(0,0,0,0.15);cursor:pointer;font-family:'Outfit',sans-serif;font-size:14px;font-weight:400;color:rgba(255,255,255,0.55);border-bottom:2px solid transparent;transition:all 0.15s;min-height:44px;}
+.trac-ong-btn.trac-ong-active{font-weight:700;color:#fff;border-bottom-color:#fff;background:rgba(0,0,0,0.05);}
 /* ── Pills parc tracteurs dans en-tête ── */
-.trac-parc-pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.1);border-radius:20px;padding:5px 12px 5px 6px;border:1px solid rgba(255,255,255,0.12);font-family:'Outfit',sans-serif;}
-.trac-parc-pill.en-rep{background:rgba(160,41,30,0.25);border-color:rgba(160,41,30,0.4);}
+.trac-parc-pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.15);border-radius:20px;padding:5px 12px 5px 6px;border:1px solid rgba(255,255,255,0.2);font-family:'Outfit',sans-serif;}
+.trac-parc-pill.en-rep{background:rgba(160,41,30,0.3);border-color:rgba(160,41,30,0.5);}
 .trac-parc-pill-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .trac-parc-pill-nom{font-size:12px;color:#fff;font-weight:600;}
 .trac-parc-pill-mod{font-size:11px;color:rgba(255,255,255,0.5);}
@@ -983,7 +989,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .hv2-card-or{background:linear-gradient(135deg,#FFF8E8,#FAF0CC);border:1px solid rgba(184,145,58,0.35);height:200px;display:flex;flex-direction:column;justify-content:space-between;}
 .hv2-card-or-vide{background:var(--or-pale);border:1px solid rgba(184,145,58,0.18);height:200px;display:flex;flex-direction:column;justify-content:space-between;}
 /* ── Pill priorité dépliable (Accueil) ── */
-.home-prio-pill-wrap{background:white;border-bottom:1px solid var(--gris-clair);}
+.home-prio-pill-wrap{background:var(--vert-pale);border-top:1px solid rgba(61,107,39,0.15);}
 .home-prio-pill-row{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;}
 .home-prio-pill{background:var(--or-pale);border:1.5px solid rgba(184,145,58,0.35);border-radius:8px;padding:5px 11px;display:flex;align-items:center;gap:7px;flex:1;transition:background 0.15s;}
 .home-prio-pill:active{background:#f5eacf;}
@@ -1038,7 +1044,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .role-chk.on{background:var(--vert);border-color:var(--vert);}
 
 /* ══ ACCUEIL V2 ══ */
-.hv2-header{background:var(--vert);padding:50px 22px 26px;position:relative;overflow:hidden;}
+.hv2-header{background:var(--vert);padding:36px 22px 20px;position:relative;overflow:hidden;}
 .hv2-header::before{content:'';position:absolute;top:-50px;right:-30px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,0.05);}
 .hv2-header::after{content:'';position:absolute;bottom:-25px;left:-25px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,0.04);}
 .hv2-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1;}
@@ -1423,7 +1429,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     <div class="hv2-top">
       <div>
         <div class="hv2-brand">Domaine</div>
-        <div class="hv2-title">Ma Vigne</div>
+        <div class="hv2-title" id="hv2-domaine-title">Ma Vigne</div>
       </div>
       <div class="hv2-top-right">
         <div class="hv2-avatar-wrap" onclick="logout()">
@@ -1445,9 +1451,9 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     </div>
   </div>
 
-  <!-- GRANDE STAT CARD — pleine largeur, directement sous le header -->
-  <div class="hv2-card-solo" style="margin-top:16px">
-    <div class="hv2-card hv2-card-vert hv2-card-fixed" id="home-stat-card" onclick="toggleHomeCard()" style="width:100%">
+  <!-- GRANDE STAT CARD + PILL PRIORITÉ collée -->
+  <div class="hv2-card-solo" style="margin-top:12px">
+    <div class="hv2-card hv2-card-vert hv2-card-fixed" id="home-stat-card" onclick="toggleHomeCard()" style="width:100%;border-radius:18px 18px 0 0">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div class="hv2-card-picto" id="home-stat-picto" style="margin-bottom:0">🌿</div>
         <div class="hv2-tap-hint">👆 changer</div>
@@ -1461,19 +1467,19 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
         </div>
       </div>
     </div>
-  </div>
-  <!-- PILL PRIORITÉ — dépliable -->
-  <div class="home-prio-pill-wrap" id="home-prio-pill-wrap">
-    <div class="home-prio-pill-row" onclick="togglePrioPill()">
-      <div class="home-prio-pill" id="home-prio-pill">
-        <span style="font-size:14px">⚡</span>
-        <span class="home-prio-pill-txt" id="home-prio-pill-txt">Aucune priorité définie</span>
-        <span class="home-prio-pill-chevron" id="home-prio-chevron">▼</span>
+    <!-- PILL PRIORITÉ — collée en bas de la card -->
+    <div class="home-prio-pill-wrap" id="home-prio-pill-wrap" style="border-radius:0 0 18px 18px;overflow:hidden">
+      <div class="home-prio-pill-row" onclick="togglePrioPill()">
+        <div class="home-prio-pill" id="home-prio-pill">
+          <span style="font-size:14px">⚡</span>
+          <span class="home-prio-pill-txt" id="home-prio-pill-txt">Aucune priorité définie</span>
+          <span class="home-prio-pill-chevron" id="home-prio-chevron">▼</span>
+        </div>
+        <div class="home-prio-pill-edit" id="home-prio-edit-btn" onclick="event.stopPropagation();openPriorityEdit()" style="display:none">✏️</div>
       </div>
-      <div class="home-prio-pill-edit" id="home-prio-edit-btn" onclick="event.stopPropagation();openPriorityEdit()" style="display:none">✏️</div>
-    </div>
-    <div class="home-prio-detail" id="home-prio-detail">
-      <div class="home-prio-detail-inner" id="home-prio-detail-txt"></div>
+      <div class="home-prio-detail" id="home-prio-detail">
+        <div class="home-prio-detail-inner" id="home-prio-detail-txt"></div>
+      </div>
     </div>
   </div>
 
@@ -1618,16 +1624,18 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 
 <!-- ══════ PAGE TRACTEUR ══════ -->
 <div class="page" id="page-tracteur">
-  <!-- En-tête sombre : parc tracteurs (pills) + onglets Sessions/Entretiens -->
-  <div style="background:var(--acier)">
-    <div style="padding:14px 16px 0">
-      <!-- Pills parc tracteurs -->
-      <div id="trac-parc-pills" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"></div>
-      <!-- Onglets -->
-      <div style="display:flex">
-        <button id="trac-ong-sessions" onclick="switchTracOnglet('sessions')" class="trac-ong-btn trac-ong-active" style="min-height:44px">Sessions</button>
-        <button id="trac-ong-entretiens" onclick="switchTracOnglet('entretiens')" class="trac-ong-btn" style="min-height:44px">Entretiens</button>
-      </div>
+  <!-- En-tête vert — même style que les autres pages -->
+  <div class="ph verde" style="padding-bottom:0">
+    <div class="ph-top" style="padding-bottom:10px">
+      <div><div class="ph-title">Tracteur</div></div>
+      <div id="up-ava-trac" style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:#fff;flex-shrink:0;cursor:pointer" onclick="logout()">N</div>
+    </div>
+    <!-- Pills parc tracteurs -->
+    <div id="trac-parc-pills" style="display:flex;gap:8px;flex-wrap:wrap;padding:0 16px 12px"></div>
+    <!-- Onglets Sessions / Entretiens -->
+    <div style="display:flex;border-top:1px solid rgba(255,255,255,0.15)">
+      <button id="trac-ong-sessions" onclick="switchTracOnglet('sessions')" class="trac-ong-btn trac-ong-active" style="min-height:44px">Sessions</button>
+      <button id="trac-ong-entretiens" onclick="switchTracOnglet('entretiens')" class="trac-ong-btn" style="min-height:44px">Entretiens</button>
     </div>
   </div>
 
@@ -1704,6 +1712,16 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
   </div>
   <div style="height:14px"></div>
   <div class="dom-badge"><div class="db-logo">🍇 Ma Vigne</div><div class="db-sub" id="dom-badge-sub">Domaine · 11,76 ha actifs</div></div>
+
+  <div class="set-sec" id="set-sec-domaine">
+    <div class="set-title">Domaine</div>
+    <div style="margin:0 16px">
+      <div class="set-row" style="border-radius:16px;gap:12px">
+        <div class="sr-l"><div class="sr-ico" style="background:var(--vert-pale)">🍇</div><div><div class="sr-lbl">Nom du domaine</div><div class="sr-sub">Affiché dans l'app et les exports PDF</div></div></div>
+        <input type="text" id="input-nom-domaine" class="fi" placeholder="Ex : Marchand-Grillot" style="max-width:150px;margin:0;font-size:13px;text-align:right;border-radius:10px;padding:6px 10px" oninput="saveNomDomaine(this.value)">
+      </div>
+    </div>
+  </div>
 
   <div class="set-sec">
     <div class="set-title">Mon compte</div>
@@ -2276,6 +2294,9 @@ function loadData() {
     if (d.TACHES)       { TACHES = d.TACHES; window.TACHES = TACHES; }
     if (d.HISTORIQUE)   { HISTORIQUE = d.HISTORIQUE; window.HISTORIQUE = HISTORIQUE; }
     if (d.priorityMessage !== undefined) { priorityMessage = d.priorityMessage; window.priorityMessage = priorityMessage; }
+    // Charger nomDomaine (clé dédiée)
+    var nd = localStorage.getItem('mavigne_nom_domaine');
+    if(nd) { if(!window.CONFIG)window.CONFIG={}; window.CONFIG.nomDomaine=nd; }
     return true;
   } catch(e) { return false; }
 }
@@ -2727,7 +2748,7 @@ function getHomeCardData(){
 }
 
 function renderHomeCard(){
-  const {pctGlobal, tacheLaMoinsAvancee, parcActives} = getHomeCardData();
+  const {pctGlobal, tacheLaPlusAvancee, parcActives} = getHomeCardData();
   const saison = getSaisonActive();
   const {totalReste} = calcHeures();
   const _picto=document.getElementById('home-stat-picto');
@@ -2742,9 +2763,9 @@ function renderHomeCard(){
       <div style="font-size:12px;font-weight:500;color:var(--texte-med)">Avancement saison</div>
       <div style="font-size:11px;color:var(--texte-doux);margin-top:2px">${parcActives.length} parcelles · 11,76 ha</div>`;
   } else {
-    const t=tacheLaMoinsAvancee;
+    const t=tacheLaPlusAvancee;
     _picto.textContent=t?(TEMOJI[t.nom]||'🌾'):'✅';
-    _chip.textContent=t?'À traiter':'Saison complète';
+    _chip.textContent=t?'La plus avancée':'Saison complète';
     if(t){
       const colT=t.pct>=75?'var(--or)':'var(--orange)';
       _content.innerHTML=`<div style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;line-height:1;color:var(--texte)">${t.pct}%</div>
@@ -2783,6 +2804,10 @@ function togglePrioPill(){
 function renderHome(){
   const {totalReste}=calcHeures();
   const saison=getSaisonActive();
+
+  // Titre domaine
+  var titleEl=document.getElementById('hv2-domaine-title');
+  if(titleEl) titleEl.textContent=(window.CONFIG&&window.CONFIG.nomDomaine)||'Ma Vigne';
 
   // Saison badge
   document.getElementById('saison-badge-home').textContent=saison.nom;
@@ -3134,6 +3159,19 @@ function savePriorityData(){
   try { localStorage.setItem('mavigne_priority', priorityMessage); } catch(e){}
   // Firebase
   if(window.fbSave) window.fbSave('config', { priorityMessage: priorityMessage });
+}
+
+function saveNomDomaine(val){
+  val = val.trim();
+  if(!window.CONFIG) window.CONFIG = {};
+  window.CONFIG.nomDomaine = val;
+  // Mettre à jour le titre header Accueil en temps réel
+  var titleEl = document.getElementById('hv2-domaine-title');
+  if(titleEl) titleEl.textContent = val || 'Ma Vigne';
+  // Sauvegarder dans Firebase (merge avec priorityMessage existant)
+  if(window.fbSave) window.fbSave('config', { nomDomaine: val, priorityMessage: priorityMessage });
+  // localStorage fallback
+  try { localStorage.setItem('mavigne_nom_domaine', val); } catch(e){}
 }
 function toggleTravail(nomParcelle,nomTache,btn){
   const p=PARCELLES.find(x=>x.nom===nomParcelle);if(!p)return;
@@ -4184,6 +4222,10 @@ function renderTracteur(){
   // Render pills parc tracteurs en en-tête
   renderTracParcPills();
 
+  // Avatar tracteur
+  var avaTrac=document.getElementById('up-ava-trac');
+  if(avaTrac&&currentUser)avaTrac.textContent=currentUser.nom.charAt(0).toUpperCase();
+
   // FAB visible si tractoriste + onglet sessions
   var fab=document.getElementById('trac-fab');
   if(fab)fab.style.display=(_tracOnglet==='sessions'&&isTractoriste())?'flex':'none';
@@ -5027,6 +5069,9 @@ function confirmDeleteTraitement(){
 
 // ════ RÉGLAGES ════
 function renderReglages(){
+  // Champ nom domaine
+  var inputDom = document.getElementById('input-nom-domaine');
+  if(inputDom) inputDom.value = (window.CONFIG&&window.CONFIG.nomDomaine)||'';
   // Aperçu domaine — avancement global saison
   const tachesSaison=getTachesSaison();
   const parcActives=PARCELLES.filter(p=>p.statut!=='Arrachee');
