@@ -5163,7 +5163,7 @@ function deleteMembre(){
 
 // ════ OVERLAYS ════
 function openOv(id){document.getElementById(id).classList.add('open');}
-function closeOv(e,id){if(!e||e.target===document.getElementById(id))document.getElementById(id).classList.remove('open');}
+function closeOv(e,id){if(!e||e.target===document.getElementById(id)){document.getElementById(id).classList.remove('open');if(window._swUpdatePending&&!document.querySelector('.overlay.open')){window._swUpdatePending=false;window.location.reload();}}}
 function pickVal(el,hid,cls){el.parentElement.querySelectorAll('.pchk').forEach(x=>{x.classList.remove('sel','vert','acre','phyt');});el.classList.add('sel',cls);document.getElementById(hid).value=el.dataset.val;}
 
 // ════ MOT DE PASSE — SHA-256 + EmailJS ════
@@ -7051,10 +7051,37 @@ if ('serviceWorker' in navigator) {
           console.warn('[SW] Background Sync non dispo :', e);
         });
       }
+      // Détecter l'installation d'un nouveau SW et recharger à l'activation
+      reg.addEventListener('updatefound', function() {
+        var newWorker = reg.installing;
+        if (!newWorker) return;
+        newWorker.addEventListener('statechange', function() {
+          if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
+            console.log('[SW] Nouvelle version activée — rechargement');
+            _swReload();
+          }
+        });
+      });
     }).catch(function(err) {
       console.warn('[SW] Échec enregistrement :', err);
     });
+    // Rechargement quand un nouveau SW prend le contrôle (skipWaiting + clients.claim)
+    navigator.serviceWorker.addEventListener('controllerchange', function() {
+      console.log('[SW] Contrôleur changé — rechargement');
+      _swReload();
+    });
   });
+}
+// Rechargement SW différé : attend la fermeture des overlays ouverts
+window._swUpdatePending = false;
+function _swReload() {
+  var overlayOuvert = document.querySelector('.overlay.open');
+  if (!overlayOuvert) {
+    window.location.reload();
+  } else {
+    console.log('[SW] Mise à jour en attente — rechargement différé (overlay ouvert)');
+    window._swUpdatePending = true;
+  }
 }
 </script>
 
