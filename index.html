@@ -4190,7 +4190,7 @@ function renderTracteur(){
 
   // Readonly banner
   var rb=document.getElementById('trac-readonly');
-  if(rb)rb.style.display=isReadOnly?'':'none';
+  if(rb)rb.style.display=!isTractoriste()?'':'none';
 
   // ── Onglet actif : s'assurer du bon état ──
   document.getElementById('trac-panel-sessions').style.display=_tracOnglet==='sessions'?'':'none';
