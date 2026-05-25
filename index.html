@@ -3021,10 +3021,16 @@ function renderParcelles(){
   }
   // Mettre à jour le filtre tâche
   const tachesSaisonF=getTachesSaison();
+  const parcActivesFilt=PARCELLES.filter(p=>p.statut!=='Arrachee');
+  const tachesSaisonFSorted=[...tachesSaisonF].sort((a,b)=>{
+    const doneA=parcActivesFilt.length>0&&parcActivesFilt.every(p=>p.taches&&p.taches[a.nom]==='Validé')?1:0;
+    const doneB=parcActivesFilt.length>0&&parcActivesFilt.every(p=>p.taches&&p.taches[b.nom]==='Validé')?1:0;
+    return doneA-doneB;
+  });
   const tfRow=document.getElementById('p-tache-filter-row');
   if(tfRow){
     tfRow.innerHTML=`<div class="ptfchip${pTacheFilter==='toutes'?' active':''}" data-t="toutes" onclick="setPTacheFilter('toutes',this)">Toutes tâches</div>`
-      +tachesSaisonF.map(t=>`<div class="ptfchip${pTacheFilter===t.nom?' active':''}" data-t="${t.nom}" onclick="setPTacheFilter('${t.nom}',this)">${TEMOJI[t.nom]||'🌿'} ${t.nom}${pTacheFilter===t.nom?' — À faire':''}</div>`).join('');
+      +tachesSaisonFSorted.map(t=>`<div class="ptfchip${pTacheFilter===t.nom?' active':''}" data-t="${t.nom}" onclick="setPTacheFilter('${t.nom}',this)">${TEMOJI[t.nom]||'🌿'} ${t.nom}${pTacheFilter===t.nom?' — À faire':''}</div>`).join('');
   }
   const data=PARCELLES.filter(p=>{
     const cl=getPCls(p);
