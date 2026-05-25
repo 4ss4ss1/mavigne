@@ -1,4 +1,4 @@
-// MA VIGNE — Service Worker v1.85
+// MA VIGNE — Service Worker v1.86
 // v1.65 — Tracteur : onglets par tracteur · fiches d'entretien · état réparateur + notifs · parc tracteurs Réglages
 // v1.66 — Fix layout onglets · Association activité↔tracteur · badge tracteur sessions · alerte réparateur · PDF entretien
 // v1.67 — Fix chevauchement onglets tracteurs
@@ -20,7 +20,8 @@
 // v1.83 — Debounce 300ms pSearch + jSearch
 // v1.84 — Guard renderSDTracEncart : re-render uniquement sur sessions/tracteurs_list/reparateur/activites
 // v1.85 — Fix navigation : masquage immédiat ancienne page (suppression pageOut/animationend → fin scroll infini)
-const CACHE_NAME = 'mavigne-v1.85';
+// v1.86 — Météo mini badge dans bannière header · Fix toggle card (tacheLaMoinsAvancee) · Pill priorité collée · Fix sessions tracteur vides (re-pull)
+const CACHE_NAME = 'mavigne-v1.86';
 const SYNC_TAG   = 'mavigne-sync';
 const APP_SHELL = ['./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 const CDN_URLS = [
@@ -29,7 +30,7 @@ const CDN_URLS = [
   'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap',
 ];
 self.addEventListener('install', event => {
-  console.log('[SW] Install v1.85');
+  console.log('[SW] Install v1.86');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache =>
       cache.addAll(APP_SHELL).then(() =>
@@ -39,7 +40,7 @@ self.addEventListener('install', event => {
   );
 });
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v1.85');
+  console.log('[SW] Activate v1.86');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))

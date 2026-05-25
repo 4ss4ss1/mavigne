@@ -1044,6 +1044,11 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .hv2-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1;}
 .hv2-brand{font-family:'Cormorant Garamond',serif;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:3px;}
 .hv2-title{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;color:#fff;line-height:1.1;}
+.hv2-top-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px;position:relative;z-index:1;}
+.hv2-meteo-mini{background:rgba(0,0,0,0.20);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:5px 10px 5px 8px;display:flex;align-items:center;gap:6px;backdrop-filter:blur(6px);}
+.hv2-meteo-mini-ico{font-size:15px;line-height:1;flex-shrink:0;}
+.hv2-meteo-mini-temp{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;color:#fff;line-height:1;}
+.hv2-meteo-mini-desc{font-size:9px;color:rgba(255,255,255,0.55);line-height:1;margin-top:1px;}
 .hv2-avatar-wrap{position:relative;flex-shrink:0;cursor:pointer;}.hv2-avatar{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:#fff;flex-shrink:0;}.hv2-msg-badge{position:absolute;top:-3px;right:-3px;background:var(--rouge);color:white;font-size:9px;font-weight:700;font-family:'Outfit',sans-serif;min-width:16px;height:16px;border-radius:8px;display:none;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--vert);line-height:1;}
 .hv2-meta{display:flex;align-items:center;gap:10px;margin-top:18px;position:relative;z-index:1;}
 .hv2-saison-pill{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:500;color:rgba(255,255,255,0.85);display:flex;align-items:center;gap:6px;}
@@ -1420,8 +1425,17 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
         <div class="hv2-brand">Domaine</div>
         <div class="hv2-title">Ma Vigne</div>
       </div>
-      <div class="hv2-avatar-wrap" onclick="logout()">
-        <div class="hv2-avatar" id="up-ava-v2">N</div>
+      <div class="hv2-top-right">
+        <div class="hv2-avatar-wrap" onclick="logout()">
+          <div class="hv2-avatar" id="up-ava-v2">N</div>
+        </div>
+        <div class="hv2-meteo-mini" id="hv2-meteo-mini" style="display:none">
+          <div class="hv2-meteo-mini-ico" id="hv2-mini-ico">☀️</div>
+          <div>
+            <div class="hv2-meteo-mini-temp" id="hv2-mini-temp">—°C</div>
+            <div class="hv2-meteo-mini-desc" id="hv2-mini-desc">Bourgogne</div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="hv2-meta">
@@ -1431,20 +1445,8 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     </div>
   </div>
 
-  <!-- MÉTÉO CARD -->
-  <div class="hv2-meteo" id="hv2-meteo-card">
-    <div class="hv2-meteo-skel">
-      <div class="hv2-skel" style="width:42px;height:42px;border-radius:50%"></div>
-      <div style="flex:1">
-        <div class="hv2-skel" style="width:70px;height:20px;margin-bottom:7px"></div>
-        <div class="hv2-skel" style="width:130px;height:13px"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- GRANDE STAT CARD — pleine largeur -->
-  <div class="hv2-section-label">Aperçu du domaine</div>
-  <div class="hv2-card-solo">
+  <!-- GRANDE STAT CARD — pleine largeur, directement sous le header -->
+  <div class="hv2-card-solo" style="margin-top:16px">
     <div class="hv2-card hv2-card-vert hv2-card-fixed" id="home-stat-card" onclick="toggleHomeCard()" style="width:100%">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div class="hv2-card-picto" id="home-stat-picto" style="margin-bottom:0">🌿</div>
@@ -1460,7 +1462,6 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
       </div>
     </div>
   </div>
-
   <!-- PILL PRIORITÉ — dépliable -->
   <div class="home-prio-pill-wrap" id="home-prio-pill-wrap">
     <div class="home-prio-pill-row" onclick="togglePrioPill()">
@@ -2567,6 +2568,18 @@ function updateNavForRoles(){
 
 // ════ MÉTÉO ════
 let meteoData=null;
+function _renderMeteoMini(emoji,temp,wind,isCache){
+  const mini=document.getElementById('hv2-meteo-mini');
+  const icoEl=document.getElementById('hv2-mini-ico');
+  const tempEl=document.getElementById('hv2-mini-temp');
+  const descEl=document.getElementById('hv2-mini-desc');
+  if(!mini)return;
+  mini.style.display='flex';
+  mini.style.opacity=isCache?'0.7':'1';
+  if(icoEl)icoEl.textContent=emoji;
+  if(tempEl)tempEl.textContent=temp+'°C';
+  if(descEl)descEl.textContent='Vent '+wind+' km/h';
+}
 async function fetchMeteo(){
   try{
     const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=47.22&longitude=4.97&current=temperature_2m,weathercode,windspeed_10m,precipitation&daily=temperature_2m_min&timezone=Europe/Paris&forecast_days=3');
@@ -2580,28 +2593,15 @@ async function fetchMeteo(){
     meteoData={temp,desc,wind,emoji,date:new Date().toISOString().split('T')[0]};
     // Sauvegarder en cache avec timestamp
     try{localStorage.setItem('mavigne_meteo_cache',JSON.stringify({...meteoData,wind,rain,ts:Date.now()}));}catch(e){}
-    // Nouvelle card météo v2
-    const mc=document.getElementById('hv2-meteo-card');
-    if(mc){
-      mc.innerHTML=`<div class="hv2-meteo-icon">${emoji}</div>
-        <div class="hv2-meteo-main">
-          <div class="hv2-meteo-temp">${temp}°<small style="font-size:16px;color:var(--texte-doux)">C</small></div>
-          <div class="hv2-meteo-desc">${desc} · Bourgogne</div>
-        </div>
-        <div class="hv2-meteo-details">
-          <div class="hv2-meteo-detail">Vent <span>${wind} km/h</span></div>
-          <div class="hv2-meteo-detail">Pluie <span>${rain} mm</span></div>
-        </div>`;
-      // Alerte gel
-      if(d.daily&&d.daily.temperature_2m_min){
-        const gelIdx=d.daily.temperature_2m_min.findIndex(t=>t<3);
-        if(gelIdx>=0){
-          const jrs=['ce soir','demain','après-demain'];
-          const alertDiv=document.createElement('div');
-          alertDiv.style.cssText='margin:8px 16px 0;background:#FFF8E8;border:1px solid #F0D080;border-radius:12px;padding:9px 14px;font-size:12px;color:#7A5C10;display:flex;align-items:center;gap:8px;';
-          alertDiv.innerHTML=`⚠️ Risque de gel ${jrs[gelIdx]||''} (${Math.round(d.daily.temperature_2m_min[gelIdx])}°C)`;
-          mc.parentNode.insertBefore(alertDiv,mc.nextSibling);
-        }
+    // Badge météo mini dans le header
+    _renderMeteoMini(emoji,temp,wind);
+    // Alerte gel
+    if(d.daily&&d.daily.temperature_2m_min){
+      const gelIdx=d.daily.temperature_2m_min.findIndex(t=>t<3);
+      if(gelIdx>=0){
+        const jrs=['ce soir','demain','après-demain'];
+        const alertDiv=document.getElementById('home-gel-alert')||(()=>{const el=document.createElement('div');el.id='home-gel-alert';el.style.cssText='margin:8px 16px 0;background:#FFF8E8;border:1px solid #F0D080;border-radius:12px;padding:9px 14px;font-size:12px;color:#7A5C10;display:flex;align-items:center;gap:8px;';const card=document.getElementById('home-stat-card');if(card&&card.parentNode)card.parentNode.insertBefore(el,card);return el;})();
+        alertDiv.innerHTML=`⚠️ Risque de gel ${jrs[gelIdx]||''} (${Math.round(d.daily.temperature_2m_min[gelIdx])}°C)`;
       }
     }
     // Enregistrer dans journal seulement si un vrai travail existe ce jour
@@ -2626,32 +2626,14 @@ async function fetchMeteo(){
           else if(diffH<24)label=`il y a ${diffH}h`;
           else{const d=ts.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});label=`le ${d} à ${ts.getHours()}h${String(ts.getMinutes()).padStart(2,'0')}`;}
         }
-        mc.innerHTML=`<div class="hv2-meteo-cache-wrap">
-          <div class="hv2-meteo-cache-main">
-            <div class="hv2-meteo-icon" style="opacity:0.65">${cache.emoji||'☁️'}</div>
-            <div class="hv2-meteo-main">
-              <div class="hv2-meteo-temp" style="color:var(--texte-med)">${cache.temp||'—'}°<small style="font-size:16px;color:var(--texte-doux)">C</small></div>
-              <div class="hv2-meteo-desc">${cache.desc||''} · Bourgogne</div>
-            </div>
-            <div class="hv2-meteo-details">
-              <div class="hv2-meteo-detail">Vent <span>${cache.wind||'—'} km/h</span></div>
-              <div class="hv2-meteo-detail">Pluie <span>${cache.rain||0} mm</span></div>
-            </div>
-          </div>
-          <div class="hv2-meteo-cache-banner">
-            <div style="display:flex;align-items:center;gap:6px">
-              <div style="width:6px;height:6px;border-radius:50%;background:var(--or);flex-shrink:0"></div>
-              <span style="font-size:10px;color:var(--or);font-weight:600">Cache${label?' · '+label:''}</span>
-            </div>
-            <button onclick="fetchMeteo()" style="display:flex;align-items:center;gap:4px;padding:3px 10px;border-radius:8px;background:var(--or-pale);border:1px solid rgba(184,145,58,0.25);font-size:10px;font-weight:600;color:var(--or);cursor:pointer;font-family:'Outfit',sans-serif">🔄 Actualiser</button>
-          </div>
-        </div>`;
+        // Afficher en cache dans le badge mini (opacité réduite)
+        _renderMeteoMini(cache.emoji||'☁️',cache.temp||'—',cache.wind||'—',true);
       } else {
-        mc.innerHTML='<div style="font-size:12px;color:var(--texte-doux);padding:4px 0">Météo indisponible</div>';
+        // Badge vide offline
+        const mini=document.getElementById('hv2-meteo-mini');
+        if(mini){mini.style.display='flex';document.getElementById('hv2-mini-ico').textContent='📡';document.getElementById('hv2-mini-temp').textContent='—';document.getElementById('hv2-mini-desc').textContent='Hors ligne';}
       }
-    }catch(e2){
-      mc.innerHTML='<div style="font-size:12px;color:var(--texte-doux);padding:4px 0">Météo indisponible</div>';
-    }
+    }catch(e2){}
   }
 }
 function wmoDesc(c){const m={0:'Dégagé',1:'Peu nuageux',2:'Partiellement nuageux',3:'Couvert',45:'Brouillard',48:'Brouillard givrant',51:'Bruine légère',53:'Bruine modérée',55:'Bruine forte',61:'Pluie légère',63:'Pluie modérée',65:'Pluie forte',71:'Neige légère',73:'Neige modérée',75:'Neige forte',80:'Averses légères',81:'Averses modérées',82:'Averses fortes',95:'Orage',96:'Orage avec grêle'};return m[c]||'Variable';}
@@ -2745,7 +2727,7 @@ function getHomeCardData(){
 }
 
 function renderHomeCard(){
-  const {pctGlobal, tacheLaPlusAvancee, parcActives} = getHomeCardData();
+  const {pctGlobal, tacheLaMoinsAvancee, parcActives} = getHomeCardData();
   const saison = getSaisonActive();
   const {totalReste} = calcHeures();
   const _picto=document.getElementById('home-stat-picto');
@@ -4188,9 +4170,16 @@ function deleteTracteuer(){
 }
 
 // ════ TRACTEUR ════
+var _tracRepullDone=false;
 function renderTracteur(){
   // Init sélection tracteur au premier render
   if(!_tracSelId&&TRACTEURS_LIST.length)_tracSelId=TRACTEURS_LIST[0].id;
+  // Fix: si sessions vides et en ligne → re-pull Firebase une seule fois
+  if(!_tracRepullDone&&SESSIONS.length===0&&navigator.onLine&&window.fbPullAll){
+    _tracRepullDone=true;
+    window.fbPullAll().then(function(){if(window._syncLocalVars)window._syncLocalVars();renderTracteur();});
+    return;
+  }
 
   // Render pills parc tracteurs en en-tête
   renderTracParcPills();
