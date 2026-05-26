@@ -1,4 +1,8 @@
-// MA VIGNE — Service Worker v2.00
+// MA VIGNE — Service Worker v2.04
+// v2.04 — Bugs audit (suite) : I1 MDP_SOURCE supprimé · I2 double pull Firebase · I8 initMap collision · I9 isAdmin guard · I10 saveData membres · C7 sessions→renderHome · V8 mentions légales dark mode
+// v2.03 — Audit bugs mai 2026 : zero confirm() natif (ovConfirmDel générique + DANGER_CFG étendu) · C2 deleteTracteuer→deleteTracteur · C9 Arrachee cohérent PDF · I3 Chloé avatar · I5 jDateDeb/jDateFin global · V4 export version 4.3
+// v2.02 — États vides illustrés : SVG inline thématiques dans Journal, Parcelles, Tracteur, Phyto · drop-shadow CSS sur icônes · cohérence accent par module
+// v2.01 — Leaflet hors réseau : bandeau discret en haut de carte · show/hide via navigator.onLine · listeners online/offline branchés · polygones toujours actifs
 // v2.00 — Nav bar : fond sombre permanent #151A14 · halos colorés par module (vert/terre/or/acier/phyto) · labels blancs · anti-éblouissement terrain
 // v1.99 — Journal compact : cards ~30% plus hautes · barre latérale colorée statut · dot halo · tâche+ouvrier+parcelle 2 lignes · badge ✓/…
 // v1.98 — Zone dangereuse : overlay confirmation stylé · saisie mot-clé EFFACER · haptique [80,60,80] · suppression confirm() natif
@@ -13,7 +17,7 @@
 // v1.89 — Mise à jour auto sans unregister : controllerchange + _swReload() + rechargement différé si overlay ouvert
 // v1.88 — Fix critique : renderTracteur — isReadOnly remplacé par !isTractoriste()
 // v1.87 — Refacto stabilité : icon-192.png unifié · closeOv(null) sécurisé · fonctions export entretien hors bloc load
-const CACHE_NAME = 'mavigne-v2.00';
+const CACHE_NAME = 'mavigne-v2.04';
 const SYNC_TAG   = 'mavigne-sync';
 const APP_SHELL = ['./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 const CDN_URLS = [
@@ -22,7 +26,7 @@ const CDN_URLS = [
   'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap',
 ];
 self.addEventListener('install', event => {
-  console.log('[SW] Install v2.00');
+  console.log('[SW] Install v2.04');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache =>
       cache.addAll(APP_SHELL).then(() =>
@@ -32,7 +36,7 @@ self.addEventListener('install', event => {
   );
 });
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v2.00');
+  console.log('[SW] Activate v2.04');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))

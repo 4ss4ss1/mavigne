@@ -134,6 +134,7 @@ function showSyncBadge(msg, color) {
 window.addEventListener('online', function() {
   console.log('[Réseau] Connexion rétablie');
   showSyncBadge('📶 Connexion rétablie…', '#1A4A7A');
+  _updateMapOfflineBanner();
   // Vider la queue des sauvegardes en attente
   setTimeout(_flushQueue, 800);
   // Recharger les données fraîches depuis Firebase
@@ -152,6 +153,7 @@ window.addEventListener('online', function() {
 window.addEventListener('offline', function() {
   console.log('[Réseau] Connexion perdue');
   showSyncBadge('📵 Hors ligne', '#7A4F2E');
+  _updateMapOfflineBanner();
 });
 
 // ── Écouter les messages du Service Worker ──
@@ -300,6 +302,7 @@ function fbListen() {
             if(pid==='page-journal'&&window.renderJournalList) window.renderJournalList();
           }
           if(key==='sessions'&&pid==='page-tracteur'&&window.renderTracteur) window.renderTracteur();
+          if(key==='sessions'&&pid==='page-home'&&window.renderHome) window.renderHome();
           if((key==='traitements'||key==='catalogue')&&pid==='page-phyto'&&window.renderPhyto) window.renderPhyto();
           if((key==='reparateur'||key==='entretiens')&&pid==='page-tracteur'&&window.renderTracteur) window.renderTracteur();
         }
@@ -350,14 +353,13 @@ window._fbLoad = async function() {
   try {
     // ── Charger toutes les collections depuis Firebase ──
     console.log('🔥 Chargement depuis Firebase');
-    await fbPullStatic(); // pull ponctuel collections statiques
-    await fbPullAll();    // pull complet (inclut les collections temps réel)
+    await fbPullAll();    // pull complet (toutes collections, statiques + temps réel)
 
     // ── Initialiser les collections absentes de Firebase (sans écraser les existantes) ──
     // Chaque collection est vérifiée individuellement : si elle n'existe pas dans Firebase,
     // on la crée avec les données locales. Cela évite tout écrasement accidentel lors d'une
     // mise à jour ou d'un redémarrage, y compris pour tracteurs_list/entretiens/reparateur.
-    var initMap = {
+    var _initData = {
       parcelles:      window.PARCELLES,
       journal:        window.JOURNAL,
       sessions:       window.SESSIONS,
@@ -374,20 +376,17 @@ window._fbLoad = async function() {
       reparateur:     window.REPARATEUR,
       historique:     window.HISTORIQUE,
     };
-    for (var initKey in initMap) {
-      await fbPushIfAbsent(initKey, initMap[initKey]);
+    for (var initKey in _initData) {
+      await fbPushIfAbsent(initKey, _initData[initKey]);
     }
     // ── Réparation automatique des mdp manquants ──
-    var MDP_SOURCE = {Nico:'vigne21',Victor:'victor21',Dessi:'dessi21',Etienne:'etienne21',Chloe:'chloe21',Shana:'shana21',Alicia:'alicia21'};
+    // Aucun mot de passe en clair dans le source : les membres sans mdp reçoivent
+    // le mot de passe par défaut. L'administrateur doit ensuite inviter chaque
+    // utilisateur à changer son mot de passe via Réglages → Changer mon mot de passe.
     var membresFb = window.MEMBRES || [];
     var repaired = false;
     membresFb.forEach(function(m) {
-      if(!m.mdp && MDP_SOURCE[m.nom]) {
-        m.mdp = MDP_SOURCE[m.nom];
-        repaired = true;
-        console.log('[MDP] Réparation automatique pour', m.nom);
-      }
-      // Membres sans mdp (ex : saisonniers créés via UI) → mdp par défaut vigne21
+      // Membres sans mdp (ex : données migrées ou saisonniers créés via UI)
       if(!m.mdp) {
         m.mdp = 'vigne21';
         repaired = true;
@@ -940,7 +939,8 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .mbtn-del{width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--rouge);background:transparent;color:var(--rouge);font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;margin-top:10px;}
 .infobx{background:var(--phyto-pale);border-radius:10px;padding:10px 12px;margin-top:8px;font-size:11px;color:var(--phyto);display:none;}
 .empty-state{text-align:center;padding:40px 20px;color:var(--texte-doux);}
-.empty-state .ei{font-size:44px;margin-bottom:14px;line-height:1;opacity:0.8;}
+.empty-state .ei{font-size:44px;margin-bottom:14px;line-height:1;opacity:0.8;display:flex;align-items:center;justify-content:center;}
+.empty-state .ei svg{filter:drop-shadow(0 0 12px rgba(200,188,168,0.2));}
 .empty-state .et{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--texte-med);margin-bottom:8px;}
 .empty-state .ed{font-size:13px;color:var(--texte-doux);line-height:1.5;max-width:240px;margin:0 auto 18px;}
 .empty-cta-v{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:12px;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;border:none;cursor:pointer;background:var(--vert-med);color:white;}
@@ -967,6 +967,13 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 
 #map{height:340px;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-md);margin-bottom:12px;}
 .mapwrap{padding:0 16px;display:none;}.mapwrap.vis{display:block;}
+/* ── Bandeau hors-ligne carte Leaflet ── */
+.map-offline-banner{display:none;position:absolute;top:0;left:0;right:0;z-index:500;align-items:center;gap:8px;padding:8px 14px;background:rgba(100,55,10,0.90);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#f5d9a0;font-size:12px;font-weight:500;border-bottom:1px solid rgba(180,120,40,0.3);pointer-events:none;border-radius:16px 16px 0 0;animation:slideMapBanner .3s ease;}
+.map-offline-banner.show{display:flex;}
+@keyframes slideMapBanner{from{transform:translateY(-100%)}to{transform:translateY(0)}}
+/* wrapper relatif pour positionner le bandeau */
+#map-container{position:relative;margin-bottom:12px;}
+#map-container #map{margin-bottom:0;}
 .plist.vis{display:block;}.plist{display:none;}
 .leg-row{display:flex;gap:12px;flex-wrap:wrap;padding:0 16px;margin-bottom:16px;}
 .leg{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--texte-doux);}
@@ -1633,7 +1640,13 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     </div>
   </div>
   <div class="mapwrap" id="pwrapcarte">
-    <div id="map"></div>
+    <div id="map-container">
+      <div id="map"></div>
+      <div class="map-offline-banner" id="map-offline-banner">
+        <span style="font-size:15px;flex-shrink:0">📵</span>
+        <span>Fond de carte indisponible hors ligne — polygones toujours actifs</span>
+      </div>
+    </div>
     <div class="leg-row">
       <div class="leg"><div class="leg-dot" style="background:var(--vert-med)"></div>100%</div>
       <div class="leg"><div class="leg-dot" style="background:var(--or)"></div>75–99%</div>
@@ -1799,7 +1812,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
       <span class="mod-header-icon">⚙️</span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v4.3</div>
+        <div class="mod-header-sub">Ma Vigne v4.4</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
     </div>
@@ -1885,7 +1898,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
       <div class="set-row" style="border-radius:16px" onclick="openOv('ovMentions')"><div class="sr-l"><div class="sr-ico" style="background:#EEF2FF">⚖️</div><div><div class="sr-lbl">Mentions légales & confidentialité</div><div class="sr-sub">RGPD · Données personnelles · Copyright</div></div></div><div class="sr-arr">›</div></div>
     </div>
   </div>
-  <div class="ver-tag">Ma Vigne v4.3 · Dark mode · États vides · Météo cache · PDF rapport saison 🌿</div>
+  <div class="ver-tag">Ma Vigne v4.4 · Bugs audit : I1 MDP_SOURCE · I2 double pull · I8 initMap collision · I9 guard isAdmin · I10 saveData · C7 sessions→home · V8 mentions légales dark 🔒</div>
 </div>
 
 <!-- ══════ NAV ══════ -->
@@ -2223,7 +2236,7 @@ let MEMBRES = [
   {nom:'Victor', email:'leravictor904@gmail.com', roles:['ouvrier','tractoriste'], statut:'Actif', couleur:'#1A4A7A', mdp:'victor21'},
   {nom:'Dessi', email:'dessi.9332@yahoo.com', roles:['ouvrier'], statut:'Actif', couleur:'#7A4F2E', mdp:'dessi21'},
   {nom:'Etienne', email:'etienne.marchand.21@gmail.com', roles:['ouvrier','tractoriste'], statut:'Actif', couleur:'#5B2D8E', mdp:'etienne21'},
-  {nom:'Chloe', email:'tonnelierchloe21@gmail.com', roles:['ouvrier'], statut:'Actif', couleur:'#B8913A', mdp:'chloe21'},
+  {nom:'Chloé', email:'tonnelierchloe21@gmail.com', roles:['ouvrier'], statut:'Actif', couleur:'#B8913A', mdp:'chloe21'},
   {nom:'Shana', email:'nana.badyka@gmail.com', roles:['ouvrier'], statut:'Actif', couleur:'#C0392B', mdp:'shana21'},
   {nom:'Alicia', email:'alicia.dupont58@live.fr', roles:['ouvrier'], statut:'Actif', couleur:'#1A5276', mdp:'alicia21'},
 ];
@@ -2506,6 +2519,7 @@ const DANGER_CFG = {
 let _dangerAction = 'reset';
 
 function openOvDanger(action) {
+  if(!isAdmin()) return; // zone dangereuse réservée aux admins
   action = action || 'reset';
   if(!DANGER_CFG[action]) return;
   _dangerAction = action;
@@ -2561,7 +2575,7 @@ window.loadData = loadData;
 
 // État
 let currentUser=null;
-let pFilter='toutes',pTacheFilter='toutes',pSearch='',jQui='tous',jTache='toutes',jSearch='',jParcelle='toutes',phTab='reg',phFilter='tous';
+let pFilter='toutes',pTacheFilter='toutes',pSearch='',jQui='tous',jTache='toutes',jSearch='',jParcelle='toutes',jDateDeb='',jDateFin='',phTab='reg',phFilter='tous';
 let fCond='tous',fAct='toutes',selEmoji='🚜';
 // ════ KML INTÉGRÉ — polygones des 46 parcelles du domaine ════
 // Généré depuis Domaine.kml — coordonnées [lat, lng] au format Leaflet
@@ -3227,8 +3241,8 @@ function renderParcelles(){
   const cont=document.getElementById('pList');
   if(!data.length){
     const msg=pTacheFilter!=='toutes'
-      ?`<div class="empty-state"><div class="ei">✅</div><div class="et">${pTacheFilter} terminé</div><div class="ed">Cette tâche est terminée sur toutes les parcelles de la saison !</div></div>`
-      :`<div class="empty-state"><div class="ei">🔍</div><div class="et">Aucun résultat</div><div class="ed">Aucune parcelle ne correspond aux filtres actifs.</div></div>`;
+      ?`<div class="empty-state"><div class="ei"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="28,4 50,16 50,44 28,56 6,44 6,16" fill="none" stroke="var(--texte-doux)" stroke-width="1.8"/><polyline points="18,28 25,35 38,21" stroke="var(--texte-doux)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="et">${pTacheFilter} terminé</div><div class="ed">Cette tâche est terminée sur toutes les parcelles de la saison !</div></div>`
+      :`<div class="empty-state"><div class="ei"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="10" width="18" height="18" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.8" opacity="0.4"/><rect x="32" y="10" width="18" height="18" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.8" opacity="0.4"/><rect x="6" y="34" width="18" height="14" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.8" opacity="0.4"/><rect x="32" y="34" width="18" height="14" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.8" opacity="0.4"/><line x1="14" y1="5" x2="42" y2="53" stroke="var(--texte-doux)" stroke-width="2" stroke-linecap="round" opacity="0.65"/></svg></div><div class="et">Aucun résultat</div><div class="ed">Aucune parcelle ne correspond aux filtres actifs.</div></div>`;
     cont.innerHTML=msg;return;
   }
   cont.innerHTML=data.map(p=>{
@@ -3559,6 +3573,8 @@ function switchPTab(tab){
       setTimeout(function(){leafMap.invalidateSize();},100);
       refreshMapColors();
     }
+    // Afficher le bandeau hors-ligne si pas de connexion
+    _updateMapOfflineBanner();
   }
 }
 var _leafLayers=[]; // stocke {poly, parcelle} pour rafraîchir les couleurs sans recréer la carte
@@ -3590,6 +3606,11 @@ function refreshMapColors(){
     item.poly.setStyle({color:cl.col,fillColor:cl.col});
     item.poly.setPopupContent('<b>'+item.parcelle.nom+'</b><br>'+item.parcelle.surface+' ha · '+cl.pct+'%');
   });
+}
+function _updateMapOfflineBanner(){
+  var b=document.getElementById('map-offline-banner');
+  if(!b)return;
+  b.classList.toggle('show',!navigator.onLine);
 }
 // fchip + pSearch listeners moved to DOMContentLoaded
 
@@ -3687,8 +3708,8 @@ function renderJournalList(){
   if(!data.length){
     const hasFilters=jQui!=='tous'||jTache!=='toutes'||jSearch||jParcelle!=='toutes'||jDateDeb||jDateFin;
     tl.innerHTML=hasFilters
-      ?`<div class="empty-state"><div class="ei">🔍</div><div class="et">Aucun résultat</div><div class="ed">Aucune entrée ne correspond aux filtres actifs.</div><button class="empty-cta-or" onclick="clearAllJFiltres()">✕ Effacer les filtres</button></div>`
-      :`<div class="empty-state"><div class="ei">📋</div><div class="et">Journal vide</div><div class="ed">Aucun travail enregistré pour cette saison. Les entrées apparaîtront ici au fil des journées.</div>${canWrite()?'<button class="empty-cta-v" onclick="openOv(\'ovJournalEntry\')">+ Ajouter un travail</button>':''}</div>`;
+      ?`<div class="empty-state"><div class="ei"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="14" stroke="var(--texte-doux)" stroke-width="2" fill="none"/><line x1="34" y1="34" x2="48" y2="48" stroke="var(--texte-doux)" stroke-width="2.5" stroke-linecap="round"/><line x1="18" y1="24" x2="30" y2="24" stroke="var(--texte-doux)" stroke-width="2" stroke-linecap="round" opacity="0.5"/></svg></div><div class="et">Aucun résultat</div><div class="ed">Aucune entrée ne correspond aux filtres actifs.</div><button class="empty-cta-or" onclick="clearAllJFiltres()">✕ Effacer les filtres</button></div>`
+      :`<div class="empty-state"><div class="ei"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="6" width="40" height="46" rx="5" fill="none" stroke="var(--texte-doux)" stroke-width="1.8"/><rect x="16" y="18" width="24" height="2.5" rx="1.25" fill="var(--texte-doux)" opacity="0.3"/><rect x="16" y="24" width="17" height="2" rx="1" fill="var(--texte-doux)" opacity="0.2"/><rect x="16" y="30" width="21" height="2" rx="1" fill="var(--texte-doux)" opacity="0.2"/><circle cx="41" cy="41" r="9" fill="var(--fond)" stroke="var(--texte-doux)" stroke-width="1.8"/><line x1="41" y1="36.5" x2="41" y2="45.5" stroke="var(--texte-doux)" stroke-width="2" stroke-linecap="round"/><line x1="36.5" y1="41" x2="45.5" y2="41" stroke="var(--texte-doux)" stroke-width="2" stroke-linecap="round"/></svg></div><div class="et">Journal vide</div><div class="ed">Aucun travail enregistré pour cette saison. Les entrées apparaîtront ici au fil des journées.</div>${canWrite()?'<button class="empty-cta-v" onclick="openOv(\'ovJournalEntry\')">+ Ajouter un travail</button>':''}</div>`;
     return;
   }
   tl.innerHTML=Object.entries(grouped).map(([date,items])=>`
@@ -3863,14 +3884,15 @@ function saveReparateur(){
 
 function retourReparateur(){
   var t=getTracteurSel();if(!t)return;
-  if(!confirm('Confirmer le retour de '+t.nom+' ?'))return;
-  delete REPARATEUR[t.id];
-  window.REPARATEUR=REPARATEUR;
-  localStorage.removeItem('mavigne_notif_rep_'+t.id);
-  saveData('reparateur');
-  renderTracTabs();
-  renderRepBanner();
-  showToast('Tracteur de retour ✓','#3D6B27');
+  openConfirmDel('Retour de '+t.nom+' ?','Confirmer que le tracteur est de retour.',function(){
+    delete REPARATEUR[t.id];
+    window.REPARATEUR=REPARATEUR;
+    localStorage.removeItem('mavigne_notif_rep_'+t.id);
+    saveData('reparateur');
+    renderTracTabs();
+    renderRepBanner();
+    showToast('Tracteur de retour ✓','#3D6B27');
+  });
 }
 
 function saveReporter(){
@@ -4104,7 +4126,7 @@ function renderEntretiens(){
   var hasAnoActive=anomActives.length>0;
 
   if(!fiches.length){
-    el.innerHTML='<div style="text-align:center;padding:24px 0;color:var(--texte-doux);font-size:13px">📋 Aucune fiche d\'entretien<br><span style="font-size:11px">Ajoutez une fiche avec le bouton ＋</span></div>';
+    el.innerHTML='<div class="empty-state" style="padding:32px 20px"><div class="ei"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="28" cy="28" r="20" fill="none" stroke="var(--texte-doux)" stroke-width="1.8"/><path d="M28 16 L30 24 L38 24 L32 30 L34 38 L28 33 L22 38 L24 30 L18 24 L26 24 Z" fill="none" stroke="var(--texte-doux)" stroke-width="1.5" opacity="0.5"/><circle cx="28" cy="28" r="4" fill="var(--texte-doux)" opacity="0.3"/></svg></div><div class="et">Aucune fiche d\'entretien</div><div class="ed">Ajoutez une fiche avec le bouton ＋ pour commencer le suivi.</div></div>';
     return;
   }
 
@@ -4168,7 +4190,7 @@ function renderListeFiches(){
   var admin=isAdmin();
 
   if(!fiches.length){
-    el.innerHTML='<div style="text-align:center;padding:32px 0;color:var(--texte-doux);font-size:13px">📋 Aucune fiche d\'entretien</div>';
+    el.innerHTML='<div class="empty-state" style="padding:32px 20px"><div class="ei"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="28" cy="28" r="20" fill="none" stroke="var(--texte-doux)" stroke-width="1.8"/><path d="M28 16 L30 24 L38 24 L32 30 L34 38 L28 33 L22 38 L24 30 L18 24 L26 24 Z" fill="none" stroke="var(--texte-doux)" stroke-width="1.5" opacity="0.5"/><circle cx="28" cy="28" r="4" fill="var(--texte-doux)" opacity="0.3"/></svg></div><div class="et">Aucune fiche</div><div class="ed">Aucun entretien enregistré pour ce tracteur.</div></div>';
     return;
   }
 
@@ -4228,13 +4250,14 @@ function renderListeFiches(){
 // ── Supprimer une fiche (admin) ──
 function deleteFiche(id){
   if(!isAdmin())return;
-  if(!confirm('Supprimer cette fiche ? Cette action est irréversible.'))return;
-  ENTRETIENS=ENTRETIENS.filter(function(f){return f.id!==id;});
-  window.ENTRETIENS=ENTRETIENS;
-  saveData('entretiens');
-  renderListeFiches();
-  renderEntretiens();
-  showToast('Fiche supprimée','#C0392B');
+  openConfirmDel('Supprimer cette fiche ?','Cette action est irréversible.',function(){
+    ENTRETIENS=ENTRETIENS.filter(function(f){return f.id!==id;});
+    window.ENTRETIENS=ENTRETIENS;
+    saveData('entretiens');
+    renderListeFiches();
+    renderEntretiens();
+    showToast('Fiche supprimée','#C0392B');
+  });
 }
 
 // ── Ouvrir l'overlay édition d'une fiche existante (admin) ──
@@ -4434,27 +4457,29 @@ function saveEditTracteur(){
   showToast('Tracteur modifié ✓','#3D6B27');
 }
 
-function deleteTracteuer(){
+function deleteTracteur(){
   var id=document.getElementById('et-id').value;
   if(TRACTEURS_LIST.length<=1){showToast('Impossible — 1 tracteur minimum','#C0392B');return;}
   var t=TRACTEURS_LIST.find(function(x){return x.id===id;});
-  if(!t||!confirm('Supprimer '+t.nom+' ? Les fiches d\'entretien associées seront aussi supprimées.'))return;
-  TRACTEURS_LIST=TRACTEURS_LIST.filter(function(x){return x.id!==id;});
-  window.TRACTEURS_LIST=TRACTEURS_LIST;
-  ENTRETIENS=ENTRETIENS.filter(function(f){return f.tracteurId!==id;});
-  window.ENTRETIENS=ENTRETIENS;
-  delete REPARATEUR[id];
-  if(_tracSelId===id)_tracSelId=TRACTEURS_LIST[0]?.id||null;
-  saveData('tracteurs_list');
-  saveData('entretiens');
-  saveData('reparateur');
-  closeOv(null,'ovEditTracteur');
-  renderTracTabs();
-  renderTracInfoBar();
-  renderRepBanner();
-  renderEntretiens();
-  renderTracteurSet();
-  showToast('Tracteur supprimé','#C0392B');
+  if(!t)return;
+  openConfirmDel('Supprimer '+t.nom+' ?','Les fiches d\'entretien associées seront aussi supprimées.',function(){
+    TRACTEURS_LIST=TRACTEURS_LIST.filter(function(x){return x.id!==id;});
+    window.TRACTEURS_LIST=TRACTEURS_LIST;
+    ENTRETIENS=ENTRETIENS.filter(function(f){return f.tracteurId!==id;});
+    window.ENTRETIENS=ENTRETIENS;
+    delete REPARATEUR[id];
+    if(_tracSelId===id)_tracSelId=TRACTEURS_LIST[0]?.id||null;
+    saveData('tracteurs_list');
+    saveData('entretiens');
+    saveData('reparateur');
+    closeOv(null,'ovEditTracteur');
+    renderTracTabs();
+    renderTracInfoBar();
+    renderRepBanner();
+    renderEntretiens();
+    renderTracteurSet();
+    showToast('Tracteur supprimé','#C0392B');
+  });
 }
 
 // ════ TRACTEUR ════
@@ -4538,7 +4563,7 @@ function renderTracteur(){
   const sl=document.getElementById('sessions-list');
   if(!sl)return;
   if(!data.length){
-    sl.innerHTML=`<div class="empty-state"><div class="ei">🚜</div><div class="et">Aucune session</div><div class="ed">Aucun passage tracteur enregistré pour cette saison.</div>${isTractoriste()?'<button class="empty-cta-ac" onclick="openNewSession()">＋ Démarrer une session</button>':''}</div>`;
+    sl.innerHTML=`<div class="empty-state"><div class="ei"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="26" width="32" height="16" rx="4" fill="none" stroke="var(--texte-doux)" stroke-width="1.8"/><rect x="36" y="32" width="14" height="10" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.5"/><circle cx="13" cy="44" r="6" fill="none" stroke="var(--texte-doux)" stroke-width="2"/><circle cx="44" cy="44" r="5" fill="none" stroke="var(--texte-doux)" stroke-width="2"/><rect x="20" y="14" width="13" height="13" rx="2" fill="none" stroke="var(--texte-doux)" stroke-width="1.5" opacity="0.5"/><line x1="26.5" y1="9" x2="26.5" y2="14" stroke="var(--texte-doux)" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/></svg></div><div class="et">Aucune session</div><div class="ed">Aucun passage tracteur enregistré pour cette saison.</div>${isTractoriste()?'<button class="empty-cta-ac" onclick="openNewSession()">＋ Démarrer une session</button>':''}</div>`;
     // Peupler quand même les selects du form nouvelle session
     _fillNewSessionForm();
     return;
@@ -5234,7 +5259,7 @@ function editCond(nom){
   openOv('ovEditCond');
 }
 function saveEditCond(){if(!isAdmin())return;const nom=document.getElementById('ec-nom').value;const c=CONDUCTEURS.find(x=>x.nom===nom);if(c)c.statut=document.getElementById('ec-st').value;saveData('conducteurs','🚜 Conducteur mis à jour');document.getElementById('ovEditCond').classList.remove('open');renderTracteur();}
-function deleteCond(){const nom=document.getElementById('ec-nom').value;if(nom==='Nico'){alert('Impossible.');return;}if(!confirm('Supprimer '+nom+'?'))return;CONDUCTEURS=CONDUCTEURS.filter(c=>c.nom!==nom);saveData('conducteurs');document.getElementById('ovEditCond').classList.remove('open');renderTracteur();}
+function deleteCond(){const nom=document.getElementById('ec-nom').value;if(nom==='Nico'){showToast('Impossible — admin protégé','#C0392B');return;}openConfirmDel('Supprimer '+nom+' ?','Ce conducteur sera retiré de la liste.',function(){CONDUCTEURS=CONDUCTEURS.filter(c=>c.nom!==nom);saveData('conducteurs');closeOv(null,'ovEditCond');renderTracteur();showToast(nom+' supprimé','#C0392B');});}
 
 // ════ PHYTO ════
 function renderPhyto(){
@@ -5251,7 +5276,7 @@ function renderPhyto(){
   document.getElementById('phyto-type-row').innerHTML=types.map(t=>`<div class="pchip2 ${phFilter===t?'active':''}" onclick="phFilter='${t}';renderPhyto()">${t==='tous'?'Tous':(TEMJ[t]||'')+' '+t}</div>`).join('');
   let data=TRAITEMENTS.filter(t=>phFilter==='tous'||t.type===phFilter).sort((a,b)=>b.date.localeCompare(a.date));
   const reg=document.getElementById('traitements-list');
-  if(!data.length)reg.innerHTML=`<div class="empty-state"><div class="ei">🌿</div><div class="et">Aucun traitement</div><div class="ed">Le registre phytosanitaire est vide pour cette saison. Enregistrez votre premier traitement pour commencer le suivi DAR.</div>${isAdmin()?'<button class="empty-cta-ph" onclick="openOv(\'ovNewTrait\')">+ Nouveau traitement</button>':''}</div>`;
+  if(!data.length)reg.innerHTML=`<div class="empty-state"><div class="ei"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M28 8 C28 8 12 22 12 34 C12 43 19 50 28 50 C37 50 44 43 44 34 C44 22 28 8 28 8Z" fill="none" stroke="var(--texte-doux)" stroke-width="1.8"/><path d="M28 22 C28 22 20 30 20 36 C20 40 24 44 28 44" stroke="var(--texte-doux)" stroke-width="1.5" stroke-linecap="round" opacity="0.4" fill="none"/><circle cx="42" cy="14" r="8" fill="none" stroke="var(--texte-doux)" stroke-width="1.5"/><line x1="42" y1="9" x2="42" y2="19" stroke="var(--texte-doux)" stroke-width="2" stroke-linecap="round"/><line x1="37" y1="14" x2="47" y2="14" stroke="var(--texte-doux)" stroke-width="2" stroke-linecap="round"/></svg></div><div class="et">Aucun traitement</div><div class="ed">Le registre phytosanitaire est vide pour cette saison. Enregistrez votre premier traitement pour commencer le suivi DAR.</div>${isAdmin()?'<button class="empty-cta-ph" onclick="openOv(\'ovNewTrait\')">+ Nouveau traitement</button>':''}</div>`;
   else reg.innerHTML=data.map((t,i)=>{
     const prod=CATALOGUE.find(p=>p.nom===t.produit);
     const darR=prod?Math.max(0,prod.dar-Math.floor((today-new Date(t.date))/86400000)):null;
@@ -5380,12 +5405,13 @@ function confirmDeleteTraitement(){
   if(_traitDetailIdx===null)return;
   const t=TRAITEMENTS[_traitDetailIdx];
   if(!t)return;
-  if(!confirm(`Supprimer le traitement ?\n\n${t.produit} — ${fmtDate(t.date)}\n\nCette action est irréversible.`))return;
-  TRAITEMENTS.splice(_traitDetailIdx,1);
-  saveData('traitements');
-  closeOv(null,'ovTraitDetail');
-  _traitDetailIdx=null;
-  renderPhyto();
+  openConfirmDel('Supprimer ce traitement ?',t.produit+' — '+fmtDate(t.date),function(){
+    TRAITEMENTS.splice(_traitDetailIdx,1);
+    saveData('traitements');
+    closeOv(null,'ovTraitDetail');
+    _traitDetailIdx=null;
+    renderPhyto();
+  },'🌿');
 }
 
 // ════ RÉGLAGES ════
@@ -5519,15 +5545,16 @@ function saveEditActTrac(){
 function deleteActivite(){
   var actNom=document.getElementById('eat-act-nom').value;
   if(!actNom)return;
-  if(!confirm('Supprimer l\'activité "'+actNom+'" ? Les sessions existantes ne seront pas affectées.'))return;
-  ACTIVITES=ACTIVITES.filter(function(a){return a.nom!==actNom;});
-  window.ACTIVITES=ACTIVITES;
-  if(navigator.vibrate)navigator.vibrate([80,60,80]);
-  saveData('activites');
-  closeOv(null,'ovEditActTrac');
-  renderActTracList();
-  renderTracteur();
-  showToast('"'+actNom+'" supprimée','#C0392B');
+  openConfirmDel('Supprimer "'+actNom+'" ?','Les sessions existantes ne seront pas affectées.',function(){
+    ACTIVITES=ACTIVITES.filter(function(a){return a.nom!==actNom;});
+    window.ACTIVITES=ACTIVITES;
+    if(navigator.vibrate)navigator.vibrate([80,60,80]);
+    saveData('activites');
+    closeOv(null,'ovEditActTrac');
+    renderActTracList();
+    renderTracteur();
+    showToast('"'+actNom+'" supprimée','#C0392B');
+  },'🚜');
 }
 
 // ── Ouvrir overlay nouvelle activité (reset + pré-remplissage) ──
@@ -5626,7 +5653,16 @@ function _setActChampType(pfx,type){
 function activateSaison(nom){SAISONS.forEach(s=>s.active=s.nom===nom);saveData('saisons');renderReglages();renderParcelles();computePStats();}
 function saveSaison(){const nom=document.getElementById('ns-nom').value.trim();if(!nom)return;SAISONS.push({nom,periode:document.getElementById('ns-periode').value,active:false});saveData('saisons');document.getElementById('ovSaison').classList.remove('open');document.getElementById('ns-nom').value='';document.getElementById('ns-periode').value='';renderReglages();}
 function saveTache(){const nom=document.getElementById('nt-nom').value.trim(),hha=parseInt(document.getElementById('nt-hha').value)||30,saison=document.getElementById('nt-saison').value;if(!nom)return;TACHES.push({nom,hha,saison});saveData('taches','📋 Tâche ajoutée');document.getElementById('ovTache').classList.remove('open');document.getElementById('nt-nom').value='';document.getElementById('nt-hha').value='';renderReglages();}
-function deleteTache(nom){if(!confirm(`Supprimer la tâche "${nom}" ?`))return;TACHES=TACHES.filter(t=>t.nom!==nom);saveData('taches','🗑️ Tâche supprimée');renderReglages();}
+function deleteTache(nom){
+  DANGER_CFG.deleteTache={
+    icon:'🌿',title:'Supprimer "'+nom+'" ?',
+    sub:'Cette tâche sera retirée de toutes les saisons.',
+    word:'SUPPRIMER',btn:'🗑️ Supprimer la tâche',successSub:'Tâche supprimée.',
+    items:['L\'historique journal n\'est pas affecté','Les stats de cette tâche disparaîtront'],
+    exec:function(){TACHES=TACHES.filter(t=>t.nom!==nom);saveData('taches','🗑️ Tâche supprimée');renderReglages();}
+  };
+  openOvDanger('deleteTache');
+}
 
 // Membres
 function toggleRole(r){rolesTemp[r]=!rolesTemp[r];const el=document.getElementById('rc-'+r);el.classList.toggle('on',rolesTemp[r]);el.textContent=rolesTemp[r]?'✓':'';}
@@ -5654,15 +5690,9 @@ function deleteMembre(){
   const idx=MEMBRES.findIndex(m=>m.nom===nom);
   if(idx>=0) MEMBRES.splice(idx,1);
   window.MEMBRES=MEMBRES;
-  try{
-    const raw=localStorage.getItem('mavigne_data_v1');
-    const d=raw?JSON.parse(raw):{};
-    d.MEMBRES=MEMBRES.map(m=>({...m}));
-    localStorage.setItem('mavigne_data_v1',JSON.stringify(d));
-  }catch(e){}
-  db.collection('mavigne').doc('membres').set({value:MEMBRES.map(m=>({...m}))})
-    .then(()=>location.reload())
-    .catch(()=>location.reload());
+  saveData('membres','🗑 Membre supprimé');
+  closeOv(null,'ovEditMembre');
+  renderReglages();
 }
 
 // ════ OVERLAYS ════
@@ -5991,39 +6021,38 @@ function notifyPriorityChange(){
 // Crée un snapshot de la saison active et l'archive dans HISTORIQUE
 function archiveSaisonActive(){
   const saison = getSaisonActive();
-  // Vérifie si un snapshot existe déjà pour cette saison
   const existing = HISTORIQUE.findIndex(h=>h.saisonNom===saison.nom);
-  const msg = existing>=0
-    ? `🔄 Écraser le snapshot de "${saison.nom}" avec l'état actuel ?`
-    : `📦 Archiver "${saison.nom}" dans l'historique ?\n\nCela sauvegarde l'état actuel des parcelles, du journal et des sessions.`;
-  if(!confirm(msg)) return;
-
-  const snapshot = {
-    saisonNom: saison.nom,
-    periode: saison.periode,
-    archivedAt: new Date().toISOString(),
-    // Snapshot complet
-    parcelles: deepClone(PARCELLES),
-    journal: deepClone(JOURNAL.filter(j=>!j.meteo)),
-    sessions: deepClone(SESSIONS),
-    taches: deepClone(getTachesSaison()),
-    travaux: deepClone(TRAVAUX),
-    // Calculs récap
-    stats: _calcHistoStats(
-      PARCELLES, JOURNAL.filter(j=>!j.meteo), getTachesSaison(), TRAVAUX
-    )
+  // Préparer la config DANGER selon contexte
+  DANGER_CFG.archiveSaison = {
+    icon: existing>=0 ? '🔄' : '📦',
+    title: existing>=0 ? 'Écraser le snapshot ?' : 'Archiver la saison ?',
+    sub: existing>=0 ? 'Le snapshot existant de "'+saison.nom+'" sera remplacé par l\'état actuel.' : 'Sauvegarde l\'état actuel des parcelles, du journal et des sessions.',
+    word: 'ARCHIVER',
+    btn: existing>=0 ? '🔄 Écraser le snapshot' : '📦 Archiver la saison',
+    successSub: 'Snapshot enregistré.',
+    items: existing>=0
+      ? ['Le snapshot précédent sera écrasé','L\'opération est réversible en réarchivant']
+      : ['État des parcelles', 'Entrées journal', 'Sessions tracteur'],
+    exec: function(){
+      const snapshot = {
+        saisonNom: saison.nom,
+        periode: saison.periode,
+        archivedAt: new Date().toISOString(),
+        parcelles: deepClone(PARCELLES),
+        journal: deepClone(JOURNAL.filter(j=>!j.meteo)),
+        sessions: deepClone(SESSIONS),
+        taches: deepClone(getTachesSaison()),
+        travaux: deepClone(TRAVAUX),
+        stats: _calcHistoStats(PARCELLES, JOURNAL.filter(j=>!j.meteo), getTachesSaison(), TRAVAUX)
+      };
+      if(existing>=0) HISTORIQUE[existing] = snapshot;
+      else HISTORIQUE.unshift(snapshot);
+      window.HISTORIQUE = HISTORIQUE;
+      saveData('historique');
+      renderHistorique();
+    }
   };
-
-  if(existing>=0) HISTORIQUE[existing] = snapshot;
-  else HISTORIQUE.unshift(snapshot);
-
-  window.HISTORIQUE = HISTORIQUE;
-  saveData('historique');
-
-  // Fermer et re-rendre
-  renderHistorique();
-  const el = document.getElementById('histo-archive-feedback');
-  if(el){ el.textContent='✅ Snapshot enregistré !'; el.style.display='block'; setTimeout(()=>el.style.display='none',2500); }
+  openOvDanger('archiveSaison');
 }
 
 // Calcule les stats d'un snapshot
@@ -6230,13 +6259,24 @@ function histoSelectA(key){ histoSelA=key; renderHistorique(); }
 function histoSelectB(key){ histoSelB=key; renderHistorique(); }
 
 function deleteHistoSnapshot(nomSaison){
-  if(!confirm(`Supprimer le snapshot de "${nomSaison}" ? Cette action est irréversible.`)) return;
-  HISTORIQUE = HISTORIQUE.filter(h=>h.saisonNom!==nomSaison);
-  window.HISTORIQUE = HISTORIQUE;
-  if(histoSelA===nomSaison) histoSelA=null;
-  if(histoSelB===nomSaison) histoSelB=null;
-  saveData('historique');
-  renderHistorique();
+  DANGER_CFG.deleteHisto = {
+    icon:'🗑️',
+    title:'Supprimer ce snapshot ?',
+    sub:'Snapshot de "'+nomSaison+'" — action irréversible.',
+    word:'SUPPRIMER',
+    btn:'🗑️ Supprimer le snapshot',
+    successSub:'Snapshot supprimé.',
+    items:['Toutes les données de ce snapshot seront perdues','Cette action est irréversible'],
+    exec:function(){
+      HISTORIQUE = HISTORIQUE.filter(h=>h.saisonNom!==nomSaison);
+      window.HISTORIQUE = HISTORIQUE;
+      if(histoSelA===nomSaison) histoSelA=null;
+      if(histoSelB===nomSaison) histoSelB=null;
+      saveData('historique');
+      renderHistorique();
+    }
+  };
+  openOvDanger('deleteHisto');
 }
 
 // ════ EXPORT ════
@@ -6255,7 +6295,7 @@ function showExportFeedback(msg){
   setTimeout(()=>{el.style.display='none';},3000);
 }
 function exportJSON(){
-  const data={exportDate:new Date().toISOString(),version:'4.1',domaine:'Ma Vigne',parcelles:PARCELLES,journal:JOURNAL.filter(j=>!j.meteo),sessions:SESSIONS,traitements:TRAITEMENTS,membres:MEMBRES.map(m=>({nom:m.nom,roles:m.roles,statut:m.statut})),saisons:SAISONS,taches:TACHES,historique:HISTORIQUE};
+  const data={exportDate:new Date().toISOString(),version:'4.3',domaine:'Domaine Marchand-Grillot',parcelles:PARCELLES,journal:JOURNAL.filter(j=>!j.meteo),sessions:SESSIONS,traitements:TRAITEMENTS,membres:MEMBRES.map(m=>({nom:m.nom,roles:m.roles,statut:m.statut})),saisons:SAISONS,taches:TACHES,historique:HISTORIQUE};
   const date=new Date().toISOString().split('T')[0];
   dlFile(JSON.stringify(data,null,2),`mavigne_export_${date}.json`,'application/json');
   showExportFeedback('✅ Export JSON téléchargé !');
@@ -6280,29 +6320,27 @@ function importJSON(input){
     }
     const nb=data.parcelles.length;
     const date=data.exportDate?new Date(data.exportDate).toLocaleDateString('fr-FR'):'inconnue';
-    if(!confirm(`📂 Charger cet export ?\n\n• ${nb} parcelles\n• Export du ${date}\n\n⚠️ Les données actuelles seront remplacées.`)){return;}
-    // Appliquer les données
-    if(data.parcelles){PARCELLES.length=0;data.parcelles.forEach(p=>PARCELLES.push(p));}
-    if(data.journal){JOURNAL=data.journal;window.JOURNAL=JOURNAL;}
-    if(data.sessions){SESSIONS=data.sessions;window.SESSIONS=SESSIONS;}
-    if(data.traitements){TRAITEMENTS=data.traitements;window.TRAITEMENTS=TRAITEMENTS;}
-    if(data.membres){MEMBRES=data.membres;window.MEMBRES=MEMBRES;}
-    if(data.saisons){SAISONS=data.saisons;window.SAISONS=SAISONS;}
-    if(data.taches){TACHES=data.taches;window.TACHES=TACHES;}
-    if(data.historique){HISTORIQUE=data.historique;window.HISTORIQUE=HISTORIQUE;}
-    // Recalculer les travaux depuis les parcelles importées
-    if(typeof recalcAllTravaux==='function')recalcAllTravaux();
-    // Sauvegarder
-    if(typeof saveData==='function'){
-      ['parcelles','journal','sessions','traitements','membres','saisons','taches','historique'].forEach(k=>saveData(k));
-    }
-    // Rafraîchir l'UI
-    if(typeof renderHome==='function')renderHome();
-    if(typeof renderParcelles==='function')renderParcelles();
-    if(typeof computePStats==='function')computePStats();
-    if(typeof renderReglages==='function')renderReglages();
-    closeOv(null,'ovExport');
-    showImportFeedback(`✅ Import réussi — ${nb} parcelles chargées depuis l'export du ${date}.`,'var(--vert-pale)','var(--vert)');
+    openConfirmDel('Charger cet export ?',''+nb+' parcelles · Export du '+date+'\nLes données actuelles seront remplacées.',function(){
+      // Appliquer les données
+      if(data.parcelles){PARCELLES.length=0;data.parcelles.forEach(p=>PARCELLES.push(p));}
+      if(data.journal){JOURNAL=data.journal;window.JOURNAL=JOURNAL;}
+      if(data.sessions){SESSIONS=data.sessions;window.SESSIONS=SESSIONS;}
+      if(data.traitements){TRAITEMENTS=data.traitements;window.TRAITEMENTS=TRAITEMENTS;}
+      if(data.membres){MEMBRES=data.membres;window.MEMBRES=MEMBRES;}
+      if(data.saisons){SAISONS=data.saisons;window.SAISONS=SAISONS;}
+      if(data.taches){TACHES=data.taches;window.TACHES=TACHES;}
+      if(data.historique){HISTORIQUE=data.historique;window.HISTORIQUE=HISTORIQUE;}
+      if(typeof recalcAllTravaux==='function')recalcAllTravaux();
+      if(typeof saveData==='function'){
+        ['parcelles','journal','sessions','traitements','membres','saisons','taches','historique'].forEach(k=>saveData(k));
+      }
+      if(typeof renderHome==='function')renderHome();
+      if(typeof renderParcelles==='function')renderParcelles();
+      if(typeof computePStats==='function')computePStats();
+      if(typeof renderReglages==='function')renderReglages();
+      closeOv(null,'ovExport');
+      showImportFeedback(`✅ Import réussi — ${nb} parcelles chargées depuis l'export du ${date}.`,'var(--vert-pale)','var(--vert)');
+    },'📂','Charger l\'export');
   };
   reader.onerror=function(){
     showImportFeedback('❌ Erreur de lecture du fichier.','var(--rouge-pale)','var(--rouge)');
@@ -6959,9 +6997,9 @@ function exportPDFRapportSaison(){
   const traitements=[...TRAITEMENTS].sort((a,b)=>a.date>b.date?1:-1);
 
   // ── Stats couverture ──
-  const nbParcelles=PARCELLES.filter(p=>p.statut!=='Arrachée').length;
-  const surfTot=PARCELLES.filter(p=>p.statut!=='Arrachée').reduce((s,p)=>s+(p.surface||0),0);
-  const pctGlobal=PARCELLES.length?Math.round(PARCELLES.filter(p=>p.statut!=='Arrachée').reduce((s,p)=>{
+  const nbParcelles=PARCELLES.filter(p=>p.statut!=='Arrachee').length;
+  const surfTot=PARCELLES.filter(p=>p.statut!=='Arrachee').reduce((s,p)=>s+(p.surface||0),0);
+  const pctGlobal=PARCELLES.length?Math.round(PARCELLES.filter(p=>p.statut!=='Arrachee').reduce((s,p)=>{
     const ts=getTachesSaison();const tot=ts.length;if(!tot)return s;
     const done=ts.filter(t=>p.taches&&p.taches[t.nom]==='Validé').length;
     return s+done/tot;
@@ -7090,7 +7128,7 @@ tbody tr:last-child{border-bottom:none;}
   </div>
   <div class="cover-bottom">
     <div class="cover-meta">Généré le ${dateGen}<br>${domaine}<br>SIRET 98214811600014</div>
-    <div class="cover-app">Généré par Ma Vigne v4.3<br>GUERETTECH</div>
+    <div class="cover-app">Généré par Ma Vigne v4.4<br>GUERETTECH</div>
   </div>
 </div>
 
@@ -7107,7 +7145,7 @@ tbody tr:last-child{border-bottom:none;}
     <div><div class="rb-val">${travaux.filter(j=>j.equipe).length}</div><div class="rb-lbl">En équipe</div></div>
   </div>
   ${travauxRows.length?`<table><thead><tr><th>Date</th><th>Parcelle</th><th>Tâche</th><th>Ouvrier / Équipe</th><th>Statut</th></tr></thead><tbody>${travauxRows}</tbody></table>`:'<p style="color:#888;font-style:italic;padding:12px 0">Aucun travail enregistré pour cette saison.</p>'}
-  <div class="page-footer"><div class="footer-dom">${domaine.toUpperCase()}</div><div class="footer-app">Rapport ${nomSaison} · Ma Vigne v4.3</div></div>
+  <div class="page-footer"><div class="footer-dom">${domaine.toUpperCase()}</div><div class="footer-app">Rapport ${nomSaison} · Ma Vigne v4.4</div></div>
 </div>
 
 <!-- PAGE 3 : TRACTEUR -->
@@ -7122,7 +7160,7 @@ tbody tr:last-child{border-bottom:none;}
     <div><div class="rb-val">${sessions.filter(s=>s.statut==='En cours').length}</div><div class="rb-lbl">En cours</div></div>
   </div>
   ${sessionsHTML||'<p style="color:#888;font-style:italic;padding:12px 0">Aucune session tracteur enregistrée pour cette saison.</p>'}
-  <div class="page-footer"><div class="footer-dom">${domaine.toUpperCase()}</div><div class="footer-app">Rapport ${nomSaison} · Ma Vigne v4.3</div></div>
+  <div class="page-footer"><div class="footer-dom">${domaine.toUpperCase()}</div><div class="footer-app">Rapport ${nomSaison} · Ma Vigne v4.4</div></div>
 </div>
 
 <!-- PAGE 4 : PHYTO -->
@@ -7137,7 +7175,7 @@ tbody tr:last-child{border-bottom:none;}
     <div><div class="rb-val">${traitements.filter(t=>{const p=CATALOGUE_MAP[t.produit]||{};if(!p.dar||!t.date)return false;const dt=new Date(t.date);dt.setDate(dt.getDate()+p.dar);return dt>today;}).length}</div><div class="rb-lbl">DAR en cours</div></div>
   </div>
   ${phytoRows||'<p style="color:#888;font-style:italic;padding:12px 0">Aucun traitement phytosanitaire enregistré pour cette saison.</p>'}
-  <div class="page-footer"><div class="footer-dom">${domaine.toUpperCase()}</div><div class="footer-app">Rapport ${nomSaison} · Ma Vigne v4.3</div></div>
+  <div class="page-footer"><div class="footer-dom">${domaine.toUpperCase()}</div><div class="footer-app">Rapport ${nomSaison} · Ma Vigne v4.4</div></div>
 </div>
 
 </body></html>`;
@@ -7424,6 +7462,24 @@ function showToast(msg,color){
   _toastTimer=setTimeout(function(){t.classList.remove('show');},2200);
 }
 
+// ── Overlay de confirmation simple (remplace confirm() natif) ──
+var _confirmDelCb=null;
+function openConfirmDel(title,sub,cb,icon,btnLabel){
+  _confirmDelCb=cb||null;
+  document.getElementById('ocd-icon').textContent=icon||'⚠️';
+  document.getElementById('ocd-title').textContent=title||'Confirmer ?';
+  document.getElementById('ocd-sub').textContent=sub||'';
+  document.getElementById('ocd-btn').textContent=btnLabel||'Supprimer';
+  openOv('ovConfirmDel');
+}
+function _execConfirmDel(){
+  closeOv(null,'ovConfirmDel');
+  if(typeof _confirmDelCb==='function'){
+    if(navigator.vibrate)navigator.vibrate([60,40,60]);
+    setTimeout(function(){_confirmDelCb();_confirmDelCb=null;},120);
+  }
+}
+
 // ── Mise à jour dots card accueil ──
 function updateHomeDots(){
   var dots=document.querySelectorAll('.hv2-card-dot');
@@ -7433,7 +7489,6 @@ function updateHomeDots(){
 }
 
 // ── Filtre dates Journal ──
-var jDateDeb='', jDateFin='';
 function applyJDateFilter(){
   jDateDeb=document.getElementById('jDateDeb').value||'';
   jDateFin=document.getElementById('jDateFin').value||'';
@@ -7529,7 +7584,7 @@ function lancerExportEntretienPDF(){
     return '<section class="tracteur-section"><div class="tracteur-title"><div><div class="tracteur-nom">'+t.nom+(t.traitementOnly?' <span class="badge-trait">Traitement</span>':'')+'</div><div class="tracteur-modele">🔩 '+(t.modele||'—')+' · '+t.type+'</div></div><div class="tracteur-annee">'+annee+'</div></div>'+resumeHTML+'<h3 class="section-sub">📋 Fiches d\'entretien</h3>'+fichesHTML+'<h3 class="section-sub" style="margin-top:20px">🔧 Passages réparateur</h3>'+repsHTML+'</section>';
   }).join('<div class="page-break"></div>');
   var aujourd_hui=fmtD(new Date().toISOString().slice(0,10));
-  var html='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Ma Vigne — Entretien '+annee+'</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Georgia,serif;font-size:11px;color:#1A1A1A;padding:20px;}.doc-header{border-bottom:2px solid #3D6B27;padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;}.doc-title{font-size:20px;font-weight:bold;color:#3D6B27;}.doc-meta{text-align:right;font-size:10px;color:#888;}.tracteur-section{margin-bottom:30px;}.tracteur-title{display:flex;justify-content:space-between;align-items:flex-start;background:#2A3547;color:white;padding:12px 16px;border-radius:8px;margin-bottom:12px;}.tracteur-nom{font-size:16px;font-weight:bold;}.tracteur-modele{font-size:10px;color:rgba(255,255,255,0.6);margin-top:3px;}.tracteur-annee{font-size:22px;font-weight:bold;color:rgba(255,255,255,0.35);}.badge-trait{font-size:9px;background:#E07B2A;color:white;border-radius:4px;padding:1px 6px;vertical-align:middle;font-weight:normal;margin-left:6px;}.resume-bar{display:flex;border:1px solid #E0DDD5;border-radius:8px;overflow:hidden;margin-bottom:16px;}.resume-item{flex:1;text-align:center;padding:10px 6px;border-right:1px solid #E0DDD5;}.resume-item:last-child{border-right:none;}.resume-val{display:block;font-size:18px;font-weight:bold;color:#2A3547;}.val-warn{color:#C0392B;}.resume-lbl{display:block;font-size:9px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:0.04em;}.section-sub{font-size:12px;font-weight:bold;color:#2A3547;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E8E4D9;}.fiche-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;overflow:hidden;break-inside:avoid;}.fiche-bloc.has-anomalie{border-color:#F5B8B4;}.fiche-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#F9F8F5;border-bottom:1px solid #E0DDD5;}.fiche-date{font-weight:bold;font-size:11px;}.fiche-meta{font-size:10px;color:#666;margin-top:2px;}.fiche-score{font-size:18px;font-weight:bold;}.score-ok{color:#3D6B27;}.score-warn{color:#E07B2A;}.check-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:8px 12px;}.check-item{font-size:10px;display:flex;justify-content:space-between;align-items:center;padding:3px 6px;border-radius:4px;}.check-item.ok{background:#EAF4E2;color:#2D5A1B;}.check-item.ko{background:#FEF0EF;color:#922B21;}.check-item span{font-weight:bold;}.anomalie{padding:6px 12px 8px;background:#FEF0EF;font-size:10px;color:#922B21;border-top:1px solid #F5B8B4;}.rep-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;padding:10px 14px;break-inside:avoid;}.rep-bloc.rep-en-cours{border-color:#F5CBA7;background:#FEF9F5;}.rep-bloc.rep-depasse{border-color:#F5B8B4;background:#FEF0EF;}.rep-header{display:flex;justify-content:space-between;align-items:center;gap:10px;}.rep-motif{font-weight:bold;font-size:11px;margin-bottom:4px;}.rep-dates{font-size:10px;color:#555;}.rep-badge{font-size:10px;font-weight:bold;padding:4px 10px;border-radius:12px;white-space:nowrap;}.badge-ok{background:#EAF4E2;color:#2D5A1B;}.badge-cours{background:#FEF3E2;color:#935116;}.empty{font-size:10px;color:#999;font-style:italic;padding:8px 0;}.page-break{page-break-after:always;}.doc-footer{border-top:1px solid #E0DDD5;padding-top:8px;margin-top:20px;font-size:9px;color:#AAA;display:flex;justify-content:space-between;}@media print{.page-break{page-break-after:always;border:none;margin:0;}}</style></head><body><div class="doc-header"><div><div class="doc-title">🍇 Ma Vigne — Entretien tracteurs</div><div style="font-size:11px;color:#666;margin-top:2px">Historique '+annee+' · '+tracteursSelectionnes.map(function(t){return t.nom;}).join(', ')+'</div></div><div class="doc-meta">Généré le '+aujourd_hui+'<br>Ma Vigne v4.3 · GUERETTECH</div></div>'+sectionsHTML+'<div class="doc-footer"><span>Ma Vigne — Document confidentiel · Usage interne</span><span>© 2026 Nicolas GUERET / GUERETTECH</span></div></body></html>';
+  var html='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Ma Vigne — Entretien '+annee+'</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Georgia,serif;font-size:11px;color:#1A1A1A;padding:20px;}.doc-header{border-bottom:2px solid #3D6B27;padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;}.doc-title{font-size:20px;font-weight:bold;color:#3D6B27;}.doc-meta{text-align:right;font-size:10px;color:#888;}.tracteur-section{margin-bottom:30px;}.tracteur-title{display:flex;justify-content:space-between;align-items:flex-start;background:#2A3547;color:white;padding:12px 16px;border-radius:8px;margin-bottom:12px;}.tracteur-nom{font-size:16px;font-weight:bold;}.tracteur-modele{font-size:10px;color:rgba(255,255,255,0.6);margin-top:3px;}.tracteur-annee{font-size:22px;font-weight:bold;color:rgba(255,255,255,0.35);}.badge-trait{font-size:9px;background:#E07B2A;color:white;border-radius:4px;padding:1px 6px;vertical-align:middle;font-weight:normal;margin-left:6px;}.resume-bar{display:flex;border:1px solid #E0DDD5;border-radius:8px;overflow:hidden;margin-bottom:16px;}.resume-item{flex:1;text-align:center;padding:10px 6px;border-right:1px solid #E0DDD5;}.resume-item:last-child{border-right:none;}.resume-val{display:block;font-size:18px;font-weight:bold;color:#2A3547;}.val-warn{color:#C0392B;}.resume-lbl{display:block;font-size:9px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:0.04em;}.section-sub{font-size:12px;font-weight:bold;color:#2A3547;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E8E4D9;}.fiche-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;overflow:hidden;break-inside:avoid;}.fiche-bloc.has-anomalie{border-color:#F5B8B4;}.fiche-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#F9F8F5;border-bottom:1px solid #E0DDD5;}.fiche-date{font-weight:bold;font-size:11px;}.fiche-meta{font-size:10px;color:#666;margin-top:2px;}.fiche-score{font-size:18px;font-weight:bold;}.score-ok{color:#3D6B27;}.score-warn{color:#E07B2A;}.check-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:8px 12px;}.check-item{font-size:10px;display:flex;justify-content:space-between;align-items:center;padding:3px 6px;border-radius:4px;}.check-item.ok{background:#EAF4E2;color:#2D5A1B;}.check-item.ko{background:#FEF0EF;color:#922B21;}.check-item span{font-weight:bold;}.anomalie{padding:6px 12px 8px;background:#FEF0EF;font-size:10px;color:#922B21;border-top:1px solid #F5B8B4;}.rep-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;padding:10px 14px;break-inside:avoid;}.rep-bloc.rep-en-cours{border-color:#F5CBA7;background:#FEF9F5;}.rep-bloc.rep-depasse{border-color:#F5B8B4;background:#FEF0EF;}.rep-header{display:flex;justify-content:space-between;align-items:center;gap:10px;}.rep-motif{font-weight:bold;font-size:11px;margin-bottom:4px;}.rep-dates{font-size:10px;color:#555;}.rep-badge{font-size:10px;font-weight:bold;padding:4px 10px;border-radius:12px;white-space:nowrap;}.badge-ok{background:#EAF4E2;color:#2D5A1B;}.badge-cours{background:#FEF3E2;color:#935116;}.empty{font-size:10px;color:#999;font-style:italic;padding:8px 0;}.page-break{page-break-after:always;}.doc-footer{border-top:1px solid #E0DDD5;padding-top:8px;margin-top:20px;font-size:9px;color:#AAA;display:flex;justify-content:space-between;}@media print{.page-break{page-break-after:always;border:none;margin:0;}}</style></head><body><div class="doc-header"><div><div class="doc-title">🍇 Ma Vigne — Entretien tracteurs</div><div style="font-size:11px;color:#666;margin-top:2px">Historique '+annee+' · '+tracteursSelectionnes.map(function(t){return t.nom;}).join(', ')+'</div></div><div class="doc-meta">Généré le '+aujourd_hui+'<br>Ma Vigne v4.4 · GUERETTECH</div></div>'+sectionsHTML+'<div class="doc-footer"><span>Ma Vigne — Document confidentiel · Usage interne</span><span>© 2026 Nicolas GUERET / GUERETTECH</span></div></body></html>';
   var win=window.open('','_blank');
   if(!win){showToast('Autorisez les popups pour l\'impression','#C0392B');return;}
   win.document.write(html);
@@ -7890,7 +7945,7 @@ function _swReload() {
       <input type="hidden" id="et-type" value="mécanique">
       <input type="hidden" id="et-trait" value="0">
       <button class="mbtn acre" style="margin-bottom:10px" onclick="saveEditTracteur()">Enregistrer</button>
-      <button class="mbtn-del" onclick="deleteTracteuer()">Supprimer ce tracteur</button>
+      <button class="mbtn-del" onclick="deleteTracteur()">Supprimer ce tracteur</button>
     </div>
   </div>
 </div>
@@ -7925,31 +7980,31 @@ function _swReload() {
     <div class="modal-hd">
       <div class="modal-title">⚖️ Mentions légales & confidentialité</div>
     </div>
-    <div class="modal-body" style="font-size:12px;color:#2D0B45;line-height:1.7">
+    <div class="modal-body" style="font-size:12px;color:var(--texte);line-height:1.7">
 
-      <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Éditeur</div>
+      <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:var(--texte)">Éditeur</div>
       <p style="margin:0 0 14px">Ma Vigne est une application développée et éditée par Nicolas GUERET.<br>
       Micro-entreprise <strong>GUERETTECH</strong> — SIRET : 98214811600014<br>
-      Contact : <span style="color:#3D6B27">ngdevpro@gmail.com</span></p>
+      Contact : <span style="color:var(--vert)">ngdevpro@gmail.com</span></p>
 
-      <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Propriété intellectuelle</div>
+      <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:var(--texte)">Propriété intellectuelle</div>
       <p style="margin:0 0 14px">L'ensemble du code source, des interfaces et des contenus de cette application est protégé par le droit d'auteur (Code de la propriété intellectuelle, art. L.111-1). Toute reproduction ou distribution sans autorisation écrite est interdite.</p>
 
-      <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Données personnelles — RGPD</div>
+      <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:var(--texte)">Données personnelles — RGPD</div>
       <p style="margin:0 0 8px"><strong>Données collectées :</strong> prénom, adresse email, rôles dans l'application.</p>
       <p style="margin:0 0 8px"><strong>Finalité :</strong> authentification et gestion des accès uniquement.</p>
       <p style="margin:0 0 8px"><strong>Base légale :</strong> intérêt légitime (gestion d'équipe).</p>
       <p style="margin:0 0 8px"><strong>Stockage :</strong> Firebase (Google Cloud, serveurs européens) + mémoire locale de l'appareil.</p>
       <p style="margin:0 0 8px"><strong>Durée :</strong> tant que vous êtes membre actif du domaine.</p>
-      <p style="margin:0 0 14px"><strong>Vos droits :</strong> accès, rectification, suppression de vos données sur simple demande à l'administrateur ou par email à <span style="color:#3D6B27">ngdevpro@gmail.com</span>. Conformément au Règlement (UE) 2016/679.</p>
+      <p style="margin:0 0 14px"><strong>Vos droits :</strong> accès, rectification, suppression de vos données sur simple demande à l'administrateur ou par email à <span style="color:var(--vert)">ngdevpro@gmail.com</span>. Conformément au Règlement (UE) 2016/679.</p>
 
-      <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Hébergement</div>
+      <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:var(--texte)">Hébergement</div>
       <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
 
-      <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Cookies & traceurs</div>
+      <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:var(--texte)">Cookies & traceurs</div>
       <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
 
-      <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v4.3</div>
+      <div style="text-align:center;color:var(--texte-doux);font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v4.4</div>
 
       <button class="mbtn" style="margin-top:20px" onclick="closeOv(null,'ovMentions')">Fermer</button>
     </div>
@@ -7970,6 +8025,17 @@ function _swReload() {
       <input class="fi ac" id="ocv-val" placeholder="" style="font-size:20px;text-align:center;font-weight:700">
       <button class="mbtn acre" onclick="confirmerValidationChamp()">✓ Confirmer</button>
       <button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux)" onclick="closeOv(null,'ovChampValidation')">Annuler</button>
+    </div>
+  </div>
+<!-- ══ OVERLAY Confirmation simple (remplace confirm()) ══ -->
+<div class="overlay" id="ovConfirmDel" onclick="closeOv(event,'ovConfirmDel')">
+  <div onclick="event.stopPropagation()" style="background:white;border-radius:18px;padding:24px;width:calc(100% - 48px);max-width:360px;margin:auto;margin-top:30vh;box-shadow:0 8px 32px rgba(0,0,0,0.18)">
+    <div style="font-size:28px;text-align:center;margin-bottom:10px" id="ocd-icon">🗑️</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;text-align:center;margin-bottom:6px" id="ocd-title">Confirmer ?</div>
+    <div style="font-family:'Outfit',sans-serif;font-size:13px;color:#666;text-align:center;margin-bottom:20px" id="ocd-sub"></div>
+    <div style="display:flex;gap:10px">
+      <button onclick="closeOv(null,'ovConfirmDel')" style="flex:1;padding:12px 0;border-radius:10px;border:1.5px solid #ccc;background:white;font-family:'Outfit',sans-serif;font-size:14px;cursor:pointer;min-height:44px">Annuler</button>
+      <button id="ocd-btn" onclick="_execConfirmDel()" style="flex:2;padding:12px 0;border-radius:10px;border:none;background:#C0392B;color:white;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;min-height:44px">Confirmer</button>
     </div>
   </div>
 </div>
