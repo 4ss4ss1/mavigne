@@ -1463,7 +1463,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v4.6</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v4.7</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -1791,7 +1791,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
       <span class="mod-header-icon">⚙️</span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v4.6</div>
+        <div class="mod-header-sub">Ma Vigne v4.7</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
     </div>
@@ -1883,7 +1883,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
       <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger('reset')"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🗑️</div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
     </div>
   </div>
-  <div class="ver-tag">Ma Vigne v4.6 · Firebase Auth : signInWithEmailAndPassword · suppression sha256/checkMdp · sendPasswordResetEmail · updatePassword+reauth 🔒</div>
+  <div class="ver-tag">Ma Vigne v4.7 · Firebase Auth : signInWithEmailAndPassword · suppression sha256/checkMdp · sendPasswordResetEmail · updatePassword+reauth 🔒</div>
 </div>
 
 <!-- ══════ NAV ══════ -->
@@ -6258,7 +6258,7 @@ function showExportFeedback(msg){
   setTimeout(()=>{el.style.display='none';},3000);
 }
 function exportJSON(){
-  const data={exportDate:new Date().toISOString(),version:'4.5',domaine:'Domaine Marchand-Grillot',parcelles:PARCELLES,journal:JOURNAL.filter(j=>!j.meteo),sessions:SESSIONS,traitements:TRAITEMENTS,membres:MEMBRES.map(m=>({nom:m.nom,roles:m.roles,statut:m.statut})),saisons:SAISONS,taches:TACHES,historique:HISTORIQUE};
+  const data={exportDate:new Date().toISOString(),version:'4.7',domaine:'Domaine Marchand-Grillot',parcelles:PARCELLES,journal:JOURNAL.filter(j=>!j.meteo),sessions:SESSIONS,traitements:TRAITEMENTS,membres:MEMBRES.map(m=>({nom:m.nom,roles:m.roles,statut:m.statut})),saisons:SAISONS,taches:TACHES,historique:HISTORIQUE};
   const date=new Date().toISOString().split('T')[0];
   dlFile(JSON.stringify(data,null,2),`mavigne_export_${date}.json`,'application/json');
   showExportFeedback('✅ Export JSON téléchargé !');
@@ -6951,199 +6951,334 @@ function exportPDFRapportSaison(){
   const today=new Date();
   const dateGen=today.toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
 
-  // ── Données ──
-  const travaux=JOURNAL.filter(j=>!j.meteo).sort((a,b)=>a.date>b.date?1:-1);
-  const sessions=[...SESSIONS].sort((a,b)=>{
-    const ord={'En cours':0,'Terminé':1};
-    return (ord[a.statut]??2)-(ord[b.statut]??2);
-  });
+  // ── Données de base ──
+  const journalSaison=JOURNAL.filter(j=>!j.meteo).sort((a,b)=>a.date>b.date?1:-1);
+  const sessions=[...SESSIONS].sort((a,b)=>a.date>b.date?1:-1);
   const traitements=[...TRAITEMENTS].sort((a,b)=>a.date>b.date?1:-1);
-
-  // ── Stats couverture ──
-  const nbParcelles=PARCELLES.filter(p=>p.statut!=='Arrachee').length;
-  const surfTot=PARCELLES.filter(p=>p.statut!=='Arrachee').reduce((s,p)=>s+(parseFloat(p.surface)||0),0);
-  const pctGlobal=PARCELLES.length?Math.round(PARCELLES.filter(p=>p.statut!=='Arrachee').reduce((s,p)=>{
-    const ts=getTachesSaison();const tot=ts.length;if(!tot)return s;
-    const done=ts.filter(t=>p.taches&&p.taches[t.nom]==='Validé').length;
-    return s+done/tot;
-  },0)/Math.max(1,nbParcelles)*100):0;
+  const parcellesActives=PARCELLES.filter(p=>p.statut!=='Arrachee');
+  const nbParcelles=parcellesActives.length;
+  const surfTot=parcellesActives.reduce((s,p)=>s+(parseFloat(p.surface)||0),0);
+  const tachesSaison=getTachesSaison();
 
   function fmtD(d){if(!d)return'—';const p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
-  function badge(txt,bg,col){return`<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:${bg};color:${col}">${txt}</span>`;}
+  function fmtDShort(d){if(!d)return'—';const p=d.split('-');const mois=['jan.','fév.','mar.','avr.','mai','juin','juil.','août','sep.','oct.','nov.','déc.'];return p[2]+' '+mois[parseInt(p[1])-1];}
 
-  // ── Tableau travaux ──
-  const travauxRows=travaux.map((j,i)=>{
-    const isEq=j.equipe||j.qui==='Equipe';
-    const qui=isEq&&j.qui&&j.qui!=='Equipe'?`Équipe (${j.qui})`:isEq?'Équipe':j.qui||'—';
-    const isVal=j.statut==='Validé';
-    return `<tr style="background:${i%2===0?'white':'#FAFAF8'}">
-      <td style="padding:8px 10px;font-size:11px;color:#666;white-space:nowrap">${fmtD(j.date)}</td>
-      <td style="padding:8px 10px;font-size:12px;font-weight:500">${j.parcelle||'—'}</td>
-      <td style="padding:8px 10px;font-size:12px">${j.tache||'—'}</td>
-      <td style="padding:8px 10px;font-size:11px">${qui}</td>
-      <td style="padding:8px 10px">${isVal
-        ?badge('✓ Validé','#EAF4E2','#2C5F14')
-        :badge('En cours','#FDF3E0','#8B5E14')}</td>
+  // ── ETP : lire depuis config (heures mensuelles saisies) ──
+  const cfgEtp=(CONFIG&&CONFIG.etp_saison)||{};
+  const hDues=cfgEtp.h_dues||0;
+  const hFaites=cfgEtp.h_faites||0;
+  const etp=hDues>0?(hFaites/hDues).toFixed(2):'—';
+  const hEstimees=tachesSaison.reduce((s,t)=>s+(t.hha||0)*surfTot,0);
+
+  // ── Durées par tâche : 1ère et dernière validation dans le journal ──
+  function getDureeTache(nomTache){
+    const entries=journalSaison.filter(j=>j.tache===nomTache&&j.statut==='Validé').sort((a,b)=>a.date>b.date?1:-1);
+    if(!entries.length)return null;
+    const d1=entries[0].date, dN=entries[entries.length-1].date;
+    const jours=Math.round((new Date(dN)-new Date(d1))/86400000)+1;
+    return {d1,dN,jours};
+  }
+
+  // ── Durées par session tracteur : 1ère et dernière parcelle validée ──
+  function getDureeSession(sess){
+    // Chercher dans le journal les entrées correspondant à l'activité de la session
+    const acte=sess.activite||'';
+    const entries=journalSaison.filter(j=>j.tache===acte&&j.statut==='Validé').sort((a,b)=>a.date>b.date?1:-1);
+    if(!entries.length){return{d1:sess.date,dN:sess.date,jours:1,nbParc:nbParcelles};}
+    const d1=entries[0].date, dN=entries[entries.length-1].date;
+    const jours=Math.round((new Date(dN)-new Date(d1))/86400000)+1;
+    return{d1,dN,jours,nbParc:entries.length};
+  }
+
+  // ── Saison globale : 1ère et dernière validation toutes tâches ──
+  const allDates=journalSaison.filter(j=>j.statut==='Validé').map(j=>j.date).sort();
+  const saisonD1=allDates[0]||'—', saisonDN=allDates[allDates.length-1]||'—';
+  const saisonJours=(saisonD1&&saisonDN&&saisonD1!=='—')?Math.round((new Date(saisonDN)-new Date(saisonD1))/86400000)+1:0;
+
+  // ── Anomalies : réparations tracteur ──
+  const repData=REPARATEUR||{};
+  const anomalies=Object.entries(repData).map(([tid,rep])=>{
+    const trac=(TRACTEURS_LIST||[]).find(t=>t.id===tid)||{nom:'Tracteur '+tid};
+    return{...rep,tracteurNom:trac.nom};
+  });
+
+  // ── ETP par ouvrier ──
+  const cfgOuvEtp=(CONFIG&&CONFIG.etp_ouvriers)||{};
+  const ouvrierCards=MEMBRES.filter(m=>m.roles&&(m.roles.includes('ouvrier')||m.roles.includes('tractoriste'))).map(m=>{
+    const d=cfgOuvEtp[m.nom]||{};
+    const dues=d.h_dues||0, faites=d.h_faites||0;
+    const etpOuv=dues>0?(faites/dues).toFixed(2):'—';
+    const bg=COULEURS_MBR[m.nom]||'#3D6B27';
+    return`<div style="border:1px solid #e8e8e8;border-radius:6px;padding:8px 8px;text-align:center;min-width:80px">
+      <div style="width:24px;height:24px;border-radius:50%;background:${bg};color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 5px">${m.nom.charAt(0)}</div>
+      <div style="font-size:9px;font-weight:700;color:#333;margin-bottom:4px">${m.nom}</div>
+      <div style="display:flex;justify-content:space-between;font-size:8px;color:#999;margin-bottom:1px"><span>Dues</span><span style="font-weight:600;color:#333">${dues?dues+'h':'—'}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:8px;color:#999;margin-bottom:3px"><span>Réelles</span><span style="font-weight:600;color:#333">${faites?faites+'h':'—'}</span></div>
+      <div style="font-size:11px;font-weight:700;color:#3D6B27;border-top:1px solid #f0f0f0;padding-top:4px">${etpOuv} ETP</div>
+    </div>`;
+  }).join('');
+
+  // ── Tableau tâches avec durées ──
+  const tachesRows=tachesSaison.map((t,i)=>{
+    const dur=getDureeTache(t.nom);
+    const hEst=Math.round((t.hha||0)*surfTot);
+    return`<tr style="background:${i%2===0?'#fff':'#f8faf7'}">
+      <td style="padding:5px 8px;font-size:11px;font-weight:700">${t.nom}</td>
+      <td style="padding:5px 8px;font-size:10px"><span style="background:#f0f0f0;border-radius:3px;padding:2px 6px;font-weight:600">${dur?fmtDShort(dur.d1):'—'}</span></td>
+      <td style="padding:5px 8px;font-size:10px"><span style="background:#f0f0f0;border-radius:3px;padding:2px 6px;font-weight:600">${dur?fmtDShort(dur.dN):'—'}</span></td>
+      <td style="padding:5px 8px;text-align:center"><span style="background:#eef5eb;color:#2D7A27;border-radius:8px;padding:2px 8px;font-size:9px;font-weight:700">${dur?dur.jours+' j':'—'}</span></td>
+      <td style="padding:5px 8px;text-align:right;font-size:10px;color:#aaa">${t.hha||'—'} h/ha</td>
+      <td style="padding:5px 8px;text-align:right;font-size:11px;font-weight:700">${hEst?hEst+'h':'—'}</td>
+    </tr>`;
+  }).join('');
+
+  // ── Tableau parcelles ──
+  const parcellesRows=parcellesActives.map((p,i)=>{
+    const dates=journalSaison.filter(j=>j.parcelle===p.nom&&j.statut==='Validé').map(j=>j.date).sort();
+    const d1=dates[0], dN=dates[dates.length-1];
+    const nbTachesTotal=tachesSaison.length;
+    const nbTachesValidees=tachesSaison.filter(t=>p.taches&&p.taches[t.nom]==='Validé').length;
+    return`<tr style="background:${i%2===0?'#fff':'#f8faf7'}">
+      <td style="padding:4px 8px;font-size:10px;font-weight:700">${p.nom}</td>
+      <td style="padding:4px 8px;font-size:9px;color:#aaa;text-align:right">${p.surface?parseFloat(p.surface).toFixed(2)+'ha':'—'}</td>
+      <td style="padding:4px 8px;font-size:9px;color:#2D7A27;font-weight:700;text-align:center">${nbTachesValidees}/${nbTachesTotal} ✓</td>
+      <td style="padding:4px 8px;font-size:9px"><span style="background:#f0f0f0;border-radius:3px;padding:1px 5px">${d1?fmtDShort(d1):'—'}</span></td>
+      <td style="padding:4px 8px;font-size:9px"><span style="background:#f0f0f0;border-radius:3px;padding:1px 5px">${dN?fmtDShort(dN):'—'}</span></td>
     </tr>`;
   }).join('');
 
   // ── Sessions tracteur ──
-  const sessionsHTML=sessions.map(s=>{
-    const pct=s.avancement||0;
-    const isEnc=s.statut==='En cours';
-    const nbFait=s.parcelles?s.parcelles.filter(p=>p.fait).length:Math.round(pct/100*nbParcelles);
+  const sessionsRows=sessions.map(s=>{
+    const dur=getDureeSession(s);
     const tracteurNom=s.tracteurId?(TRACTEURS_LIST||[]).find(t=>t.id===s.tracteurId)?.nom||'—':'—';
-    return `<div style="border:1px solid #E0DDD5;border-radius:8px;margin-bottom:12px;overflow:hidden">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#F5F4F0;border-bottom:1px solid #E0DDD5">
-        <div>
-          <div style="font-size:13px;font-weight:700">🚜 ${s.activite||'Session'}</div>
-          <div style="font-size:11px;color:#888;margin-top:2px">${tracteurNom?tracteurNom+' · ':''}${s.conducteur||'—'} · ${fmtD(s.date)}</div>
+    return`<div style="border:1px solid #b5d9a6;background:#f9fdf8;border-radius:6px;padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="width:8px;height:8px;border-radius:50%;background:#3D6B27;flex-shrink:0"></div>
+          <span style="font-size:12px;font-weight:700;color:#1B2E1A">${s.activite||'Session'}</span>
+          <span style="font-size:9px;color:#888;margin-left:4px">${tracteurNom?tracteurNom+' · ':''}${s.conducteur||'—'}</span>
         </div>
-        ${isEnc?badge('En cours','#FDF3E0','#8B5E14'):badge('✓ Terminé','#EAF4E2','#2C5F14')}
+        <div style="display:flex;align-items:center;gap:5px;font-size:9px">
+          <span style="background:#f0f0f0;border-radius:3px;padding:2px 6px;font-weight:600">1ère : ${fmtDShort(dur.d1)}</span>
+          <span style="color:#3D6B27">→</span>
+          <span style="background:#f0f0f0;border-radius:3px;padding:2px 6px;font-weight:600">Dernière : ${fmtDShort(dur.dN)}</span>
+          <span style="background:#eef5eb;color:#2D7A27;border-radius:8px;padding:2px 7px;font-weight:700">${dur.jours} jour${dur.jours>1?'s':''}</span>
+          <span style="color:#aaa">· ${dur.nbParc||nbParcelles} parcelles</span>
+        </div>
       </div>
-      <div style="display:flex;gap:28px;padding:10px 14px;flex-wrap:wrap">
-        <div><div style="font-size:9px;text-transform:uppercase;color:#AAA;letter-spacing:0.6px;margin-bottom:3px">Avancement</div>
-          <div style="font-size:14px;font-weight:700;color:#1A3A2A">${pct}%</div>
-          <div style="height:4px;width:120px;background:#E8E8E4;border-radius:3px;margin-top:5px;overflow:hidden"><div style="height:100%;width:${pct}%;background:#2C4E1A;border-radius:3px"></div></div>
-        </div>
-        <div><div style="font-size:9px;text-transform:uppercase;color:#AAA;letter-spacing:0.6px;margin-bottom:3px">Parcelles</div>
-          <div style="font-size:14px;font-weight:700">${nbFait} / ${nbParcelles}</div>
-        </div>
-        <div><div style="font-size:9px;text-transform:uppercase;color:#AAA;letter-spacing:0.6px;margin-bottom:3px">Conducteur</div>
-          <div style="font-size:14px;font-weight:700">${s.conducteur||'—'}</div>
-        </div>
-        ${isEnc?`<div><div style="font-size:9px;text-transform:uppercase;color:#AAA;letter-spacing:0.6px;margin-bottom:3px">Restant</div><div style="font-size:14px;font-weight:700;color:#B85A1A">${nbParcelles-nbFait} parcelles</div></div>`:''}
-      </div>
+      <div style="font-size:16px;font-weight:700;color:#3D6B27;flex-shrink:0">100% ✓</div>
     </div>`;
   }).join('');
 
-  // ── Traitements phyto ──
+  // ── Phyto ──
   const CATALOGUE_MAP={};(CATALOGUE||[]).forEach(p=>{CATALOGUE_MAP[p.nom]=p;});
-  const typeColor={'Cuivre':'#1A4A7A','Soufre':'#7D6608','Fongicide':'#4A2060','Insecticide':'#A0291E','Herbicide':'#1E3A12','Biocontrôle':'#2C6E49'};
-  const phytoRows=traitements.map(t=>{
+  const typeBg={'Cuivre':'#e8f5e8','Soufre':'#fef9e0','Fongicide':'#e8eef8','Insecticide':'#fde8e8','Herbicide':'#e8f0e8','Biocontrôle':'#eef5ee'};
+  const typeCol={'Cuivre':'#1A4A7A','Soufre':'#b8860b','Fongicide':'#1A4A7A','Insecticide':'#922B21','Herbicide':'#1E3A12','Biocontrôle':'#2C6E49'};
+  const phytoRows=traitements.map((t,i)=>{
     const prod=CATALOGUE_MAP[t.produit]||{};
-    const tc=typeColor[prod.type]||'#666';
+    const bg=typeBg[prod.type]||'#f0f0f0', col=typeCol[prod.type]||'#666';
     const darJ=prod.dar;
-    let darCell='—';
-    if(darJ&&t.date){const dt=new Date(t.date);dt.setDate(dt.getDate()+darJ);const r=Math.ceil((dt-today)/86400000);darCell=r>0?`<span style="color:#B85A1A;font-weight:700">${r}j restants</span>`:`<span style="color:#2C5F14">✅ Libre</span>`;}
-    return `<div style="display:flex;align-items:flex-start;gap:8px;padding:10px 0;border-bottom:1px solid #F0EEE9">
-      <div style="font-size:11px;color:#AAA;width:68px;flex-shrink:0;padding-top:1px">${fmtD(t.date)}</div>
-      <div style="flex:1">
-        <div style="font-size:13px;font-weight:600;margin-bottom:2px">${t.produit||'—'} <span style="display:inline-block;padding:1px 7px;border-radius:8px;font-size:9px;font-weight:700;background:#F0EAF8;color:${tc}">${prod.type||'—'}</span></div>
-        <div style="font-size:11px;color:#888">Dose : ${t.dose||prod.dose||'—'} · ${t.parcelles||'Toutes parcelles'} · ${t.operateur||'—'}</div>
-      </div>
-      <div style="font-size:11px;text-align:right;flex-shrink:0;padding-top:1px">${darCell}</div>
-    </div>`;
+    let darTxt='—';
+    if(darJ&&t.date){const dt=new Date(t.date);dt.setDate(dt.getDate()+darJ);const r=Math.ceil((dt-today)/86400000);darTxt=r>0?`<span style="color:#C0392B;font-weight:700">${r}j ⚠</span>`:`<span style="color:#2D7A27;font-weight:700">Respecté ✓</span>`;}
+    return`<tr style="background:${i%2===0?'#fff':'#f8f9fb'}">
+      <td style="padding:5px 8px;font-size:10px;font-weight:700">${t.produit||'—'}</td>
+      <td style="padding:5px 8px"><span style="display:inline-block;padding:1px 6px;border-radius:6px;font-size:8px;font-weight:700;background:${bg};color:${col}">${prod.type||'—'}</span></td>
+      <td style="padding:5px 8px;font-size:10px">${fmtDShort(t.date)}</td>
+      <td style="padding:5px 8px;font-size:9px;color:#888">${t.parcelles||'Domaine entier'}</td>
+      <td style="padding:5px 8px;font-size:10px">${darTxt}</td>
+    </tr>`;
   }).join('');
 
-  // ── Récaps ──
-  const nbOuvriersActifs=[...new Set(travaux.map(j=>j.qui).filter(Boolean))].length;
-  const nbTravauxTotal=travaux.length;
+  // ── Anomalies : réparations tracteur ──
+  const anomHtml=anomalies.length?anomalies.map(a=>{
+    const dep=fmtDShort(a.depuis), ret=a.prevu_retour?fmtDShort(a.prevu_retour):'—';
+    const dureeAnom=(a.depuis&&a.prevu_retour)?Math.round((new Date(a.prevu_retour)-new Date(a.depuis))/86400000)+'j':'—';
+    return`<div style="border-left:3px solid #C8913A;background:#fff;border-radius:0 5px 5px 0;padding:8px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:12px">
+      <div>
+        <div style="font-size:9px;color:#888">${a.tracteurNom}</div>
+        <div style="font-size:11px;font-weight:700;color:#1a1a1a;margin:2px 0">${a.motif||'Réparation'}</div>
+        <div style="font-size:9px;color:#C8913A">Depuis le ${dep}${a.reparateur?' · '+a.reparateur:''} · Immobilisation : ${dureeAnom}</div>
+      </div>
+      <div style="background:#fff3e0;border-radius:5px;padding:5px 10px;text-align:center;color:#b86a00;font-weight:700;font-size:9px;flex-shrink:0">Retour prévu<br><span style="font-size:10px">${ret}</span></div>
+    </div>`;
+  }).join(''):`<p style="font-size:10px;color:#aaa;font-style:italic;padding:8px 0">Aucune anomalie enregistrée pour cette saison.</p>`;
 
   const html=`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
 <title>Rapport de saison — ${nomSaison} — ${domaine}</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1A1A1A;background:white;font-size:12px;}
-@page{margin:20mm 18mm;}
-@media print{.page-break{page-break-before:always;}.no-break{break-inside:avoid;}}
-.cover{padding:48px 0 40px;border-top:6px solid #2C4E1A;min-height:calc(100vh - 40px);display:flex;flex-direction:column;justify-content:space-between;}
-.cover-domaine{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#888;margin-bottom:14px;}
-.cover-titre{font-size:32px;font-weight:700;color:#1A1A1A;line-height:1.2;margin-bottom:6px;}
-.cover-sous{font-size:16px;font-weight:300;color:#666;margin-bottom:28px;}
-.cover-stats{display:flex;gap:28px;padding:18px 0;border-top:1px solid #E8E8E4;border-bottom:1px solid #E8E8E4;margin-bottom:28px;}
-.cs-val{font-size:26px;font-weight:700;color:#2C4E1A;line-height:1;}
-.cs-lbl{font-size:10px;color:#888;margin-top:3px;}
-.cover-desc{font-size:12px;color:#666;line-height:1.6;}
-.cover-bottom{display:flex;justify-content:space-between;align-items:flex-end;margin-top:32px;padding-top:16px;border-top:1px solid #E8E8E4;}
-.cover-meta{font-size:10px;color:#AAA;line-height:1.8;}
-.cover-app{font-size:10px;color:#CCC;text-align:right;line-height:1.6;}
-.section-page{padding:32px 0;}
-.sec-head{display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:2px solid #2C4E1A;margin-bottom:20px;}
-.sec-num{width:26px;height:26px;border-radius:50%;background:#2C4E1A;color:white;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.sec-title{font-size:17px;font-weight:700;}
-.sec-sub{font-size:10px;color:#AAA;margin-top:1px;}
-.recap-band{display:flex;gap:20px;background:#F8F7F4;border-radius:8px;padding:12px 14px;margin-bottom:18px;}
-.rb-val{font-size:19px;font-weight:700;color:#2C4E1A;}
-.rb-lbl{font-size:9px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:0.5px;}
-table{width:100%;border-collapse:collapse;}
-thead th{background:#F5F4F0;padding:7px 9px;text-align:left;font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:#666;border-bottom:1px solid #E0DDD5;}
-tbody tr{border-bottom:1px solid #F0EEE9;}
-tbody tr:last-child{border-bottom:none;}
-.page-footer{border-top:1px solid #F0EEE9;padding:8px 0 0;display:flex;justify-content:space-between;margin-top:20px;}
-.footer-dom{font-size:9px;color:#CCC;font-weight:600;letter-spacing:0.5px;}
-.footer-app{font-size:9px;color:#DDD;}
+body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1a1a1a;background:#fff;font-size:12px;}
+@page{size:A4;margin:14mm 16mm;}
+@media print{
+  .pg{page-break-after:always;}
+  .pg:last-child{page-break-after:avoid;}
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+}
+.pg{width:100%;overflow:hidden;}
+/* COUVERTURE */
+.cover{background:linear-gradient(155deg,#1B2E1A 0%,#0d1a0d 60%,#0a1508 100%);color:#fff;padding:44px 0 0;min-height:230mm;display:flex;flex-direction:column;position:relative;overflow:hidden;}
+.cover-logo{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:36px;display:flex;align-items:center;gap:10px;}
+.cover-logo::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.1);}
+.cover-dom{font-family:Georgia,serif;font-size:34px;font-weight:bold;color:#fff;margin-bottom:6px;}
+.cover-sais{font-family:Georgia,serif;font-size:15px;color:rgba(255,255,255,0.4);font-style:italic;margin-bottom:36px;}
+.kpis{display:flex;gap:10px;margin-bottom:14px;}
+.kpi{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:12px 10px;text-align:center;flex:1;}
+.kpi-v{font-size:26px;font-weight:700;color:#8BC474;display:block;line-height:1;}
+.kpi-l{font-size:8px;color:rgba(255,255,255,0.35);margin-top:4px;display:block;text-transform:uppercase;letter-spacing:0.5px;}
+.etp-bloc{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:14px 18px;display:flex;align-items:center;gap:18px;margin-bottom:14px;}
+.etp-n{font-size:40px;font-weight:700;color:#8BC474;line-height:1;}
+.etp-lbl{font-size:11px;color:#fff;font-weight:600;margin-bottom:2px;}
+.etp-sub{font-size:8px;color:rgba(255,255,255,0.28);}
+.etp-calc{font-size:8px;color:rgba(255,255,255,0.2);border-left:1px solid rgba(255,255,255,0.08);padding-left:14px;font-style:italic;margin-left:auto;}
+.cv-tl{display:flex;align-items:center;gap:6px;font-size:8px;color:rgba(255,255,255,0.3);margin-bottom:auto;}
+.cv-d{background:rgba(255,255,255,0.08);border-radius:3px;padding:3px 8px;font-size:9px;font-weight:600;color:rgba(255,255,255,0.55);}
+.cv-dur{background:rgba(61,107,39,0.3);border-radius:8px;padding:2px 8px;font-size:8px;font-weight:700;color:#8BC474;}
+.cv-foot{margin-top:auto;border-top:1px solid rgba(255,255,255,0.08);padding:9px 0;display:flex;justify-content:space-between;font-size:8px;color:rgba(255,255,255,0.18);}
+/* PAGES INTÉRIEURES */
+.p-head{background:#1B2E1A;color:#fff;padding:10px 0;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.p-head h2{font-size:16px;font-weight:700;}
+.p-num{font-size:9px;color:rgba(255,255,255,0.4);display:block;text-align:right;}
+.p-dom{font-size:7px;color:rgba(255,255,255,0.22);display:block;text-align:right;}
+.s-lbl{font-size:8px;text-transform:uppercase;letter-spacing:1.5px;color:#3D6B27;font-weight:700;margin-bottom:5px;}
+.s-note{font-size:8px;color:#bbb;font-style:italic;margin-top:4px;margin-bottom:10px;line-height:1.4;}
+table{width:100%;border-collapse:collapse;margin-bottom:4px;}
+th{background:#1B2E1A;color:#fff;padding:5px 8px;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:0.5px;font-weight:500;}
+th.r{text-align:right;}
+td{padding:5px 8px;border-bottom:1px solid #f0f0f0;font-size:10px;vertical-align:middle;}
+.etp-band{background:#f3f7f2;border-radius:5px;padding:8px 14px;margin:8px 0;display:flex;gap:0;}
+.eb-cell{flex:1;text-align:center;border-right:1px solid #ddd;padding:0 10px;}
+.eb-cell:last-child{border-right:none;}
+.eb-v{font-size:18px;font-weight:700;color:#1B2E1A;display:block;}
+.eb-l{font-size:7px;color:#888;display:block;}
+.ouv-row{display:flex;gap:5px;flex-wrap:wrap;margin:6px 0;}
+.p-foot{border-top:1px solid #eee;padding:6px 0 0;display:flex;justify-content:space-between;font-size:7px;color:#bbb;margin-top:auto;}
+.anom-box{background:#fff8f0;border:1px solid #f0d8b8;border-radius:6px;padding:10px 12px;}
+.anom-ttl{font-size:8px;text-transform:uppercase;letter-spacing:1.5px;color:#C8913A;font-weight:700;margin-bottom:8px;}
 </style></head><body>
 
 <!-- PAGE 1 : COUVERTURE -->
+<div class="pg">
 <div class="cover">
-  <div>
-    <div class="cover-domaine">${domaine.toUpperCase()}</div>
-    <div class="cover-titre">Rapport de saison</div>
-    <div class="cover-sous">${nomSaison} · Bourgogne</div>
-    <div class="cover-stats">
-      <div><div class="cs-val">${nbParcelles}</div><div class="cs-lbl">Parcelles actives</div></div>
-      <div><div class="cs-val">${surfTot.toFixed(2)} ha</div><div class="cs-lbl">Surface totale</div></div>
-      <div><div class="cs-val">${pctGlobal}%</div><div class="cs-lbl">Avancement global</div></div>
-      <div><div class="cs-val">${sessions.length}</div><div class="cs-lbl">Sessions tracteur</div></div>
-    </div>
-    <div class="cover-desc">Ce rapport couvre l'ensemble des travaux manuels, des sessions de travail mécanique et des traitements phytosanitaires enregistrés dans l'application Ma Vigne au cours de la saison ${nomSaison}.</div>
+  <div class="cover-logo">Ma Vigne · Rapport de saison</div>
+  <div class="cover-dom">${domaine}</div>
+  <div class="cover-sais">${nomSaison} — Bilan final de saison</div>
+  <div class="kpis">
+    <div class="kpi"><span class="kpi-v">${hDues?hDues+'h':'—'}</span><span class="kpi-l">Heures dues</span></div>
+    <div class="kpi"><span class="kpi-v">${hFaites?hFaites+'h':'—'}</span><span class="kpi-l">Heures réelles</span></div>
+    <div class="kpi"><span class="kpi-v">${sessions.length}</span><span class="kpi-l">Sessions tracteur</span></div>
+    <div class="kpi"><span class="kpi-v">${traitements.length}</span><span class="kpi-l">Traitements phyto</span></div>
   </div>
-  <div class="cover-bottom">
-    <div class="cover-meta">Généré le ${dateGen}<br>${domaine}<br>SIRET 98214811600014</div>
-    <div class="cover-app">Généré par Ma Vigne v4.6<br>GUERETTECH</div>
+  <div class="etp-bloc">
+    <div class="etp-n">${etp}</div>
+    <div><div class="etp-lbl">ETP sur la saison</div><div class="etp-sub">${MEMBRES.filter(m=>m.roles&&m.roles.includes('ouvrier')).length} ouvriers · ${nbParcelles} parcelles · ${surfTot.toFixed(2)} ha</div></div>
+    <div class="etp-calc">${hFaites?hFaites+'h faites':''} ÷ ${hDues?hDues+'h dues':''} = ${etp} ETP</div>
+  </div>
+  <div class="cv-tl">
+    <span style="font-size:7px;text-transform:uppercase;letter-spacing:1px">Saison</span>
+    <span class="cv-d">${fmtDShort(saisonD1)}</span>
+    <span style="color:rgba(139,196,116,0.5);font-size:12px">→</span>
+    <span class="cv-d">${fmtDShort(saisonDN)}</span>
+    <span class="cv-dur">${saisonJours} jours</span>
+    <span>· ${tachesSaison.length} tâches · ${nbParcelles} parcelles · ${anomalies.length} anomalie${anomalies.length!==1?'s':''} tracteur</span>
+  </div>
+  <div class="cv-foot">
+    <span>Rapport final — ${nomSaison}</span>
+    <span>Ma Vigne v4.7 · ${domaine} · Bourgogne</span>
+    <span>Page 1 / 4</span>
   </div>
 </div>
-
-<!-- PAGE 2 : TRAVAUX -->
-<div class="section-page page-break">
-  <div class="sec-head">
-    <div class="sec-num">1</div>
-    <div><div class="sec-title">Travaux manuels</div><div class="sec-sub">Journal de saison — ${nomSaison}</div></div>
-  </div>
-  <div class="recap-band">
-    <div><div class="rb-val">${nbTravauxTotal}</div><div class="rb-lbl">Entrées journal</div></div>
-    <div><div class="rb-val">${nbOuvriersActifs}</div><div class="rb-lbl">Ouvriers actifs</div></div>
-    <div><div class="rb-val">${travaux.filter(j=>j.statut==='Validé').length}</div><div class="rb-lbl">Validées</div></div>
-    <div><div class="rb-val">${travaux.filter(j=>j.equipe).length}</div><div class="rb-lbl">En équipe</div></div>
-  </div>
-  ${travauxRows.length?`<table><thead><tr><th>Date</th><th>Parcelle</th><th>Tâche</th><th>Ouvrier / Équipe</th><th>Statut</th></tr></thead><tbody>${travauxRows}</tbody></table>`:'<p style="color:#888;font-style:italic;padding:12px 0">Aucun travail enregistré pour cette saison.</p>'}
-  <div class="page-footer"><div class="footer-dom">${domaine.toUpperCase()}</div><div class="footer-app">Rapport ${nomSaison} · Ma Vigne v4.6</div></div>
 </div>
 
-<!-- PAGE 3 : TRACTEUR -->
-<div class="section-page page-break">
-  <div class="sec-head">
-    <div class="sec-num">2</div>
-    <div><div class="sec-title">Travaux mécaniques</div><div class="sec-sub">Sessions tracteur · ${nomSaison}</div></div>
-  </div>
-  <div class="recap-band">
-    <div><div class="rb-val">${sessions.length}</div><div class="rb-lbl">Sessions</div></div>
-    <div><div class="rb-val">${sessions.filter(s=>s.statut==='Terminé').length}</div><div class="rb-lbl">Terminées</div></div>
-    <div><div class="rb-val">${sessions.filter(s=>s.statut==='En cours').length}</div><div class="rb-lbl">En cours</div></div>
-  </div>
-  ${sessionsHTML||'<p style="color:#888;font-style:italic;padding:12px 0">Aucune session tracteur enregistrée pour cette saison.</p>'}
-  <div class="page-footer"><div class="footer-dom">${domaine.toUpperCase()}</div><div class="footer-app">Rapport ${nomSaison} · Ma Vigne v4.6</div></div>
+<!-- PAGE 2 : HEURES + TÂCHES -->
+<div class="pg">
+<div class="p-head">
+  <h2>⏱ Heures — dues, réelles et ETP</h2>
+  <div><span class="p-num">Page 2 / 4</span><span class="p-dom">${domaine}</span></div>
 </div>
 
-<!-- PAGE 4 : PHYTO -->
-<div class="section-page page-break">
-  <div class="sec-head">
-    <div class="sec-num">3</div>
-    <div><div class="sec-title">Traitements phytosanitaires</div><div class="sec-sub">Registre réglementaire · ${nomSaison}</div></div>
-  </div>
-  <div class="recap-band">
-    <div><div class="rb-val">${traitements.length}</div><div class="rb-lbl">Traitements</div></div>
-    <div><div class="rb-val">${[...new Set(traitements.map(t=>t.produit))].length}</div><div class="rb-lbl">Produits distincts</div></div>
-    <div><div class="rb-val">${traitements.filter(t=>{const p=CATALOGUE_MAP[t.produit]||{};if(!p.dar||!t.date)return false;const dt=new Date(t.date);dt.setDate(dt.getDate()+p.dar);return dt>today;}).length}</div><div class="rb-lbl">DAR en cours</div></div>
-  </div>
-  ${phytoRows||'<p style="color:#888;font-style:italic;padding:12px 0">Aucun traitement phytosanitaire enregistré pour cette saison.</p>'}
-  <div class="page-footer"><div class="footer-dom">${domaine.toUpperCase()}</div><div class="footer-app">Rapport ${nomSaison} · Ma Vigne v4.6</div></div>
+<div class="s-lbl">Récapitulatif mensuel</div>
+<table>
+  <thead><tr><th>Mois</th><th class="r">H. dues</th><th class="r">H. réelles</th><th class="r">Écart</th><th class="r">ETP</th><th class="r">H. estimées réf.</th></tr></thead>
+  <tbody>
+    ${(cfgEtp.mois||[]).map((m,i)=>{
+      const ec=m.h_faites-m.h_dues;const etpm=m.h_dues>0?(m.h_faites/m.h_dues).toFixed(2):'—';
+      return`<tr style="background:${i%2===0?'#fff':'#f8faf7'}"><td style="font-weight:700">${m.label||m.nom||'Mois '+(i+1)}</td><td class="r">${m.h_dues||'—'}h</td><td class="r" style="font-weight:700">${m.h_faites||'—'}h</td><td class="r" style="color:${ec>=0?'#2D7A27':'#C0392B'};font-weight:700">${ec>=0?'+':''}${ec}h</td><td class="r" style="font-weight:700">${etpm}</td><td class="r" style="color:#aaa">${m.h_est?'~'+m.h_est+'h':'—'}</td></tr>`;
+    }).join('')||`<tr><td colspan="6" style="color:#aaa;font-style:italic;padding:6px 8px">Données mensuelles non renseignées — saisir dans Réglages</td></tr>`}
+    <tr style="background:#eef5eb;font-weight:700;border-top:2px solid #1B2E1A"><td>TOTAL saison</td><td class="r">${hDues?hDues+'h':'—'}</td><td class="r">${hFaites?hFaites+'h':'—'}</td><td class="r" style="color:#2D7A27">${hDues&&hFaites?'+'+(hFaites-hDues)+'h':'—'}</td><td class="r">${etp} ETP</td><td class="r" style="color:#aaa">~${Math.round(hEstimees)}h</td></tr>
+  </tbody>
+</table>
+<div class="s-note">H. estimées = référentiel h/ha × surface totale. H. réelles = saisies dans les rapports mensuels. ETP = H. réelles ÷ H. dues.</div>
+
+<div class="etp-band">
+  <div class="eb-cell"><span class="eb-v">${hDues?hDues+'h':'—'}</span><span class="eb-l">Heures dues</span></div>
+  <div class="eb-cell"><span class="eb-v">${hFaites?hFaites+'h':'—'}</span><span class="eb-l">Heures réelles</span></div>
+  <div class="eb-cell"><span class="eb-v" style="color:#3D6B27">${hDues&&hFaites?'+'+(hFaites-hDues)+'h':'—'}</span><span class="eb-l">Heures sup.</span></div>
+  <div class="eb-cell"><span class="eb-v" style="color:#3D6B27">${etp}</span><span class="eb-l">ETP saison</span></div>
+</div>
+
+<div class="s-lbl" style="margin-top:10px">Estimation par ouvrier</div>
+<div class="ouv-row">${ouvrierCards||'<span style="font-size:9px;color:#aaa;font-style:italic">Données par ouvrier non renseignées</span>'}</div>
+
+<div class="s-lbl" style="margin-top:10px">Durée par tâche — 1ère à dernière parcelle validée</div>
+<table>
+  <thead><tr><th>Tâche</th><th>1ère validation</th><th>Dernière validation</th><th style="text-align:center">Durée</th><th class="r">Réf. h/ha</th><th class="r">H. estimées</th></tr></thead>
+  <tbody>${tachesRows||'<tr><td colspan="6" style="color:#aaa;font-style:italic">Aucune tâche pour cette saison</td></tr>'}</tbody>
+</table>
+<div class="s-note">Dates issues des entrées journal avec statut Validé, 1ère et dernière occurrence pour chaque tâche sur les ${nbParcelles} parcelles actives.</div>
+
+<div class="p-foot"><span>${domaine}</span><span>Ma Vigne v4.7 · Rapport ${nomSaison}</span><span>Page 2 / 4</span></div>
+</div>
+
+<!-- PAGE 3 : PARCELLES -->
+<div class="pg">
+<div class="p-head">
+  <h2>🌿 Bilan parcelles — toutes tâches validées</h2>
+  <div><span class="p-num">Page 3 / 4</span><span class="p-dom">${nbParcelles} parcelles · ${surfTot.toFixed(2)} ha</span></div>
+</div>
+
+<div class="s-lbl">${nbParcelles} parcelles actives — ${nomSaison} · toutes tâches Validé ✓</div>
+<table>
+  <thead><tr><th>Parcelle</th><th class="r">Surface</th><th style="text-align:center">Tâches</th><th>1ère validation</th><th>Dernière validation</th></tr></thead>
+  <tbody>${parcellesRows}</tbody>
+</table>
+${parcellesActives.some(p=>p.statut==='Arrachee')?'':''}
+<div class="s-note">1 parcelle arrachée non incluse : Chazière (statut Arrachée). Dates issues du journal — 1ère et dernière validation de parcelle par tâche.</div>
+
+<div class="p-foot"><span>${domaine}</span><span>Ma Vigne v4.7 · Rapport ${nomSaison}</span><span>Page 3 / 4</span></div>
+</div>
+
+<!-- PAGE 4 : TRACTEUR + PHYTO + ANOMALIES -->
+<div class="pg">
+<div class="p-head">
+  <h2>🚜 Tracteur · 🌿 Phyto · ⚠ Anomalies</h2>
+  <div><span class="p-num">Page 4 / 4</span><span class="p-dom">${domaine}</span></div>
+</div>
+
+<div class="s-lbl">Sessions tracteur — 1ère à dernière parcelle validée</div>
+${sessionsRows||'<p style="font-size:9px;color:#aaa;font-style:italic;padding:4px 0">Aucune session tracteur enregistrée.</p>'}
+<div class="s-note">Dates issues du journal — 1ère et dernière validation de parcelle pour chaque activité tracteur.</div>
+
+<div style="height:10px"></div>
+<div class="s-lbl">Registre phytosanitaire — ${nomSaison}</div>
+<table>
+  <thead><tr><th>Produit</th><th>Classe</th><th>Date</th><th>Zone</th><th>DAR à la récolte</th></tr></thead>
+  <tbody>${phytoRows||'<tr><td colspan="5" style="color:#aaa;font-style:italic">Aucun traitement enregistré.</td></tr>'}</tbody>
+</table>
+<div class="s-note">DAR vérifié à la date de récolte. Traitements avec DAR &gt; 0 j signalés ⚠.</div>
+
+<div style="height:10px"></div>
+<div class="s-lbl">Anomalies — Réparations tracteur enregistrées</div>
+<div class="anom-box">
+  <div class="anom-ttl">⚠ ${anomalies.length} réparation${anomalies.length!==1?'s':''} enregistrée${anomalies.length!==1?'s':''}</div>
+  ${anomHtml}
+</div>
+
+<div class="p-foot" style="margin-top:10px"><span>${domaine} · Bourgogne · SIRET 98214811600014</span><span>Généré le ${dateGen} par Ma Vigne v4.7 · GUERETTECH</span><span>Page 4 / 4</span></div>
 </div>
 
 </body></html>`;
 
-  const win=window.open('','_blank','width=1000,height=750');
+  const win=window.open('','_blank','width=1000,height=800');
   if(!win){showExportFeedback('❌ Popup bloquée — autorisez les popups pour ce site');return;}
   win.document.write(html);
   win.document.close();
@@ -7577,7 +7712,7 @@ function lancerExportEntretienPDF(){
     return '<section class="tracteur-section"><div class="tracteur-title"><div><div class="tracteur-nom">'+t.nom+(t.traitementOnly?' <span class="badge-trait">Traitement</span>':'')+'</div><div class="tracteur-modele">🔩 '+(t.modele||'—')+' · '+t.type+'</div></div><div class="tracteur-annee">'+annee+'</div></div>'+resumeHTML+'<h3 class="section-sub">📋 Fiches d\'entretien</h3>'+fichesHTML+'<h3 class="section-sub" style="margin-top:20px">🔧 Passages réparateur</h3>'+repsHTML+'</section>';
   }).join('<div class="page-break"></div>');
   var aujourd_hui=fmtD(new Date().toISOString().slice(0,10));
-  var html='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Ma Vigne — Entretien '+annee+'</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Georgia,serif;font-size:11px;color:#1A1A1A;padding:20px;}.doc-header{border-bottom:2px solid #3D6B27;padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;}.doc-title{font-size:20px;font-weight:bold;color:#3D6B27;}.doc-meta{text-align:right;font-size:10px;color:#888;}.tracteur-section{margin-bottom:30px;}.tracteur-title{display:flex;justify-content:space-between;align-items:flex-start;background:#2A3547;color:white;padding:12px 16px;border-radius:8px;margin-bottom:12px;}.tracteur-nom{font-size:16px;font-weight:bold;}.tracteur-modele{font-size:10px;color:rgba(255,255,255,0.6);margin-top:3px;}.tracteur-annee{font-size:22px;font-weight:bold;color:rgba(255,255,255,0.35);}.badge-trait{font-size:9px;background:#E07B2A;color:white;border-radius:4px;padding:1px 6px;vertical-align:middle;font-weight:normal;margin-left:6px;}.resume-bar{display:flex;border:1px solid #E0DDD5;border-radius:8px;overflow:hidden;margin-bottom:16px;}.resume-item{flex:1;text-align:center;padding:10px 6px;border-right:1px solid #E0DDD5;}.resume-item:last-child{border-right:none;}.resume-val{display:block;font-size:18px;font-weight:bold;color:#2A3547;}.val-warn{color:#C0392B;}.resume-lbl{display:block;font-size:9px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:0.04em;}.section-sub{font-size:12px;font-weight:bold;color:#2A3547;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E8E4D9;}.fiche-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;overflow:hidden;break-inside:avoid;}.fiche-bloc.has-anomalie{border-color:#F5B8B4;}.fiche-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#F9F8F5;border-bottom:1px solid #E0DDD5;}.fiche-date{font-weight:bold;font-size:11px;}.fiche-meta{font-size:10px;color:#666;margin-top:2px;}.fiche-score{font-size:18px;font-weight:bold;}.score-ok{color:#3D6B27;}.score-warn{color:#E07B2A;}.check-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:8px 12px;}.check-item{font-size:10px;display:flex;justify-content:space-between;align-items:center;padding:3px 6px;border-radius:4px;}.check-item.ok{background:#EAF4E2;color:#2D5A1B;}.check-item.ko{background:#FEF0EF;color:#922B21;}.check-item span{font-weight:bold;}.anomalie{padding:6px 12px 8px;background:#FEF0EF;font-size:10px;color:#922B21;border-top:1px solid #F5B8B4;}.rep-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;padding:10px 14px;break-inside:avoid;}.rep-bloc.rep-en-cours{border-color:#F5CBA7;background:#FEF9F5;}.rep-bloc.rep-depasse{border-color:#F5B8B4;background:#FEF0EF;}.rep-header{display:flex;justify-content:space-between;align-items:center;gap:10px;}.rep-motif{font-weight:bold;font-size:11px;margin-bottom:4px;}.rep-dates{font-size:10px;color:#555;}.rep-badge{font-size:10px;font-weight:bold;padding:4px 10px;border-radius:12px;white-space:nowrap;}.badge-ok{background:#EAF4E2;color:#2D5A1B;}.badge-cours{background:#FEF3E2;color:#935116;}.empty{font-size:10px;color:#999;font-style:italic;padding:8px 0;}.page-break{page-break-after:always;}.doc-footer{border-top:1px solid #E0DDD5;padding-top:8px;margin-top:20px;font-size:9px;color:#AAA;display:flex;justify-content:space-between;}@media print{.page-break{page-break-after:always;border:none;margin:0;}}</style></head><body><div class="doc-header"><div><div class="doc-title">🍇 Ma Vigne — Entretien tracteurs</div><div style="font-size:11px;color:#666;margin-top:2px">Historique '+annee+' · '+tracteursSelectionnes.map(function(t){return t.nom;}).join(', ')+'</div></div><div class="doc-meta">Généré le '+aujourd_hui+'<br>Ma Vigne v4.6 · GUERETTECH</div></div>'+sectionsHTML+'<div class="doc-footer"><span>Ma Vigne — Document confidentiel · Usage interne</span><span>© 2026 Nicolas GUERET / GUERETTECH</span></div></body></html>';
+  var html='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Ma Vigne — Entretien '+annee+'</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Georgia,serif;font-size:11px;color:#1A1A1A;padding:20px;}.doc-header{border-bottom:2px solid #3D6B27;padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;}.doc-title{font-size:20px;font-weight:bold;color:#3D6B27;}.doc-meta{text-align:right;font-size:10px;color:#888;}.tracteur-section{margin-bottom:30px;}.tracteur-title{display:flex;justify-content:space-between;align-items:flex-start;background:#2A3547;color:white;padding:12px 16px;border-radius:8px;margin-bottom:12px;}.tracteur-nom{font-size:16px;font-weight:bold;}.tracteur-modele{font-size:10px;color:rgba(255,255,255,0.6);margin-top:3px;}.tracteur-annee{font-size:22px;font-weight:bold;color:rgba(255,255,255,0.35);}.badge-trait{font-size:9px;background:#E07B2A;color:white;border-radius:4px;padding:1px 6px;vertical-align:middle;font-weight:normal;margin-left:6px;}.resume-bar{display:flex;border:1px solid #E0DDD5;border-radius:8px;overflow:hidden;margin-bottom:16px;}.resume-item{flex:1;text-align:center;padding:10px 6px;border-right:1px solid #E0DDD5;}.resume-item:last-child{border-right:none;}.resume-val{display:block;font-size:18px;font-weight:bold;color:#2A3547;}.val-warn{color:#C0392B;}.resume-lbl{display:block;font-size:9px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:0.04em;}.section-sub{font-size:12px;font-weight:bold;color:#2A3547;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E8E4D9;}.fiche-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;overflow:hidden;break-inside:avoid;}.fiche-bloc.has-anomalie{border-color:#F5B8B4;}.fiche-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#F9F8F5;border-bottom:1px solid #E0DDD5;}.fiche-date{font-weight:bold;font-size:11px;}.fiche-meta{font-size:10px;color:#666;margin-top:2px;}.fiche-score{font-size:18px;font-weight:bold;}.score-ok{color:#3D6B27;}.score-warn{color:#E07B2A;}.check-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:8px 12px;}.check-item{font-size:10px;display:flex;justify-content:space-between;align-items:center;padding:3px 6px;border-radius:4px;}.check-item.ok{background:#EAF4E2;color:#2D5A1B;}.check-item.ko{background:#FEF0EF;color:#922B21;}.check-item span{font-weight:bold;}.anomalie{padding:6px 12px 8px;background:#FEF0EF;font-size:10px;color:#922B21;border-top:1px solid #F5B8B4;}.rep-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;padding:10px 14px;break-inside:avoid;}.rep-bloc.rep-en-cours{border-color:#F5CBA7;background:#FEF9F5;}.rep-bloc.rep-depasse{border-color:#F5B8B4;background:#FEF0EF;}.rep-header{display:flex;justify-content:space-between;align-items:center;gap:10px;}.rep-motif{font-weight:bold;font-size:11px;margin-bottom:4px;}.rep-dates{font-size:10px;color:#555;}.rep-badge{font-size:10px;font-weight:bold;padding:4px 10px;border-radius:12px;white-space:nowrap;}.badge-ok{background:#EAF4E2;color:#2D5A1B;}.badge-cours{background:#FEF3E2;color:#935116;}.empty{font-size:10px;color:#999;font-style:italic;padding:8px 0;}.page-break{page-break-after:always;}.doc-footer{border-top:1px solid #E0DDD5;padding-top:8px;margin-top:20px;font-size:9px;color:#AAA;display:flex;justify-content:space-between;}@media print{.page-break{page-break-after:always;border:none;margin:0;}}</style></head><body><div class="doc-header"><div><div class="doc-title">🍇 Ma Vigne — Entretien tracteurs</div><div style="font-size:11px;color:#666;margin-top:2px">Historique '+annee+' · '+tracteursSelectionnes.map(function(t){return t.nom;}).join(', ')+'</div></div><div class="doc-meta">Généré le '+aujourd_hui+'<br>Ma Vigne v4.7 · GUERETTECH</div></div>'+sectionsHTML+'<div class="doc-footer"><span>Ma Vigne — Document confidentiel · Usage interne</span><span>© 2026 Nicolas GUERET / GUERETTECH</span></div></body></html>';
   var win=window.open('','_blank');
   if(!win){showToast('Autorisez les popups pour l\'impression','#C0392B');return;}
   win.document.write(html);
@@ -7997,7 +8132,7 @@ function _swReload() {
       <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:var(--texte)">Cookies & traceurs</div>
       <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
 
-      <div style="text-align:center;color:var(--texte-doux);font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v4.6</div>
+      <div style="text-align:center;color:var(--texte-doux);font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v4.7</div>
 
       <button class="mbtn" style="margin-top:20px" onclick="closeOv(null,'ovMentions')">Fermer</button>
     </div>
