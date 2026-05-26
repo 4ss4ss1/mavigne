@@ -177,6 +177,10 @@ function applyFbData(key, value) {
       window.priorityMessage = value.priorityMessage;
       if(window._syncLocalVars) window._syncLocalVars();
     }
+    if(value.domaine_nom) {
+      DOMAINE_NOM = value.domaine_nom;
+      if(typeof applyDomNom === 'function') applyDomNom();
+    }
   } else if(key === 'membres') {
     // mdp supprimé — Firebase Auth gère les mots de passe côté serveur
     window.MEMBRES = value;
@@ -853,6 +857,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 /* ══ RÉGLAGES ══ */
 .dom-badge{background:var(--vert);color:white;border-radius:16px;padding:16px;margin:0 16px 20px;text-align:center;}
 .db-logo{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;margin-bottom:4px;}
+.db-nom{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400;opacity:0.85;margin-bottom:2px;}
 .db-sub{font-size:11px;opacity:0.7;}
 .set-sec{margin-bottom:24px;}
 .set-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--texte-doux);margin-bottom:10px;padding:0 16px;}
@@ -1472,8 +1477,8 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
   <div class="hv2-header">
     <div class="hv2-top">
       <div>
-        <div class="hv2-brand">Domaine</div>
-        <div class="hv2-title">Ma Vigne</div>
+        <div class="hv2-brand">Ma Vigne</div>
+        <div class="hv2-title" id="hv2-domaine-nom">Domaine Marchand-Grillot</div>
       </div>
       <div class="hv2-top-right">
         <div class="hv2-avatar-wrap" onclick="logout()">
@@ -1797,7 +1802,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     </div>
   </div>
   <div style="height:8px"></div>
-  <div class="dom-badge"><div class="db-logo">🍇 Ma Vigne</div><div class="db-sub" id="dom-badge-sub">Domaine · 11,76 ha actifs</div></div>
+  <div class="dom-badge"><div class="db-logo">🍇 Ma Vigne</div><div class="db-nom" id="dom-badge-nom">Domaine Marchand-Grillot</div><div class="db-sub" id="dom-badge-sub">Domaine · 11,76 ha actifs</div></div>
 
   <div class="set-sec">
     <div class="set-title">Mon compte</div>
@@ -1806,7 +1811,18 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     </div>
   </div>
 
-  <div class="set-sec">
+  <!-- ── Mon domaine — admin : éditable ; autres : lecture seule sur badge uniquement ── -->
+  <div class="set-sec" id="set-row-domaine-nom" style="display:none">
+    <div class="set-title">Mon domaine</div>
+    <div style="margin:0 16px">
+      <div class="set-row" style="border-radius:16px" onclick="openEditDomNom()">
+        <div class="sr-l"><div class="sr-ico" style="background:var(--vert-pale)">🏡</div><div><div class="sr-lbl">Nom du domaine</div><div class="sr-sub">Affiché sur l'accueil et les exports PDF</div></div></div>
+        <div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:600;color:var(--vert);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="dom-nom-val">Domaine Marchand-Grillot</span><span class="sr-arr">›</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="set-sec" id="set-sec-saisons">
     <div class="set-title">Saison active</div>
     <div id="saisons-list" style="padding:0 16px"></div>
     <div style="padding:0 16px;margin-top:8px;display:flex;gap:8px">
@@ -1815,7 +1831,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     </div>
   </div>
 
-  <div class="set-sec">
+  <div class="set-sec" id="set-sec-taches">
     <div class="set-title">Tâches — <span id="taches-saison-label"></span></div>
     <div style="background:white;border-radius:16px;padding:0 16px;margin:0 16px;box-shadow:var(--shadow-sm)">
       <div id="taches-config-list"></div>
@@ -1823,7 +1839,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     <div style="padding:0 16px;margin-top:8px"><button class="mbtn verte" style="margin-top:0;font-size:13px;padding:10px" onclick="openOv('ovTache')">＋ Nouvelle tâche</button></div>
   </div>
 
-  <div class="set-sec">
+  <div class="set-sec" id="set-sec-equipe">
     <div class="set-title">Équipe & accès</div>
     <div id="membres-list" style="padding:0 16px"></div>
     <div style="padding:0 16px;margin-top:8px"><button class="mbtn verte" style="margin-top:0;font-size:13px;padding:10px" onclick="openOv('ovMembre')">＋ Ajouter un membre</button></div>
@@ -1842,6 +1858,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
       </div>
       <div class="set-row" onclick="requestNotifications()"><div class="sr-l"><div class="sr-ico" style="background:var(--terre-pale)">🔔</div><div><div class="sr-lbl">Notifications</div><div class="sr-sub" id="notif-status">Alertes gel, DAR, validations</div></div></div><div class="sr-arr" id="notif-arr">›</div></div>
       <div class="set-row" onclick="openExport()"><div class="sr-l"><div class="sr-ico" style="background:var(--bleu-pale)">📤</div><div><div class="sr-lbl">Exporter / Importer</div><div class="sr-sub">JSON · CSV journal · CSV parcelles · Restaurer</div></div></div><div class="sr-arr">›</div></div>
+      <div class="set-row" onclick="openOv('ovMentions')"><div class="sr-l"><div class="sr-ico" style="background:#F0E8F8">⚖️</div><div><div class="sr-lbl">Mentions légales & confidentialité</div><div class="sr-sub">RGPD · Éditeur · Hébergement</div></div></div><div class="sr-arr">›</div></div>
       <div class="set-row" style="border-radius:0 0 16px 16px" onclick="logout()"><div class="sr-l"><div class="sr-ico" style="background:var(--gris-clair)">🚪</div><div><div class="sr-lbl">Se déconnecter</div></div></div><div class="sr-arr">›</div></div>
     </div>
   </div>
@@ -1860,16 +1877,10 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     <div id="act-trac-list" style="background:white;border-radius:16px;padding:0 16px;margin:0 16px;box-shadow:var(--shadow-sm)"></div>
   </div>
 
-  <div class="set-sec">
+  <div class="set-sec" id="set-sec-danger">
     <div class="set-title" style="color:var(--rouge)">⚠️ Zone dangereuse</div>
     <div style="margin:0 16px">
       <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger('reset')"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🗑️</div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
-    </div>
-  </div>
-    <div class="set-sec">
-    <div class="set-title">Légal</div>
-    <div style="margin:0 16px">
-      <div class="set-row" style="border-radius:16px" onclick="openOv('ovMentions')"><div class="sr-l"><div class="sr-ico" style="background:#EEF2FF">⚖️</div><div><div class="sr-lbl">Mentions légales & confidentialité</div><div class="sr-sub">RGPD · Données personnelles · Copyright</div></div></div><div class="sr-arr">›</div></div>
     </div>
   </div>
   <div class="ver-tag">Ma Vigne v4.6 · Firebase Auth : signInWithEmailAndPassword · suppression sha256/checkMdp · sendPasswordResetEmail · updatePassword+reauth 🔒</div>
@@ -1877,6 +1888,24 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 
 <!-- ══════ NAV ══════ -->
 <!-- ══════ PAGE CHAT ══════ -->
+
+<!-- ══ OVERLAY : Édition nom du domaine ══ -->
+<div class="overlay" id="ovEditDomNom" onclick="closeOv(event,'ovEditDomNom')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd">
+      <div class="modal-title">🏡 Nom du domaine</div>
+      <div class="modal-sub">Affiché sur l'accueil, les exports PDF et les rapports</div>
+    </div>
+    <div class="modal-body">
+      <div class="fl">Nom du domaine viticole</div>
+      <input class="fi ac" id="edn-input" type="text" placeholder="Ex : Domaine Dupont, Château de la Vigne…" maxlength="60">
+      <div style="font-size:11px;color:var(--texte-doux);margin-top:6px;margin-bottom:14px">Ce nom remplace "Ma Vigne" sur l'accueil et dans les PDF.<br>Le nom de l'application reste "Ma Vigne".</div>
+      <button class="mbtn verte" onclick="saveEditDomNom()">✓ Enregistrer</button>
+      <button class="mbtn" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux)" onclick="closeOv(null,'ovEditDomNom')">Annuler</button>
+    </div>
+  </div>
+</div>
 
 <!-- Overlay Zone dangereuse -->
 <div class="overlay" id="ovDanger" onclick="closeOvDanger(event)">
@@ -2463,6 +2492,7 @@ function loadData() {
     if (d.TACHES)       { TACHES = d.TACHES; window.TACHES = TACHES; }
     if (d.HISTORIQUE)   { HISTORIQUE = d.HISTORIQUE; window.HISTORIQUE = HISTORIQUE; }
     if (d.priorityMessage !== undefined) { priorityMessage = d.priorityMessage; window.priorityMessage = priorityMessage; }
+    if (d.CONFIG && d.CONFIG.domaine_nom) { DOMAINE_NOM = d.CONFIG.domaine_nom; }
     return true;
   } catch(e) { return false; }
 }
@@ -2718,6 +2748,7 @@ async function confirmLogin(){
     btn.textContent = 'Se connecter';
     applyRoles();
     updateNavForRoles();
+    applyDomNom();
     goTo('home');
     fetchMeteo();
   } catch(e) {
@@ -2799,7 +2830,8 @@ function canWrite(){return isAdmin()||(currentUser?.roles.includes('ouvrier')&&!
 function applyRoles(){
   // Phyto — admin seulement
   document.querySelectorAll('.nb[data-p=phyto]').forEach(b=>b.style.display=canSeePhyto()?'':'none');
-  document.querySelectorAll('.nb[data-p=reglages]').forEach(b=>b.style.display=isAdmin()?'':'none');
+  // Réglages visible par tous — contenu filtré dans renderReglages() selon le rôle
+  document.querySelectorAll('.nb[data-p=reglages]').forEach(b=>b.style.display='');
   // Tracteur readonly banner
   const isReadOnly=!isTractoriste();
   const condAddBtn=document.getElementById('cond-add-btn');
@@ -2967,6 +2999,7 @@ function goTo(page){
 
 // ════ ACCUEIL ════
 let homeCardMode = 0; // 0 = avancement global, 1 = tâche en cours
+let DOMAINE_NOM = 'Domaine Marchand-Grillot'; // Nom configurable du domaine viticole
 
 function getHomeCardData(){
   const tachesSaison = getTachesSaison();
@@ -5400,7 +5433,19 @@ function renderReglages(){
   if(smb)smb.textContent=MEMBRES.length;
   if(stk)stk.textContent=TACHES.length;
   if(str)str.textContent=TRACTEURS_LIST.length;
-  // Aperçu domaine — avancement global saison
+
+  // Badge rôle dans l'en-tête
+  const roleB=document.getElementById('regl-role-badge');
+  if(roleB){
+    const rLabel=getRoleLabel(currentUser?currentUser.roles:[]);
+    roleB.textContent=rLabel;
+    const isA=isAdmin();
+    roleB.style.background=isA?'rgba(61,107,39,0.2)':'rgba(74,159,200,0.2)';
+    roleB.style.color=isA?'#7CB95A':'#4A9FC8';
+    roleB.style.border='1px solid '+(isA?'rgba(61,107,39,0.3)':'rgba(74,159,200,0.3)');
+  }
+
+  // Aperçu domaine — avancement global saison + DOMAINE_NOM
   const tachesSaison=getTachesSaison();
   const parcActives=PARCELLES.filter(p=>p.statut!=='Arrachee');
   const totalCases=tachesSaison.length*parcActives.length;
@@ -5409,24 +5454,48 @@ function renderReglages(){
   const saison=getSaisonActive();
   const sub=document.getElementById('dom-badge-sub');
   if(sub)sub.textContent=`${saison.nom} · ${pctGlobal}% accompli · ${parcActives.length} parcelles · 11,76 ha`;
-  // Saisons
-  const sl=document.getElementById('saisons-list');
-  sl.innerHTML=SAISONS.map(s=>`<div class="saison-card" onclick="activateSaison('${s.nom}')"><div><div class="sc-nom">${s.nom}</div><div class="sc-periode">${s.periode}</div></div>${s.active?'<div class="sc-active-badge">✅ Active</div>':''}</div>`).join('');
-  // Tâches
-  const saisonNom=getSaisonActive().nom.split(' ')[0];
-  document.getElementById('taches-saison-label').textContent=getSaisonActive().nom;
-  const tachesList=document.getElementById('taches-config-list');
-  const tachesFiltrees=TACHES.filter(t=>t.saison===saisonNom||getSaisonActive().nom.includes(t.saison));
-  tachesList.innerHTML=tachesFiltrees.map(t=>`<div class="tache-config-row"><div class="tcr-info"><div class="tcr-nom">${TEMOJI[t.nom]||'🌿'} ${t.nom}</div><div class="tcr-hha">${t.hha}h/ha · Total estimé: ${Math.round(t.hha*SURF_TOTALE)}h</div></div><div class="tcr-del" onclick="deleteTache('${t.nom}')">🗑</div></div>`).join('');
-  // Membres
-  const ml=document.getElementById('membres-list');
-  ml.innerHTML=MEMBRES.map(m=>`<div class="membre-card" onclick="editMembre('${m.nom}')"><div class="m-ava" style="background:${m.couleur||'#888'}">${m.nom[0]}</div><div class="m-info"><div class="m-nom">${m.nom}</div><div class="m-roles">${m.roles.map(r=>`<span class="m-role-badge rb-${r}">${r}</span>`).join('')}</div><div class="m-statut">${m.email||''} · ${m.statut}</div></div></div>`).join('');
-  // Update select saisons dans modal tâche
-  document.getElementById('nt-saison').innerHTML=['Hiver','Printemps','Été','Automne'].map(s=>`<option value="${s}" ${s===saisonNom?'selected':''}>${s}</option>`).join('');
-  // Parc tracteurs (admin)
-  renderTracteurSet();
-  // Association activité↔tracteur (admin)
-  renderActTracList();
+  // Appliquer DOMAINE_NOM dans le badge
+  const domNomEl=document.getElementById('dom-badge-nom');
+  if(domNomEl)domNomEl.textContent=DOMAINE_NOM;
+  // Ligne édition du nom (admin uniquement)
+  const domEditRow=document.getElementById('set-row-domaine-nom');
+  if(domEditRow){
+    domEditRow.style.display=isAdmin()?'':'none';
+    const domValEl=document.getElementById('dom-nom-val');
+    if(domValEl)domValEl.textContent=DOMAINE_NOM;
+  }
+
+  // Sections admin uniquement
+  const secSaisons=document.getElementById('set-sec-saisons');
+  const secTaches=document.getElementById('set-sec-taches');
+  const secEquipe=document.getElementById('set-sec-equipe');
+  const secDanger=document.getElementById('set-sec-danger');
+  if(secSaisons)secSaisons.style.display=isAdmin()?'':'none';
+  if(secTaches)secTaches.style.display=isAdmin()?'':'none';
+  if(secEquipe)secEquipe.style.display=isAdmin()?'':'none';
+  if(secDanger)secDanger.style.display=isAdmin()?'':'none';
+
+  if(isAdmin()){
+    // Saisons
+    const sl=document.getElementById('saisons-list');
+    if(sl)sl.innerHTML=SAISONS.map(s=>`<div class="saison-card" onclick="activateSaison('${s.nom}')"><div><div class="sc-nom">${s.nom}</div><div class="sc-periode">${s.periode}</div></div>${s.active?'<div class="sc-active-badge">✅ Active</div>':''}</div>`).join('');
+    // Tâches
+    const saisonNom=getSaisonActive().nom.split(' ')[0];
+    document.getElementById('taches-saison-label').textContent=getSaisonActive().nom;
+    const tachesList=document.getElementById('taches-config-list');
+    const tachesFiltrees=TACHES.filter(t=>t.saison===saisonNom||getSaisonActive().nom.includes(t.saison));
+    tachesList.innerHTML=tachesFiltrees.map(t=>`<div class="tache-config-row"><div class="tcr-info"><div class="tcr-nom">${TEMOJI[t.nom]||'🌿'} ${t.nom}</div><div class="tcr-hha">${t.hha}h/ha · Total estimé: ${Math.round(t.hha*SURF_TOTALE)}h</div></div><div class="tcr-del" onclick="deleteTache('${t.nom}')">🗑</div></div>`).join('');
+    // Membres
+    const ml=document.getElementById('membres-list');
+    if(ml)ml.innerHTML=MEMBRES.map(m=>`<div class="membre-card" onclick="editMembre('${m.nom}')"><div class="m-ava" style="background:${m.couleur||'#888'}">${m.nom[0]}</div><div class="m-info"><div class="m-nom">${m.nom}</div><div class="m-roles">${m.roles.map(r=>`<span class="m-role-badge rb-${r}">${r}</span>`).join('')}</div><div class="m-statut">${m.email||''} · ${m.statut}</div></div></div>`).join('');
+    // Update select saisons dans modal tâche
+    const ntSaison=document.getElementById('nt-saison');
+    if(ntSaison)ntSaison.innerHTML=['Hiver','Printemps','Été','Automne'].map(s=>`<option value="${s}" ${s===saisonNom?'selected':''}>${s}</option>`).join('');
+    // Parc tracteurs (admin)
+    renderTracteurSet();
+    // Association activité↔tracteur (admin)
+    renderActTracList();
+  }
 }
 // ── Render liste association activité↔tracteur (Réglages) ──
 function renderActTracList(){
@@ -6298,7 +6367,7 @@ function exportPDFMois(){
   const [annee,mois]=moisVal.split('-');
   const moisNoms=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
   const moisNom=moisNoms[parseInt(mois)-1]+' '+annee;
-  const domaine=(window.CONFIG&&window.CONFIG.nomDomaine)||'Domaine Marchand-Grillot';
+  const domaine=(window.DOMAINE_NOM||DOMAINE_NOM||'Domaine Marchand-Grillot');
 
   // Champs saisis manuellement
   const heuresTotales=(document.getElementById('pdf-heures').value||'').trim();
@@ -6878,7 +6947,7 @@ function exportPDFPhyto(){
 function exportPDFRapportSaison(){
   const saison=getSaisonActive();
   const nomSaison=saison?saison.nom:'Saison';
-  const domaine=(window.CONFIG&&window.CONFIG.nomDomaine)||'Domaine Marchand-Grillot';
+  const domaine=(window.DOMAINE_NOM||DOMAINE_NOM||'Domaine Marchand-Grillot');
   const today=new Date();
   const dateGen=today.toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
 
@@ -7356,7 +7425,37 @@ function showToast(msg,color){
   _toastTimer=setTimeout(function(){t.classList.remove('show');},2200);
 }
 
-// ── Overlay de confirmation simple (remplace confirm() natif) ──
+// ════ DOMAINE_NOM ════
+function openEditDomNom(){
+  if(!isAdmin()){showToast('Réservé aux administrateurs','#C0392B');return;}
+  document.getElementById('edn-input').value=DOMAINE_NOM;
+  openOv('ovEditDomNom');
+  setTimeout(function(){document.getElementById('edn-input').focus();},300);
+}
+function saveEditDomNom(){
+  var val=document.getElementById('edn-input').value.trim();
+  if(!val){showToast('Le nom ne peut pas être vide','#C0392B');return;}
+  DOMAINE_NOM=val;
+  // Persister dans config Firebase/localStorage
+  if(!window.CONFIG)window.CONFIG={};
+  window.CONFIG.domaine_nom=val;
+  saveData('config');
+  applyDomNom();
+  closeOv(null,'ovEditDomNom');
+  renderReglages();
+  showToast('Nom du domaine mis à jour ✓','#3D6B27');
+}
+function applyDomNom(){
+  // Header accueil
+  var htEl=document.getElementById('hv2-domaine-nom');
+  if(htEl)htEl.textContent=DOMAINE_NOM;
+  // Badge Réglages
+  var dnEl=document.getElementById('dom-badge-nom');
+  if(dnEl)dnEl.textContent=DOMAINE_NOM;
+  // Ligne édition Réglages
+  var dvEl=document.getElementById('dom-nom-val');
+  if(dvEl)dvEl.textContent=DOMAINE_NOM;
+}
 var _confirmDelCb=null;
 function openConfirmDel(title,sub,cb,icon,btnLabel){
   _confirmDelCb=cb||null;
