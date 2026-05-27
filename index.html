@@ -1477,7 +1477,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v4.7</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v4.8</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -2095,7 +2095,48 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
     <button onclick="exportJSON()" style="background:var(--acier);color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">📦 <div><div>Export JSON complet</div><div style="font-size:11px;opacity:0.75;font-weight:400">Toutes les données — sauvegarde complète</div></div></button>
     <button onclick="exportPDFPhyto()" style="background:#4A2060;color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">🧪 <div><div>Registre phyto PDF</div><div style="font-size:11px;opacity:0.75;font-weight:400">Registre réglementaire complet — toute la saison</div></div></button>
     <button onclick="exportPDFRapportSaison()" style="background:#1A3A2A;color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">📄 <div><div>Rapport de saison PDF</div><div style="font-size:11px;opacity:0.75;font-weight:400">Travaux · Tracteur · Phyto — rapport complet</div></div></button>
-    <div style="border-top:1px solid var(--gris);margin:4px 0"></div>
+  </div>
+  <!-- Bloc ETP saison — admin uniquement -->
+  <div id="set-sec-etp" style="display:none">
+    <div style="font-size:11px;font-weight:700;color:var(--texte-doux);text-transform:uppercase;letter-spacing:1px;margin:18px 0 10px">⏱ Heures &amp; ETP — rapport de saison</div>
+    <div style="background:var(--fond-module);border:1px solid var(--gris);border-radius:14px;overflow:hidden">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--gris)">
+        <div style="font-size:12px;font-weight:600;color:var(--texte-doux)">Heures de la saison active</div>
+        <div style="font-size:10px;color:var(--texte-doux);opacity:0.6;margin-top:2px">Utilisé dans le rapport PDF de saison</div>
+      </div>
+      <div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;color:var(--texte-doux);flex:1">Heures dues (total saison)</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="number" id="etp-h-dues" min="0" oninput="calcEtpLive()"
+              style="width:72px;background:var(--fond-module);border:1px solid var(--gris);border-radius:8px;color:var(--texte);font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;padding:7px 10px;text-align:right;-moz-appearance:textfield">
+            <span style="font-size:11px;color:var(--texte-doux)">h</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;color:var(--texte-doux);flex:1">Heures réelles travaillées</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="number" id="etp-h-faites" min="0" oninput="calcEtpLive()"
+              style="width:72px;background:var(--fond-module);border:1px solid var(--gris);border-radius:8px;color:var(--texte);font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;padding:7px 10px;text-align:right;-moz-appearance:textfield">
+            <span style="font-size:11px;color:var(--texte-doux)">h</span>
+          </div>
+        </div>
+        <div style="background:rgba(160,168,184,0.1);border:1px solid rgba(160,168,184,0.2);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:11px;color:var(--texte-doux)">ETP saison calculé</div>
+            <div id="etp-calc-label" style="font-size:9px;color:var(--texte-doux);opacity:0.5;font-style:italic;margin-top:2px">—</div>
+          </div>
+          <div id="etp-result-val" style="font-size:22px;font-weight:700;color:var(--acier)">—</div>
+        </div>
+        <button onclick="saveEtpSaison()"
+          style="background:var(--ardoise);color:white;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;width:100%">
+          Enregistrer les heures
+        </button>
+        <div style="font-size:10px;color:var(--texte-doux);opacity:0.5;font-style:italic;text-align:center;line-height:1.5">Ces données alimentent uniquement le rapport PDF.<br>Elles ne modifient pas le journal ni les tâches.</div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:4px"><div style="border-top:1px solid var(--gris);margin:4px 0"></div>
     <button onclick="document.getElementById('import-json-input').click()" style="background:var(--bleu-pale);color:var(--bleu);border:2px dashed var(--bleu);border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px">📂 <div><div>Charger un export JSON</div><div style="font-size:11px;opacity:0.75;font-weight:400">Restaurer une sauvegarde · remplace les données actuelles</div></div></button>
     <input type="file" id="import-json-input" accept=".json,application/json" style="display:none" onchange="importJSON(this)">
   </div>
@@ -5434,6 +5475,31 @@ function confirmDeleteTraitement(){
 }
 
 // ════ RÉGLAGES ════
+// ── ETP saison (Réglages admin) ──
+function calcEtpLive(){
+  const d=parseFloat(document.getElementById('etp-h-dues')?.value)||0;
+  const f=parseFloat(document.getElementById('etp-h-faites')?.value)||0;
+  const resEl=document.getElementById('etp-result-val');
+  const lblEl=document.getElementById('etp-calc-label');
+  if(!resEl)return;
+  if(d>0&&f>0){
+    const etp=(f/d).toFixed(2);
+    resEl.textContent=etp;
+    resEl.style.color=parseFloat(etp)>=1?'var(--vert)':'var(--orange,#C8913A)';
+    if(lblEl)lblEl.textContent=f+'h ÷ '+d+'h';
+  } else {
+    resEl.textContent='—';
+    resEl.style.color='var(--acier)';
+    if(lblEl)lblEl.textContent='—';
+  }
+}
+function saveEtpSaison(){
+  const d=parseFloat(document.getElementById('etp-h-dues')?.value)||0;
+  const f=parseFloat(document.getElementById('etp-h-faites')?.value)||0;
+  if(!CONFIG)window.CONFIG={};
+  CONFIG.etp_saison={h_dues:d,h_faites:f};
+  saveData('config','⏱ Heures saison enregistrées');
+}
 function renderReglages(){
   // Stats band en-tête
   const smb=document.getElementById('regl-stat-membres');
@@ -5483,6 +5549,19 @@ function renderReglages(){
   if(secTaches)secTaches.style.display=isAdmin()?'':'none';
   if(secEquipe)secEquipe.style.display=isAdmin()?'':'none';
   if(secDanger)secDanger.style.display=isAdmin()?'':'none';
+  // Bloc ETP — admin uniquement, pré-remplir depuis CONFIG
+  const secEtp=document.getElementById('set-sec-etp');
+  if(secEtp){
+    secEtp.style.display=isAdmin()?'':'none';
+    if(isAdmin()){
+      const cfgEtp=(CONFIG&&CONFIG.etp_saison)||{};
+      const inDues=document.getElementById('etp-h-dues');
+      const inFaites=document.getElementById('etp-h-faites');
+      if(inDues)inDues.value=cfgEtp.h_dues||'';
+      if(inFaites)inFaites.value=cfgEtp.h_faites||'';
+      calcEtpLive();
+    }
+  }
 
   if(isAdmin()){
     // Saisons
@@ -8141,7 +8220,7 @@ function _swReload() {
       <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:var(--texte)">Cookies & traceurs</div>
       <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
 
-      <div style="text-align:center;color:var(--texte-doux);font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v4.7</div>
+      <div style="text-align:center;color:var(--texte-doux);font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v4.8</div>
 
       <button class="mbtn" style="margin-top:20px" onclick="closeOv(null,'ovMentions')">Fermer</button>
     </div>

@@ -1,5 +1,6 @@
 // MA VIGNE — Service Worker v2.09
 // v2.09 — Fix critique Firebase Auth : pull complet post-auth uniquement (_fbLoadAfterAuth) · suppression repull _tracRepullDone · index v4.8
+// v2.09 — Réglages admin : saisie heures dues/faites + calcul ETP live + sauvegarde CONFIG.etp_saison
 // v2.08 — Rapport saison PDF v2 : design A4 · durées tâches (1ère→dernière validation) · ETP · anomalies tracteur · parcelles bilan
 // v2.07 — DOMAINE_NOM configurable : header accueil · badge Réglages · PDF · overlay édition admin · Réglages accessible à tous (mdp, thème, notifs, mentions légales)
 // v2.06 — Firebase Auth : SDK auth-compat · signInWithEmailAndPassword · signOut · sendPasswordResetEmail · updatePassword+reauth · suppression sha256/checkMdp/RESEND
