@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v2.09
+// MA VIGNE — Service Worker v2.10
+// v2.10 — Fix race condition Réglages : _authReady flag + retry goTo(reglages) · index v4.9
 // v2.09 — Fix critique Firebase Auth : pull complet post-auth uniquement (_fbLoadAfterAuth) · suppression repull _tracRepullDone · index v4.8
 // v2.09 — Réglages admin : saisie heures dues/faites + calcul ETP live + sauvegarde CONFIG.etp_saison
 // v2.08 — Rapport saison PDF v2 : design A4 · durées tâches (1ère→dernière validation) · ETP · anomalies tracteur · parcelles bilan
@@ -10,7 +11,7 @@
 // v2.02 — États vides illustrés : SVG inline thématiques dans Journal, Parcelles, Tracteur, Phyto
 // v2.01 — Leaflet hors réseau : bandeau discret en haut de carte · listeners online/offline
 // v2.00 — Nav bar : fond sombre permanent #151A14 · halos colorés par module
-const CACHE_NAME = 'mavigne-v2.09';
+const CACHE_NAME = 'mavigne-v2.10';
 const SYNC_TAG   = 'mavigne-sync';
 const APP_SHELL = ['./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 const CDN_URLS = [
@@ -19,7 +20,7 @@ const CDN_URLS = [
   'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap',
 ];
 self.addEventListener('install', event => {
-  console.log('[SW] Install v2.09');
+  console.log('[SW] Install v2.10');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache =>
       cache.addAll(APP_SHELL).then(() =>
