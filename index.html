@@ -454,6 +454,10 @@ console.log('🔥 Firebase prêt, en attente de _fbLoad()');
   --shadow-md:0 6px 24px rgba(0,0,0,0.5);
   --bg-app:#141412;--bg-card:#1E1E1A;
 }
+/* Mode clair — gradient carte priorité */
+:root:not([data-theme="dark"]) .hv2-card-or{background:linear-gradient(135deg,#FFF8E8,#FAF0CC);}
+/* Mode sombre — gradient carte priorité sombre */
+[data-theme="dark"] .hv2-card-or{background:linear-gradient(135deg,#2A1E08,#221808);}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;}
 #app-root{background:var(--bg-app);min-height:100vh;transition:background 0.3s,color 0.3s;}
@@ -601,7 +605,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .pc-main{display:flex;align-items:center;padding:14px;gap:12px;}
 .pc-ava{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;position:relative;}
 .ava-c{background:var(--vert-pale);}.ava-a{background:var(--or-pale);}.ava-r{background:var(--orange-pale);}.ava-x{background:var(--rouge-pale);}
-.pc-dot{position:absolute;bottom:-2px;right:-2px;width:16px;height:16px;border-radius:50%;border:2px solid white;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.pc-dot{position:absolute;bottom:-2px;right:-2px;width:16px;height:16px;border-radius:50%;border:2px solid var(--bg-card);font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center;}
 .dc{background:var(--vert-med);color:white;}.da{background:var(--or);color:white;}.dr{background:var(--orange);color:white;}
 .pc-info{flex:1;min-width:0;}
 .pc-nom{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -617,7 +621,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .pc-bar-fill{height:100%;border-radius:4px;}
 .pc-tchips{display:flex;gap:4px;padding:0 14px 12px;flex-wrap:wrap;}
 .tc{font-size:11px;padding:3px 8px;border-radius:8px;font-weight:500;}
-.tcv{background:var(--vert-pale);color:var(--vert-med);}.tcf{background:var(--or-pale);color:var(--terre);}.tce{background:var(--orange-pale);color:var(--orange);}.tcm{background:var(--gris-clair);color:var(--texte-doux);}.tc-nd{background:#F0F0F0;color:#888;border:1.5px solid #DDD;}
+.tcv{background:var(--vert-pale);color:var(--vert-med);}.tcf{background:var(--or-pale);color:var(--terre);}.tce{background:var(--orange-pale);color:var(--orange);}.tcm{background:var(--gris-clair);color:var(--texte-doux);}.tc-nd{background:var(--gris-clair);color:var(--texte-doux);border:1.5px solid var(--gris);}
 
 /* Validation travaux */
 .val-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--gris-clair);}
@@ -952,13 +956,13 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .sdp-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--gris-clair);cursor:pointer;transition:background 0.1s;border-radius:6px;}
 .sdp-row:active{background:var(--gris-clair);}
 .sdp-row.sdp-done{background:var(--vert-pale);border-radius:8px;padding:11px 8px;border-color:transparent;margin:1px 0;}
-.sdp-row.sdp-skip{background:#FFF3F0;border-radius:8px;padding:11px 8px;border-color:transparent;margin:1px 0;opacity:0.75;}
+.sdp-row.sdp-skip{background:var(--rouge-pale);border-radius:8px;padding:11px 8px;border-color:transparent;margin:1px 0;opacity:0.75;}
 .sdp-check{width:22px;height:22px;border-radius:7px;border:2px solid var(--gris);background:white;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0;transition:all 0.15s;}
 .sdp-check.on{background:var(--vert-med);border-color:var(--vert-med);}
 .sdp-check.skip{background:#E0C0B8;border-color:#C89A90;color:#8B4A40;font-size:11px;}
 .sdp-skip-btn{font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;border:none;cursor:pointer;flex-shrink:0;transition:all 0.15s;}
-.sdp-skip-btn.active{background:#F0D0C8;color:#8B3A28;}
-.sdp-skip-btn.inactive{background:#F0F0EC;color:#999;}
+.sdp-skip-btn.active{background:var(--terre-pale);color:var(--terre);}
+.sdp-skip-btn.inactive{background:var(--gris-clair);color:var(--texte-doux);}
 .sc-edit-btn{background:var(--acier-pale);border:1.5px solid var(--acier);border-radius:8px;padding:4px 9px;font-size:13px;cursor:pointer;color:var(--acier);margin-right:6px;flex-shrink:0;transition:background 0.15s;}
 .sc-edit-btn:active{background:var(--acier);color:white;}
 .sc-bfill-enc{background:var(--orange)!important;}
@@ -1001,7 +1005,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 /* Tap hint */
 .hv2-tap-hint{font-size:11px;color:rgba(61,107,39,0.5);font-weight:600;background:rgba(61,107,39,0.08);border-radius:8px;padding:2px 7px;display:flex;align-items:center;gap:3px;white-space:nowrap;}
 /* Card droite priorité — même hauteur */
-.hv2-card-or{background:linear-gradient(135deg,#FFF8E8,#FAF0CC);border:1px solid rgba(184,145,58,0.35);height:200px;display:flex;flex-direction:column;justify-content:space-between;}
+.hv2-card-or{background:var(--or-pale);border:1px solid rgba(184,145,58,0.35);height:200px;display:flex;flex-direction:column;justify-content:space-between;}
 .hv2-card-or-vide{background:var(--or-pale);border:1px solid rgba(184,145,58,0.18);height:200px;display:flex;flex-direction:column;justify-content:space-between;}
 /* ── Pill priorité dépliable (Accueil) ── */
 .home-prio-pill-wrap{}
@@ -1014,7 +1018,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .home-prio-pill-edit{font-size:13px;color:var(--texte-doux);flex-shrink:0;padding:4px 2px;min-width:32px;text-align:center;}
 .home-prio-detail{overflow:hidden;max-height:0;transition:max-height 0.28s cubic-bezier(0.4,0,0.2,1);}
 .home-prio-detail.open{max-height:100px;}
-.home-prio-detail-inner{font-size:12px;color:#4A3A08;line-height:1.6;padding:0 16px 12px 20px;border-left:3px solid var(--or);margin:0 16px 0 16px;}
+.home-prio-detail-inner{font-size:12px;color:var(--texte-med);line-height:1.6;padding:0 16px 12px 20px;border-left:3px solid var(--or);margin:0 16px 0 16px;}
 
 /* Card stat seule, pleine largeur */
 .hv2-card-solo{padding:0 16px;}
@@ -1183,7 +1187,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 
 /* travaux récents */
 .hv2-travaux{display:flex;flex-direction:column;gap:9px;padding:0 16px;}
-.hv2-tv-item{background:white;border-radius:var(--radius-card);border:1px solid var(--gris-clair);padding:13px 15px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-sm);cursor:pointer;transition:transform 0.12s;}
+.hv2-tv-item{background:var(--bg-card);border-radius:var(--radius-card);border:1px solid var(--gris-clair);padding:13px 15px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-sm);cursor:pointer;transition:transform 0.12s;}
 .hv2-tv-item:active{transform:scale(0.98);}
 .hv2-tv-dot{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
 .hv2-dot-v{background:var(--vert-pale);}
@@ -1814,7 +1818,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
       <span class="mod-header-icon">⚙️</span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v4.11</div>
+        <div class="mod-header-sub">Ma Vigne v4.12</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
     </div>
@@ -1906,7 +1910,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
       <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger('reset')"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🗑️</div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
     </div>
   </div>
-  <div class="ver-tag">Ma Vigne v4.11 · Firebase Auth : signInWithEmailAndPassword · suppression sha256/checkMdp · sendPasswordResetEmail · updatePassword+reauth 🔒</div>
+  <div class="ver-tag">Ma Vigne v4.12 · Firebase Auth : signInWithEmailAndPassword · suppression sha256/checkMdp · sendPasswordResetEmail · updatePassword+reauth 🔒</div>
 </div>
 
 <!-- ══════ NAV ══════ -->
@@ -7288,7 +7292,7 @@ td{padding:5px 8px;border-bottom:1px solid #f0f0f0;font-size:10px;vertical-align
   </div>
   <div class="cv-foot">
     <span>Rapport final — ${nomSaison}</span>
-    <span>Ma Vigne v4.11 · ${domaine} · Bourgogne</span>
+    <span>Ma Vigne v4.12 · ${domaine} · Bourgogne</span>
     <span>Page 1 / 4</span>
   </div>
 </div>
@@ -7331,7 +7335,7 @@ td{padding:5px 8px;border-bottom:1px solid #f0f0f0;font-size:10px;vertical-align
 </table>
 <div class="s-note">Dates issues des entrées journal avec statut Validé, 1ère et dernière occurrence pour chaque tâche sur les ${nbParcelles} parcelles actives.</div>
 
-<div class="p-foot"><span>${domaine}</span><span>Ma Vigne v4.11 · Rapport ${nomSaison}</span><span>Page 2 / 4</span></div>
+<div class="p-foot"><span>${domaine}</span><span>Ma Vigne v4.12 · Rapport ${nomSaison}</span><span>Page 2 / 4</span></div>
 </div>
 
 <!-- PAGE 3 : PARCELLES -->
@@ -7349,7 +7353,7 @@ td{padding:5px 8px;border-bottom:1px solid #f0f0f0;font-size:10px;vertical-align
 ${parcellesActives.some(p=>p.statut==='Arrachee')?'':''}
 <div class="s-note">1 parcelle arrachée non incluse : Chazière (statut Arrachée). Dates issues du journal — 1ère et dernière validation de parcelle par tâche.</div>
 
-<div class="p-foot"><span>${domaine}</span><span>Ma Vigne v4.11 · Rapport ${nomSaison}</span><span>Page 3 / 4</span></div>
+<div class="p-foot"><span>${domaine}</span><span>Ma Vigne v4.12 · Rapport ${nomSaison}</span><span>Page 3 / 4</span></div>
 </div>
 
 <!-- PAGE 4 : TRACTEUR + PHYTO + ANOMALIES -->
@@ -7378,7 +7382,7 @@ ${sessionsRows||'<p style="font-size:9px;color:#aaa;font-style:italic;padding:4p
   ${anomHtml}
 </div>
 
-<div class="p-foot" style="margin-top:10px"><span>${domaine} · Bourgogne · SIRET 98214811600014</span><span>Généré le ${dateGen} par Ma Vigne v4.11 · GUERETTECH</span><span>Page 4 / 4</span></div>
+<div class="p-foot" style="margin-top:10px"><span>${domaine} · Bourgogne · SIRET 98214811600014</span><span>Généré le ${dateGen} par Ma Vigne v4.12 · GUERETTECH</span><span>Page 4 / 4</span></div>
 </div>
 
 </body></html>`;
@@ -7817,7 +7821,7 @@ function lancerExportEntretienPDF(){
     return '<section class="tracteur-section"><div class="tracteur-title"><div><div class="tracteur-nom">'+t.nom+(t.traitementOnly?' <span class="badge-trait">Traitement</span>':'')+'</div><div class="tracteur-modele">🔩 '+(t.modele||'—')+' · '+t.type+'</div></div><div class="tracteur-annee">'+annee+'</div></div>'+resumeHTML+'<h3 class="section-sub">📋 Fiches d\'entretien</h3>'+fichesHTML+'<h3 class="section-sub" style="margin-top:20px">🔧 Passages réparateur</h3>'+repsHTML+'</section>';
   }).join('<div class="page-break"></div>');
   var aujourd_hui=fmtD(new Date().toISOString().slice(0,10));
-  var html='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Ma Vigne — Entretien '+annee+'</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Georgia,serif;font-size:11px;color:#1A1A1A;padding:20px;}.doc-header{border-bottom:2px solid #3D6B27;padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;}.doc-title{font-size:20px;font-weight:bold;color:#3D6B27;}.doc-meta{text-align:right;font-size:10px;color:#888;}.tracteur-section{margin-bottom:30px;}.tracteur-title{display:flex;justify-content:space-between;align-items:flex-start;background:#2A3547;color:white;padding:12px 16px;border-radius:8px;margin-bottom:12px;}.tracteur-nom{font-size:16px;font-weight:bold;}.tracteur-modele{font-size:10px;color:rgba(255,255,255,0.6);margin-top:3px;}.tracteur-annee{font-size:22px;font-weight:bold;color:rgba(255,255,255,0.35);}.badge-trait{font-size:9px;background:#E07B2A;color:white;border-radius:4px;padding:1px 6px;vertical-align:middle;font-weight:normal;margin-left:6px;}.resume-bar{display:flex;border:1px solid #E0DDD5;border-radius:8px;overflow:hidden;margin-bottom:16px;}.resume-item{flex:1;text-align:center;padding:10px 6px;border-right:1px solid #E0DDD5;}.resume-item:last-child{border-right:none;}.resume-val{display:block;font-size:18px;font-weight:bold;color:#2A3547;}.val-warn{color:#C0392B;}.resume-lbl{display:block;font-size:9px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:0.04em;}.section-sub{font-size:12px;font-weight:bold;color:#2A3547;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E8E4D9;}.fiche-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;overflow:hidden;break-inside:avoid;}.fiche-bloc.has-anomalie{border-color:#F5B8B4;}.fiche-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#F9F8F5;border-bottom:1px solid #E0DDD5;}.fiche-date{font-weight:bold;font-size:11px;}.fiche-meta{font-size:10px;color:#666;margin-top:2px;}.fiche-score{font-size:18px;font-weight:bold;}.score-ok{color:#3D6B27;}.score-warn{color:#E07B2A;}.check-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:8px 12px;}.check-item{font-size:10px;display:flex;justify-content:space-between;align-items:center;padding:3px 6px;border-radius:4px;}.check-item.ok{background:#EAF4E2;color:#2D5A1B;}.check-item.ko{background:#FEF0EF;color:#922B21;}.check-item span{font-weight:bold;}.anomalie{padding:6px 12px 8px;background:#FEF0EF;font-size:10px;color:#922B21;border-top:1px solid #F5B8B4;}.rep-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;padding:10px 14px;break-inside:avoid;}.rep-bloc.rep-en-cours{border-color:#F5CBA7;background:#FEF9F5;}.rep-bloc.rep-depasse{border-color:#F5B8B4;background:#FEF0EF;}.rep-header{display:flex;justify-content:space-between;align-items:center;gap:10px;}.rep-motif{font-weight:bold;font-size:11px;margin-bottom:4px;}.rep-dates{font-size:10px;color:#555;}.rep-badge{font-size:10px;font-weight:bold;padding:4px 10px;border-radius:12px;white-space:nowrap;}.badge-ok{background:#EAF4E2;color:#2D5A1B;}.badge-cours{background:#FEF3E2;color:#935116;}.empty{font-size:10px;color:#999;font-style:italic;padding:8px 0;}.page-break{page-break-after:always;}.doc-footer{border-top:1px solid #E0DDD5;padding-top:8px;margin-top:20px;font-size:9px;color:#AAA;display:flex;justify-content:space-between;}@media print{.page-break{page-break-after:always;border:none;margin:0;}}</style></head><body><div class="doc-header"><div><div class="doc-title">🍇 Ma Vigne — Entretien tracteurs</div><div style="font-size:11px;color:#666;margin-top:2px">Historique '+annee+' · '+tracteursSelectionnes.map(function(t){return t.nom;}).join(', ')+'</div></div><div class="doc-meta">Généré le '+aujourd_hui+'<br>Ma Vigne v4.11 · GUERETTECH</div></div>'+sectionsHTML+'<div class="doc-footer"><span>Ma Vigne — Document confidentiel · Usage interne</span><span>© 2026 Nicolas GUERET / GUERETTECH</span></div></body></html>';
+  var html='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Ma Vigne — Entretien '+annee+'</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Georgia,serif;font-size:11px;color:#1A1A1A;padding:20px;}.doc-header{border-bottom:2px solid #3D6B27;padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;}.doc-title{font-size:20px;font-weight:bold;color:#3D6B27;}.doc-meta{text-align:right;font-size:10px;color:#888;}.tracteur-section{margin-bottom:30px;}.tracteur-title{display:flex;justify-content:space-between;align-items:flex-start;background:#2A3547;color:white;padding:12px 16px;border-radius:8px;margin-bottom:12px;}.tracteur-nom{font-size:16px;font-weight:bold;}.tracteur-modele{font-size:10px;color:rgba(255,255,255,0.6);margin-top:3px;}.tracteur-annee{font-size:22px;font-weight:bold;color:rgba(255,255,255,0.35);}.badge-trait{font-size:9px;background:#E07B2A;color:white;border-radius:4px;padding:1px 6px;vertical-align:middle;font-weight:normal;margin-left:6px;}.resume-bar{display:flex;border:1px solid #E0DDD5;border-radius:8px;overflow:hidden;margin-bottom:16px;}.resume-item{flex:1;text-align:center;padding:10px 6px;border-right:1px solid #E0DDD5;}.resume-item:last-child{border-right:none;}.resume-val{display:block;font-size:18px;font-weight:bold;color:#2A3547;}.val-warn{color:#C0392B;}.resume-lbl{display:block;font-size:9px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:0.04em;}.section-sub{font-size:12px;font-weight:bold;color:#2A3547;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E8E4D9;}.fiche-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;overflow:hidden;break-inside:avoid;}.fiche-bloc.has-anomalie{border-color:#F5B8B4;}.fiche-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#F9F8F5;border-bottom:1px solid #E0DDD5;}.fiche-date{font-weight:bold;font-size:11px;}.fiche-meta{font-size:10px;color:#666;margin-top:2px;}.fiche-score{font-size:18px;font-weight:bold;}.score-ok{color:#3D6B27;}.score-warn{color:#E07B2A;}.check-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:8px 12px;}.check-item{font-size:10px;display:flex;justify-content:space-between;align-items:center;padding:3px 6px;border-radius:4px;}.check-item.ok{background:#EAF4E2;color:#2D5A1B;}.check-item.ko{background:#FEF0EF;color:#922B21;}.check-item span{font-weight:bold;}.anomalie{padding:6px 12px 8px;background:#FEF0EF;font-size:10px;color:#922B21;border-top:1px solid #F5B8B4;}.rep-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;padding:10px 14px;break-inside:avoid;}.rep-bloc.rep-en-cours{border-color:#F5CBA7;background:#FEF9F5;}.rep-bloc.rep-depasse{border-color:#F5B8B4;background:#FEF0EF;}.rep-header{display:flex;justify-content:space-between;align-items:center;gap:10px;}.rep-motif{font-weight:bold;font-size:11px;margin-bottom:4px;}.rep-dates{font-size:10px;color:#555;}.rep-badge{font-size:10px;font-weight:bold;padding:4px 10px;border-radius:12px;white-space:nowrap;}.badge-ok{background:#EAF4E2;color:#2D5A1B;}.badge-cours{background:#FEF3E2;color:#935116;}.empty{font-size:10px;color:#999;font-style:italic;padding:8px 0;}.page-break{page-break-after:always;}.doc-footer{border-top:1px solid #E0DDD5;padding-top:8px;margin-top:20px;font-size:9px;color:#AAA;display:flex;justify-content:space-between;}@media print{.page-break{page-break-after:always;border:none;margin:0;}}</style></head><body><div class="doc-header"><div><div class="doc-title">🍇 Ma Vigne — Entretien tracteurs</div><div style="font-size:11px;color:#666;margin-top:2px">Historique '+annee+' · '+tracteursSelectionnes.map(function(t){return t.nom;}).join(', ')+'</div></div><div class="doc-meta">Généré le '+aujourd_hui+'<br>Ma Vigne v4.12 · GUERETTECH</div></div>'+sectionsHTML+'<div class="doc-footer"><span>Ma Vigne — Document confidentiel · Usage interne</span><span>© 2026 Nicolas GUERET / GUERETTECH</span></div></body></html>';
   var win=window.open('','_blank');
   if(!win){showToast('Autorisez les popups pour l\'impression','#C0392B');return;}
   win.document.write(html);
