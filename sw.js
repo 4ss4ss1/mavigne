@@ -1,5 +1,5 @@
 // MA VIGNE — Service Worker v2.10
-// v2.10 — Fix race condition Réglages : _authReady flag + retry goTo(reglages) · index v4.9
+// v2.10 — Fix applyFbData : ignore tableau vide Firebase pour saisons/taches/membres → conserve données statiques · index v4.10
 // v2.09 — Fix critique Firebase Auth : pull complet post-auth uniquement (_fbLoadAfterAuth) · suppression repull _tracRepullDone · index v4.8
 // v2.09 — Réglages admin : saisie heures dues/faites + calcul ETP live + sauvegarde CONFIG.etp_saison
 // v2.08 — Rapport saison PDF v2 : design A4 · durées tâches (1ère→dernière validation) · ETP · anomalies tracteur · parcelles bilan
