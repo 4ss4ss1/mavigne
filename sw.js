@@ -1,5 +1,5 @@
-// MA VIGNE — Service Worker v2.20
-// v2.20 — Guard tenant : correction auto tenant invalide (mavigne_mavigne→marchand-grillot) · meilleurs messages erreur login Firebase · index v4.20
+// MA VIGNE — Service Worker v2.21
+// v2.21 — Fix profils vides : suppression double lecture ?tenant= dans _fbLoad (conflit avec guard v4.20) · index v4.21
 // v2.19 — Fix calcHeures : tâches custom calculées à la volée depuis PARCELLES si absentes de TRAVAUX · index v4.19
 // v2.18 — Lien invitation ?tenant=slug : pose TENANT_ID sans onboarding · copyInviteLink() dans Réglages · index v4.18
 // v2.17 — Onboarding intégré + tenantId (fbDoc→mavigne_{TENANT_ID}) + création compte Firebase Auth admin · index v4.17
@@ -20,7 +20,7 @@
 // v2.02 — États vides illustrés
 // v2.01 — Leaflet hors réseau
 // v2.00 — Nav bar fond sombre permanent
-const CACHE_NAME = 'mavigne-v2.20';
+const CACHE_NAME = 'mavigne-v2.21';
 const SYNC_TAG   = 'mavigne-sync';
 const APP_SHELL = ['./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 const CDN_URLS = [
@@ -29,7 +29,7 @@ const CDN_URLS = [
   'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap',
 ];
 self.addEventListener('install', event => {
-  console.log('[SW] Install v2.20');
+  console.log('[SW] Install v2.21');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache =>
       cache.addAll(APP_SHELL).then(() =>
@@ -39,7 +39,7 @@ self.addEventListener('install', event => {
   );
 });
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v2.20');
+  console.log('[SW] Activate v2.21');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
