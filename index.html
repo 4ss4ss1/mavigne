@@ -63,7 +63,13 @@ const COLLECTIONS = ['parcelles','journal','sessions','travaux','traitements',
                      'catalogue','conducteurs','activites','membres','saisons','taches','config','historique',
                      'tracteurs_list','entretiens','reparateur'];
 
-function fbDoc(key) { return db.collection('mavigne').doc(key); }
+// ── TenantId : isolation des données par domaine ──
+// Posé par l'onboarding au 1er lancement, ou 'marchand-grillot' par défaut
+var TENANT_ID = (function(){
+  var t = localStorage.getItem('mavigne_tenant');
+  return t || 'marchand-grillot';
+})();
+function fbDoc(key) { return db.collection('mavigne_' + TENANT_ID).doc(key); }
 
 // ── Helper deep clone (remplace JSON.parse/JSON.stringify partout) ──
 function deepClone(v) { return JSON.parse(JSON.stringify(v)); }
@@ -420,6 +426,27 @@ window._fbLoadAfterAuth = async function() {
 // Le reste des données est chargé après authentification dans _fbLoadAfterAuth().
 window._fbLoad = async function() {
   _loadQueue();
+
+  // ── Tenant : lien d'invitation (?tenant=slug) ou onboarding ──
+  // 1. Lien invitation : ?tenant=slug dans l'URL → pose le tenant et continue
+  var _urlTenant = new URLSearchParams(window.location.search).get('tenant');
+  if(_urlTenant) {
+    var _slug = _urlTenant.toLowerCase().replace(/[^a-z0-9-]/g,'').substring(0,40);
+    if(_slug) {
+      localStorage.setItem('mavigne_tenant', _slug);
+      TENANT_ID = _slug;
+      // Nettoyer l'URL sans recharger
+      var _cleanUrl = window.location.pathname + window.location.hash;
+      window.history.replaceState(null,'', _cleanUrl);
+      console.log('[Tenant] Posé via invitation :', TENANT_ID);
+    }
+  }
+  // 2. Toujours pas de tenant → onboarding (vrai premier lancement admin)
+  if(!localStorage.getItem('mavigne_tenant')) {
+    console.log('[Onboarding] Aucun tenant — affichage onboarding');
+    if(typeof showOnboarding === 'function') showOnboarding();
+    return;
+  }
 
   // Hors ligne : fallback localStorage complet
   if (!navigator.onLine) {
@@ -1341,6 +1368,80 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .chat-send-btn{width:34px;height:34px;min-width:34px;background:#3D6B27;border:none;border-radius:50%;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;}
 .chat-notif-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--rouge);border-radius:50%;border:2px solid white;display:none;}
 
+
+/* ══ ONBOARDING ══ */
+#onboarding-screen{position:fixed;inset:0;background:linear-gradient(160deg,#1A1F2E 0%,#0F1319 55%,#111820 100%);display:flex;flex-direction:column;z-index:10000;overflow:hidden;}
+#onboarding-screen::before{content:'';position:absolute;top:-80px;right:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(61,107,39,0.12) 0%,transparent 70%);pointer-events:none;}
+#onboarding-screen::after{content:'';position:absolute;bottom:-60px;left:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(184,145,58,0.08) 0%,transparent 70%);pointer-events:none;}
+.ob-header{padding:52px 24px 20px;position:relative;z-index:2;flex-shrink:0;}
+.ob-logo{font-size:40px;margin-bottom:12px;}
+.ob-title{font-family:'Cormorant Garamond',serif;color:white;font-size:28px;font-weight:600;margin-bottom:4px;}
+.ob-sub{color:rgba(255,255,255,0.38);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;}
+.ob-progress{padding:0 24px 20px;position:relative;z-index:2;flex-shrink:0;}
+.ob-steps{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+.ob-step{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,0.12);transition:background 0.4s;}
+.ob-step.done{background:#6BA34A;}.ob-step.active{background:#B8913A;}
+.ob-step-labels{display:flex;justify-content:space-between;}
+.ob-step-lbl{font-size:10px;color:rgba(255,255,255,0.3);font-weight:500;transition:color 0.3s;}
+.ob-step-lbl.active{color:#B8913A;}.ob-step-lbl.done{color:rgba(255,255,255,0.5);}
+.ob-body{flex:1;overflow-y:auto;padding:0 24px;-webkit-overflow-scrolling:touch;position:relative;z-index:2;}
+.ob-screen{display:none;}.ob-screen.active{display:block;animation:obFadeIn 0.25s ease;}
+@keyframes obFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.ob-section-title{color:rgba(255,255,255,0.9);font-size:18px;font-weight:600;margin-bottom:6px;font-family:'Cormorant Garamond',serif;}
+.ob-section-sub{color:rgba(255,255,255,0.4);font-size:12px;line-height:1.5;margin-bottom:24px;}
+.ob-label{color:rgba(255,255,255,0.5);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px;display:block;}
+.ob-input{width:100%;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.14);border-radius:12px;padding:13px 16px;font-size:15px;font-family:'Outfit',sans-serif;color:white;outline:none;margin-bottom:16px;transition:border-color 0.2s;}
+.ob-input:focus{border-color:rgba(255,255,255,0.32);}.ob-input::placeholder{color:rgba(255,255,255,0.2);}
+.ob-input.ob-error{border-color:rgba(200,60,60,0.6);background:rgba(200,60,60,0.06);}
+.ob-slug-preview{display:flex;align-items:center;gap:8px;background:rgba(107,163,74,0.1);border:1px solid rgba(107,163,74,0.25);border-radius:10px;padding:9px 14px;margin-bottom:20px;font-size:12px;color:rgba(255,255,255,0.6);}
+.ob-slug-val{color:#6BA34A;font-weight:600;font-family:monospace;font-size:13px;}
+.ob-loc-row{display:flex;gap:10px;margin-bottom:8px;}.ob-loc-row .ob-input{margin-bottom:0;}
+.ob-loc-hint{font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:20px;line-height:1.4;}
+.ob-parcelle-list{margin-bottom:12px;}
+.ob-parcelle-item{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+.ob-parcelle-nom{color:white;font-size:14px;font-weight:500;flex:1;}
+.ob-parcelle-surf{color:#B8913A;font-size:13px;font-weight:600;white-space:nowrap;}
+.ob-parcelle-del{width:28px;height:28px;border-radius:8px;background:rgba(160,41,30,0.2);border:1px solid rgba(160,41,30,0.3);color:rgba(255,255,255,0.6);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;min-width:28px;}
+.ob-add-row{display:flex;gap:8px;margin-bottom:8px;align-items:center;}.ob-add-row .ob-input{margin-bottom:0;}
+.ob-add-btn{width:44px;height:44px;flex-shrink:0;background:rgba(107,163,74,0.2);border:1.5px solid rgba(107,163,74,0.4);border-radius:12px;color:#6BA34A;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.ob-total-surf{text-align:right;font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:16px;}
+.ob-total-surf span{color:#B8913A;font-weight:600;}
+.ob-membre-item{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.ob-mbr-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;color:white;flex-shrink:0;}
+.ob-mbr-info{flex:1;min-width:0;}.ob-mbr-nom{color:white;font-size:13px;font-weight:600;}.ob-mbr-roles{color:rgba(255,255,255,0.4);font-size:11px;margin-top:2px;}
+.ob-mbr-del{width:28px;height:28px;border-radius:8px;background:rgba(160,41,30,0.2);border:1px solid rgba(160,41,30,0.3);color:rgba(255,255,255,0.6);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;min-width:28px;}
+.ob-mbr-form{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:16px;margin-bottom:16px;}
+.ob-mbr-form .ob-input{margin-bottom:10px;}
+.ob-roles-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;}
+.ob-role-chip{padding:6px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);transition:all 0.15s;min-height:32px;display:flex;align-items:center;}
+.ob-role-chip.active{background:rgba(107,163,74,0.2);border-color:rgba(107,163,74,0.5);color:#6BA34A;}
+.ob-role-chip.ob-admin.active{background:rgba(184,145,58,0.2);border-color:rgba(184,145,58,0.5);color:#B8913A;}
+.ob-mbr-add-btn{width:100%;background:rgba(107,163,74,0.15);border:1.5px solid rgba(107,163,74,0.35);border-radius:10px;padding:10px;color:#6BA34A;font-size:13px;font-weight:600;cursor:pointer;min-height:44px;}
+.ob-taches-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.ob-tache-chip{background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:12px;padding:11px 12px;cursor:pointer;transition:all 0.15s;text-align:center;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ob-tache-chip.active{background:rgba(107,163,74,0.15);border-color:rgba(107,163,74,0.45);}
+.ob-tache-chip.ob-custom{border-style:dashed;}
+.ob-tache-nom{color:rgba(255,255,255,0.8);font-size:12px;font-weight:600;}.ob-tache-hha{color:rgba(255,255,255,0.3);font-size:11px;margin-top:3px;}
+.ob-tache-chip.active .ob-tache-nom{color:#6BA34A;}.ob-tache-chip.active .ob-tache-hha{color:rgba(107,163,74,0.7);}
+.ob-taches-hint{font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:20px;line-height:1.4;}
+.ob-recap{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:16px;margin-bottom:16px;}
+.ob-recap-row{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+.ob-recap-row:last-child{border-bottom:none;padding-bottom:0;}
+.ob-recap-key{color:rgba(255,255,255,0.4);font-size:12px;}.ob-recap-val{color:rgba(255,255,255,0.85);font-size:12px;font-weight:600;text-align:right;max-width:60%;}
+.ob-footer{padding:20px 24px calc(20px + env(safe-area-inset-bottom,0px));position:relative;z-index:2;flex-shrink:0;}
+.ob-btn-row{display:flex;gap:10px;}
+.ob-btn-back{flex:1;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:14px;padding:15px;color:rgba(255,255,255,0.6);font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;min-height:50px;}
+.ob-btn-next{flex:2;background:rgba(255,255,255,0.95);border:none;border-radius:14px;padding:15px;color:#1A1F2E;font-size:14px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;min-height:50px;}
+.ob-btn-next.ob-green{background:linear-gradient(135deg,#3D6B27,#6BA34A);color:white;}
+.ob-btn-solo{width:100%;background:rgba(255,255,255,0.95);border:none;border-radius:14px;padding:15px;color:#1A1F2E;font-size:14px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;min-height:50px;}
+.ob-pwd-strength{height:3px;border-radius:3px;margin-bottom:12px;margin-top:-10px;transition:background 0.3s,width 0.3s;}
+.ob-finish-icon{font-size:60px;margin-bottom:20px;display:block;text-align:center;}
+.ob-finish-title{font-family:'Cormorant Garamond',serif;color:white;font-size:28px;font-weight:600;margin-bottom:10px;text-align:center;}
+.ob-finish-sub{color:rgba(255,255,255,0.45);font-size:13px;line-height:1.6;margin-bottom:32px;text-align:center;}
+.ob-finish-badges{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:32px;}
+.ob-finish-badge{background:rgba(107,163,74,0.15);border:1px solid rgba(107,163,74,0.3);border-radius:20px;padding:6px 14px;font-size:12px;color:#6BA34A;font-weight:500;}
+#ob-toast{position:fixed;bottom:120px;left:50%;transform:translateX(-50%);background:#A0291E;color:white;border-radius:20px;padding:9px 18px;font-size:13px;font-weight:600;opacity:0;transition:opacity 0.2s;pointer-events:none;white-space:nowrap;z-index:10001;}
+#ob-toast.show{opacity:1;}
 </style>
 </head>
 <body ontouchstart="">
@@ -1472,6 +1573,122 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 
 <!-- ══════ LOGIN ══════ -->
 <div id="sync-badge" style="position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#3D6B27;color:white;font-size:11px;font-weight:600;font-family:'Outfit',sans-serif;padding:5px 14px;border-radius:20px;z-index:99999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.2)"></div>
+
+<!-- ══ ONBOARDING ══ -->
+<div id="onboarding-screen" style="display:none">
+  <div class="ob-header">
+    <div class="ob-logo">🍇</div>
+    <div class="ob-title">Ma Vigne</div>
+    <div class="ob-sub">Configuration initiale</div>
+  </div>
+  <div class="ob-progress">
+    <div class="ob-steps">
+      <div class="ob-step active" id="ob-bar-1"></div>
+      <div class="ob-step" id="ob-bar-2"></div>
+      <div class="ob-step" id="ob-bar-3"></div>
+      <div class="ob-step" id="ob-bar-4"></div>
+    </div>
+    <div class="ob-step-labels">
+      <span class="ob-step-lbl active" id="ob-lbl-1">Domaine</span>
+      <span class="ob-step-lbl" id="ob-lbl-2">Parcelles</span>
+      <span class="ob-step-lbl" id="ob-lbl-3">Équipe</span>
+      <span class="ob-step-lbl" id="ob-lbl-4">Saison</span>
+    </div>
+  </div>
+  <div class="ob-body">
+    <!-- Étape 1 : Domaine -->
+    <div class="ob-screen active" id="ob-screen-1">
+      <div class="ob-section-title">Votre domaine</div>
+      <div class="ob-section-sub">Ces informations identifient votre domaine dans l'application.</div>
+      <label class="ob-label">Nom du domaine</label>
+      <input class="ob-input" id="ob-domaine" type="text" placeholder="ex : Domaine Dupont" oninput="obUpdateSlug()" autocomplete="off">
+      <div class="ob-slug-preview" id="ob-slug-preview" style="display:none">
+        <span style="color:rgba(255,255,255,0.4);font-size:11px">Identifiant :</span>
+        <span class="ob-slug-val" id="ob-slug-val">—</span>
+        <span style="color:rgba(255,255,255,0.25);font-size:11px;margin-left:auto">généré automatiquement</span>
+      </div>
+      <label class="ob-label">Localisation (météo + carte)</label>
+      <div class="ob-loc-row">
+        <input class="ob-input" id="ob-lat" type="number" step="0.001" placeholder="Latitude">
+        <input class="ob-input" id="ob-lon" type="number" step="0.001" placeholder="Longitude">
+      </div>
+      <div class="ob-loc-hint">Coordonnées GPS de vos vignes. Modifiables ensuite dans les Réglages.</div>
+    </div>
+    <!-- Étape 2 : Parcelles -->
+    <div class="ob-screen" id="ob-screen-2">
+      <div class="ob-section-title">Vos parcelles</div>
+      <div class="ob-section-sub">Ajoutez vos parcelles une par une. L'import KML sera disponible prochainement.</div>
+      <div class="ob-parcelle-list" id="ob-parcelle-list"></div>
+      <div class="ob-add-row">
+        <input class="ob-input" id="ob-parc-nom" type="text" placeholder="Nom de la parcelle" style="flex:2" autocomplete="off">
+        <input class="ob-input" id="ob-parc-surf" type="number" step="0.01" min="0.01" placeholder="ha" style="flex:1">
+        <button class="ob-add-btn" onclick="obAddParcelle()">+</button>
+      </div>
+      <div class="ob-total-surf" id="ob-total-surf" style="display:none">Total : <span id="ob-surf-val">0</span> ha</div>
+    </div>
+    <!-- Étape 3 : Équipe -->
+    <div class="ob-screen" id="ob-screen-3">
+      <div class="ob-section-title">Votre équipe</div>
+      <div class="ob-section-sub">Commencez par créer votre compte administrateur, puis ajoutez les autres membres.</div>
+      <!-- Compte admin -->
+      <div class="ob-mbr-form">
+        <label class="ob-label">Votre compte (administrateur)</label>
+        <input class="ob-input" id="ob-admin-nom" type="text" placeholder="Votre prénom" autocomplete="off">
+        <input class="ob-input" id="ob-admin-email" type="email" placeholder="Votre email" autocomplete="off">
+        <input class="ob-input" id="ob-admin-pwd" type="password" placeholder="Mot de passe (min. 8 caractères)" oninput="obCheckPwd()">
+        <div class="ob-pwd-strength" id="ob-pwd-strength" style="width:0;background:#A0291E"></div>
+        <input class="ob-input" id="ob-admin-pwd2" type="password" placeholder="Confirmer le mot de passe">
+      </div>
+      <!-- Autres membres -->
+      <div id="ob-membre-list"></div>
+      <div class="ob-mbr-form">
+        <label class="ob-label">Ajouter un membre</label>
+        <input class="ob-input" id="ob-mbr-nom" type="text" placeholder="Prénom" autocomplete="off">
+        <input class="ob-input" id="ob-mbr-email" type="email" placeholder="Email" autocomplete="off">
+        <div class="ob-roles-row" id="ob-roles-row">
+          <div class="ob-role-chip" onclick="obToggleRole('ouvrier',this)">Ouvrier</div>
+          <div class="ob-role-chip" onclick="obToggleRole('tractoriste',this)">Tractoriste</div>
+          <div class="ob-role-chip" onclick="obToggleRole('saisonnier',this)">Saisonnier</div>
+        </div>
+        <button class="ob-mbr-add-btn" onclick="obAddMembre()">+ Ajouter ce membre</button>
+      </div>
+    </div>
+    <!-- Étape 4 : Saison -->
+    <div class="ob-screen" id="ob-screen-4">
+      <div class="ob-section-title">Saison active</div>
+      <div class="ob-section-sub">Nommez votre saison et sélectionnez les tâches à réaliser.</div>
+      <label class="ob-label">Nom de la saison</label>
+      <input class="ob-input" id="ob-saison" type="text" placeholder="ex : Printemps 2026" value="Printemps 2026" autocomplete="off" oninput="obUpdateRecap()">
+      <label class="ob-label">Tâches de la saison</label>
+      <div class="ob-taches-grid" id="ob-taches-grid"></div>
+      <label class="ob-label">Ajouter une tâche personnalisée</label>
+      <div class="ob-add-row" style="margin-bottom:4px">
+        <input class="ob-input" id="ob-tache-custom" type="text" placeholder="ex : Désherbage" style="flex:2">
+        <input class="ob-input" id="ob-tache-hha" type="number" min="1" placeholder="h/ha" style="flex:1">
+        <button class="ob-add-btn" onclick="obAddTacheCustom()">+</button>
+      </div>
+      <div class="ob-taches-hint">Passages supplémentaires et ajustements disponibles dans les Réglages.</div>
+      <label class="ob-label" style="margin-top:8px">Récapitulatif</label>
+      <div class="ob-recap" id="ob-recap"></div>
+    </div>
+    <!-- Écran final -->
+    <div class="ob-screen" id="ob-screen-5">
+      <div style="padding:40px 0 20px">
+        <span class="ob-finish-icon">🍇</span>
+        <div class="ob-finish-title">Création du compte…</div>
+        <div class="ob-finish-sub" id="ob-finish-sub">Configuration en cours, veuillez patienter.</div>
+        <div class="ob-finish-badges" id="ob-finish-badges"></div>
+      </div>
+    </div>
+  </div>
+  <div class="ob-footer" id="ob-footer">
+    <div class="ob-btn-row">
+      <button class="ob-btn-back" id="ob-btn-back" onclick="obPrevStep()" style="display:none">← Retour</button>
+      <button class="ob-btn-next" id="ob-btn-next" onclick="obNextStep()">Suivant →</button>
+    </div>
+  </div>
+</div>
+<div id="ob-toast"></div>
 
 <div id="login-screen">
   <div class="login-logo">🍇</div>
@@ -1853,7 +2070,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
       <span class="mod-header-icon">⚙️</span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v4.15</div>
+        <div class="mod-header-sub">Ma Vigne v4.18</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
     </div>
@@ -1877,9 +2094,13 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
   <div class="set-sec" id="set-row-domaine-nom" style="display:none">
     <div class="set-title">Mon domaine</div>
     <div style="margin:0 16px">
-      <div class="set-row" style="border-radius:16px" onclick="openEditDomNom()">
+      <div class="set-row" style="border-radius:16px 16px 0 0" onclick="openEditDomNom()">
         <div class="sr-l"><div class="sr-ico" style="background:var(--vert-pale)">🏡</div><div><div class="sr-lbl">Nom du domaine</div><div class="sr-sub">Affiché sur l'accueil et les exports PDF</div></div></div>
         <div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:600;color:var(--vert);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="dom-nom-val">Domaine Marchand-Grillot</span><span class="sr-arr">›</span></div>
+      </div>
+      <div class="set-row" style="border-radius:0 0 16px 16px;border-top:1px solid var(--gris-clair)" onclick="copyInviteLink()">
+        <div class="sr-l"><div class="sr-ico" style="background:var(--acier-pale)">🔗</div><div><div class="sr-lbl">Lien d'invitation</div><div class="sr-sub" id="invite-link-sub">Partager avec un nouveau membre</div></div></div>
+        <div class="sr-arr">⎘</div>
       </div>
     </div>
   </div>
@@ -1945,7 +2166,7 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
       <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger('reset')"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🗑️</div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
     </div>
   </div>
-  <div class="ver-tag">Ma Vigne v4.15 · Firebase Auth : signInWithEmailAndPassword · suppression sha256/checkMdp · sendPasswordResetEmail · updatePassword+reauth 🔒</div>
+  <div class="ver-tag">Ma Vigne v4.18 · Firebase Auth : signInWithEmailAndPassword · suppression sha256/checkMdp · sendPasswordResetEmail · updatePassword+reauth 🔒</div>
 </div>
 
 <!-- ══════ NAV ══════ -->
@@ -2765,6 +2986,387 @@ let loginPendingIdx = -1;
 
 // Couleurs avatars login — palette ardoise/or sobre
 var LP_COLORS=['#2C4A3E','#3A3A5C','#4A3228','#1E3A4A','#3C2E4A','#2A4028','#4A3C1E'];
+
+// ════════════════════════════════════
+// ONBOARDING — Configuration initiale
+// S'affiche uniquement si 'mavigne_tenant' absent du localStorage
+// ════════════════════════════════════
+var _obStep = 1;
+var _obDomaine = { nom:'', slug:'', lat:'', lon:'' };
+var _obParcelles = [];
+var _obMembres = []; // membres supplémentaires (hors admin)
+var _obRolesActifs = {};
+var _obTachesCustom = [];
+var _obTachesSel = [];
+
+var OB_TACHES = [
+  {nom:'Taille',        label:'Taille',        hha:70, saison:'Hiver'},
+  {nom:'Tirage',        label:'Tirage',         hha:40, saison:'Hiver'},
+  {nom:'Brulage',       label:'Brûlage',        hha:40, saison:'Hiver'},
+  {nom:'Reparation',    label:'Réparation',     hha:30, saison:'Printemps'},
+  {nom:'Pliage',        label:'Pliage',         hha:45, saison:'Printemps'},
+  {nom:'Plantation',    label:'Plantation',     hha:15, saison:'Printemps'},
+  {nom:'Ebourgeonnage', label:'Ébourgeonnage',  hha:35, saison:'Printemps'},
+  {nom:'Pioche',        label:'Pioche',         hha:40, saison:'Printemps'},
+  {nom:'Relevage',      label:'Relevage',       hha:50, saison:'Printemps'},
+  {nom:'Accolage',      label:'Accolage',       hha:50, saison:'Printemps'},
+  {nom:'Palissage',     label:'Palissage',      hha:50, saison:'Printemps'}
+];
+
+var OB_MBR_COLORS = ['#1A4A7A','#7A4F2E','#5B2D8E','#B8913A','#C0392B','#1A5276','#2E86C1'];
+
+function obSlugify(str) {
+  return str.toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').substring(0,40);
+}
+
+function obShowToast(msg) {
+  var t = document.getElementById('ob-toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(function(){ t.classList.remove('show'); }, 2500);
+}
+
+function obHighlight(id) {
+  var el = document.getElementById(id);
+  if(!el) return;
+  el.classList.add('ob-error');
+  setTimeout(function(){ el.classList.remove('ob-error'); }, 1500);
+}
+
+// ── Slug ──
+function obUpdateSlug() {
+  var val = document.getElementById('ob-domaine').value.trim();
+  var slug = obSlugify(val);
+  _obDomaine.nom = val; _obDomaine.slug = slug;
+  var preview = document.getElementById('ob-slug-preview');
+  if(slug){ preview.style.display='flex'; document.getElementById('ob-slug-val').textContent=slug; }
+  else { preview.style.display='none'; }
+}
+
+// ── Parcelles ──
+function obAddParcelle() {
+  var nom = document.getElementById('ob-parc-nom').value.trim();
+  var surf = parseFloat(document.getElementById('ob-parc-surf').value);
+  if(!nom){ obShowToast('Nom de parcelle requis'); return; }
+  if(!surf||surf<=0){ obShowToast('Surface invalide'); return; }
+  _obParcelles.push({nom:nom,surface:surf,statut:'Active',taches:{}});
+  document.getElementById('ob-parc-nom').value='';
+  document.getElementById('ob-parc-surf').value='';
+  obRenderParcelles();
+}
+function obRemoveParcelle(i){ _obParcelles.splice(i,1); obRenderParcelles(); }
+function obRenderParcelles() {
+  var list = document.getElementById('ob-parcelle-list');
+  var total = _obParcelles.reduce(function(s,p){return s+p.surface;},0);
+  var totalEl = document.getElementById('ob-total-surf');
+  if(_obParcelles.length===0){list.innerHTML='';totalEl.style.display='none';return;}
+  totalEl.style.display='block';
+  document.getElementById('ob-surf-val').textContent=total.toFixed(2);
+  list.innerHTML=_obParcelles.map(function(p,i){
+    return '<div class="ob-parcelle-item">'
+      +'<div class="ob-parcelle-nom">'+p.nom+'</div>'
+      +'<div class="ob-parcelle-surf">'+p.surface.toFixed(2)+' ha</div>'
+      +'<div class="ob-parcelle-del" onclick="obRemoveParcelle('+i+')">✕</div>'
+      +'</div>';
+  }).join('');
+}
+
+// ── Membres supplémentaires ──
+function obToggleRole(role, el) {
+  if(_obRolesActifs[role]){delete _obRolesActifs[role];el.classList.remove('active');}
+  else{_obRolesActifs[role]=true;el.classList.add('active');}
+}
+function obAddMembre() {
+  var nom = document.getElementById('ob-mbr-nom').value.trim();
+  var email = document.getElementById('ob-mbr-email').value.trim();
+  var roles = Object.keys(_obRolesActifs);
+  if(!nom){obShowToast('Prénom requis');return;}
+  if(!email){obShowToast('Email requis');return;}
+  if(roles.length===0){obShowToast('Sélectionnez au moins un rôle');return;}
+  _obMembres.push({nom:nom,email:email,roles:roles,couleur:OB_MBR_COLORS[_obMembres.length%OB_MBR_COLORS.length]});
+  document.getElementById('ob-mbr-nom').value='';
+  document.getElementById('ob-mbr-email').value='';
+  _obRolesActifs={};
+  document.querySelectorAll('#ob-roles-row .ob-role-chip').forEach(function(c){c.classList.remove('active');});
+  obRenderMembres();
+}
+function obRemoveMembre(i){ _obMembres.splice(i,1); obRenderMembres(); }
+function obRenderMembres() {
+  var list = document.getElementById('ob-membre-list');
+  if(_obMembres.length===0){list.innerHTML='';return;}
+  list.innerHTML=_obMembres.map(function(m,i){
+    return '<div class="ob-membre-item">'
+      +'<div class="ob-mbr-avatar" style="background:'+m.couleur+'">'+m.nom.charAt(0).toUpperCase()+'</div>'
+      +'<div class="ob-mbr-info"><div class="ob-mbr-nom">'+m.nom+'</div>'
+      +'<div class="ob-mbr-roles">'+m.roles.join(', ')+' · '+m.email+'</div></div>'
+      +'<div class="ob-mbr-del" onclick="obRemoveMembre('+i+')">✕</div>'
+      +'</div>';
+  }).join('');
+}
+
+// ── Force mot de passe ──
+function obCheckPwd() {
+  var pwd = document.getElementById('ob-admin-pwd').value;
+  var bar = document.getElementById('ob-pwd-strength');
+  var score = 0;
+  if(pwd.length>=8) score++;
+  if(/[A-Z]/.test(pwd)) score++;
+  if(/[0-9]/.test(pwd)) score++;
+  if(/[^A-Za-z0-9]/.test(pwd)) score++;
+  var colors = ['#A0291E','#B85A1A','#B8913A','#3D6B27'];
+  var widths = ['25%','50%','75%','100%'];
+  bar.style.width = pwd.length>0 ? widths[score-1]||'10%' : '0';
+  bar.style.background = pwd.length>0 ? colors[score-1]||'#A0291E' : '#A0291E';
+}
+
+// ── Tâches ──
+function obInitTaches() {
+  if(_obTachesSel.length===0){
+    _obTachesSel = OB_TACHES.filter(function(t){return t.saison==='Printemps';}).map(function(t){return t.nom;});
+  }
+  obRenderTachesGrid();
+}
+function obRenderTachesGrid() {
+  var toutes = OB_TACHES.concat(_obTachesCustom);
+  var grid = document.getElementById('ob-taches-grid');
+  if(!grid) return;
+  grid.innerHTML = toutes.map(function(t){
+    var isActive = _obTachesSel.indexOf(t.nom)>=0;
+    var cls = 'ob-tache-chip'+(isActive?' active':'')+(t.custom?' ob-custom':'');
+    return '<div class="'+cls+'" onclick="obToggleTache(\'' + t.nom + '\',this)">'
+      +'<div class="ob-tache-nom">'+t.label+(t.custom?' <span style="font-size:9px;opacity:0.5">✦</span>':'')+'</div>'
+      +'<div class="ob-tache-hha">'+(t.hha||'—')+' h/ha</div>'
+      +'</div>';
+  }).join('');
+}
+function obToggleTache(nom, el) {
+  var idx = _obTachesSel.indexOf(nom);
+  if(idx>=0){_obTachesSel.splice(idx,1);el.classList.remove('active');}
+  else{_obTachesSel.push(nom);el.classList.add('active');}
+  obUpdateRecap();
+}
+function obAddTacheCustom() {
+  var nom = document.getElementById('ob-tache-custom').value.trim();
+  var hha = parseInt(document.getElementById('ob-tache-hha').value)||0;
+  if(!nom){obShowToast('Nom de tâche requis');return;}
+  var toutes = OB_TACHES.concat(_obTachesCustom);
+  if(toutes.some(function(t){return t.label.toLowerCase()===nom.toLowerCase();})){obShowToast('Tâche déjà présente');return;}
+  var slug = nom.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'_');
+  _obTachesCustom.push({nom:slug,label:nom,hha:hha,custom:true});
+  _obTachesSel.push(slug);
+  document.getElementById('ob-tache-custom').value='';
+  document.getElementById('ob-tache-hha').value='';
+  obRenderTachesGrid();
+  obUpdateRecap();
+}
+
+// ── Récap ──
+function obUpdateRecap() {
+  var surfTot = _obParcelles.reduce(function(s,p){return s+p.surface;},0);
+  var adminNom = document.getElementById('ob-admin-nom').value.trim()||'—';
+  var toutes = OB_TACHES.concat(_obTachesCustom);
+  var tachesLabels = _obTachesSel.map(function(n){
+    var t = toutes.filter(function(t){return t.nom===n;})[0];
+    return t?t.label:n;
+  }).join(', ')||'—';
+  var el = document.getElementById('ob-recap');
+  if(!el) return;
+  el.innerHTML =
+    '<div class="ob-recap-row"><span class="ob-recap-key">Domaine</span><span class="ob-recap-val">'+(_obDomaine.nom||'—')+'</span></div>'
+    +'<div class="ob-recap-row"><span class="ob-recap-key">Identifiant</span><span class="ob-recap-val" style="font-family:monospace;color:#B8913A">'+(_obDomaine.slug||'—')+'</span></div>'
+    +'<div class="ob-recap-row"><span class="ob-recap-key">Parcelles</span><span class="ob-recap-val">'+_obParcelles.length+' · '+surfTot.toFixed(2)+' ha</span></div>'
+    +'<div class="ob-recap-row"><span class="ob-recap-key">Admin</span><span class="ob-recap-val">'+adminNom+'</span></div>'
+    +'<div class="ob-recap-row"><span class="ob-recap-key">Équipe</span><span class="ob-recap-val">'+(_obMembres.length+1)+' membres</span></div>'
+    +'<div class="ob-recap-row"><span class="ob-recap-key">Saison</span><span class="ob-recap-val">'+(document.getElementById('ob-saison')?document.getElementById('ob-saison').value:'—')+'</span></div>'
+    +'<div class="ob-recap-row"><span class="ob-recap-key">Tâches</span><span class="ob-recap-val">'+tachesLabels+'</span></div>';
+}
+
+// ── Navigation ──
+function obGoToStep(n) {
+  document.querySelectorAll('.ob-screen').forEach(function(s){s.classList.remove('active');});
+  var screen = document.getElementById('ob-screen-'+n);
+  if(screen) screen.classList.add('active');
+  for(var i=1;i<=4;i++){
+    var bar=document.getElementById('ob-bar-'+i);
+    var lbl=document.getElementById('ob-lbl-'+i);
+    if(!bar) continue;
+    bar.className='ob-step'+(i<n?' done':i===n?' active':'');
+    lbl.className='ob-step-lbl'+(i<n?' done':i===n?' active':'');
+  }
+  var btnBack=document.getElementById('ob-btn-back');
+  var btnNext=document.getElementById('ob-btn-next');
+  var footer=document.getElementById('ob-footer');
+  if(btnBack) btnBack.style.display=(n>1&&n<=4)?'':'none';
+  if(n===4){
+    if(btnNext){btnNext.textContent='✓ Lancer Ma Vigne';btnNext.classList.add('ob-green');}
+  } else if(n===5){
+    if(footer) footer.style.display='none';
+  } else {
+    if(btnNext){btnNext.textContent='Suivant →';btnNext.classList.remove('ob-green');}
+  }
+  if(n===2) obRenderParcelles();
+  if(n===3) obRenderMembres();
+  if(n===4){ obInitTaches(); obUpdateRecap(); }
+  _obStep=n;
+}
+function obNextStep(){ if(obValidateStep(_obStep)) obGoToStep(_obStep+1); }
+function obPrevStep(){ if(_obStep>1) obGoToStep(_obStep-1); }
+
+// ── Validation ──
+function obValidateStep(n){
+  if(n===1){
+    if(!_obDomaine.nom){obShowToast('Nom du domaine requis');obHighlight('ob-domaine');return false;}
+    if(!_obDomaine.slug){obShowToast('Nom invalide');return false;}
+    _obDomaine.lat=document.getElementById('ob-lat').value;
+    _obDomaine.lon=document.getElementById('ob-lon').value;
+    return true;
+  }
+  if(n===2){
+    if(_obParcelles.length===0){obShowToast('Ajoutez au moins une parcelle');return false;}
+    return true;
+  }
+  if(n===3){
+    var nom=document.getElementById('ob-admin-nom').value.trim();
+    var email=document.getElementById('ob-admin-email').value.trim();
+    var pwd=document.getElementById('ob-admin-pwd').value;
+    var pwd2=document.getElementById('ob-admin-pwd2').value;
+    if(!nom){obShowToast('Prénom requis');obHighlight('ob-admin-nom');return false;}
+    if(!email||!email.includes('@')){obShowToast('Email invalide');obHighlight('ob-admin-email');return false;}
+    if(pwd.length<8){obShowToast('Mot de passe trop court (8 caractères min.)');obHighlight('ob-admin-pwd');return false;}
+    if(pwd!==pwd2){obShowToast('Les mots de passe ne correspondent pas');obHighlight('ob-admin-pwd2');return false;}
+    return true;
+  }
+  if(n===4){
+    var saisonNom=document.getElementById('ob-saison').value.trim();
+    if(!saisonNom){obShowToast('Nom de saison requis');obHighlight('ob-saison');return false;}
+    if(_obTachesSel.length===0){obShowToast('Sélectionnez au moins une tâche');return false;}
+    return true;
+  }
+  return true;
+}
+
+// ── Finalisation ──
+async function obFinalize() {
+  var screen5 = document.getElementById('ob-screen-5');
+  var finSub = document.getElementById('ob-finish-sub');
+  var finBadges = document.getElementById('ob-finish-badges');
+
+  // Récupérer les valeurs finales
+  var adminNom   = document.getElementById('ob-admin-nom').value.trim();
+  var adminEmail = document.getElementById('ob-admin-email').value.trim();
+  var adminPwd   = document.getElementById('ob-admin-pwd').value;
+  var saisonNom  = document.getElementById('ob-saison').value.trim();
+
+  obGoToStep(5);
+  if(finSub) finSub.textContent='Création du compte en cours…';
+
+  try {
+    // 1. Créer le compte Firebase Auth admin
+    var cred = await firebase.auth().createUserWithEmailAndPassword(adminEmail, adminPwd);
+
+    // 2. Activer le tenantId
+    TENANT_ID = _obDomaine.slug;
+    localStorage.setItem('mavigne_tenant', TENANT_ID);
+
+    // 3. Construire les données initiales
+    var adminMembre = {nom:adminNom, email:adminEmail, roles:['admin','ouvrier','tractoriste'], couleur:'#3D6B27', statut:'actif'};
+    var tousLesMembres = [adminMembre].concat(_obMembres.map(function(m,i){
+      return {nom:m.nom,email:m.email,roles:m.roles,couleur:m.couleur,statut:'actif'};
+    }));
+
+    var toutesLesTaches = OB_TACHES.concat(_obTachesCustom).filter(function(t){
+      return _obTachesSel.indexOf(t.nom)>=0;
+    }).map(function(t){ return {nom:t.nom,hha:t.hha,saison:t.saison||'Custom'}; });
+
+    // Ajouter les tâches custom au tableau global TACHES
+    _obTachesCustom.forEach(function(tc){
+      if(!TACHES.find(function(t){return t.nom===tc.nom;})){
+        TACHES.push({nom:tc.nom,hha:tc.hha,saison:'Custom'});
+      }
+    });
+
+    var saisonObj = [{nom:saisonNom, periode:'', active:true, taches:_obTachesSel}];
+    var configObj = {domaine_nom:_obDomaine.nom, lat:parseFloat(_obDomaine.lat)||47.22, lon:parseFloat(_obDomaine.lon)||4.97, onboarding_done:true};
+
+    // Appliquer dans les variables globales
+    PARCELLES.length=0; _obParcelles.forEach(function(p){PARCELLES.push(p);});
+    MEMBRES = tousLesMembres; window.MEMBRES = MEMBRES;
+    SAISONS = saisonObj; window.SAISONS = SAISONS;
+    TACHES = TACHES; window.TACHES = TACHES;
+    CONFIG = configObj; window.CONFIG = CONFIG;
+    DOMAINE_NOM = _obDomaine.nom;
+
+    // 4. Pousser tout vers Firebase (nouveau tenant)
+    if(finSub) finSub.textContent='Sauvegarde en cours…';
+    await fbDoc('membres').set({value:tousLesMembres});
+    await fbDoc('parcelles').set({value:PARCELLES});
+    await fbDoc('saisons').set({value:saisonObj});
+    await fbDoc('taches').set({value:TACHES});
+    await fbDoc('config').set({value:configObj});
+
+    // 5. Poser le flag migration (pas besoin de migrer sur un nouveau domaine)
+    localStorage.setItem('mavigne_migrated_v1','1');
+
+    // 6. Badges de confirmation
+    if(finSub) finSub.textContent='Votre domaine est prêt !';
+    var surfTot = _obParcelles.reduce(function(s,p){return s+p.surface;},0);
+    var badges = [_obDomaine.nom, _obParcelles.length+' parcelles · '+surfTot.toFixed(2)+' ha', tousLesMembres.length+' membres', saisonNom];
+    if(finBadges) finBadges.innerHTML = badges.map(function(b){return '<span class="ob-finish-badge">'+b+'</span>';}).join('');
+
+    // 7. Lancer l'app après 2s
+    setTimeout(function(){
+      document.getElementById('onboarding-screen').style.display='none';
+      currentUser = adminMembre;
+      currentUser._firebaseUser = cred.user;
+      applyDomNom();
+      applyRoles();
+      updateNavForRoles();
+      goTo('home');
+      fetchMeteo();
+      if(navigator.onLine && window._fbLoadAfterAuth) window._fbLoadAfterAuth();
+    }, 2000);
+
+  } catch(e) {
+    console.error('[Onboarding] Erreur:', e);
+    var msg = e.code === 'auth/email-already-in-use'
+      ? '❌ Cet email est déjà utilisé. Utilisez un autre email.'
+      : e.code === 'auth/weak-password'
+      ? '❌ Mot de passe trop faible.'
+      : '❌ Erreur : ' + (e.message||e.code);
+    obShowToast(msg);
+    if(finSub) finSub.textContent = msg;
+    // Permettre de revenir en arrière
+    var footer = document.getElementById('ob-footer');
+    if(footer) footer.style.display='';
+    var btnNext = document.getElementById('ob-btn-next');
+    var btnBack = document.getElementById('ob-btn-back');
+    if(btnNext){btnNext.textContent='Réessayer';btnNext.classList.remove('ob-green');btnNext.onclick=obFinalize;}
+    if(btnBack){btnBack.style.display='';btnBack.onclick=function(){obGoToStep(4);};}
+  }
+}
+
+// ── Point d'entrée ──
+function obStart() {
+  // Si step 4 → lancer la finalisation au lieu de nextStep
+  if(_obStep===4){
+    if(obValidateStep(4)) obFinalize();
+    return;
+  }
+  obNextStep();
+}
+
+function showOnboarding() {
+  var screen = document.getElementById('onboarding-screen');
+  if(screen){ screen.style.display='flex'; obGoToStep(1); }
+  // Rebrancher le bouton next sur obStart
+  var btnNext = document.getElementById('ob-btn-next');
+  if(btnNext) btnNext.onclick = obStart;
+}
+
 function initLogin(){
   var profiles = document.getElementById('login-profiles');
   profiles.innerHTML = '';
@@ -3687,7 +4289,15 @@ function injectMeteoIfNeeded(date){
 }
 
 function recalcTravaux(nomTache){
-  const t=TRAVAUX[nomTache];if(!t)return;
+  // Si la tâche n'existe pas encore dans TRAVAUX (tâche custom créée depuis Réglages),
+  // on l'initialise à la volée depuis TACHES
+  if(!TRAVAUX[nomTache]){
+    const tDef=TACHES.find(t=>t.nom===nomTache);
+    if(!tDef)return; // tâche inconnue même dans TACHES → abandon
+    const surfTot=parseFloat(SURF_TOTALE)||0;
+    TRAVAUX[nomTache]={h_ha:tDef.hha,saison:tDef.saison,surf_done:0,surf_total:surfTot,pct:0,h_total:Math.round(tDef.hha*surfTot),h_done:0,h_reste:Math.round(tDef.hha*surfTot)};
+  }
+  const t=TRAVAUX[nomTache];
   const parcellesValidees=PARCELLES.filter(p=>p.taches[nomTache]==='Validé').reduce((s,p)=>s+p.surface,0);
   t.surf_done=Math.round(parcellesValidees*100)/100;
   t.h_done=Math.round(t.h_ha*parcellesValidees*10)/10;
@@ -7337,7 +7947,7 @@ td{padding:5px 8px;border-bottom:1px solid #f0f0f0;font-size:10px;vertical-align
   </div>
   <div class="cv-foot">
     <span>Rapport final — ${nomSaison}</span>
-    <span>Ma Vigne v4.15 · ${domaine} · Bourgogne</span>
+    <span>Ma Vigne v4.18 · ${domaine} · Bourgogne</span>
     <span>Page 1 / 4</span>
   </div>
 </div>
@@ -7380,7 +7990,7 @@ td{padding:5px 8px;border-bottom:1px solid #f0f0f0;font-size:10px;vertical-align
 </table>
 <div class="s-note">Dates issues des entrées journal avec statut Validé, 1ère et dernière occurrence pour chaque tâche sur les ${nbParcelles} parcelles actives.</div>
 
-<div class="p-foot"><span>${domaine}</span><span>Ma Vigne v4.15 · Rapport ${nomSaison}</span><span>Page 2 / 4</span></div>
+<div class="p-foot"><span>${domaine}</span><span>Ma Vigne v4.18 · Rapport ${nomSaison}</span><span>Page 2 / 4</span></div>
 </div>
 
 <!-- PAGE 3 : PARCELLES -->
@@ -7398,7 +8008,7 @@ td{padding:5px 8px;border-bottom:1px solid #f0f0f0;font-size:10px;vertical-align
 ${parcellesActives.some(p=>p.statut==='Arrachee')?'':''}
 <div class="s-note">1 parcelle arrachée non incluse : Chazière (statut Arrachée). Dates issues du journal — 1ère et dernière validation de parcelle par tâche.</div>
 
-<div class="p-foot"><span>${domaine}</span><span>Ma Vigne v4.15 · Rapport ${nomSaison}</span><span>Page 3 / 4</span></div>
+<div class="p-foot"><span>${domaine}</span><span>Ma Vigne v4.18 · Rapport ${nomSaison}</span><span>Page 3 / 4</span></div>
 </div>
 
 <!-- PAGE 4 : TRACTEUR + PHYTO + ANOMALIES -->
@@ -7427,7 +8037,7 @@ ${sessionsRows||'<p style="font-size:9px;color:#aaa;font-style:italic;padding:4p
   ${anomHtml}
 </div>
 
-<div class="p-foot" style="margin-top:10px"><span>${domaine} · Bourgogne · SIRET 98214811600014</span><span>Généré le ${dateGen} par Ma Vigne v4.15 · GUERETTECH</span><span>Page 4 / 4</span></div>
+<div class="p-foot" style="margin-top:10px"><span>${domaine} · Bourgogne · SIRET 98214811600014</span><span>Généré le ${dateGen} par Ma Vigne v4.18 · GUERETTECH</span><span>Page 4 / 4</span></div>
 </div>
 
 </body></html>`;
@@ -7734,6 +8344,27 @@ function saveEditDomNom(){
   renderReglages();
   showToast('Nom du domaine mis à jour ✓','#3D6B27');
 }
+function copyInviteLink() {
+  var tenant = localStorage.getItem('mavigne_tenant') || TENANT_ID;
+  if(!tenant) { showToast('Identifiant domaine introuvable','#A0291E'); return; }
+  var base = window.location.origin + window.location.pathname;
+  var link = base + '?tenant=' + tenant;
+  if(navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link).then(function(){
+      showToast('Lien copié ✓','#3D6B27');
+      var sub = document.getElementById('invite-link-sub');
+      if(sub){ sub.textContent=link; setTimeout(function(){ sub.textContent='Partager avec un nouveau membre'; },4000); }
+    }).catch(function(){ _fallbackCopyInvite(link); });
+  } else { _fallbackCopyInvite(link); }
+}
+function _fallbackCopyInvite(link) {
+  var ta=document.createElement('textarea');
+  ta.value=link;ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');showToast('Lien copié ✓','#3D6B27');}
+  catch(e){showToast(link,'#1A4A7A');}
+  document.body.removeChild(ta);
+}
 function applyDomNom(){
   // Header accueil
   var htEl=document.getElementById('hv2-domaine-nom');
@@ -7866,7 +8497,7 @@ function lancerExportEntretienPDF(){
     return '<section class="tracteur-section"><div class="tracteur-title"><div><div class="tracteur-nom">'+t.nom+(t.traitementOnly?' <span class="badge-trait">Traitement</span>':'')+'</div><div class="tracteur-modele">🔩 '+(t.modele||'—')+' · '+t.type+'</div></div><div class="tracteur-annee">'+annee+'</div></div>'+resumeHTML+'<h3 class="section-sub">📋 Fiches d\'entretien</h3>'+fichesHTML+'<h3 class="section-sub" style="margin-top:20px">🔧 Passages réparateur</h3>'+repsHTML+'</section>';
   }).join('<div class="page-break"></div>');
   var aujourd_hui=fmtD(new Date().toISOString().slice(0,10));
-  var html='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Ma Vigne — Entretien '+annee+'</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Georgia,serif;font-size:11px;color:#1A1A1A;padding:20px;}.doc-header{border-bottom:2px solid #3D6B27;padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;}.doc-title{font-size:20px;font-weight:bold;color:#3D6B27;}.doc-meta{text-align:right;font-size:10px;color:#888;}.tracteur-section{margin-bottom:30px;}.tracteur-title{display:flex;justify-content:space-between;align-items:flex-start;background:#2A3547;color:white;padding:12px 16px;border-radius:8px;margin-bottom:12px;}.tracteur-nom{font-size:16px;font-weight:bold;}.tracteur-modele{font-size:10px;color:rgba(255,255,255,0.6);margin-top:3px;}.tracteur-annee{font-size:22px;font-weight:bold;color:rgba(255,255,255,0.35);}.badge-trait{font-size:9px;background:#E07B2A;color:white;border-radius:4px;padding:1px 6px;vertical-align:middle;font-weight:normal;margin-left:6px;}.resume-bar{display:flex;border:1px solid #E0DDD5;border-radius:8px;overflow:hidden;margin-bottom:16px;}.resume-item{flex:1;text-align:center;padding:10px 6px;border-right:1px solid #E0DDD5;}.resume-item:last-child{border-right:none;}.resume-val{display:block;font-size:18px;font-weight:bold;color:#2A3547;}.val-warn{color:#C0392B;}.resume-lbl{display:block;font-size:9px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:0.04em;}.section-sub{font-size:12px;font-weight:bold;color:#2A3547;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E8E4D9;}.fiche-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;overflow:hidden;break-inside:avoid;}.fiche-bloc.has-anomalie{border-color:#F5B8B4;}.fiche-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#F9F8F5;border-bottom:1px solid #E0DDD5;}.fiche-date{font-weight:bold;font-size:11px;}.fiche-meta{font-size:10px;color:#666;margin-top:2px;}.fiche-score{font-size:18px;font-weight:bold;}.score-ok{color:#3D6B27;}.score-warn{color:#E07B2A;}.check-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:8px 12px;}.check-item{font-size:10px;display:flex;justify-content:space-between;align-items:center;padding:3px 6px;border-radius:4px;}.check-item.ok{background:#EAF4E2;color:#2D5A1B;}.check-item.ko{background:#FEF0EF;color:#922B21;}.check-item span{font-weight:bold;}.anomalie{padding:6px 12px 8px;background:#FEF0EF;font-size:10px;color:#922B21;border-top:1px solid #F5B8B4;}.rep-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;padding:10px 14px;break-inside:avoid;}.rep-bloc.rep-en-cours{border-color:#F5CBA7;background:#FEF9F5;}.rep-bloc.rep-depasse{border-color:#F5B8B4;background:#FEF0EF;}.rep-header{display:flex;justify-content:space-between;align-items:center;gap:10px;}.rep-motif{font-weight:bold;font-size:11px;margin-bottom:4px;}.rep-dates{font-size:10px;color:#555;}.rep-badge{font-size:10px;font-weight:bold;padding:4px 10px;border-radius:12px;white-space:nowrap;}.badge-ok{background:#EAF4E2;color:#2D5A1B;}.badge-cours{background:#FEF3E2;color:#935116;}.empty{font-size:10px;color:#999;font-style:italic;padding:8px 0;}.page-break{page-break-after:always;}.doc-footer{border-top:1px solid #E0DDD5;padding-top:8px;margin-top:20px;font-size:9px;color:#AAA;display:flex;justify-content:space-between;}@media print{.page-break{page-break-after:always;border:none;margin:0;}}</style></head><body><div class="doc-header"><div><div class="doc-title">🍇 Ma Vigne — Entretien tracteurs</div><div style="font-size:11px;color:#666;margin-top:2px">Historique '+annee+' · '+tracteursSelectionnes.map(function(t){return t.nom;}).join(', ')+'</div></div><div class="doc-meta">Généré le '+aujourd_hui+'<br>Ma Vigne v4.15 · GUERETTECH</div></div>'+sectionsHTML+'<div class="doc-footer"><span>Ma Vigne — Document confidentiel · Usage interne</span><span>© 2026 Nicolas GUERET / GUERETTECH</span></div></body></html>';
+  var html='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Ma Vigne — Entretien '+annee+'</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Georgia,serif;font-size:11px;color:#1A1A1A;padding:20px;}.doc-header{border-bottom:2px solid #3D6B27;padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;}.doc-title{font-size:20px;font-weight:bold;color:#3D6B27;}.doc-meta{text-align:right;font-size:10px;color:#888;}.tracteur-section{margin-bottom:30px;}.tracteur-title{display:flex;justify-content:space-between;align-items:flex-start;background:#2A3547;color:white;padding:12px 16px;border-radius:8px;margin-bottom:12px;}.tracteur-nom{font-size:16px;font-weight:bold;}.tracteur-modele{font-size:10px;color:rgba(255,255,255,0.6);margin-top:3px;}.tracteur-annee{font-size:22px;font-weight:bold;color:rgba(255,255,255,0.35);}.badge-trait{font-size:9px;background:#E07B2A;color:white;border-radius:4px;padding:1px 6px;vertical-align:middle;font-weight:normal;margin-left:6px;}.resume-bar{display:flex;border:1px solid #E0DDD5;border-radius:8px;overflow:hidden;margin-bottom:16px;}.resume-item{flex:1;text-align:center;padding:10px 6px;border-right:1px solid #E0DDD5;}.resume-item:last-child{border-right:none;}.resume-val{display:block;font-size:18px;font-weight:bold;color:#2A3547;}.val-warn{color:#C0392B;}.resume-lbl{display:block;font-size:9px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:0.04em;}.section-sub{font-size:12px;font-weight:bold;color:#2A3547;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E8E4D9;}.fiche-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;overflow:hidden;break-inside:avoid;}.fiche-bloc.has-anomalie{border-color:#F5B8B4;}.fiche-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#F9F8F5;border-bottom:1px solid #E0DDD5;}.fiche-date{font-weight:bold;font-size:11px;}.fiche-meta{font-size:10px;color:#666;margin-top:2px;}.fiche-score{font-size:18px;font-weight:bold;}.score-ok{color:#3D6B27;}.score-warn{color:#E07B2A;}.check-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:8px 12px;}.check-item{font-size:10px;display:flex;justify-content:space-between;align-items:center;padding:3px 6px;border-radius:4px;}.check-item.ok{background:#EAF4E2;color:#2D5A1B;}.check-item.ko{background:#FEF0EF;color:#922B21;}.check-item span{font-weight:bold;}.anomalie{padding:6px 12px 8px;background:#FEF0EF;font-size:10px;color:#922B21;border-top:1px solid #F5B8B4;}.rep-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;padding:10px 14px;break-inside:avoid;}.rep-bloc.rep-en-cours{border-color:#F5CBA7;background:#FEF9F5;}.rep-bloc.rep-depasse{border-color:#F5B8B4;background:#FEF0EF;}.rep-header{display:flex;justify-content:space-between;align-items:center;gap:10px;}.rep-motif{font-weight:bold;font-size:11px;margin-bottom:4px;}.rep-dates{font-size:10px;color:#555;}.rep-badge{font-size:10px;font-weight:bold;padding:4px 10px;border-radius:12px;white-space:nowrap;}.badge-ok{background:#EAF4E2;color:#2D5A1B;}.badge-cours{background:#FEF3E2;color:#935116;}.empty{font-size:10px;color:#999;font-style:italic;padding:8px 0;}.page-break{page-break-after:always;}.doc-footer{border-top:1px solid #E0DDD5;padding-top:8px;margin-top:20px;font-size:9px;color:#AAA;display:flex;justify-content:space-between;}@media print{.page-break{page-break-after:always;border:none;margin:0;}}</style></head><body><div class="doc-header"><div><div class="doc-title">🍇 Ma Vigne — Entretien tracteurs</div><div style="font-size:11px;color:#666;margin-top:2px">Historique '+annee+' · '+tracteursSelectionnes.map(function(t){return t.nom;}).join(', ')+'</div></div><div class="doc-meta">Généré le '+aujourd_hui+'<br>Ma Vigne v4.18 · GUERETTECH</div></div>'+sectionsHTML+'<div class="doc-footer"><span>Ma Vigne — Document confidentiel · Usage interne</span><span>© 2026 Nicolas GUERET / GUERETTECH</span></div></body></html>';
   var win=window.open('','_blank');
   if(!win){showToast('Autorisez les popups pour l\'impression','#C0392B');return;}
   win.document.write(html);

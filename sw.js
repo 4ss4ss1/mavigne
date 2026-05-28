@@ -1,4 +1,7 @@
-// MA VIGNE — Service Worker v2.15
+// MA VIGNE — Service Worker v2.18
+// v2.18 — Lien invitation ?tenant=slug : pose TENANT_ID sans onboarding · copyInviteLink() dans Réglages · index v4.18
+// v2.17 — Onboarding intégré + tenantId (fbDoc→mavigne_{TENANT_ID}) + création compte Firebase Auth admin · index v4.17
+// v2.16 — Fix recalcTravaux : init TRAVAUX à la volée pour tâches custom (Relevage 2, etc.) · index v4.16
 // v2.15 — Refacto taches : Ebourgeonnage/Pioche sans numerotation · migration auto donnees Firebase · index v4.15
 // v2.14 — Toast saveJournalEntry : showToast immédiat dans saveJournalEntry (indépendant Firebase) · index v4.14
 // v2.13 — Backup localStorage versionné 7 jours (mavigne_backup_YYYY-MM-DD, purge auto) · index v4.13
@@ -16,7 +19,7 @@
 // v2.02 — États vides illustrés : SVG inline thématiques dans Journal, Parcelles, Tracteur, Phyto
 // v2.01 — Leaflet hors réseau : bandeau discret en haut de carte · listeners online/offline
 // v2.00 — Nav bar : fond sombre permanent #151A14 · halos colorés par module
-const CACHE_NAME = 'mavigne-v2.15';
+const CACHE_NAME = 'mavigne-v2.18';
 const SYNC_TAG   = 'mavigne-sync';
 const APP_SHELL = ['./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 const CDN_URLS = [
@@ -25,7 +28,7 @@ const CDN_URLS = [
   'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap',
 ];
 self.addEventListener('install', event => {
-  console.log('[SW] Install v2.15');
+  console.log('[SW] Install v2.18');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache =>
       cache.addAll(APP_SHELL).then(() =>
@@ -35,7 +38,7 @@ self.addEventListener('install', event => {
   );
 });
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v2.15');
+  console.log('[SW] Activate v2.18');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
