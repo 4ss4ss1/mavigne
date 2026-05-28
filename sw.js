@@ -1,5 +1,5 @@
-// MA VIGNE — Service Worker v2.25
-// v2.25 — Fix SyntaxError ligne 3499 : apostrophes échappées dans profiles.innerHTML · index v4.25
+// MA VIGNE — Service Worker v2.26
+// v2.26 — Fix SyntaxError ligne 3505 : apostrophe parasite dans catch confirmLogin · index v4.26
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES (localStorage corrompu écrasait données statiques) · index v4.22
 // v2.21 — Fix profils vides : suppression double lecture ?tenant= dans _fbLoad (conflit avec guard v4.20) · index v4.21
 // v2.20 — Guard tenant : correction auto tenant invalide (mavigne_mavigne→marchand-grillot) · meilleurs messages erreur login Firebase · index v4.20
@@ -15,7 +15,7 @@
 // v2.10 — Fix applyFbData tableaux vides · index v4.10
 // v2.09 — Fix critique Firebase Auth · index v4.8
 // v2.08 — PDF v2 · v2.07 — DOMAINE_NOM · v2.06 — Firebase Auth · v2.00–v2.05 — divers
-const CACHE_NAME = 'mavigne-v2.25';
+const CACHE_NAME = 'mavigne-v2.26';
 const SYNC_TAG   = 'mavigne-sync';
 
 // Fichiers mis en cache à l'install (hors index.html — géré en network-first)
@@ -27,7 +27,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  console.log('[SW] Install v2.25');
+  console.log('[SW] Install v2.26');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache =>
       // Mettre en cache index.html + statics + CDN
@@ -39,7 +39,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v2.25');
+  console.log('[SW] Activate v2.26');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => {
