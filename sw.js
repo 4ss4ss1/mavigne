@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v2.19
+// MA VIGNE — Service Worker v2.20
+// v2.20 — Guard tenant : correction auto tenant invalide (mavigne_mavigne→marchand-grillot) · meilleurs messages erreur login Firebase · index v4.20
 // v2.19 — Fix calcHeures : tâches custom calculées à la volée depuis PARCELLES si absentes de TRAVAUX · index v4.19
 // v2.18 — Lien invitation ?tenant=slug : pose TENANT_ID sans onboarding · copyInviteLink() dans Réglages · index v4.18
 // v2.17 — Onboarding intégré + tenantId (fbDoc→mavigne_{TENANT_ID}) + création compte Firebase Auth admin · index v4.17
@@ -10,17 +11,16 @@
 // v2.11 — Fix CONFIG non déclarée globalement + sw.js clone Response corrigé · index v4.11
 // v2.10 — Fix applyFbData : ignore tableau vide Firebase pour saisons/taches/membres → conserve données statiques · index v4.10
 // v2.09 — Fix critique Firebase Auth : pull complet post-auth uniquement (_fbLoadAfterAuth) · suppression repull _tracRepullDone · index v4.8
-// v2.09 — Réglages admin : saisie heures dues/faites + calcul ETP live + sauvegarde CONFIG.etp_saison
-// v2.08 — Rapport saison PDF v2 : design A4 · durées tâches (1ère→dernière validation) · ETP · anomalies tracteur · parcelles bilan
-// v2.07 — DOMAINE_NOM configurable : header accueil · badge Réglages · PDF · overlay édition admin · Réglages accessible à tous (mdp, thème, notifs, mentions légales)
-// v2.06 — Firebase Auth : SDK auth-compat · signInWithEmailAndPassword · signOut · sendPasswordResetEmail · updatePassword+reauth · suppression sha256/checkMdp/RESEND
-// v2.05 — Audit v4.5 : I4 surfTot parseFloat · N1/N2 versions cohérentes · V2 recalcTravaux guard surf_total · V4 jSearch guard meteo
-// v2.04 — Bugs audit (suite) : I1 MDP_SOURCE supprimé · I2 double pull Firebase · I8 initMap collision · I9 isAdmin guard · I10 saveData membres · C7 sessions→renderHome · V8 mentions légales dark mode
-// v2.03 — Audit bugs mai 2026 : zero confirm() natif · C2 deleteTracteuer→deleteTracteur · C9 Arrachee cohérent PDF · I3 Chloé avatar · I5 jDateDeb/jDateFin global
-// v2.02 — États vides illustrés : SVG inline thématiques dans Journal, Parcelles, Tracteur, Phyto
-// v2.01 — Leaflet hors réseau : bandeau discret en haut de carte · listeners online/offline
-// v2.00 — Nav bar : fond sombre permanent #151A14 · halos colorés par module
-const CACHE_NAME = 'mavigne-v2.19';
+// v2.08 — Rapport saison PDF v2 · index v4.8
+// v2.07 — DOMAINE_NOM configurable · index v4.6
+// v2.06 — Firebase Auth · index v4.6
+// v2.05 — Audit v4.5
+// v2.04 — Bugs audit (suite)
+// v2.03 — Audit bugs mai 2026
+// v2.02 — États vides illustrés
+// v2.01 — Leaflet hors réseau
+// v2.00 — Nav bar fond sombre permanent
+const CACHE_NAME = 'mavigne-v2.20';
 const SYNC_TAG   = 'mavigne-sync';
 const APP_SHELL = ['./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 const CDN_URLS = [
@@ -29,7 +29,7 @@ const CDN_URLS = [
   'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600;700&display=swap',
 ];
 self.addEventListener('install', event => {
-  console.log('[SW] Install v2.19');
+  console.log('[SW] Install v2.20');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache =>
       cache.addAll(APP_SHELL).then(() =>
@@ -39,7 +39,7 @@ self.addEventListener('install', event => {
   );
 });
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate v2.19');
+  console.log('[SW] Activate v2.20');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
